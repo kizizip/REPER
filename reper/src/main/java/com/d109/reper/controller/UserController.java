@@ -146,6 +146,29 @@ public class UserController {
     }
 
 
+    // 회원정보 수정
+    @PatchMapping("/{userId}")
+    @Operation(summary = "사용자의 개인정보를 수정합니다.", description = "사용자는 이름과 전화번호를 수정할 수 있습니다.")
+    public ResponseEntity<?> updateUserInfo(@PathVariable Long userId, @RequestBody UserUpdateRequest updateRequest) {
+        try {
+            logger.debug("회원정보 수정 요청 - userId: {}, updateRequest: {}", userId, updateRequest);
+
+            // 사용자 정보 수정
+            boolean result = userService.updateUserInfo(userId, updateRequest);
+
+            if (result) {
+                return ResponseEntity.ok(updateRequest);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("서버 오류 발생");
+        }
+    }
+
+
+
     // 로그인 api에서 예시 request를 보여주기 위한 DTO
     public static class LoginRequest {
 
@@ -163,9 +186,9 @@ public class UserController {
         public String getPassword() {
             return password;
         }
-
     }
 
+    //회원가입 api에서 예시 request를 보여주기 위한 DTO
     public static class JoinRequest {
 
         @Setter
@@ -213,4 +236,25 @@ public class UserController {
             return UserRole.valueOf(role.toUpperCase());
         }
     }
+
+
+    public static class UserUpdateRequest {
+
+        @Setter
+        @Schema(description = "사용자의 이름", example = "홍길동")
+        private String userName;
+
+        @Setter
+        @Schema(description = "사용자의 전화번호", example = "010-9876-5432")
+        private String phone;
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+    }
+
 }

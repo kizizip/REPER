@@ -107,4 +107,27 @@ public class UserService {
         return userProfile;
     }
 
+
+    // 회원정보 수정
+    public boolean updateUserInfo(Long userId, UserController.UserUpdateRequest updateRequest) {
+        try {
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+
+            // 수정 가능한 필드만 업데이트 (이름과 전화번호)
+            if (updateRequest.getUserName() != null) {
+                user.setUserName(updateRequest.getUserName());
+            }
+            if (updateRequest.getPhone() != null) {
+                user.setPhone(updateRequest.getPhone());
+            }
+
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 }
