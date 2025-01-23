@@ -16,25 +16,30 @@ public class StoreEmployeeController {
 
     private final StoreEmployeeService storeEmployeeService;
 
-    // 알바생 -> 사장 가게 등록 권한 요청
     @PostMapping("/{storeId}/employees/{userId}/approve")
-    @Operation(summary = "알바생이 가게 등록 권한을 요청합니다.",
-            description = "권한 요청시 store_employee 테이블에 추가됩니다.")
+    @Operation(summary = "알바생->사장 권한 요청", description = "알바생 정보를 가게에 등록합니다. isEmployed는 기본값 false로 설정됩니다.")
     public ResponseEntity<?> requestStorePermission(
             @PathVariable Long storeId,
             @PathVariable Long userId) {
 
         try {
-            StoreEmployee storeEmployee = storeEmployeeService.requestPermission(storeId, userId);
+            StoreEmployee storeEmployee = storeEmployeeService.addStoreEmployee(storeId, userId);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(storeEmployee);
+            // 응답에서 isEmployed 값을 true로 설정
+            ResponseBody response = new ResponseBody(
+                    "정상적으로 요청되었습니다.",
+                    storeEmployee.getStore().getStoreId(),
+                    storeEmployee.getUser().getUserId(),
+                    false
+            );
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
         } catch (IllegalArgumentException e) {
-            // storeId 혹은 userId가 유효하지 않음
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ErrorResponse("storeId 혹은 userId가 유효하지 않음.")
             );
         } catch (ConflictException e) {
-            // 이미 권한 요청이 존재함
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                     new ErrorResponse("해당 가게/직원 조합으로 권한 요청이 이미 존재함.")
             );
@@ -45,6 +50,39 @@ public class StoreEmployeeController {
         }
     }
 
+    // 성공 응답 형식
+    public static class ResponseBody {
+        private String message;
+        private Long storeId;
+        private Long userId;
+        private boolean isEmployed;
+
+        public ResponseBody(String message, Long storeId, Long userId, boolean isEmployed) {
+            this.message = message;
+            this.storeId = storeId;
+            this.userId = userId;
+            this.isEmployed = isEmployed;
+        }
+
+        // Getters
+        public String getMessage() {
+            return message;
+        }
+
+        public Long getStoreId() {
+            return storeId;
+        }
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public boolean getIsEmployed() {
+            return isEmployed;
+        }
+    }
+
+    // 에러 응답 형식
     public static class ErrorResponse {
         private String error;
 

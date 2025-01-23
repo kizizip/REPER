@@ -6,6 +6,7 @@ import com.d109.reper.domain.User;
 import com.d109.reper.repository.StoreEmployeeRepository;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.repository.UserRepository;
+import com.d109.reper.response.ConflictException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,25 +20,26 @@ public class StoreEmployeeService {
     private final StoreEmployeeRepository storeEmployeeRepository;
 
     @Transactional
-    public StoreEmployee requestPermission(Long storeId, Long userId) {
-        // storeId와 userId가 유효한지 확인
+    public StoreEmployee addStoreEmployee(Long storeId, Long userId) {
+        // Store 조회
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("storeId 혹은 userId가 유효하지 않음."));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("storeId 혹은 userId가 유효하지 않음."));
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 storeId입니다."));
 
-        // 해당 가게/직원 조합으로 권한 요청이 이미 존재하는지 확인
-        if (storeEmployeeRepository.requestAlreadyExists(store, user)) {
-//            throw new ConflictException("해당 가게/직원 조합으로 권한 요청이 이미 존재함.");
+        // User 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 userId입니다."));
+
+        // 중복 체크
+        boolean exists = storeEmployeeRepository.existsByStoreAndUser(store, user);
+        if (exists) {
+            throw new ConflictException("해당 가게/직원 조합으로 권한 요청이 이미 존재합니다.");
         }
 
-        // 권한 요청을 위한 StoreEmployee 객체 생성
+        // StoreEmployee 생성 및 저장
         StoreEmployee storeEmployee = new StoreEmployee();
         storeEmployee.setStore(store);
         storeEmployee.setUser(user);
-        storeEmployee.setEmployed(false); // 기본적으로 false로 설정
-
-        // StoreEmployee 엔티티 저장
+        storeEmployee.setEmployed(false); // 기본값 false 설정
         return storeEmployeeRepository.save(storeEmployee);
     }
 }
