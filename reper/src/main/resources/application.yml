@@ -1,0 +1,19 @@
+spring:
+  config:
+    import: optional:application-secrets.yml
+  datasource:
+    url: jdbc:mysql://localhost:3306/reper?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update # (개발환경) -> (운영 환경) validation/none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+logging.level:
+  org.hibernate.SQL: debug # (개발 환경) SQL 로그 출력
+  org.hibernate.orm.jdbc.bind: trace # (개발 환경) SQL 바인딩 값 출력
