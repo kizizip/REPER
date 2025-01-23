@@ -1,93 +1,101 @@
-# 공통Pjt D109 Reper
+# 🏪 음성인식 기반 카페 레시피 도우미
+
+## 👥 팀 구성
+| 역할 | 이름 |
+|------|------|
+| 팀장 | 심근원 |
+| 팀원 | 김정언, 박재영, 안주현, 이서현, 임지혜 |
+
+## 📊 프로젝트 기획
+
+### 💡 기획 의도
+카페 현장의 실질적인 문제를 해결하고자 다음과 같은 목표로 기획되었습니다:
+- 다양한 카페 레시피의 빠른 학습 및 숙지 지원
+- 핸즈프리 음성인식으로 위생적인 레시피 확인 가능
+- 체계적인 레시피 관리 시스템 구축
+- 신규 직원의 효율적인 교육 지원
+
+<img width="6001" alt="개발 기획" src="https://github.com/user-attachments/assets/a6402e95-260e-4464-b7c0-116674385415" />
+
+### 페르소나 분석
+서비스의 주요 사용자를 이해하기 위해 세 가지 페르소나를 설정했습니다:
+
+**1. 알바생 페르소나**
+- 특징: 새로운 카페 알바생
+- 니즈: 빠른 레시피 학습, 실수 없는 업무 수행
+
+![페르소나-알바생ver](https://github.com/user-attachments/assets/21819574-7b24-4530-a05b-f4e3822629fc)
+
+**2. 카페 운영자 페르소나**
+- 특징: 카페 점주
+- 니즈: 효율적인 직원 교육, 레시피 관리
+
+![페르소나-사장님ver](https://github.com/user-attachments/assets/7425e78e-9ac7-4fe9-a64e-e315fedbaf40)
+
+**3. 카페 관리자 페르소나**
+- 특징: 매장 관리자
+- 니즈: 체계적인 근태 관리, 업무 효율화
 
 
+![페르소나-사장님(근태)ver](https://github.com/user-attachments/assets/f76b1783-b5c1-4c19-a017-c620fa5ec251)
 
-## Getting started
+### 고객여정 지도 (Customer Journey Map)
+사용자 경험을 깊이 이해하기 위해 두 관점에서 여정 지도를 작성했습니다:
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+**1. 알바생 관점의 여정 지도**
+![고객여정지도-알바생ver](https://github.com/user-attachments/assets/02046000-6228-45fe-9b34-1571cdd0ccfb)
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+**2. 운영자 관점의 여정 지도**
+![고객여정지도-사장님ver](https://github.com/user-attachments/assets/ae4003c4-51fd-4516-9d3e-5ea2838daa25)
 
-## Add your files
+### 🎯 기대 효과
+1. 알바생 측면:
+   - 음성으로 간편한 레시피 확인
+   - 단계별 상세 레시피로 실수 방지
+   - 빠른 업무 적응 가능
+   
+2. 사장님 측면:
+   - 체계적인 레시피 관리
+   - 교육 시간 및 비용 절감
+   - 매장 레시피 보안 강화
+   - 일관된 맛과 품질 유지
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+<img width="5246" alt="기획의도 및 기대효과 및 어플 이름" src="https://github.com/user-attachments/assets/2bc4272a-1fea-4d7c-9ecc-aaf10a4daf79" />
 
-```
-cd existing_repo
-git remote add origin https://lab.ssafy.com/shimkwkr/pjt-d109-reper.git
-git branch -M master
-git push -uf origin master
-```
+## 🔍 시장 분석
+### 경쟁사 분석
+시장 조사를 통해 다음과 같은 차별화 전략을 수립했습니다:
+- 음성인식 기반의 핸즈프리 솔루션
+- 체계적인 레시피 관리 시스템
+- 보안이 강화된 레시피 보호
+- 직관적인 UI/UX로 사용자 편의성 극대화
 
-## Integrate with your tools
+<img width="7264" alt="시장조사 및 자료조사" src="https://github.com/user-attachments/assets/29de6882-fba1-4cb5-85d0-bbd33338876d" />
+![D109 - Google Docs-이미지-0](https://github.com/user-attachments/assets/ba311011-a7f5-4209-82ec-59e520d7e892)
+![D109 - Google Docs-이미지-1](https://github.com/user-attachments/assets/af0d313b-8035-403b-abae-314cafb84579)
+![D109 - Google Docs-이미지-2](https://github.com/user-attachments/assets/09555e4c-4913-4d91-ab67-1ec9988ae4e1)
+![D109 - Google Docs-이미지-3](https://github.com/user-attachments/assets/f89b3871-ca89-40fc-906f-d58c62bbc237)
+![D109 - Google Docs-이미지-4](https://github.com/user-attachments/assets/bb4b0790-39d8-4291-a394-865b3ee9892e)
 
-- [ ] [Set up project integrations](https://lab.ssafy.com/shimkwkr/pjt-d109-reper/-/settings/integrations)
 
-## Collaborate with your team
+## 🛠 개발 방향
+1. **기술적 요구사항**
+   - 정확한 음성 인식 시스템 구현
+   - 안정적인 데이터베이스 설계
+   - 문서 파일 인식 및 변환 시스템
+   - 보안 시스템 구축
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+2. **시스템 확장성**
+   - 추가 기능 구현을 위한 확장 가능한 설계
+   - API 연동을 위한 시스템 설계
+   - 다양한 디바이스 지원
 
-## Test and Deploy
 
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+    |이름|1/13|1/14|1/15|1/16|1/17|
+   |---|-----|----|----|----|----|
+   |심근원|프로젝트 아이디어 도출, 조합|최종 아이디어 확정, 기능 명세서 작성|페르소나, 고객 여정 지도 작성|개발 기획 피드백 및 수정, 피그마 작업 준비| 피그마 작업 |
+   |김정언|아이디어 도출 (종일 팀 회의)|아이디어 확정 및 아이디어 확장 (종일 팀 회의)| 기획안 작성 - 시장 조사(기획의도 자료 조사, 시장 규모 조사, 경쟁사 분석), 카페 메뉴별 레시피 더미 데이터 생성|프론트 기능 명세서 작성 (종일 프론트 회의)|피그마를 활용하여 앱 UI 및 프로토타입 디자인 |
+   |박재영|아이디어 회의 - 아이디어 도출|아이디어 회의 - 아이디어 확정 및 아이디어 확장|페르소나, 고객여정지도 작성성|- api 명세서 초안 작성<br/>- DB 구체화<br/>- ERD 초안 제작|- api 명세서 구체화<br/>- ERD 완성 및 프론트에 전달|
+   |안주현|아이디어 회의 - 아이디어 도출|아이디어 회의 - 아이디어 확정 및  아이디어확장|기획안 작성 - 주요고객층, 시장분석 및 자료조사, 더미 데이터 작성(이용할 카페 레시피 파일)|프론트엔드 기능명세서 작성,  Actvity, Fragment별 기능 작성|프로토타입, 목업 ,UI 디자인 |
+   |이서현|아이디어 회의 - 아이디어 도출|아이디어 회의 - 아이디어 확정 및 아이디어 확장|기획의도 및 기대효과 도출|- api 명세서 초안 작성<br/>- DB 구체화<br/>- ERD 초안 제작|- api 명세서 구체화<br/>- ERD 완성 및 프론트에 전달|
+   |임지혜|아이디어 회의 - 아이디어 도출|아이디어 회의 - 아이디어 확정 및 아이디어 확장|기획의도 및 기대효과 도출|- api 명세서 초안 작성<br/>- DB 구체화<br/>- ERD 초안 제작|- api 명세서 구체화<br/>- ERD 완성 및 프론트에 전달|
