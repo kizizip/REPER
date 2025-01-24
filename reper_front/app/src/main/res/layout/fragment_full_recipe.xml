@@ -6,124 +6,129 @@
     android:layout_height="match_parent"
     tools:context=".ui.recipe.FullRecipeFragment">
 
-    <com.sothree.slidinguppanel.SlidingUpPanelLayout
-        android:layout_height="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fullrecipe_fm_back_layout"
         android:layout_width="match_parent"
-        app:umanoPanelHeight="300dp"
-        android:gravity="bottom"
-        app:umanoDragView="@id/fullrecipe_fm_slide_layout"
-        app:umanoOverlay="true">
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/fullrecipe_fm_iv"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@color/green"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/fullrecipe_fm_back_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="0dp"
+            android:padding="24dp"
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_iv">
 
-            <ImageView
-                android:id="@+id/fullrecipe_fm_iv"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:background="@color/green"
-                app:layout_constraintEnd_toEndOf="parent"
+            <TextView
+                android:id="@+id/fullrecipe_fm_tv_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="카테고리"
+                android:textColor="@color/lightgray"
+                android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:padding="24dp"
-                android:background="@color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_iv">
-
-                <TextView
-                    android:id="@+id/fullrecipe_fm_tv_category"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="카테고리"
-                    android:textColor="@color/lightgray"
-                    android:textSize="16sp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/fullrecipe_fm_tv_menu_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:fontFamily="@font/pretendard_semibold"
-                    android:text="메뉴명"
-                    android:textColor="@color/black"
-                    android:textSize="24sp"
-                    app:layout_constraintStart_toStartOf="@+id/fullrecipe_fm_tv_category"
-                    app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_tv_category" />
-
-                <FrameLayout
-                    android:id="@+id/fullrecipe_fm_fl_btn_heart"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="@+id/fullrecipe_fm_tv_menu_name"
-                    app:layout_constraintEnd_toEndOf="parent">
-
-                    <ImageButton
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/fullrecipe_heart_btn" />
-
-                    <ImageView
-                        android:id="@+id/fullrecipe_fm_iv_lineheart"
-                        android:visibility="visible"
-                        android:layout_width="25dp"
-                        android:layout_height="21.43dp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="2dp"
-                        android:background="@drawable/fullrecipe_lineheart" />
-
-                    <ImageView
-                        android:id="@+id/fullrecipe_fm_iv_fullheart"
-                        android:visibility="gone"
-                        android:layout_width="25dp"
-                        android:layout_height="21.88dp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="2dp"
-                        android:background="@drawable/fullrecipe_heart"/>
-                </FrameLayout>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/fullrecipe_fm_slide_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/fullrecipe_slidinguppanel"
-            android:padding="24dp">
-
-            <com.google.android.material.button.MaterialButtonToggleGroup
+            <TextView
+                android:id="@+id/fullrecipe_fm_tv_menu_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:background="@color/lightgreen"
-                app:singleSelection="true">
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/fullrecipe_tm_btn_ice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Ice"
-                    android:background="@color/green"/>
-                <com.google.android.material.button.MaterialButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Hot"
-                    android:background="@color/green"/>
-            </com.google.android.material.button.MaterialButtonToggleGroup>
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/pretendard_semibold"
+                android:text="메뉴명"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                app:layout_constraintStart_toStartOf="@+id/fullrecipe_fm_tv_category"
+                app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_tv_category" />
+
+            <FrameLayout
+                android:id="@+id/fullrecipe_fm_fl_btn_heart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/fullrecipe_fm_tv_menu_name"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageButton
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/fullrecipe_heart_btn" />
+
+                <ImageView
+                    android:id="@+id/fullrecipe_fm_iv_lineheart"
+                    android:visibility="visible"
+                    android:layout_width="25dp"
+                    android:layout_height="21.43dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/fullrecipe_lineheart" />
+
+                <ImageView
+                    android:id="@+id/fullrecipe_fm_iv_fullheart"
+                    android:visibility="gone"
+                    android:layout_width="25dp"
+                    android:layout_height="21.88dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/fullrecipe_heart"/>
+            </FrameLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="40dp"
+        android:background="@drawable/fullrecipe_slidinguppanel">
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggle_button_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:singleSelection="true"
+            app:checkedButton="@+id/fullrecipe_fm_btn_ice"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fullrecipe_fm_btn_ice"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/pretendard_semibold"
+                android:text="Ice"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:background="@drawable/button_selector_fullrecipe"
+                android:visibility="visible" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fullrecipe_fm_btn_hot"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hot"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:background="@drawable/button_selector_fullrecipe"
+                android:visibility="visible" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

@@ -99,4 +99,8 @@ dependencies {
     // SlidingUPPanel dependency
     implementation ("com.sothree.slidinguppanel:library:3.4.0")
 
+
+    // lottie
+    implementation ("com.airbnb.android:lottie-compose:6.5.0")
+
 }
