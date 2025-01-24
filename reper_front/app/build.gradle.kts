@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.ssafy.reper"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.ssafy.reper"
@@ -95,4 +95,8 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.8.8")
 
     implementation ("com.fasterxml.jackson.core:jackson-databind:2.15.2") // 적절한 최신 버전 사용
+
+    // SlidingUPPanel dependency
+    implementation ("com.sothree.slidinguppanel:library:3.4.0")
+
 }
