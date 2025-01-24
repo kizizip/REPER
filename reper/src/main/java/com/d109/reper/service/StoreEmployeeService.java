@@ -21,17 +21,14 @@ public class StoreEmployeeService {
     private final StoreEmployeeRepository storeEmployeeRepository;
 
 
-
-    //시험용으로 만듭니다.
+    // 알바생 정보를 조회하기 위한 메서드
     @Transactional
     public StoreEmployee employeeInfo(Long storeId, Long userId) {
-        // Store 조회
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 storeId입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
 
-        // User 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 userId입니다."));
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
 
         StoreEmployee employee = storeEmployeeRepository.findByStoreAndUser(store, user)
                 .orElseThrow(() -> new IllegalArgumentException("직원을 찾을 수 없습니다."));
@@ -42,13 +39,11 @@ public class StoreEmployeeService {
     // 알바생->사장 권한 요청 (store_employee 테이블에 추가)
     @Transactional
     public StoreEmployee addStoreEmployee(Long storeId, Long userId) {
-        // Store 조회
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 storeId입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
 
-        // User 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 userId입니다."));
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
 
         // 중복 체크
         boolean exists = storeEmployeeRepository.existsByStoreAndUser(store, user);
@@ -70,11 +65,10 @@ public class StoreEmployeeService {
     public boolean updateIsEmployed(Long storeId, Long userId) {
         try {
             Store store = storeRepository.findById(storeId)
-                    .orElseThrow(() -> new IllegalArgumentException("EmployeeNotFound"));
+                    .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
 
             User user = userRepository.findByUserId(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("EmployeeNotFound"));
-
+                    .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
 
             StoreEmployee storeEmployee = storeEmployeeRepository.findByStoreAndUser(store, user)
                     .orElseThrow(() -> new IllegalArgumentException("EmployeeNotFound"));
@@ -91,5 +85,22 @@ public class StoreEmployeeService {
     }
 
     // 권한 요청 거절 or 알바생 삭제하기 (테이블에서 데이터 삭제)
+    @Transactional
+    public StoreEmployee deleteEmployee(Long storeId, Long userId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
+
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+
+        StoreEmployee storeEmployee = storeEmployeeRepository.findByStoreAndUser(store, user)
+                .orElseThrow(() -> new IllegalArgumentException("EmployeeNotFound"));
+
+        if (storeEmployee != null) {
+            storeEmployeeRepository.delete(storeEmployee);
+        }
+
+        return storeEmployee;
+    }
 
 }

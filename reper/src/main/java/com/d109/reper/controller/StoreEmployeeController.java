@@ -86,6 +86,25 @@ public class StoreEmployeeController {
 
 
     // 권한 요청 거정 or 알바생 자르기 (알바생 정보 삭제)
+    @DeleteMapping("/{storeId}/employees/{userId}")
+    @Operation(summary = "권한 요청 거절 or 알바생 자르기", description = "store_employee 테이블에서 알바생 정보를 삭제합니다.")
+    public ResponseEntity<Object> deleteEmployee(@PathVariable Long storeId, @PathVariable Long userId) {
+        try {
+            StoreEmployee storeEmployee = storeEmployeeService.deleteEmployee(storeId, userId);
+
+            // 삭제 성공시 응답
+            return ResponseEntity.ok(new ResponseBody(
+                    "정상적으로 삭제되었습니다.",
+                    storeId,
+                    userId,
+                    storeEmployee.isEmployed()
+            ));
+        } catch (Exception e) {
+            // 예외 발생 시 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("DB 처리 중 서버 오류 발생"));
+        }
+    }
 
 
 
