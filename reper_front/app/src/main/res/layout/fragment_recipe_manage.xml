@@ -74,7 +74,7 @@
                 android:layout_height="match_parent"
                 android:textSize="18sp"
                 android:background="@android:color/transparent"
-                android:hint="공지를 입력해보세요."/>
+                android:hint="레시피를 검색해보세요"/>
 
         </LinearLayout>
 

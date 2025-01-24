@@ -10,6 +10,7 @@
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,7 +35,8 @@
             android:layout_marginTop="62dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/bgwhite"
+            tools:ignore="UseAppTint"
+            android:tint="@color/bgwhite"
         />
 
         <TextView
@@ -85,6 +87,7 @@
                 android:layout_width="47dp"
                 android:layout_height="47dp"
                 android:src="@drawable/ink_pen_24px"
+                tools:ignore="UseAppTint"
                 android:tint="@color/maingreen"
                 />
 
@@ -127,6 +130,7 @@
                     android:layout_height="47dp"
                     android:layout_marginTop="8dp"
                     android:src="@drawable/list_alt_24px"
+                    tools:ignore="UseAppTint"
                     android:tint="@color/maingreen" />
 
                 <TextView
@@ -167,6 +171,7 @@
                     android:layout_width="47dp"
                     android:layout_height="47dp"
                     android:src="@drawable/menu_book_24px"
+                    tools:ignore="UseAppTint"
                     android:tint="@color/maingreen"
                     />
 

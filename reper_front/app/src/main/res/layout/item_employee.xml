@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/bgwhite"
     android:layout_width="match_parent"
-    android:layout_height="62dp">
+    android:layout_height="60dp">
 
     <!-- 카드뷰 -->
     <androidx.cardview.widget.CardView
@@ -81,7 +81,8 @@
                 app:layout_constraintEnd_toEndOf="@+id/btn_accept"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_marginRight="24dp"
-                app:tint="@color/lightgray"/>
+                tools:ignore="UseAppTint"
+                android:tint="@color/lightgray"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
