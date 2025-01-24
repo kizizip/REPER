@@ -3,12 +3,137 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bgwhite"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.boss.WriteNotiFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:padding="24dp"
+        >
+
+
+        <ImageView
+            android:id="@+id/noti_write_fg_back_icon"
+            android:layout_width="24dp"
+            android:layout_height="28dp"
+            android:src="@drawable/baseline_arrow_back_ios_24"
+            app:layout_constraintBottom_toBottomOf="@+id/textView"
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="visible"
+         />
+
+        <TextView
+            android:id="@+id/textView"
+            style="@style/titleFontStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:text="공지 쓰기"
+            android:layout_marginLeft="16dp"
+            app:layout_constraintStart_toEndOf="@+id/noti_write_fg_back_icon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id="@+id/noti_write_fg_delete_tv"
+            style="@style/titleFontStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="76dp"
+            android:text="삭제"
+            android:textSize="18sp"
+            android:textColor="@color/mainorange"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            tools:layout_editor_absoluteX="24dp">
+
+            <!-- 상단 라인 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lightgray" />
+
+            <!-- 다른 내용들 -->
+            <EditText
+                android:id="@+id/noti_write_fg_title_ET"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:background="@android:color/transparent"
+                android:backgroundTint="@color/lightgray"
+                android:hint="제목을 입력하세요"
+                android:fontFamily="@font/pretendard_semibold"
+                android:textSize="18sp"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+            <!-- 하단 라인 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lightgray" />
+
+            <EditText
+                android:id="@+id/noti_write_fg_content_ET"
+                android:layout_width="match_parent"
+                android:layout_height="331.31dp"
+                android:background="@android:color/transparent"
+                android:layout_marginTop="24dp"
+                android:hint="내용을 입력해주세요"
+                android:gravity="top"
+                android:layout_marginHorizontal="16dp"
+                />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lightgray" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="2025. 01. 14"
+                android:textSize="16sp"
+                android:textColor="@color/lightgray"
+                android:layout_gravity="end"/>
+
+
+        </LinearLayout>
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/noti_write_fg_save_btn"
+            style="@style/titleFontStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/butto_main"
+            android:text="저장"
+            android:textColor="@color/bgwhite"
+            android:layout_marginBottom="30dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:layout_editor_absoluteX="24dp" />
+
+
+
+
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
 
 </FrameLayout>
