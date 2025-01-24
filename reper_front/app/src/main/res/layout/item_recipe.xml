@@ -37,7 +37,7 @@
                 app:cardCornerRadius="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-              />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <!-- 날짜 텍스트 -->
             <TextView
@@ -61,7 +61,7 @@
                 android:layout_marginStart="8dp"
                 android:elevation="8dp"
                 android:layout_marginLeft="16dp"
-                android:text="김정언"
+                android:text="레시피 이름입니다"
                 android:textColor="@color/fontblack"
                 android:textSize="18sp"
                 android:layout_marginTop="8dp"
