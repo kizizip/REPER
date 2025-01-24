@@ -17,3 +17,5 @@ spring:
 logging.level:
   org.hibernate.SQL: debug # (개발 환경) SQL 로그 출력
   org.hibernate.orm.jdbc.bind: trace # (개발 환경) SQL 바인딩 값 출력
+
+springdoc.override-with-generic-response: false

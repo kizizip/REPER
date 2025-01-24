@@ -1,9 +1,6 @@
 package com.d109.reper.controller;
 
-import com.d109.reper.response.ConflictException;
 import com.d109.reper.service.StoreEmployeeService;
-import com.d109.reper.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +21,10 @@ public class StoreEmployeeController {
     // 알바생->사장 권한 요청 (데이터 추가)
     @PostMapping("/{storeId}/employees/{userId}/approve")
     @Operation(summary = "알바생->사장 권한 요청", description = "알바생 정보를 가게에 등록합니다. isEmployed는 기본값 false로 설정됩니다.")
-    public ResponseEntity<?> requestStorePermission(
-            @PathVariable Long storeId,
-            @PathVariable Long userId) {
-
+    public ResponseEntity<?> requestStorePermission(@PathVariable Long storeId, @PathVariable Long userId) {
         try {
             StoreEmployee storeEmployee = storeEmployeeService.addStoreEmployee(storeId, userId);
 
-            // 응답에서 isEmployed 값을 true로 설정
             ResponseBody response = new ResponseBody(
                     "정상적으로 요청되었습니다.",
                     storeEmployee.getStore().getStoreId(),
@@ -42,17 +35,11 @@ public class StoreEmployeeController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ErrorResponse("storeId 혹은 userId가 유효하지 않음.")
-            );
-        } catch (ConflictException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                    new ErrorResponse("해당 가게/직원 조합으로 권한 요청이 이미 존재함.")
-            );
+            throw new IllegalArgumentException("storeId 혹은 userId가 유효하지 않음.");
+        } catch (IllegalStateException e) {
+            throw new IllegalStateException("해당 가게/직원 조합으로 권한 요청이 이미 존재함.");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    new ErrorResponse("DB 처리 중 서버 오류 발생")
-            );
+            throw new RuntimeException("DB 처리 중 서버 오류 발생");
         }
     }
 
@@ -62,25 +49,20 @@ public class StoreEmployeeController {
     @Operation(summary = "사장->알바생 권한 승인", description = "storeId와 userId를 넘기면 is_employed값이 true로 바뀝니다. 성공시 true를 반환합니다.")
     public ResponseEntity<Object> approveEmployee(@PathVariable Long storeId, @PathVariable Long userId) {
         try {
+            // isEmployed값이 이미 true인지 확인하는 코드
             boolean already = storeEmployeeService.employeeInfo(storeId, userId).isEmployed();
-            logger.info("already값", already);
-
             if (already) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(new ErrorResponse("이미 승인된 직원임."));
+                throw new IllegalStateException("이미 승인된 직원임.");
             }
 
-            boolean isUpdated = storeEmployeeService.updateIsEmployed(storeId, userId);
+            storeEmployeeService.updateIsEmployed(storeId, userId);
 
             return ResponseEntity.ok(true);
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ErrorResponse("storeId 혹은 userId가 유효하지 않음.")
-            );
+            throw new IllegalArgumentException("storeId 혹은 userId가 유효하지 않음.");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse("DB 처리 중 서버 오류 발생"));
+            throw new RuntimeException("DB 처리 중 서버 오류 발생");
         }
     }
 
@@ -99,13 +81,12 @@ public class StoreEmployeeController {
                     userId,
                     storeEmployee.isEmployed()
             ));
+        }catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("storeId 혹은 userId가 유효하지 않음.");
         } catch (Exception e) {
-            // 예외 발생 시 처리
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse("DB 처리 중 서버 오류 발생"));
+            throw new RuntimeException("DB 처리 중 서버 오류 발생");
         }
     }
-
 
 
     // 성공 응답 형식
@@ -137,19 +118,6 @@ public class StoreEmployeeController {
 
         public boolean getIsEmployed() {
             return isEmployed;
-        }
-    }
-
-    // 에러 응답 형식
-    public static class ErrorResponse {
-        private String error;
-
-        public ErrorResponse(String error) {
-            this.error = error;
-        }
-
-        public String getError() {
-            return error;
         }
     }
 }

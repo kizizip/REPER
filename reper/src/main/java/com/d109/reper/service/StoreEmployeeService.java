@@ -1,13 +1,11 @@
 package com.d109.reper.service;
 
-import com.d109.reper.controller.StoreEmployeeController;
 import com.d109.reper.domain.Store;
 import com.d109.reper.domain.StoreEmployee;
 import com.d109.reper.domain.User;
 import com.d109.reper.repository.StoreEmployeeRepository;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.repository.UserRepository;
-import com.d109.reper.response.ConflictException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +46,7 @@ public class StoreEmployeeService {
         // 중복 체크
         boolean exists = storeEmployeeRepository.existsByStoreAndUser(store, user);
         if (exists) {
-            throw new ConflictException("해당 가게/직원 조합으로 권한 요청이 이미 존재합니다.");
+            throw new IllegalStateException("해당 가게/직원 조합으로 권한 요청이 이미 존재합니다.");
         }
 
         // StoreEmployee 생성, 저장
@@ -74,7 +72,7 @@ public class StoreEmployeeService {
                     .orElseThrow(() -> new IllegalArgumentException("EmployeeNotFound"));
 
             if (storeEmployee.isEmployed()) {
-                throw new ConflictException("이미 승인된 직원입니다.");
+                throw new IllegalStateException("이미 승인된 직원입니다.");
             }
 
             storeEmployee.setIsEmployed(true);
