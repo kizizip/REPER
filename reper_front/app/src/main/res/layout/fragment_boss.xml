@@ -15,6 +15,8 @@
         android:layout_height="wrap_content"
         android:src="@drawable/top_bar"
         android:scaleType="center"
+        android:elevation="5dp"
+        android:translationZ="5dp"
         />
 
 </LinearLayout>
@@ -22,7 +24,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingHorizontal="24dp">
+        android:paddingHorizontal="40dp">
 
         <ImageView
             android:id="@+id/recipe_fg_back_icon"
@@ -60,8 +62,8 @@
 
         <androidx.cardview.widget.CardView
             android:id="@+id/boss_fg_notice_write"
-            android:layout_width="107dp"
-            android:layout_height="107dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_marginTop="32dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/boss_fg_store_spiner"
@@ -100,44 +102,40 @@
         </androidx.cardview.widget.CardView>
 
 
-
         <androidx.cardview.widget.CardView
             android:id="@+id/boss_fg_notice_list"
-            android:layout_width="107dp"
-            android:layout_height="107dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_marginTop="32dp"
-            android:layout_marginLeft="20dp"
-            app:cardCornerRadius = "8dp"
             android:elevation="5dp"
             android:translationZ="5dp"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/boss_fg_recipe_manage"
             app:layout_constraintStart_toEndOf="@+id/boss_fg_notice_write"
-            app:layout_constraintTop_toBottomOf="@+id/boss_fg_store_spiner" >
-
+            app:layout_constraintTop_toBottomOf="@+id/boss_fg_store_spiner">
 
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:orientation="vertical">
 
 
                 <ImageView
-                    android:layout_marginTop="8dp"
                     android:layout_width="47dp"
                     android:layout_height="47dp"
+                    android:layout_marginTop="8dp"
                     android:src="@drawable/list_alt_24px"
-                    android:tint="@color/maingreen"
-                    />
+                    android:tint="@color/maingreen" />
 
                 <TextView
-                    android:layout_marginTop="8dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="공지 내역"
-                    android:textSize="16sp"
+                    android:layout_marginTop="8dp"
                     android:fontFamily="@font/pretendard_regular"
-                    />
+                    android:text="공지 내역"
+                    android:textSize="16sp" />
 
             </LinearLayout>
 
@@ -146,14 +144,13 @@
 
         <androidx.cardview.widget.CardView
             android:id="@+id/boss_fg_recipe_manage"
-            android:layout_width="107dp"
-            android:layout_height="107dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_marginTop="32dp"
-            android:layout_marginLeft="20dp"
             app:cardCornerRadius = "8dp"
             android:elevation="5dp"
             android:translationZ="5dp"
-            app:layout_constraintStart_toEndOf="@+id/boss_fg_notice_list"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/boss_fg_store_spiner" >
 
 
