@@ -129,6 +129,29 @@ public class UserController {
     }
 
 
+    // 비밀번호 변경
+
+
+
+
+    // 회원 탈퇴
+    @DeleteMapping("/{userId}")
+    @Operation(summary = "userId 입력시 회원 정보를 삭제합니다.")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        boolean isDeleted = userService.deleteUser(userId);
+
+
+        if (isDeleted ) {
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("message", "정상적으로 삭제됨.");
+            responseBody.put("userId", userId);
+
+            return ResponseEntity.ok(responseBody);
+        } else {
+            throw new NoSuchElementException("회원 정보를 찾을 수 없음.");
+        }
+    }
+
 
     // 로그인 api에서 예시 request를 보여주기 위한 DTO
     public static class LoginRequest {

@@ -2,11 +2,14 @@ package com.d109.reper.service;
 
 import com.d109.reper.controller.UserController;
 import com.d109.reper.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.d109.reper.domain.User;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,6 +128,27 @@ public class UserService {
             userRepository.save(user);
             return true;
         } catch (Exception e) {
+            return false;
+        }
+    }
+
+
+    // 비밀번호 변경
+
+
+
+
+    // 회원 탈퇴
+    // 최초 실행시 기능이 동작하지 않아 GPT에게 물어보았는데, @Transactional을 붙이라는 답변을 받았습니다.
+    // @Transactional을 명시하니 기능이 잘 동작합니다. 그러나 다른 메서드는 이를 명시하지 않아도 동작하여, 나중에 차이점을 다시 검색하려고 주석 덧붙입니다.
+    @Transactional
+    public boolean deleteUser(Long userId) {
+        Optional<User> user = userRepository.findByUserId(userId);
+
+        if (user.isPresent()) {
+            userRepository.deleteByUserId(userId);
+            return true;
+        } else {
             return false;
         }
     }
