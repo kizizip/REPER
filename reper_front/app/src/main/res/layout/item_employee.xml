@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/bgwhite"
     android:layout_width="match_parent"
     android:layout_height="62dp">
 
@@ -21,7 +22,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:padding="8dp">
+         >
 
             <!-- 이름 텍스트 -->
             <TextView
@@ -31,7 +32,7 @@
                 android:text="김정언"
                 android:textColor="@color/fontblack"
                 android:textSize="18dp"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="24dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -64,7 +65,7 @@
                 android:textColor="@android:color/white"
                 android:textSize="12sp"
                 app:cornerRadius="50dp"
-                android:layout_marginRight="8dp"
+                android:layout_marginRight="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
@@ -79,7 +80,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/btn_accept"
                 app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginRight="16dp"
+                android:layout_marginRight="24dp"
                 app:tint="@color/lightgray"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
