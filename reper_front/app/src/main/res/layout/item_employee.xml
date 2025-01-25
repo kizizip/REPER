@@ -5,18 +5,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/bgwhite"
     android:layout_width="match_parent"
-    android:layout_height="60dp">
+    android:layout_height="68dp">
 
     <!-- 카드뷰 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="60dp"
         android:elevation="5dp"
-        android:translationZ="5dp"
+        android:translationZ="1dp"
         app:cardCornerRadius="8dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+       >
 
         <!-- CardView 내부 ConstraintLayout -->
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -42,7 +42,7 @@
             <!-- visibility조절해서 쓰시면됩니당 -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_reject"
-                android:layout_width="80dp"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/lightgray"
                 android:text="거절"
@@ -57,7 +57,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_accept"
-                android:layout_width="80dp"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/maingreen"
                 android:text="수락"

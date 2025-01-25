@@ -54,6 +54,7 @@
 
         <Spinner
             android:id="@+id/boss_fg_store_spiner"
+            android:layout_marginHorizontal="2dp"
             android:layout_width="match_parent"
             android:layout_height="52sp"
             android:layout_marginTop="40dp"
@@ -63,6 +64,7 @@
             tools:layout_editor_absoluteX="24dp" />
 
         <androidx.cardview.widget.CardView
+            android:layout_marginStart="2dp"
             android:id="@+id/boss_fg_notice_write"
             android:layout_width="100dp"
             android:layout_height="100dp"
@@ -148,6 +150,7 @@
 
         <androidx.cardview.widget.CardView
             android:id="@+id/boss_fg_recipe_manage"
+            android:layout_marginEnd="2dp"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="32dp"
@@ -199,15 +202,17 @@
             app:layout_constraintTop_toBottomOf="@id/boss_fg_notice_write"
             app:layout_constraintStart_toStartOf="parent"/>
 
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/access_false_list"
             android:layout_width="match_parent"
-            android:layout_height="136dp"
-            android:layout_marginTop="20dp"
-            app:layout_constraintTop_toBottomOf="@id/access"
+            android:layout_height="150dp"
+            android:layout_marginTop="24dp"
+            android:scrollbars="vertical"
+            android:scrollbarFadeDuration="0"
+            android:scrollbarThumbVertical="@drawable/scroll_bar"
             app:layout_constraintStart_toStartOf="parent"
-            />
-
+            app:layout_constraintTop_toBottomOf="@id/access" />
 
         <TextView
             android:id="@+id/store_employee"
@@ -227,6 +232,9 @@
             android:layout_marginTop="20dp"
             app:layout_constraintTop_toBottomOf="@id/store_employee"
             app:layout_constraintStart_toStartOf="parent"
+            android:scrollbars="vertical"
+            android:scrollbarFadeDuration="0"
+            android:scrollbarThumbVertical="@drawable/scroll_bar"
             />
 
 

@@ -7,6 +7,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.boss.WriteNotiFragment">
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -87,19 +88,25 @@
             <EditText
                 android:id="@+id/noti_write_fg_content_ET"
                 android:layout_width="match_parent"
-                android:layout_height="331.31dp"
+                android:layout_height="380dp"
                 android:background="@android:color/transparent"
                 android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
                 android:hint="내용을 입력해주세요"
                 android:gravity="top"
                 android:layout_marginHorizontal="16dp"
+                android:scrollbars="vertical"
+                android:scrollbarFadeDuration="0"
+                android:scrollbarThumbVertical="@drawable/scroll_bar"
                 />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/lightgray" />
+
             <TextView
+                android:id="@+id/noti_fg_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -123,12 +130,6 @@
             android:layout_marginBottom="30dp"
             app:layout_constraintBottom_toBottomOf="parent"
             tools:layout_editor_absoluteX="24dp" />
-
-
-
-
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
