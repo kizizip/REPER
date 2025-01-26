@@ -4,6 +4,8 @@ import com.d109.reper.controller.UserController;
 import com.d109.reper.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.d109.reper.domain.User;
 import java.util.HashMap;
@@ -19,6 +21,21 @@ public class UserService {
 
     private final UserRepository userRepository;
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
+    private final PasswordEncoder passwordEncoder;
+
+
+
+    public int insertMember(User user) {
+        // 패스워드 암호화
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // User를 저장하고, 저장된 User가 null이 아니면 성공으로 판단
+        User savedUser = userRepository.save(user);
+        return savedUser != null ? 1 : 0;
+    }
+
+
 
 
     // 회원가입
@@ -63,7 +80,12 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new SecurityException("InvalidCredentials"));
 
-        if (!user.getPassword().equals(password)) {
+//        if (!user.getPassword().equals(password)) {
+//            logger.warn("비밀번호 불일치 - email: {}", email);
+//            throw new SecurityException("InvalidCredentials");
+//        }
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             logger.warn("비밀번호 불일치 - email: {}", email);
             throw new SecurityException("InvalidCredentials");
         }

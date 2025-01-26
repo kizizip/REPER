@@ -27,24 +27,26 @@ public class UserController {
     private final UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    // 회원가입
-    @PostMapping
-    @Operation(summary = "사용자 정보를 추가합니다. 성공하면 true를 리턴합니다. ", description = "모든 정보를 입력해야 회원가입이 가능합니다.")
-    public ResponseEntity<?> signup(@RequestBody JoinRequest joinRequest) {
 
-            // 이메일 중복 확인
-            if (userService.isEmailDuplicate(joinRequest.getEmail())) {
-                throw new IllegalArgumentException("이메일이 이미 존재함.");
-            }
 
-            boolean result = userService.join(joinRequest);
-
-            if (result) {
-                return ResponseEntity.ok(true);
-            } else {
-                throw new RuntimeException("회원가입 실패");
-            }
-    }
+//    // 회원가입
+//    @PostMapping
+//    @Operation(summary = "사용자 정보를 추가합니다. 성공하면 true를 리턴합니다. ", description = "모든 정보를 입력해야 회원가입이 가능합니다.")
+//    public ResponseEntity<?> signup(@RequestBody JoinRequest joinRequest) {
+//
+//            // 이메일 중복 확인
+//            if (userService.isEmailDuplicate(joinRequest.getEmail())) {
+//                throw new IllegalArgumentException("이메일이 이미 존재함.");
+//            }
+//
+//            boolean result = userService.join(joinRequest);
+//
+//            if (result) {
+//                return ResponseEntity.ok(true);
+//            } else {
+//                throw new RuntimeException("회원가입 실패");
+//            }
+//    }
 
 
     // 이메일 중복 확인
@@ -198,19 +200,15 @@ public class UserController {
         public String getEmail() {
             return email;
         }
-
         public String getPassword() {
             return password;
         }
-
         public String getUserName() {
             return userName;
         }
-
         public String getPhone() {
             return phone;
         }
-
         public String getRole() {
             return role;
         }
