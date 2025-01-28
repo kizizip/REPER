@@ -11,7 +11,7 @@ import java.util.List;
 @Getter @Setter
 public class Store {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long storeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,6 +26,9 @@ public class Store {
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreEmployee> storeEmployees = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
 
     //연관관계 메서드
     //가입 요청 메서드 (storeEmployee 추가)

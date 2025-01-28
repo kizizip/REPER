@@ -32,6 +32,7 @@ public class UserService {
 
         // User를 저장하고, 저장된 User가 null이 아니면 성공으로 판단
         User savedUser = userRepository.save(user);
+        logger.info("저장된 User: {}", savedUser);
         return savedUser != null ? 1 : 0;
     }
 

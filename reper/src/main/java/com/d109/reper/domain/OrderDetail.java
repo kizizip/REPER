@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter @Setter
 public class OrderDetail {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderDetailId;
 
     @ManyToOne(fetch = FetchType.LAZY)

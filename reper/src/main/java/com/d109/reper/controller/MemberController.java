@@ -6,7 +6,7 @@ import com.d109.reper.service.UserService;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +39,7 @@ public class MemberController {
 
     //회원가입
     @PostMapping("/member/insertMember")
-    public String insertMember(@RequestBody JoinRequest joinRequest) {
+    public ResponseEntity<?> insertMember(@RequestBody JoinRequest joinRequest) {
         log.info("insertMember::: {}", joinRequest);
 
         User user = new User();
@@ -51,10 +51,11 @@ public class MemberController {
 
         int res = userService.insertMember(user);
         log.info("res ::: 0", res);
+
         if (res ==1) {
-            return "redirect:/index";
+            return ResponseEntity.ok().body("회원가입 성공");
         } else {
-            return "redirect:/error/registerError";
+            return ResponseEntity.badRequest().body("회원가입 실패");
         }
     }
 
@@ -103,7 +104,11 @@ public class MemberController {
 
         // UserRole Enum으로 변환
         public UserRole getRoleEnum() {
-            return UserRole.valueOf(role.toUpperCase());
+            try {
+                return UserRole.valueOf(role.toUpperCase());
+            } catch (IllegalArgumentException | NullPointerException e) {
+                return UserRole.STAFF; // 기본값 설정
+            }
         }
     }
 
