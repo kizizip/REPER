@@ -105,108 +105,117 @@
             android:padding="40dp"
             android:background="@drawable/fullrecipe_slidinguppanel">
 
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/fullrecipe_fm_btngroup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:singleSelection="true"
-                app:checkedButton="@+id/fullrecipe_fm_btn_ice"
-                android:backgroundTint="@color/darkgreen"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/fullrecipe_fm_btn_ice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/CheckedToggleButtonStyle"
-                    android:fontFamily="@font/pretendard_bold"
-                    android:text="Ice"
-                    android:textSize="20sp"
-                    android:textAllCaps="false"
-                    android:visibility="visible" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/fullrecipe_fm_btn_hot"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/BaseToggleButtonStyle"
-                    android:text="Hot"
-                    android:textSize="20sp"
-                    android:fontFamily="@font/pretendard_bold"
-                    android:textAllCaps="false"
-                    android:visibility="visible" />
-
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-
-            <TextView
-                android:id="@+id/textView5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/pretendard_bold"
-                android:text="Ingredients"
-                android:textColor="@color/darkgreen"
-                android:textSize="24sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_btngroup" />
-
-            <TextView
-                android:id="@+id/fullrecipe_fm_tv_ingredients"
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="재료"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:fontFamily="@font/pretendard_regular"
-                app:layout_constraintStart_toStartOf="@+id/textView5"
-                app:layout_constraintTop_toBottomOf="@+id/textView5" />
+                android:layout_height="match_parent">
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/textView10"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/pretendard_bold"
-                android:text="Recipe"
-                android:textColor="@color/darkgreen"
-                android:textSize="24sp"
-                app:layout_constraintStart_toStartOf="@+id/fullrecipe_fm_tv_ingredients"
-                app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_tv_ingredients" />
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/fullrecipe_fm_btngroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        app:singleSelection="true"
+                        app:checkedButton="@+id/fullrecipe_fm_btn_ice"
+                        android:backgroundTint="@color/darkgreen"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/fullrecipe_fm_rv_recipe"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintStart_toStartOf="@+id/textView10"
-                app:layout_constraintTop_toBottomOf="@+id/textView10" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/fullrecipe_fm_btn_ice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/CheckedToggleButtonStyle"
+                            android:fontFamily="@font/pretendard_bold"
+                            android:text="Ice"
+                            android:textSize="20sp"
+                            android:textAllCaps="false"
+                            android:visibility="visible" />
 
-            <TextView
-                android:id="@+id/textView11"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/pretendard_bold"
-                android:text="Note"
-                android:textColor="@color/darkgreen"
-                android:textSize="24sp"
-                app:layout_constraintStart_toStartOf="@+id/fullrecipe_fm_rv_recipe"
-                app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_rv_recipe" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/fullrecipe_fm_btn_hot"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/BaseToggleButtonStyle"
+                            android:text="Hot"
+                            android:textSize="20sp"
+                            android:fontFamily="@font/pretendard_bold"
+                            android:textAllCaps="false"
+                            android:visibility="visible" />
 
-            <TextView
-                android:id="@+id/fullrecipe_fm_tv_note"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="고객 요청 사항"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:fontFamily="@font/pretendard_regular"
-                app:layout_constraintStart_toStartOf="@+id/textView11"
-                app:layout_constraintTop_toBottomOf="@+id/textView11" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:fontFamily="@font/pretendard_bold"
+                        android:text="Ingredients"
+                        android:textColor="@color/darkgreen"
+                        android:textSize="24sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_btngroup" />
+
+                    <TextView
+                        android:id="@+id/fullrecipe_fm_tv_ingredients"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="재료"
+                        android:textColor="@color/black"
+                        android:textSize="20sp"
+                        android:fontFamily="@font/pretendard_regular"
+                        app:layout_constraintStart_toStartOf="@+id/textView5"
+                        app:layout_constraintTop_toBottomOf="@+id/textView5" />
+
+                    <TextView
+                        android:id="@+id/textView10"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:fontFamily="@font/pretendard_bold"
+                        android:text="Recipe"
+                        android:textColor="@color/darkgreen"
+                        android:textSize="24sp"
+                        app:layout_constraintStart_toStartOf="@+id/fullrecipe_fm_tv_ingredients"
+                        app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_tv_ingredients" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/fullrecipe_fm_rv_recipe"
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintStart_toStartOf="@+id/textView10"
+                        app:layout_constraintTop_toBottomOf="@+id/textView10" />
+
+                    <TextView
+                        android:id="@+id/textView11"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:fontFamily="@font/pretendard_bold"
+                        android:text="Note"
+                        android:textColor="@color/darkgreen"
+                        android:textSize="24sp"
+                        app:layout_constraintStart_toStartOf="@+id/fullrecipe_fm_rv_recipe"
+                        app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_rv_recipe" />
+
+                    <TextView
+                        android:id="@+id/fullrecipe_fm_tv_note"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="고객 요청 사항"
+                        android:textColor="@color/black"
+                        android:textSize="20sp"
+                        android:fontFamily="@font/pretendard_regular"
+                        app:layout_constraintStart_toStartOf="@+id/textView11"
+                        app:layout_constraintTop_toBottomOf="@+id/textView11" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </ScrollView>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
