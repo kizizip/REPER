@@ -63,3 +63,26 @@
 //
 //
 //}
+
+
+package com.ssafy.reper.data.local
+
+import android.content.Context
+import android.content.SharedPreferences
+
+class SharedPreferencesUtil(context: Context) {
+    private var preferences: SharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+
+    fun getUserCookie(): String? {
+        return preferences.getString(KEY_USER_COOKIE, null)
+    }
+
+    fun saveUserCookie(cookie: String) {
+        preferences.edit().putString(KEY_USER_COOKIE, cookie).apply()
+    }
+
+    companion object {
+        private const val SHARED_PREFERENCES_NAME = "reper_preference"
+        private const val KEY_USER_COOKIE = "user_cookie"
+    }
+}

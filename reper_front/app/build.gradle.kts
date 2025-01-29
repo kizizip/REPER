@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.ssafy.reper"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.ssafy.reper"
