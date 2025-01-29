@@ -118,25 +118,36 @@
             app:layout_constraintTop_toBottomOf="@+id/textView14" />
 
         <TextView
-            android:id="@+id/textView15"
+            android:id="@+id/editmyaccount_fm_tv_myaccess"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:fontFamily="@font/pretendard_regular"
-            android:text="가게 정보 수정"
+            android:text="내 권한 수정"
             android:textColor="@color/darkgreen"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_et_tel" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <ScrollView
+            android:id="@+id/editmyaccount_fm_sv"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="200dp"
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView15" />
+            app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_tv_myaccess">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/editmyaccount_fm_rv"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toTopOf="@+id/editmyaccount_fm_fl_ten_edit"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_tv_myaccess" />
+        </ScrollView>
 
         <FrameLayout
             android:id="@+id/editmyaccount_fm_fl_ten_edit"
@@ -145,7 +156,7 @@
             android:layout_marginTop="32dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recyclerView">
+            app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_sv">
 
             <ImageButton
                 android:id="@+id/allrecipe_fm_btn_edit"
