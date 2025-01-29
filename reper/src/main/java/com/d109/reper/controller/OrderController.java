@@ -21,7 +21,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<Order> getOrdersByStoreId(@PathVariable Long storeId) {
+    public List<OrderResponseDto> getOrdersByStoreId(@PathVariable Long storeId) {
 //        return orderService.findOrdersByStoreId(storeId);
         System.out.println("Store ID from request: " + storeId);
         return orderService.findOrdersByStoreId(storeId);

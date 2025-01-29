@@ -19,9 +19,10 @@ public class Order {
     private LocalDateTime orderDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id")
+    @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
+    @Column(name = "is_completed")
     private boolean isCompleted;
 
     // 양방향 관계 설정
@@ -30,9 +31,10 @@ public class Order {
 
     // 연관관계 메서드 (OrderDetail과)
     public void addOrderDetail(OrderDetail orderDetail) {
-        orderDetails.add(orderDetail);
-        if (orderDetail.getOrder() != this) {
-            orderDetail.setOrder(this);
+        if (orderDetail == null) {
+            throw new IllegalArgumentException("OrderDetail cannot be null");
         }
+        orderDetails.add(orderDetail);
+        orderDetail.setOrder(this);
     }
 }
