@@ -23,15 +23,17 @@ public class OrderService {
     }
 
     public List<OrderResponseDto> findOrdersByStoreId(Long storeId) {
-//        List<Order> orders = orderRepository.findByStore_StoreId(storeId);
-
-        Store store = storeRepository.findById(storeId)
-                        .orElseThrow(() -> new IllegalArgumentException("Store not found"));
-
-        List<Order> orders = orderRepository.findByStore(store);
+        List<Order> orders = orderRepository.findByStore_StoreId(storeId);
         System.out.println("Orders found: " + orders);
         return orders.stream()
                 .map(OrderResponseDto::new)
                 .collect(Collectors.toList());
     }
+
+    public OrderResponseDto findOrderByStoreIdAndOrderId(Long storeId, Long orderId) {
+        Order order = orderRepository.findByStore_StoreIdAndOrderId(storeId, orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+        return new OrderResponseDto(order);
+    }
+
 }

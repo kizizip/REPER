@@ -20,10 +20,18 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    // 특정 매장의 전체 주문 조회하기
     @GetMapping
     public List<OrderResponseDto> getOrdersByStoreId(@PathVariable Long storeId) {
 //        return orderService.findOrdersByStoreId(storeId);
         System.out.println("Store ID from request: " + storeId);
         return orderService.findOrdersByStoreId(storeId);
+    }
+
+
+    // 특정 매장의 특정 주문 조회하기
+    @GetMapping("/{orderId}")
+    public OrderResponseDto getOrderById(@PathVariable Long storeId, @PathVariable Long orderId) {
+        return orderService.findOrderByStoreIdAndOrderId(storeId, orderId);
     }
 }
