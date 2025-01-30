@@ -5,56 +5,131 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
+import com.ssafy.reper.data.local.HomeAnnouncementModel
+import com.ssafy.reper.data.local.HomeBannerModel
+import com.ssafy.reper.data.local.OrderRecipeModel
+import com.ssafy.reper.databinding.FragmentOrderBinding
+import com.ssafy.reper.databinding.FragmentOrderRecipeBinding
+import com.ssafy.reper.ui.MainActivity
+import com.ssafy.reper.ui.home.adapter.RVHomeAnnouncement
+import com.ssafy.reper.ui.order.adapter.RVOrderRecipeAdapter
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [OrderRecipeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class OrderRecipeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+    private var _binding: FragmentOrderRecipeBinding? = null
+    private val binding get() = _binding!!
+
+    private val orderdetailItems = mutableListOf<OrderRecipeModel>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_order_recipe, container, false)
+
+        _binding = FragmentOrderRecipeBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment OrderRecipeFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            OrderRecipeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // 탭 초기 상태 설정 (단계별 레시피 선택)
+        binding.orderRecipeFragmentStepbystepRecipeTab.isSelected = true
+        binding.orderRecipeFragmentAllRecipeTab.isSelected = false
+
+        // 탭 클릭 리스너 설정
+        binding.orderRecipeFragmentStepbystepRecipeTab.setOnClickListener {
+            binding.orderRecipeFragmentStepbystepRecipeTab.isSelected = true
+            binding.orderRecipeFragmentAllRecipeTab.isSelected = false
+            // 여기에 단계별 레시피 표시 로직 추가
+        }
+
+        binding.orderRecipeFragmentAllRecipeTab.setOnClickListener {
+            binding.orderRecipeFragmentStepbystepRecipeTab.isSelected = false
+            binding.orderRecipeFragmentAllRecipeTab.isSelected = true
+            // 여기에 전체 레시피 표시 로직 추가
+        }
+
+        // 주문 상세 리스트 코드!!!
+        orderdetailItems.add(
+            OrderRecipeModel(
+                R.drawable.americano_hot,
+                "아메리카노 hot",
+                2,
+                "없음"
+            )
+        )
+
+        orderdetailItems.add(
+            OrderRecipeModel(
+                R.drawable.americano_hot,
+                "아메리카노 Ice",
+                3,
+                "샷 추가"
+            )
+        )
+
+        orderdetailItems.add(
+            OrderRecipeModel(
+                R.drawable.americano_hot,
+                "카페모카 Ice",
+                1,
+                "휘핑 빼고"
+            )
+        )
+
+        orderdetailItems.add(
+            OrderRecipeModel(
+                R.drawable.americano_hot,
+                "카페라떼 hot",
+                2,
+                "없음"
+            )
+        )
+
+        orderdetailItems.add(
+            OrderRecipeModel(
+                R.drawable.americano_hot,
+                "아메리카노 hot",
+                2,
+                "없음"
+            )
+        )
+
+        orderdetailItems.add(
+            OrderRecipeModel(
+                R.drawable.americano_hot,
+                "아메리카노 hot",
+                2,
+                "없음"
+            )
+        )
+
+        val rvOrderRecipe = binding.fragmentOrderRecipeRv
+        val rvOrderRecipeAdapter = RVOrderRecipeAdapter(orderdetailItems)
+
+        rvOrderRecipe.adapter = rvOrderRecipeAdapter
+        rvOrderRecipe.layoutManager = LinearLayoutManager(context,  LinearLayoutManager.VERTICAL, false)
+
     }
+
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Fragment가 파괴될 때 BottomNavigationView 다시 보이게 하기
+        (activity as MainActivity).showBottomNavigation()
+
+        _binding = null
+    }
+
 }

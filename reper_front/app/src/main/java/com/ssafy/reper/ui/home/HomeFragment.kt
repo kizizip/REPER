@@ -191,21 +191,21 @@ class HomeFragment : Fragment() {
         // 현재 진행중인 주문 코드!!!
         orderItems.add(
             HomeOrderModel(
-                "아메리카노 외 1잔",
+                "아메리카노 외.. 1잔",
                 "1분전"
             )
         )
 
         orderItems.add(
             HomeOrderModel(
-                "아메리카노 외 2잔",
+                "아메리카노 외.. 2잔",
                 "2분전"
             )
         )
 
         orderItems.add(
             HomeOrderModel(
-                "아메리카노 외 3잔",
+                "아메리카노 외.. 3잔",
                 "3분전"
             )
         )

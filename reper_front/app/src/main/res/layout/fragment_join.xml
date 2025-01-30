@@ -263,6 +263,7 @@
                     android:background="@drawable/login_button"
                     android:text="Join"
                     android:textColor="#FFFFFF"
+                    android:fontFamily="@font/pretendard_semibold"
                     android:textSize="18sp" />
 
             </LinearLayout>
