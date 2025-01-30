@@ -1,26 +1,91 @@
 package com.d109.reper.controller;
 
 import com.d109.reper.domain.KakaoUserInfo;
+import com.d109.reper.domain.KakaoUserInfoResponse;
 import com.d109.reper.domain.User;
 import com.d109.reper.domain.UserRole;
 import com.d109.reper.repository.UserRepository;
+import com.d109.reper.service.KakaoApiService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
+@Slf4j
 public class KakaoLoginController {
 
     @Autowired
     private UserRepository userRepository;
+
+
+
+    // 카카오 로그인 후 리디렉션 되는 콜백을 처리
+    @GetMapping("/callback")
+    public ResponseEntity<?> kakaoCallback(@RequestParam("code") String code) {
+        // 카카오에서 전달받은 인증 코드를 이용해 액세스 토큰을 발급받음
+        String accessToken = getKakaoAccessToken(code);
+        log.info("카카오 액세스 토큰: " + accessToken);
+
+        // 토큰을 통해 사용자 정보를 가져옴
+//        KakaoUserInfo kakaoUserInfo = getKakaoUserInfo(accessToken);
+        KakaoUserInfo kakaoUserInfo = KakaoApiService.getKakaoUserInfo2(accessToken);
+        String userInfo = KakaoApiService.getKakaoUserInfo(accessToken);
+        log.info("카카오 사용자 정보: " + kakaoUserInfo);
+        log.info("사용자정보.." + userInfo);
+
+        // DB에서 사용자 검색 또는 새로 생성
+        User user = userRepository.findByEmail(kakaoUserInfo.getEmail())
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setEmail(kakaoUserInfo.getEmail());
+                    newUser.setUserName(kakaoUserInfo.getNickname());
+                    newUser.setPassword(""); // 비밀번호는 카카오에서 관리하므로 빈 값
+                    newUser.setRole(UserRole.STAFF); // 기본 권한 설정
+                    return userRepository.save(newUser);
+                });
+
+        // 사용자 정보 반환
+        return ResponseEntity.ok(user);
+    }
+
+    // 인증 코드로 액세스 토큰 요청
+    private String getKakaoAccessToken(String code) {
+        String url = "https://kauth.kakao.com/oauth/token";
+        RestTemplate restTemplate = new RestTemplate();
+
+        // 요청 파라미터 설정
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("client_id", "11a435ceceba6f2724e9f7b1b9b69f5b"); // 카카오 REST API 키
+        body.add("redirect_uri", "http://localhost:8080/api/auth/callback");
+        body.add("code", code);
+
+        // POST 요청
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+
+        // 응답에서 액세스 토큰 추출
+        Map<String, String> responseBody = response.getBody();
+        return responseBody != null ? responseBody.get("access_token") : null;
+    }
 
     @PostMapping("/kakao")
     public ResponseEntity<?> kakaoLogin(@RequestBody KakaoLoginRequest kakaoLoginRequest) {
         //1. 카카오 access token으로 카카오 사용자 정보 조회
 
         KakaoUserInfo kakaoUserInfo = getKakaoUserInfo(kakaoLoginRequest.getAccessToken());
+        log.info("kakao Token: ", kakaoLoginRequest.getAccessToken());
+//        KakaoUserInfo kakaoUserInfo =
 
         //2. db에서 해당 사용자 검색
         User user = userRepository.findByEmail(kakaoUserInfo.getEmail())
@@ -44,27 +109,37 @@ public class KakaoLoginController {
         RestTemplate restTemplate = new RestTemplate();
         String url = "https://kapi.kakao.com/v2/user/me";
 
-        var headers = new org.springframework.http.HttpHeaders();
+        // 요청 헤더 설정
+        var headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
-        var entity = new org.springframework.http.HttpEntity<>(headers);
+        var entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<KakaoUserInfo> response = restTemplate.exchange(
+            // 카카오 API 호출
+            ResponseEntity<KakaoUserInfoResponse> response = restTemplate.exchange(
                     url,
                     org.springframework.http.HttpMethod.GET,
                     entity,
-                    KakaoUserInfo.class
+                    KakaoUserInfoResponse.class // 응답을 KakaoUserInfoResponse로 받음
             );
 
-            // 응답 확인을 위한 로그 추가
-            System.out.println("Kakao API Response: " + response.getBody());
-
-            return response.getBody();
+            // 응답에서 실제 사용자 정보를 추출하여 KakaoUserInfo 객체에 담기
+            KakaoUserInfoResponse responseBody = response.getBody();
+            if (responseBody != null) {
+                KakaoUserInfo kakaoUserInfo = new KakaoUserInfo();
+                // KakaoUserInfoResponse에서 이메일과 닉네임을 가져와서 KakaoUserInfo에 세팅
+                kakaoUserInfo.setEmail(responseBody.getKakao_account().getEmail());
+                kakaoUserInfo.setNickname(responseBody.getProperties().getNickname());
+                return kakaoUserInfo;
+            }
         } catch (Exception e) {
             // 예외 처리 및 디버깅 메시지 추가
             throw new RuntimeException("Failed to fetch Kakao user info: " + e.getMessage(), e);
         }
+
+        return null;
     }
+
 
 
     public static class KakaoLoginRequest {

@@ -22,4 +22,4 @@ springdoc.override-with-generic-response: false
 
 kakao:
   client_id: 11a435ceceba6f2724e9f7b1b9b69f5b
-  redirect_uri: http://localhost:8080/callback
+  redirect_uri: http://localhost:8080/api/auth/callback
