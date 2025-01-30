@@ -204,7 +204,7 @@
                         android:id="@+id/FragmentJoinSpinnerUserType"
                         android:layout_width="match_parent"
                         android:layout_height="49.36dp"
-                        android:background="@drawable/spinner_background"
+                        android:background="@drawable/join_spinner_background"
                         android:paddingStart="16dp"
                         android:paddingEnd="40dp"
                         android:popupBackground="#FFFFFF"

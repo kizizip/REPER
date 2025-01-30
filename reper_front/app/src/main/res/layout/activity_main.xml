@@ -11,12 +11,13 @@
         android:id="@+id/activityMainFragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/activityMainBottomMenu"
+        app:layout_constraintBottom_toTopOf="@+id/activity_main_bottom_menu"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/activityMainBottomMenu"
-        android:background="@color/white"
+        android:id="@+id/activity_main_bottom_menu"
+        android:background="@color/bgwhite"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"

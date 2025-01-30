@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ssafy.reper.R
-import android.widget.Spinner
 import android.widget.ArrayAdapter
 import android.widget.AdapterView
 import com.ssafy.reper.databinding.FragmentJoinBinding
@@ -40,10 +39,10 @@ class JoinFragment : Fragment() {
         
         val adapter = ArrayAdapter(
             requireContext(),
-            R.layout.spinner_item,
+            R.layout.join_spinner_item,
             userTypes
         ).apply {
-            setDropDownViewResource(R.layout.spinner_item)
+            setDropDownViewResource(R.layout.join_spinner_item)
         }
         
         spinner.adapter = adapter

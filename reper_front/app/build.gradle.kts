@@ -95,4 +95,5 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.8.8")
 
     implementation ("com.fasterxml.jackson.core:jackson-databind:2.15.2") // 적절한 최신 버전 사용
+
 }
