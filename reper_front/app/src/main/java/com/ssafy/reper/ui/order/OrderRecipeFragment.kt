@@ -42,6 +42,12 @@ class OrderRecipeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 뒤로가기 버튼 클릭 리스너 설정
+        binding.notiFgBackIcon.setOnClickListener {
+            // 프래그먼트 매니저의 백스택에서 현재 프래그먼트 제거
+            parentFragmentManager.popBackStack()
+        }
+
         // 탭 초기 상태 설정 (단계별 레시피 선택)
         binding.orderRecipeFragmentStepbystepRecipeTab.isSelected = true
         binding.orderRecipeFragmentAllRecipeTab.isSelected = false

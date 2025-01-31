@@ -151,6 +151,7 @@ class OrderFragment : Fragment() {
 
         rvOrderAdapter.itemClick = object : RVHomeOrderAdapter.ItemClick {
             override fun onClick(view: View, position: Int) {
+
                 // BottomNavigationView 숨기기
                 (activity as MainActivity).hideBottomNavigation()
                 

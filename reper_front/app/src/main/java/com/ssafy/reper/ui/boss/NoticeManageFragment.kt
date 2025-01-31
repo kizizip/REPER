@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentNoticeManageBinding
 import com.ssafy.reper.databinding.FragmentRecipeManageBinding
+import com.ssafy.reper.ui.MainActivity
 
 class NoticeManageFragment : Fragment() {
     private var _binding: FragmentNoticeManageBinding? = null
@@ -34,6 +35,9 @@ class NoticeManageFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Fragment가 파괴될 때 BottomNavigationView 다시 보이게 하기
+        (activity as MainActivity).showBottomNavigation()
+
         _binding = null
     }
 

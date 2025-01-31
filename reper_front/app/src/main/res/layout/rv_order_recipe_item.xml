@@ -36,19 +36,20 @@
                 <TextView
                     android:id="@+id/rv_order_recipe_title"
                     android:text="아메리카노 Ice"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:fontFamily="@font/pretendard_semibold"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
                 <LinearLayout
+                    android:layout_marginTop="4dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
 
                     <TextView
                         android:text="수량 : "
                         android:textColor="@color/darkgray"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:fontFamily="@font/pretendard_regular"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
@@ -57,7 +58,7 @@
                         android:id="@+id/rv_order_recipe_quantity"
                         android:text="2"
                         android:textColor="@color/darkgray"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:fontFamily="@font/pretendard_regular"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
@@ -65,13 +66,14 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:layout_marginTop="4dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
 
                     <TextView
                         android:text="요청사항 : "
                         android:textColor="@color/black"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:fontFamily="@font/pretendard_regular"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
@@ -80,7 +82,7 @@
                         android:id="@+id/rv_order_recipe_message"
                         android:text="샷 추가"
                         android:textColor="@color/black"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:fontFamily="@font/pretendard_regular"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>

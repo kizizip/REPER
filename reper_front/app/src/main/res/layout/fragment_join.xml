@@ -12,16 +12,13 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginRight="40dp"
-            android:layout_marginLeft="40dp">
+            android:layout_marginHorizontal="40dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-
                 android:orientation="vertical"
-                tools:layout_editor_absoluteX="16dp"
-                tools:layout_editor_absoluteY="-109dp">
+                android:layout_marginBottom="60dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -258,11 +255,10 @@
                 <androidx.appcompat.widget.AppCompatButton
                     android:layout_width="match_parent"
                     android:layout_height="49.36dp"
-                    android:layout_marginTop="38.82dp"
-                    android:layout_marginBottom="40dp"
+                    android:layout_marginTop="40dp"
                     android:background="@drawable/login_button"
                     android:text="Join"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:fontFamily="@font/pretendard_semibold"
                     android:textSize="18sp" />
 
