@@ -40,4 +40,29 @@ public class NoticeService {
         notice.setContent(content);
         noticeRepository.save(notice);
     }
+
+    // 공지 단건 조회
+    public Notice findOneNotice(Long noticeId) {
+        return noticeRepository.findOne(noticeId);
+    }
+
+    // 공지 삭제
+//    public void deleteNotice(Long noticeId, Long userId, Long storeId) {
+//
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+//
+//        Store store = storeRepository.findById(storeId)
+//                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
+//
+//        Notice notice = noticeRepository.findOne(noticeId)
+//                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+//
+//        // 공지의 store의 owner의 userid와 로그인한사용자 userid가 같지 않으면
+//        if (!store.getOwner().getUserId().equals(user.getUserId())) {
+//
+//        }
+//
+//        noticeRepository.delete(notice);
+//    }
 }

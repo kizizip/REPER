@@ -38,6 +38,19 @@ public class NoticeController {
         ));
     }
 
+    @GetMapping("/{noticeId}")
+    @Operation(summary = "{noticeId}에 해당하는 공지 하나를 조회합니다.")
+    public ResponseEntity<ResponseBodyOne> findOneNotice(
+            @PathVariable Long noticeId) {
+
+        Notice notice = noticeService.findOneNotice(noticeId);
+
+        return ResponseEntity.ok(new ResponseBodyOne(
+                notice.getTitle(),
+                notice.getContent()));
+    }
+
+
     //성공 응답 형식
     @Getter
     public static class ResponseBody {
@@ -51,6 +64,18 @@ public class NoticeController {
             this.message = message;
             this.userId = userId;
             this.storeId = storeId;
+            this.title = title;
+            this.content = content;
+        }
+    }
+
+    // 조회 하나 응답
+    @Getter
+    public static class ResponseBodyOne {
+        private String title;
+        private String content;
+
+        public ResponseBodyOne(String title, String content) {
             this.title = title;
             this.content = content;
         }
