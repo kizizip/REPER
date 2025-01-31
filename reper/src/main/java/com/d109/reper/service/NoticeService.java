@@ -4,6 +4,7 @@ import com.d109.reper.domain.Notice;
 import com.d109.reper.domain.Store;
 import com.d109.reper.domain.User;
 import com.d109.reper.repository.NoticeRepository;
+import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
