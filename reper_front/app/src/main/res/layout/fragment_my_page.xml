@@ -144,6 +144,7 @@
 
         <Spinner
             android:id="@+id/mypage_fm_sp"
+            android:overlapAnchor="false"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginStart="40dp"
