@@ -1,0 +1,4 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/bgwhite"/>  <!-- 배경 색상 -->
+    <stroke android:width="2dp" android:color="#D1D1D1"/>  <!-- 테두리 -->
+</shape>

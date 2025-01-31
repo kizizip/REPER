@@ -8,12 +8,22 @@
     tools:context=".ui.MainActivity">
 
     <FrameLayout
-        android:id="@+id/main_flayout"
+        android:id="@+id/activityMainFragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/activity_main_bottom_menu" />
 
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/activity_main_bottom_menu"
+        android:background="@color/bgwhite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:itemTextColor="@color/bottom_menu_item_color"
+        app:itemIconTint="@color/bottom_menu_item_color"
+        app:labelVisibilityMode="labeled"
+        app:itemActiveIndicatorStyle="@null"
+        app:itemRippleColor="@android:color/transparent"
+        app:menu="@menu/bottom_menu_item" />
 </androidx.constraintlayout.widget.ConstraintLayout>
