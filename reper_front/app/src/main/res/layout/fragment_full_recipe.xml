@@ -101,7 +101,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fullrecipe_fm_slide_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="800dp"
             android:padding="40dp"
             android:background="@drawable/fullrecipe_slidinguppanel">
 

@@ -57,16 +57,12 @@ class FullRecipeFragment : Fragment() {
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
         // Ice Hot 버튼 클릭
         fullRecipeBinding.fullrecipeFmBtnIce.setOnClickListener {
-            fullRecipeBinding.fullrecipeFmBtnIce.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.white))
-            fullRecipeBinding.fullrecipeFmBtnIce.setTextColor(ContextCompat.getColor(mainActivity, R.color.black))
-            fullRecipeBinding.fullrecipeFmBtnHot.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.green))
-            fullRecipeBinding.fullrecipeFmBtnHot.setTextColor(ContextCompat.getColor(mainActivity, R.color.white))
+            fullRecipeBinding.fullrecipeFmBtngroup.check(fullRecipeBinding.fullrecipeFmBtnIce.id)
+            btnHotIceColorChange()
         }
         fullRecipeBinding.fullrecipeFmBtnHot.setOnClickListener {
-            fullRecipeBinding.fullrecipeFmBtnIce.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.green))
-            fullRecipeBinding.fullrecipeFmBtnIce.setTextColor(ContextCompat.getColor(mainActivity, R.color.white))
-            fullRecipeBinding.fullrecipeFmBtnHot.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.white))
-            fullRecipeBinding.fullrecipeFmBtnHot.setTextColor(ContextCompat.getColor(mainActivity, R.color.black))
+            fullRecipeBinding.fullrecipeFmBtngroup.check(fullRecipeBinding.fullrecipeFmBtnHot .id)
+            btnHotIceColorChange()
         }
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
     }
@@ -75,5 +71,21 @@ class FullRecipeFragment : Fragment() {
         super.onDestroyView()
         mainActivity.showBottomNavigation()
         _fullRecipeBinding = null
+    }
+
+    fun btnHotIceColorChange(){
+        if(fullRecipeBinding.fullrecipeFmBtngroup.checkedButtonId == fullRecipeBinding.fullrecipeFmBtnIce.id){
+            fullRecipeBinding.fullrecipeFmBtnIce.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.green))
+            fullRecipeBinding.fullrecipeFmBtnIce.setTextColor(ContextCompat.getColor(mainActivity, R.color.white))
+            fullRecipeBinding.fullrecipeFmBtnHot.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.white))
+            fullRecipeBinding.fullrecipeFmBtnHot.setTextColor(ContextCompat.getColor(mainActivity, R.color.black))
+        }
+
+        if(fullRecipeBinding.fullrecipeFmBtngroup.checkedButtonId == fullRecipeBinding.fullrecipeFmBtnHot.id){
+            fullRecipeBinding.fullrecipeFmBtnIce.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.white))
+            fullRecipeBinding.fullrecipeFmBtnIce.setTextColor(ContextCompat.getColor(mainActivity, R.color.black))
+            fullRecipeBinding.fullrecipeFmBtnHot.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.green))
+            fullRecipeBinding.fullrecipeFmBtnHot.setTextColor(ContextCompat.getColor(mainActivity, R.color.white))
+        }
     }
 }
