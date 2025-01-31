@@ -45,7 +45,7 @@ public class Recipe {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserFavoriteRecipe> userFavoriteRecipes = new ArrayList<>();
 
-    // 양방향 관계 설정
+    // 양방향 연관관계 메서드
     public void addRecipeStep(RecipeStep recipeStep) {
         recipeSteps.add(recipeStep);
         recipeStep.setRecipe(this);
