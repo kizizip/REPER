@@ -58,5 +58,23 @@ public class NoticeService {
         return noticeRepository.findAllByStore_StoreId(storeId);
     }
 
+    // 공지 삭제
+    @Transactional
+    public void deleteNotice(Long noticeId, Long userId, Long storeId) {
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
+
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new IllegalArgumentException("NoticeNotFound"));
+        // 공지 매장의 owner의 userId가 로그인한 userId랑 다를때
+        if (!notice.getStore().getOwner().getUserId().equals(user.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "공지 삭제 권한이 없습니다.");
+        }
+
+        noticeRepository.delete(notice);
+    }
 }

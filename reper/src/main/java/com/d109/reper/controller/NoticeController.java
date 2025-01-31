@@ -68,7 +68,18 @@ public class NoticeController {
         return ResponseEntity.ok(response);
     }
 
- 
+    @DeleteMapping("/{noticeId}")
+    @Operation(summary = "{noticeId}에 해당하는 공지를 삭제합니다.")
+    public ResponseEntity<String> deleteNotice(
+            @PathVariable Long storeId,
+            @PathVariable Long noticeId,
+            @RequestBody Map<String, Object> requestBody) {
+        Long userId = Long.valueOf(requestBody.get("userId").toString());
+
+        noticeService.deleteNotice(noticeId, userId, storeId);
+
+        return ResponseEntity.ok("공지 삭제 완료");
+    }
 
     // Response DTO
         //성공 응답 형식
