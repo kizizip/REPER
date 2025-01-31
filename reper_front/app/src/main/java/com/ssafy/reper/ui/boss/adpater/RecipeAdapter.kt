@@ -1,4 +1,4 @@
-package com.ssafy.reper.ui.boss
+package com.ssafy.reper.ui.boss.adpater
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

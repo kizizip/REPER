@@ -8,10 +8,11 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.databinding.FragmentBossBinding
+import com.ssafy.reper.ui.boss.adpater.AccessAdapter
 
 class BossFragment : Fragment() {
     private var _binding: FragmentBossBinding? = null
@@ -55,10 +56,10 @@ class BossFragment : Fragment() {
 
         val adapter = ArrayAdapter(
             requireContext(),
-            R.layout.join_spinner_item,
+            R.layout.order_spinner_item,
             userTypes
         ).apply {
-            setDropDownViewResource(R.layout.join_spinner_item)
+            setDropDownViewResource(R.layout.boss_spinner_item)
         }
 
         spinner.adapter = adapter
@@ -73,6 +74,39 @@ class BossFragment : Fragment() {
                 // 아무것도 선택되지 않았을 때의 처리
             }
         }
+
+
+        binding.bossFgNoticeWrite.setOnClickListener {
+            val fragment = WriteNotiFragment()
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.activityMainFragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
+
+        binding.bossFgNoticeList.setOnClickListener {
+            val fragment = NoticeManageFragment()
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.activityMainFragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.bossFgRecipeManage.setOnClickListener {
+            val fragment = RecipeManageFragment()
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.activityMainFragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
+
+        val bottomNav: BottomNavigationView = requireActivity().findViewById(R.id.activity_main_bottom_menu)
+        bottomNav.visibility = View.GONE
 
 
     }

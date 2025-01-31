@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.databinding.FragmentMyPageBinding
+import com.ssafy.reper.ui.boss.BossFragment
 
 class MyPageFragment : Fragment() {
 
@@ -50,6 +51,16 @@ class MyPageFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 // 아무것도 선택되지 않았을 때의 처리
             }
+        }
+
+
+        myPageBinding.mypageFmBtnBossMenu.setOnClickListener {
+            val bossFragment = BossFragment()
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.activityMainFragmentContainer, bossFragment)
+                .addToBackStack(null)
+                .commit()
         }
     }
 }

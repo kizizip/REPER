@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/bgwhite"
+
     tools:context=".ui.boss.NoticeManageFragment">
-    
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingHorizontal="40dp"
-        >
+        android:layout_marginBottom="60dp"
+        android:paddingHorizontal="24dp">
 
 
         <ImageView
@@ -27,9 +28,9 @@
             style="@style/titleFontStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
             android:layout_marginTop="60dp"
             android:text="공지내역"
-            android:layout_marginLeft="16dp"
             app:layout_constraintStart_toEndOf="@+id/noti_fg_back_icon"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -37,41 +38,43 @@
         <LinearLayout
             android:id="@+id/recipe_fg_search_noti"
             android:layout_width="match_parent"
-            android:layout_height="53dp"
-            android:scaleType="fitXY"
-            android:orientation="horizontal"
+            android:layout_height="60dp"
             android:layout_marginTop="32dp"
             android:background="@drawable/search_bar"
+            android:orientation="horizontal"
+            android:scaleType="fitXY"
             app:layout_constraintTop_toBottomOf="@+id/textView">
+
 
             <Spinner
                 android:id="@+id/noti_fg_spinner"
-                android:layout_width="60dp"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginLeft="16dp"/>
-
+                android:layout_marginLeft="16dp"
+                android:background="@drawable/noti_spinner_background"
+                android:overlapAnchor="false"
+                android:paddingEnd="32dp"
+                android:spinnerMode="dropdown" />
 
             <EditText
                 android:id="@+id/noti_fg_search_ET"
-                android:layout_width="210dp"
+                android:layout_width="200dp"
                 android:layout_height="match_parent"
-                android:textSize="18sp"
                 android:background="@android:color/transparent"
-                android:hint="공지를 입력해보세요."/>
+                android:hint="공지를 입력해보세요."
+                android:textSize="18sp" />
 
 
             <ImageButton
                 android:id="@+id/noti_fg_search_btn"
                 android:layout_width="30dp"
                 android:layout_height="28dp"
-                android:src="@drawable/search_24px"
                 android:layout_gravity="center"
                 android:layout_marginRight="16dp"
                 android:backgroundTint="@color/bgwhite"
-                app:tint="@color/darkgray"
-                />
-
+                android:src="@drawable/search_24px"
+                app:tint="@color/darkgray" />
 
 
         </LinearLayout>
@@ -80,32 +83,26 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/noti_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginTop="32dp"
-            android:scrollbars="vertical"
             android:scrollbarFadeDuration="0"
             android:scrollbarThumbVertical="@drawable/scroll_bar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recipe_fg_search_noti"/>
-
-
+            android:scrollbars="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recipe_fg_search_noti" />
 
 
         <TextView
             android:id="@+id/blank_noti_tv"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginTop="32dp"
             android:text="공지내역이 비어있습니다."
-            android:textSize="18sp"
             android:textColor="@color/lightgray"
+            android:textSize="18sp"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recipe_fg_search_noti"/>
-        
-        
-        
-        
-        
+            app:layout_constraintTop_toBottomOf="@+id/recipe_fg_search_noti" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

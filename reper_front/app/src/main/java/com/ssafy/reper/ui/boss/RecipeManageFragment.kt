@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentRecipeManageBinding
+import com.ssafy.reper.ui.boss.adpater.RecipeAdapter
 
 
 class RecipeManageFragment : Fragment() {

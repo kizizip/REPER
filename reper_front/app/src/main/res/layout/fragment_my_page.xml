@@ -117,7 +117,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="40dp"
-            android:visibility="gone"
+            android:visibility="visible"
             android:text="사장님 메뉴"
             android:textColor="@color/darkgray"
             android:textSize="16sp"
@@ -133,6 +133,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="40dp"
+            android:visibility="gone"
             android:fontFamily="@font/pretendard_regular"
             android:text="권한 요청"
             android:textColor="@color/darkgray"
@@ -140,7 +141,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/mypage_fm_tv_store_num"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/mypage_fm_tv_store_num"
-            app:strokeColor="@color/darkgray" />
+            app:strokeColor="@color/darkgray" />ㅎ
 
         <Spinner
             android:id="@+id/mypage_fm_sp"
@@ -148,14 +149,14 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginStart="40dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="40dp"
             android:paddingHorizontal="24dp"
             android:spinnerMode="dropdown"
             android:background="@drawable/mypage_store_list"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mypage_fm_btn_request_menu" />
+            app:layout_constraintTop_toBottomOf="@+id/textView7" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/linearLayout"

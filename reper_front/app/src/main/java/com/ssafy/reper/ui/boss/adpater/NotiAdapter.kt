@@ -1,4 +1,4 @@
-package com.ssafy.reper.ui.boss
+package com.ssafy.reper.ui.boss.adpater
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -17,8 +17,8 @@ class NotiAdapter  :
 
 
     override fun onBindViewHolder(holder: NotiViewHolder, position: Int) {
-        holder.binding.notiItemTitle.text = "😊멋쟁이 공지가 들어갈 자리입니다😊"
-        holder.binding.notiItemUploadTime.text = "2025.01.25"
+        holder.binding.itemNotiTitle.text = "😊멋쟁이 공지가 들어갈 자리입니다😊"
+        holder.binding.itemNotiTime.text = "1분전"
     }
 
 
