@@ -10,13 +10,18 @@ import com.ssafy.reper.R
 import com.ssafy.reper.databinding.ActivityMainBinding
 import com.ssafy.reper.ui.recipe.FullRecipeFragment
 import com.ssafy.reper.ui.home.HomeFragment
+import com.ssafy.reper.ui.mypage.MyPageFragment
 import com.ssafy.reper.ui.order.OrderFragment
+import com.ssafy.reper.ui.recipe.AllRecipeFragment
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        enableEdgeToEdge()
+
         super.onCreate(savedInstanceState)
 
         // View Binding 초기화
@@ -38,10 +43,24 @@ class MainActivity : AppCompatActivity() {
                         .commit()
                     true
                 }
+                // RecipeFragment로 이동
+                R.id.recipe_icon -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.activityMainFragmentContainer, AllRecipeFragment())
+                        .commit()
+                    true
+                }
                 // OrderFragment로 이동
                 R.id.order_icon -> {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.activityMainFragmentContainer, OrderFragment())
+                        .commit()
+                    true
+                }
+                // MyPageFragment로 이동
+                R.id.mypage_icon -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.activityMainFragmentContainer, MyPageFragment())
                         .commit()
                     true
                 }

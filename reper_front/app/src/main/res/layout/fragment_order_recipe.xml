@@ -106,7 +106,7 @@
             android:id="@+id/appCompatButton"
             android:layout_width="match_parent"
             android:layout_height="49.36dp"
-            android:layout_marginBottom="40dp"
+            android:layout_marginBottom="80dp"
             android:background="@drawable/login_button"
             android:fontFamily="@font/pretendard_semibold"
             android:text="주문 완료"
