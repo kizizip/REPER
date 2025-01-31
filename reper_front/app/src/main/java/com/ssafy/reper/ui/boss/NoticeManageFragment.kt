@@ -43,7 +43,7 @@ class NoticeManageFragment : Fragment() {
             R.layout.order_spinner_item,
             notis
         ).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            setDropDownViewResource(R.layout.boss_spinner_item)
         }
 
         notiSpinner.adapter = adapter

@@ -12,4 +12,6 @@
     <style name="Theme.MyApp" parent="Theme.MaterialComponents.DayNight">
         <item name="materialButtonStyle">@style/BaseToggleButtonStyle</item>
     </style>
+
+
 </resources>
