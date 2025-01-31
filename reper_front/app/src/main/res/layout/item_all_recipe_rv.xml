@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="20dp"
+    android:background="@drawable/item_allrecipe_back">
+
+    <ImageView
+        android:id="@+id/allrecipe_rv_item_iv_menu"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@color/lightgray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/allrecipe_rv_item_tv_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="@font/pretendard_semibold"
+        android:text="메뉴명"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/allrecipe_rv_item_iv_menu" />
+
+    <FrameLayout
+        android:id="@+id/allrecipe_rv_item_fl_btn_heart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/allrecipe_rv_item_btn_heart"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/fullrecipe_heart_btn" />
+
+        <ImageView
+            android:id="@+id/allrecipe_rv_item_iv_lineheart"
+            android:layout_width="25dp"
+            android:layout_height="21.43dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="2dp"
+            android:background="@drawable/fullrecipe_lineheart"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/alllrecipe_rv_item_iv_fullheart"
+            android:layout_width="25dp"
+            android:layout_height="21.88dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="2dp"
+            android:background="@drawable/fullrecipe_heart"
+            android:visibility="gone" />
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

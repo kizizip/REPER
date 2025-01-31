@@ -13,11 +13,11 @@ class AddCookiesInterceptor : Interceptor{
         val builder: Request.Builder = chain.request().newBuilder()
 
         // cookie 가져오기
-        val getCookies = ApplicationClass.sharedPreferencesUtil.getUserCookie()
-        for (cookie in getCookies!!) {
-            builder.addHeader("Cookie", cookie)
-//            Log.v(TAG,"Adding Header: $cookie")
-        }
+//        val getCookies = ApplicationClass.sharedPreferencesUtil.getUserCookie()
+//        for (cookie in getCookies!!) {
+//            builder.addHeader("Cookie", cookie)
+////            Log.v(TAG,"Adding Header: $cookie")
+//        }
         return chain.proceed(builder.build())
     }
 }

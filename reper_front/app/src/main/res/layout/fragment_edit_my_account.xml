@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    tools:context=".ui.mypage.EditMyAccountFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="40dp">
+
+        <ImageButton
+            android:id="@+id/editmyaccount_fm_btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/backspace"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView9"
+            style="@style/styleTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="개인정보 수정"
+            app:layout_constraintBottom_toBottomOf="@+id/editmyaccount_fm_btn_back"
+            app:layout_constraintStart_toEndOf="@+id/editmyaccount_fm_btn_back"
+            app:layout_constraintTop_toTopOf="@+id/editmyaccount_fm_btn_back" />
+
+        <TextView
+            android:id="@+id/textView12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:fontFamily="@font/pretendard_regular"
+            android:text="아이디"
+            android:textColor="@color/darkgreen"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView9" />
+
+        <EditText
+            android:id="@+id/editmyaccount_fm_et_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/editmyaccount_edittext_back"
+            android:fontFamily="@font/pretendard_regular"
+            android:hint="000000000@naver.com"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView12" />
+
+        <TextView
+            android:id="@+id/textView13"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/pretendard_regular"
+            android:text="이름"
+            android:textColor="@color/darkgreen"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_et_id" />
+
+        <EditText
+            android:id="@+id/editmyaccount_fm_et_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/editmyaccount_edittext_back"
+            android:fontFamily="@font/pretendard_regular"
+            android:hint="김정언"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView13" />
+
+        <TextView
+            android:id="@+id/textView14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/pretendard_regular"
+            android:text="전화번호"
+            android:textColor="@color/darkgreen"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_et_name" />
+
+        <EditText
+            android:id="@+id/editmyaccount_fm_et_tel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/editmyaccount_edittext_back"
+            android:fontFamily="@font/pretendard_regular"
+            android:hint="010-0000-0000"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView14" />
+
+        <TextView
+            android:id="@+id/editmyaccount_fm_tv_myaccess"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/pretendard_regular"
+            android:text="내 권한 수정"
+            android:textColor="@color/darkgreen"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_et_tel" />
+
+        <ScrollView
+            android:id="@+id/editmyaccount_fm_sv"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_tv_myaccess">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/editmyaccount_fm_rv"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toTopOf="@+id/editmyaccount_fm_fl_ten_edit"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_tv_myaccess" />
+        </ScrollView>
+
+        <FrameLayout
+            android:id="@+id/editmyaccount_fm_fl_ten_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_sv">
+
+            <ImageButton
+                android:id="@+id/allrecipe_fm_btn_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@android:color/transparent"
+                android:src="@drawable/btn"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/pretendard_semibold"
+                android:text="수정"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/editmyaccount_fm_tv_deleteaccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/pretendard_regular"
+            android:text="회원탈퇴"
+            android:textColor="@color/darkgray"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="@+id/editmyaccount_fm_fl_ten_edit"
+            app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_fl_ten_edit" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>
