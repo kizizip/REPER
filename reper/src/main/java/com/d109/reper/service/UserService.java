@@ -26,6 +26,7 @@ public class UserService {
 
 
 
+    // 회원가입
     public int insertMember(User user) {
         // 패스워드 암호화
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -35,31 +36,6 @@ public class UserService {
         logger.info("저장된 User: {}", savedUser);
         return savedUser != null ? 1 : 0;
     }
-
-
-
-
-    // 회원가입
-    public boolean join(UserController.JoinRequest joinRequest) {
-        try {
-            User user = new User(); //JoinRequest를 User엔티티로 변환함
-            user.setEmail(joinRequest.getEmail());
-            user.setPassword(joinRequest.getPassword());
-            user.setUserName(joinRequest.getUserName());
-            user.setPhone(joinRequest.getPhone());
-            user.setRole(joinRequest.getRoleEnum());
-
-
-
-            userRepository.save(user);
-            logger.info("회원가입 성공 - userId: {}", user.getUserId());
-            return true;
-        } catch (Exception e) {
-            logger.error("회원가입 실패 - 오류: {}", e.getMessage());
-            return false;
-        }
-    }
-
 
 
     // 아이디 중복 확인
@@ -81,38 +57,12 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new SecurityException("InvalidCredentials"));
 
-//        if (!user.getPassword().equals(password)) {
-//            logger.warn("비밀번호 불일치 - email: {}", email);
-//            throw new SecurityException("InvalidCredentials");
-//        }
-
         if (!passwordEncoder.matches(password, user.getPassword())) {
             logger.warn("비밀번호 불일치 - email: {}", email);
             throw new SecurityException("InvalidCredentials");
         }
 
         return user;
-    }
-
-
-    //사용자 로그인
-    public Map<String, Object> login(String email, String password) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new SecurityException("InvalidCredentials"));
-
-        if (!user.getPassword().equals(password)) {
-            throw new SecurityException("InvalidCredentials");
-        }
-
-        // 로그인 성공 시 사용자 정보를 반환
-        Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("userId", user.getUserId());
-        userInfo.put("email", user.getEmail());
-        userInfo.put("username", user.getUserName());
-        userInfo.put("role", user.getRole().name());
-        userInfo.put("phone", user.getPhone());
-
-        return userInfo;
     }
 
 

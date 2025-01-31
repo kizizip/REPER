@@ -1,4 +1,4 @@
-package com.d109.reper.domain;
+package com.d109.reper.response;
 
 public class KakaoUserInfoResponse {
     private Properties properties;

@@ -12,8 +12,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,25 +30,33 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
 
+    //회원가입
+    @PostMapping
+    @Operation(summary = "사용자 정보를 추가합니다. 성공하면 true를 리턴합니다. ", description = "모든 정보를 입력해야 회원가입이 가능합니다.")
+    public ResponseEntity<?> join(@RequestBody JoinRequest joinRequest) {
+        log.info("insertMember::: {}", joinRequest);
 
-//    // 회원가입
-//    @PostMapping
-//    @Operation(summary = "사용자 정보를 추가합니다. 성공하면 true를 리턴합니다. ", description = "모든 정보를 입력해야 회원가입이 가능합니다.")
-//    public ResponseEntity<?> signup(@RequestBody JoinRequest joinRequest) {
-//
-//            // 이메일 중복 확인
-//            if (userService.isEmailDuplicate(joinRequest.getEmail())) {
-//                throw new IllegalArgumentException("이메일이 이미 존재함.");
-//            }
-//
-//            boolean result = userService.join(joinRequest);
-//
-//            if (result) {
-//                return ResponseEntity.ok(true);
-//            } else {
-//                throw new RuntimeException("회원가입 실패");
-//            }
-//    }
+        // 이메일 중복 확인
+        if (userService.isEmailDuplicate(joinRequest.getEmail())) {
+            throw new IllegalArgumentException("이메일이 이미 존재함.");
+        }
+
+        User user = new User();
+        user.setEmail(joinRequest.getEmail());
+        user.setPassword(joinRequest.getPassword());
+        user.setUserName(joinRequest.getUserName());
+        user.setPhone(joinRequest.getPhone());
+        user.setRole(joinRequest.getRoleEnum());  // Enum 변환
+
+        int res = userService.insertMember(user);
+        log.info("res ::: 0", res);
+
+        if (res == 1) {
+            return ResponseEntity.ok(true);
+        } else {
+            throw new RuntimeException("회원가입 실패");
+        }
+    }
 
 
     // 이메일 중복 확인
@@ -70,9 +76,8 @@ public class UserController {
     }
 
 
-
     // 사용자 로그인
-    //쿠키 이용 방식
+    // 쿠키 이용 방식
     @PostMapping("/login")
     @Operation(summary = "로그인 처리 후 성공적으로 로그인 되었다면 쿠키(loginId)를 포함한 일부 정보를 내려보냅니다.",
             description = "<pre>email와 pass 두개만 넘겨도 정상동작한다. \n 아래는 id, pass만 입력한 샘플코드\n"
@@ -107,37 +112,6 @@ public class UserController {
         return ResponseEntity.ok(responseBody);
     }
 
-    //로그인 (JWT 이용)
-//    @PostMapping("/login")
-//    @Operation(summary = "로그인 처리 후 JWT를 반환합니다.")
-//    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) throws Exception {
-//        logger.info("로그인 요청 - email: {}", loginRequest.getEmail());
-//
-//        if(loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty()
-//                || loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
-//            throw new IllegalArgumentException("email 혹은 password가 올바르지 않음.");
-//        }
-//
-//        //사용자 인증
-//        User user = userService.validateLogin(loginRequest.getEmail(), loginRequest.getPassword());
-//
-//        //JWT 생성 (여기서는 JwtTokenProvider 클래스를 사용한다.)
-//
-//        String jwt = jwtTokenProvider.createToken(user.getEmail(), user.getRole().name());
-//
-//        //Response Body 생성
-//        Map<String, Object> responseBody = new HashMap<>();
-//        responseBody.put("userId", user.getUserId());
-//        responseBody.put("username", user.getUserName());
-//        responseBody.put("role", user.getRole().name());
-//
-//        //JWT를 Authorization 헤더에 담아 응답
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.set("Authorization", "Bearer " + jwt);
-//
-//        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
-//    }
-
 
     // 회원 정보 조회
     @GetMapping("/{userId}/info")
@@ -171,8 +145,6 @@ public class UserController {
 //    @PatchMapping("/{userId}/{password}")
 
 
-
-
     // 회원 탈퇴
     @DeleteMapping("/{userId}")
     @Operation(summary = "userId 입력시 회원 정보를 삭제합니다.")
@@ -181,7 +153,7 @@ public class UserController {
         boolean isDeleted = userService.deleteUser(userId);
 
 
-        if (isDeleted ) {
+        if (isDeleted) {
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("message", "정상적으로 삭제됨.");
             responseBody.put("userId", userId);
@@ -194,17 +166,7 @@ public class UserController {
 
 
 
-    //JWT 인가 기능 구현
-    //올바른 JWT토큰을 가지고 있으면 HttpStatus.OK 메시지를 줌
-    @GetMapping("/check")
-    public ResponseEntity check() {
-        return new ResponseEntity(HttpStatus.OK);
-    }
-
-
-
-
-    // 로그인 api에서 예시 request를 보여주기 위한 DTO
+    // 로그인 api에서 예시 request를 보여주기 위한 형식적 DTO
     public static class LoginRequest {
 
         @Setter
@@ -222,6 +184,27 @@ public class UserController {
             return password;
         }
     }
+
+
+    public static class UserUpdateRequest {
+
+        @Setter
+        @Schema(description = "사용자의 이름", example = "홍길동")
+        private String userName;
+
+        @Setter
+        @Schema(description = "사용자의 전화번호", example = "010-9876-5432")
+        private String phone;
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+    }
+
 
     //회원가입 api에서 예시 request를 보여주기 위한 DTO
     public static class JoinRequest {
@@ -249,42 +232,30 @@ public class UserController {
         public String getEmail() {
             return email;
         }
+
         public String getPassword() {
             return password;
         }
+
         public String getUserName() {
             return userName;
         }
+
         public String getPhone() {
             return phone;
         }
+
         public String getRole() {
             return role;
         }
 
         // UserRole Enum으로 변환
         public UserRole getRoleEnum() {
-            return UserRole.valueOf(role.toUpperCase());
-        }
-    }
-
-
-    public static class UserUpdateRequest {
-
-        @Setter
-        @Schema(description = "사용자의 이름", example = "홍길동")
-        private String userName;
-
-        @Setter
-        @Schema(description = "사용자의 전화번호", example = "010-9876-5432")
-        private String phone;
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public String getPhone() {
-            return phone;
+            try {
+                return UserRole.valueOf(role.toUpperCase());
+            } catch (IllegalArgumentException | NullPointerException e) {
+                return UserRole.STAFF; // 기본값 설정
+            }
         }
     }
 

@@ -1,11 +1,12 @@
 package com.d109.reper.controller;
 
 import com.d109.reper.domain.KakaoUserInfo;
-import com.d109.reper.domain.KakaoUserInfoResponse;
+import com.d109.reper.response.KakaoUserInfoResponse;
 import com.d109.reper.domain.User;
 import com.d109.reper.domain.UserRole;
 import com.d109.reper.repository.UserRepository;
 import com.d109.reper.service.KakaoApiService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -25,20 +26,19 @@ public class KakaoLoginController {
     private UserRepository userRepository;
 
 
-
-    // 카카오 로그인 후 리디렉션 되는 콜백을 처리
+    //리디렉션 콜백 처리
     @GetMapping("/callback")
+    @Operation(summary = "카카오 로그인 후 리디렉션 되는 콜백을 처리합니다.")
     public ResponseEntity<?> kakaoCallback(@RequestParam("code") String code) {
         // 카카오에서 전달받은 인증 코드를 이용해 액세스 토큰을 발급받음
         String accessToken = getKakaoAccessToken(code);
         log.info("카카오 액세스 토큰: " + accessToken);
 
         // 토큰을 통해 사용자 정보를 가져옴
-//        KakaoUserInfo kakaoUserInfo = getKakaoUserInfo(accessToken);
         KakaoUserInfo kakaoUserInfo = KakaoApiService.getKakaoUserInfo2(accessToken);
         String userInfo = KakaoApiService.getKakaoUserInfo(accessToken);
         log.info("카카오 사용자 정보: " + kakaoUserInfo);
-        log.info("사용자정보.." + userInfo);
+        log.info("카카오 사용자정보2: " + userInfo);
 
         // DB에서 사용자 검색 또는 새로 생성
         User user = userRepository.findByEmail(kakaoUserInfo.getEmail())
@@ -80,12 +80,11 @@ public class KakaoLoginController {
     }
 
     @PostMapping("/kakao")
+    @Operation(summary = "accessToken을 날리면 User 테이블상의 모든 정보를 불러옵니다."
+            , description = "GET메서드와 유사하나, User 엔티티를 기본형으로 합니다.")
     public ResponseEntity<?> kakaoLogin(@RequestBody KakaoLoginRequest kakaoLoginRequest) {
         //1. 카카오 access token으로 카카오 사용자 정보 조회
-
         KakaoUserInfo kakaoUserInfo = getKakaoUserInfo(kakaoLoginRequest.getAccessToken());
-        log.info("kakao Token: ", kakaoLoginRequest.getAccessToken());
-//        KakaoUserInfo kakaoUserInfo =
 
         //2. db에서 해당 사용자 검색
         User user = userRepository.findByEmail(kakaoUserInfo.getEmail())
@@ -104,7 +103,10 @@ public class KakaoLoginController {
 
     }
 
+    // 토큰으로 사용자 정보(일부) 가져오기
     @GetMapping("/kakao")
+    @Operation(summary = "accessToken을 날리면 사용자의 email, nickname을 불러옵니다."
+    , description = "POST 메서드와 유사하나, 카카오가 제공하는 정보를 불러옵니다.")
     private KakaoUserInfo getKakaoUserInfo(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
         String url = "https://kapi.kakao.com/v2/user/me";
@@ -123,7 +125,7 @@ public class KakaoLoginController {
                     KakaoUserInfoResponse.class // 응답을 KakaoUserInfoResponse로 받음
             );
 
-            // 응답에서 실제 사용자 정보를 추출하여 KakaoUserInfo 객체에 담기
+            // 응답에서 사용자 정보를 추출하여 KakaoUserInfo 객체에 담기
             KakaoUserInfoResponse responseBody = response.getBody();
             if (responseBody != null) {
                 KakaoUserInfo kakaoUserInfo = new KakaoUserInfo();
@@ -133,7 +135,6 @@ public class KakaoLoginController {
                 return kakaoUserInfo;
             }
         } catch (Exception e) {
-            // 예외 처리 및 디버깅 메시지 추가
             throw new RuntimeException("Failed to fetch Kakao user info: " + e.getMessage(), e);
         }
 

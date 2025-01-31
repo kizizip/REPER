@@ -1,8 +1,7 @@
 package com.d109.reper.service;
 
 import com.d109.reper.domain.KakaoUserInfo;
-import com.d109.reper.domain.KakaoUserInfoResponse;
-import org.jose4j.http.Response;
+import com.d109.reper.response.KakaoUserInfoResponse;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
