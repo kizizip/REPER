@@ -17,9 +17,11 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/activity_main_bottom_menu"
-        android:background="@color/bgwhite"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="120dp"
+        android:background="@color/bgwhite"
+        android:elevation="8dp"
+        app:itemIconSize="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:itemTextColor="@color/bottom_menu_item_color"
         app:itemIconTint="@color/bottom_menu_item_color"

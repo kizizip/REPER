@@ -2,6 +2,7 @@ package com.ssafy.reper.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -13,10 +14,12 @@ import com.ssafy.reper.ui.home.HomeFragment
 import com.ssafy.reper.ui.mypage.MyPageFragment
 import com.ssafy.reper.ui.order.OrderFragment
 import com.ssafy.reper.ui.recipe.AllRecipeFragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -76,5 +79,30 @@ class MainActivity : AppCompatActivity() {
 
     fun showBottomNavigation() {
         binding.activityMainBottomMenu.visibility = View.VISIBLE
+    }
+
+    // binding의 bottomMenu에 접근하기 위한 public 메서드
+    fun getBottomNavigationView(): BottomNavigationView {
+        return binding.activityMainBottomMenu
+    }
+
+
+    // backstack에 아무것도없는 상태에서 뒤로가기 버튼을 눌렀을때
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        // 현재 BackStack에 있는 Fragment 개수 확인
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            // 2초 이내에 뒤로가기 버튼을 한 번 더 누르면 앱 종료
+            if (System.currentTimeMillis() - backPressedTime < 2000) {
+                finish()
+                return
+            }
+            
+            // 뒤로가기 버튼을 처음 누를 때
+            Toast.makeText(this, "한 번 더 누르면 앱이 종료됩니다.", Toast.LENGTH_SHORT).show()
+            backPressedTime = System.currentTimeMillis()
+        } else {
+            super.onBackPressed()
+        }
     }
 }

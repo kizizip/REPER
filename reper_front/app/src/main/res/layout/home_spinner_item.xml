@@ -7,4 +7,4 @@
     android:fontFamily="@font/pretendard_semibold"
     android:paddingVertical="12dp"
     android:paddingHorizontal="16dp"
-    android:background="@android:color/transparent"/>
+    android:background="@color/white"/>
