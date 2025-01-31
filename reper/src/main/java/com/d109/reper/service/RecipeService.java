@@ -1,8 +1,10 @@
 package com.d109.reper.service;
 
+import com.d109.reper.domain.Animation;
 import com.d109.reper.domain.Ingredient;
 import com.d109.reper.domain.Recipe;
 import com.d109.reper.domain.RecipeStep;
+import com.d109.reper.repository.AnimationRepository;
 import com.d109.reper.repository.RecipeRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final AnimationRepository animationRepository;
     private final EntityManager em;
 
     //레시피 등록
@@ -31,6 +34,10 @@ public class RecipeService {
     public void saveRecipes(List<Recipe> recipes) {
         logger.info("트랜잭션 시작 - 레시피 저장");
 
+        // 1) animation 테이블에 저장된 모든 Animation 정보 조회
+        List<Animation> animations = animationRepository.findAll();
+
+        // 2) 레시피 등록 로직
         for (Recipe recipe : recipes) {
             logger.info("레시피 저장: {}", recipe.getRecipeName());
 
@@ -40,19 +47,29 @@ public class RecipeService {
             // 레시피 단계 저장
             List<RecipeStep> steps = recipe.getRecipeSteps();
 
-            for (int i = 0; i < recipe.getRecipeSteps().size(); i++) {
-                RecipeStep oldStep = steps.get(i);
+            // 기존 steps 리스트 복사
+            List<RecipeStep> originalSteps = new ArrayList<>(recipe.getRecipeSteps());
+            recipe.getRecipeSteps().clear();  // 기존 리스트 비우기
 
-                // 새로운 RecipeStep 객체 생성
-                RecipeStep newStep = new RecipeStep();
-                newStep.setRecipe(recipe);  // 레시피와 연관 설정
-                newStep.setStepNumber(i + 1);
-                newStep.setInstruction(oldStep.getInstruction());  // 💡 instruction 값 저장
-                newStep.setCreatedAt(LocalDateTime.now());
-                newStep.setUpdatedAt(LocalDateTime.now());
+            // 각 step에 대해 필요한 정보만 설정
+            for (int i = 0; i < originalSteps.size(); i++) {
+                RecipeStep originalStep = originalSteps.get(i);
 
-                recipe.addRecipeStep(newStep);
-                logger.info("✔ 저장할 레시피 단계 {}: {}", i + 1, newStep.getInstruction());
+                RecipeStep step = new RecipeStep();
+                step.setInstruction(originalStep.getInstruction());
+                step.setStepNumber(i + 1);
+                step.setCreatedAt(LocalDateTime.now());
+                step.setUpdatedAt(LocalDateTime.now());
+
+                // 3) step.instruction에 애니메이션 keyword가 포함되어 있는지 확인
+                for (Animation animation : animations) {
+                    if (step.getInstruction().contains(animation.getKeyword())) {
+                        step.setAnimationUrl(animation.getAnimationUrl());
+                        break;
+                    }
+                }
+
+                recipe.addRecipeStep(step);  // 양방향 연관관계 메서드
             }
 
             // 재료 저장

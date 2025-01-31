@@ -4,7 +4,6 @@ import com.d109.reper.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.web.bind.annotation.*;
 import com.d109.reper.response.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;

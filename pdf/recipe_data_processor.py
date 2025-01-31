@@ -117,7 +117,7 @@ def send_json_to_spring(data):
 def upload_file():
     file = request.files["file"]
     if file:
-        file_path = "C:/Users/SSAFY/Desktop/레시피.pdf"
+        file_path = "C:/Users/SSAFY/Desktop/행복한카페 메뉴 레시피.pdf"
         file.save(file_path)
         text = extract_text_from_pdf(file_path)
         structured_data = json.loads(process_recipe_text(text)) 
