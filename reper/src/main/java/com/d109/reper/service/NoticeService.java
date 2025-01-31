@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -45,6 +47,14 @@ public class NoticeService {
     public Notice findOneNotice(Long noticeId) {
         return noticeRepository.findOne(noticeId);
     }
+
+    // 매장별 전체 공지 조회
+    public List<Notice> findNotices(Long storeId) {
+        //본인이 다니는 매장인지 예외처리 나중에 할까...??
+
+        return noticeRepository.findAll(storeId);
+    }
+
 
     // 공지 삭제
 //    public void deleteNotice(Long noticeId, Long userId, Long storeId) {

@@ -4,6 +4,7 @@ import com.d109.reper.domain.Notice;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,5 +22,10 @@ public class NoticeRepository {
     }
 
     // 공지 전체 조회
+    public List<Notice> findAll(Long storeId) {
+        return em.createQuery("select n from Notice n where n.store.id = :storeId", Notice.class)
+                .setParameter("storeId", storeId)
+                .getResultList();
+    }
 
 }

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -50,8 +51,25 @@ public class NoticeController {
                 notice.getContent()));
     }
 
+    @GetMapping
+    @Operation(summary = "{storeId}에 해당하는 전체 공지를 조회합니다.")
+    public ResponseEntity<List<ResponseBodyAll>> findNotices(
+            @PathVariable Long storeId) {
+        List<Notice> notices = noticeService.findNotices(storeId);
 
-    //성공 응답 형식
+        List<ResponseBodyAll> response = List.of(new ResponseBodyAll(
+                storeId,
+                notices.stream()
+                        .map(notice -> new ResponseBodyAll.NoticeResponse(
+                                notice.getNoticeId(), notice.getTitle(), notice.getContent()))
+                        .toList()
+        ));
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Response DTO
+        //성공 응답 형식
     @Getter
     public static class ResponseBody {
         private String message;
@@ -80,5 +98,30 @@ public class NoticeController {
             this.content = content;
         }
     }
+
+    // 매장별 전체 조회 응답
+    @Getter
+    public static class ResponseBodyAll {
+        private Long storeId;
+        private List<NoticeResponse> notices;
+
+        public ResponseBodyAll(Long storeId, List<NoticeResponse> notices) {
+            this.storeId = storeId;
+            this.notices = notices;
+        }
+
+        @Getter
+        public static class NoticeResponse {
+            private Long noticeId;
+            private String title;
+            private String content;
+
+            public NoticeResponse(Long noticeId, String title, String content) {
+                this.noticeId = noticeId;
+                this.title = title;
+                this.content = content;
+            }
+        }
+    };
 
 }
