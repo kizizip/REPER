@@ -1,27 +1,26 @@
 package com.d109.reper.controller;
 
-import com.d109.reper.jwt.JwtTokenProvider;
-import com.d109.reper.service.UserService;
+import com.d109.reper.domain.User;
 import com.d109.reper.domain.UserRole;
+import com.d109.reper.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Map;
-import java.util.HashMap;
-import java.net.URLEncoder;
-import java.util.NoSuchElementException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.d109.reper.domain.User;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -30,7 +29,6 @@ import jakarta.servlet.http.HttpServletResponse;
 public class UserController {
 
     private final UserService userService;
-    private final JwtTokenProvider jwtTokenProvider;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
 
@@ -75,70 +73,70 @@ public class UserController {
 
     // 사용자 로그인
     //쿠키 이용 방식
-//    @PostMapping("/login")
-//    @Operation(summary = "로그인 처리 후 성공적으로 로그인 되었다면 쿠키(loginId)를 포함한 일부 정보를 내려보냅니다.",
-//            description = "<pre>email와 pass 두개만 넘겨도 정상동작한다. \n 아래는 id, pass만 입력한 샘플코드\n"
-//                    + "{\r\n" + "  \"email\": \"example@example.com\",\r\n" + "  \"pass\": \"aa12\"\r\n" + "}" + "</pre>")
-//    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) throws Exception {
-//        logger.info("로그인 요청 - email: {}", loginRequest.getEmail());
-//
-//        if (loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty() ||
-//                loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
-//            throw new IllegalArgumentException("email 혹은 password 누락");
-//        }
-//
-//        User user = userService.validateLogin(loginRequest.getEmail(), loginRequest.getPassword());
-//
-//        // 쿠키 생성
-//        Cookie cookie = new Cookie("loginId", URLEncoder.encode(user.getEmail(), "UTF-8"));
-//        cookie.setHttpOnly(true);  // XSS 방지
-//        cookie.setSecure(false);  // HTTPS에서만 전송 (테스트 시 false, 실제 서비스에서는 true 권장)
-//        cookie.setPath("/");
-//        cookie.setMaxAge(60 * 60 * 24 * 30); // 30일
-//        response.addCookie(cookie);
-//
-//        logger.info("쿠키 - cookie: {} = {}", cookie.getName(), cookie.getValue());
-//
-//        // Response Body 생성
-//        Map<String, Object> responseBody = new HashMap<>();
-//        responseBody.put("userId", user.getUserId());
-//        responseBody.put("username", user.getUserName());
-//        responseBody.put("role", user.getRole().name());
-//        responseBody.put("loginIdCookie", cookie.getValue());
-//
-//        return ResponseEntity.ok(responseBody);
-//    }
-
-    //로그인 (JWT 이용)
     @PostMapping("/login")
-    @Operation(summary = "로그인 처리 후 JWT를 반환합니다.")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) throws Exception {
+    @Operation(summary = "로그인 처리 후 성공적으로 로그인 되었다면 쿠키(loginId)를 포함한 일부 정보를 내려보냅니다.",
+            description = "<pre>email와 pass 두개만 넘겨도 정상동작한다. \n 아래는 id, pass만 입력한 샘플코드\n"
+                    + "{\r\n" + "  \"email\": \"example@example.com\",\r\n" + "  \"pass\": \"aa12\"\r\n" + "}" + "</pre>")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) throws Exception {
         logger.info("로그인 요청 - email: {}", loginRequest.getEmail());
 
-        if(loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty()
-                || loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("email 혹은 password가 올바르지 않음.");
+        if (loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty() ||
+                loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("email 혹은 password 누락");
         }
 
-        //사용자 인증
         User user = userService.validateLogin(loginRequest.getEmail(), loginRequest.getPassword());
 
-        //JWT 생성 (여기서는 JwtTokenProvider 클래스를 사용한다.)
+        // 쿠키 생성
+        Cookie cookie = new Cookie("loginId", URLEncoder.encode(user.getEmail(), "UTF-8"));
+        cookie.setHttpOnly(true);  // XSS 방지
+        cookie.setSecure(false);  // HTTPS에서만 전송 (테스트 시 false, 실제 서비스에서는 true 권장)
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24 * 30); // 30일
+        response.addCookie(cookie);
 
-        String jwt = jwtTokenProvider.createToken(user.getEmail(), user.getRole().name());
+        logger.info("쿠키 - cookie: {} = {}", cookie.getName(), cookie.getValue());
 
-        //Response Body 생성
+        // Response Body 생성
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("userId", user.getUserId());
         responseBody.put("username", user.getUserName());
         responseBody.put("role", user.getRole().name());
+        responseBody.put("loginIdCookie", cookie.getValue());
 
-        //JWT를 Authorization 헤더에 담아 응답
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwt);
-
-        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
+        return ResponseEntity.ok(responseBody);
     }
+
+    //로그인 (JWT 이용)
+//    @PostMapping("/login")
+//    @Operation(summary = "로그인 처리 후 JWT를 반환합니다.")
+//    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) throws Exception {
+//        logger.info("로그인 요청 - email: {}", loginRequest.getEmail());
+//
+//        if(loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty()
+//                || loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
+//            throw new IllegalArgumentException("email 혹은 password가 올바르지 않음.");
+//        }
+//
+//        //사용자 인증
+//        User user = userService.validateLogin(loginRequest.getEmail(), loginRequest.getPassword());
+//
+//        //JWT 생성 (여기서는 JwtTokenProvider 클래스를 사용한다.)
+//
+//        String jwt = jwtTokenProvider.createToken(user.getEmail(), user.getRole().name());
+//
+//        //Response Body 생성
+//        Map<String, Object> responseBody = new HashMap<>();
+//        responseBody.put("userId", user.getUserId());
+//        responseBody.put("username", user.getUserName());
+//        responseBody.put("role", user.getRole().name());
+//
+//        //JWT를 Authorization 헤더에 담아 응답
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Authorization", "Bearer " + jwt);
+//
+//        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
+//    }
 
 
     // 회원 정보 조회
@@ -170,6 +168,7 @@ public class UserController {
 
 
     // 비밀번호 변경
+//    @PatchMapping("/{userId}/{password}")
 
 
 
@@ -178,6 +177,7 @@ public class UserController {
     @DeleteMapping("/{userId}")
     @Operation(summary = "userId 입력시 회원 정보를 삭제합니다.")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        log.info("회원 삭제: {}", userId);
         boolean isDeleted = userService.deleteUser(userId);
 
 
