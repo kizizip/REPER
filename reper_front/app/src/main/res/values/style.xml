@@ -2,6 +2,7 @@
 <resources>
     <style name="titleFontStyle">
         <item name="fontFamily">@font/pretendard_semibold</item>
+        <item name="android:textColor">@color/fontblack</item>
         <item name="android:textSize">24sp</item>
     </style>
 </resources>

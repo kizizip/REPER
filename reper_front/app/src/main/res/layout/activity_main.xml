@@ -27,5 +27,4 @@
         app:itemActiveIndicatorStyle="@null"
         app:itemRippleColor="@android:color/transparent"
         app:menu="@menu/bottom_menu_item" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

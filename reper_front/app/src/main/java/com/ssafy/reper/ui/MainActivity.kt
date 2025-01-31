@@ -44,10 +44,10 @@ class MainActivity : AppCompatActivity() {
                         .commit()
                     true
                 }
+
                 else -> false // 그 외의 경우 처리해 주지 않음
             }
         }
-
     }
 
     fun hideBottomNavigation() {
