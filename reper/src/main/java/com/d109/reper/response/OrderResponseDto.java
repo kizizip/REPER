@@ -44,12 +44,12 @@ import java.util.stream.Collectors;
     @Getter
     @Setter
     @NoArgsConstructor
-    @AllArgsConstructor
+                              @AllArgsConstructor
     public class OrderDetailDto {
-        private Long orderDetailId;
-        private Long recipeId;
-        private int quantity;
-        private String customerRequest;
+            private Long orderDetailId;
+            private Long recipeId;
+            private int quantity;
+            private String customerRequest;
 
         public OrderDetailDto(OrderDetail orderDetail) {
             this.orderDetailId = orderDetail.getOrderDetailId();

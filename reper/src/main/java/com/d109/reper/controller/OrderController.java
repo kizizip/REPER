@@ -1,13 +1,13 @@
 package com.d109.reper.controller;
 
 import com.d109.reper.domain.Order;
+import com.d109.reper.domain.OrderDetail;
 import com.d109.reper.response.OrderResponseDto;
 import com.d109.reper.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.aspectj.weaver.ast.Or;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -35,5 +35,19 @@ public class OrderController {
     @Operation(summary = "특정 매장의 특정 주문 한 건을 조회합니다.", description = "한 주문건에 여러 음료가 포함될 수 있습니다.")
     public OrderResponseDto getOrderById(@PathVariable Long storeId, @PathVariable Long orderId) {
         return orderService.findOrderByStoreIdAndOrderId(storeId, orderId);
+    }
+
+
+    // 랜덤으로 더미데이터 생성 (주문 한 건씩)
+    // storeId는 1L로 통일합니다. 수정이 필요할 시 추후에 요청해 주세요.
+    @PostMapping
+    @Operation(summary = "클릭시 주문 한 건씩 추가합니다.", description = "주문 한 건당 1~3개의 음료(recipe)가 포함됩니다. storeId는 1로 통일. 수정이 필요하다면 추후 요청해 주세요.")
+    public ResponseEntity<OrderResponseDto> createOrder() {
+        Order order = orderService.createRandomOrder();
+
+        // OrderResponseDto로 변환
+        OrderResponseDto orderResponseDto = new OrderResponseDto(order);
+
+        return ResponseEntity.ok(orderResponseDto);
     }
 }
