@@ -9,13 +9,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentFullRecipeBinding
 import com.ssafy.reper.databinding.FragmentStepRecipeBinding
 import com.ssafy.reper.ui.MainActivity
+import com.ssafy.reper.ui.recipe.AllRecipeFragment.GridSpacingItemDecoration
 
 private const val TAG = "FullRecipeFragment_정언"
 class FullRecipeFragment : Fragment() {
+
+    // 레시피 리스트 recyclerView Adapter
+    private lateinit var fullRecipeListAdapter: FullRecipeListAdapter
 
     private lateinit var mainActivity: MainActivity
 
@@ -65,6 +71,11 @@ class FullRecipeFragment : Fragment() {
             btnHotIceColorChange()
         }
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        // RecyclerView adapter 처리
+        initAdapter()
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
     }
 
     override fun onDestroyView() {
@@ -78,14 +89,30 @@ class FullRecipeFragment : Fragment() {
             fullRecipeBinding.fullrecipeFmBtnIce.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.green))
             fullRecipeBinding.fullrecipeFmBtnIce.setTextColor(ContextCompat.getColor(mainActivity, R.color.white))
             fullRecipeBinding.fullrecipeFmBtnHot.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.white))
-            fullRecipeBinding.fullrecipeFmBtnHot.setTextColor(ContextCompat.getColor(mainActivity, R.color.black))
+            fullRecipeBinding.fullrecipeFmBtnHot.setTextColor(ContextCompat.getColor(mainActivity, R.color.green))
         }
 
         if(fullRecipeBinding.fullrecipeFmBtngroup.checkedButtonId == fullRecipeBinding.fullrecipeFmBtnHot.id){
             fullRecipeBinding.fullrecipeFmBtnIce.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.white))
-            fullRecipeBinding.fullrecipeFmBtnIce.setTextColor(ContextCompat.getColor(mainActivity, R.color.black))
+            fullRecipeBinding.fullrecipeFmBtnIce.setTextColor(ContextCompat.getColor(mainActivity, R.color.green))
             fullRecipeBinding.fullrecipeFmBtnHot.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.green))
             fullRecipeBinding.fullrecipeFmBtnHot.setTextColor(ContextCompat.getColor(mainActivity, R.color.white))
+        }
+    }
+
+    fun initAdapter() {
+        // allrecipe item 클릭 이벤트 리스너
+        fullRecipeListAdapter = FullRecipeListAdapter(mutableListOf()) { position ->
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.activityMainFragmentContainer, StepRecipeFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        fullRecipeBinding.fullrecipeFmRvRecipe.apply {
+            layoutManager = LinearLayoutManager(mainActivity, LinearLayoutManager.VERTICAL, false)
+            fullRecipeListAdapter.recipeStepList = mutableListOf("1. 샷을 내린다.", "2. 샷을 붓는다.", "3. 뜨거운 물을 넣는다.")
+            adapter = fullRecipeListAdapter
         }
     }
 }
