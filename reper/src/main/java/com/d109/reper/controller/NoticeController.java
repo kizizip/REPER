@@ -28,7 +28,7 @@ public class NoticeController {
         String title = requestBody.get("title").toString();
         String content = requestBody.get("content").toString();
 
-        noticeService.saveNotice(userId, storeId, title, content);
+        noticeService.saveNotice(storeId, userId, title, content);
 
         return ResponseEntity.ok(new ResponseBody(
                 "공지가 정상적으로 등록되었습니다.",
@@ -68,15 +68,31 @@ public class NoticeController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{noticeId}")
-    @Operation(summary = "{noticeId}에 해당하는 공지를 삭제합니다.")
-    public ResponseEntity<String> deleteNotice(
+
+    @PutMapping("/{noticeId}")
+    @Operation(summary = "{noticeId}에 해당하는 공지를 수정합니다.")
+    public ResponseEntity<NoticeController.ResponseBody> updateNotice(
             @PathVariable Long storeId,
             @PathVariable Long noticeId,
             @RequestBody Map<String, Object> requestBody) {
+
+        Long userId = Long.valueOf(requestBody.get("userId").toString());
+        String title = (String) requestBody.get("title");
+        String content = (String) requestBody.get("content");
+
+        NoticeController.ResponseBody responseBody = noticeService.updateNotice(noticeId, storeId, userId, title, content);
+        return ResponseEntity.ok(responseBody);
+    }
+
+    @DeleteMapping("/{noticeId}")
+    @Operation(summary = "{noticeId}에 해당하는 공지를 삭제합니다.")
+    public ResponseEntity<String> deleteNotice(
+            @PathVariable Long noticeId,
+            @PathVariable Long storeId,
+            @RequestBody Map<String, Object> requestBody) {
         Long userId = Long.valueOf(requestBody.get("userId").toString());
 
-        noticeService.deleteNotice(noticeId, userId, storeId);
+        noticeService.deleteNotice(noticeId, storeId, userId);
 
         return ResponseEntity.ok("공지 삭제 완료");
     }
