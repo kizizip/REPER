@@ -26,7 +26,11 @@ public class NoticeService {
 
     // 공지 등록
     @Transactional
-    public void saveNotice(Long storeId, Long userId, String title, String content) {
+    public Long saveNotice(Long storeId, Long userId, String title, String content) {
+        if (storeId == null || storeId <=0 || userId == null || userId <= 0) {
+            throw new IllegalArgumentException("storeId, userId는 필수이고, 1이상의 값이어야 합니다.");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
 
@@ -36,15 +40,30 @@ public class NoticeService {
         if (!store.getOwner().getUserId().equals(user.getUserId())) {
             throw new IllegalArgumentException("User is not the owner of this store");
         }
-        // title, content 값 안들어왔을때 예외처리 - ing
 
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be empty");
+        }
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("Content cannot be empty");
+        }
 
         Notice notice = new Notice();
         notice.setStore(store);
         notice.setUser(user);
         notice.setTitle(title);
         notice.setContent(content);
-        noticeRepository.save(notice);
+        Notice saveNotice = noticeRepository.save(notice);
+
+        if (saveNotice == null) {
+            throw new RuntimeException("Notice 등록 실패: save() 결과가 null입니다.");
+        }
+
+        if (saveNotice.getNoticeId() == null) {
+            throw new RuntimeException("Notice 등록 실패: ID가 생성되지 않았습니다.");
+        }
+
+        return saveNotice.getNoticeId();
     }
 
 
@@ -70,17 +89,33 @@ public class NoticeService {
     // 공지 수정
     @Transactional
     public NoticeController.ResponseBody updateNotice(Long noticeId, Long storeId, Long userId, String newTitle, String newContent) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
-
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
+        if (noticeId == null || storeId == null || userId ==null) {
+            throw new IllegalArgumentException("noticeId, storeId, userId는 필수입니다.");
+        }
 
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("NoticeNotFound"));
 
+        storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+
+        if (!notice.getStore().getStoreId().equals(storeId)) {
+            throw new IllegalArgumentException("해당 가게에 속한 공지가 아닙니다.");
+        }
+
         if (!notice.getStore().getOwner().getUserId().equals(user.getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "공지 수정 권한이 없습니다.");
+        }
+
+        if (newTitle != null && newTitle.trim().isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be empty");
+        }
+
+        if (newContent != null && newContent.trim().isEmpty()) {
+            throw new IllegalArgumentException("Content cannot be empty");
         }
 
         boolean isUpdated = false;
@@ -98,7 +133,12 @@ public class NoticeService {
         String message = isUpdated ? "공지 수정 완료" : "변경된 내용이 없습니다.";
 
         return new NoticeController.ResponseBody(
-                message, userId, storeId, notice.getTitle(), notice.getContent());
+                message,
+                notice.getNoticeId(),
+                notice.getStore().getStoreId(),
+                userId,
+                notice.getTitle(),
+                notice.getContent());
     }
 
     // 공지 삭제

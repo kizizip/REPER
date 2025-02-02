@@ -28,12 +28,13 @@ public class NoticeController {
         String title = requestBody.get("title").toString();
         String content = requestBody.get("content").toString();
 
-        noticeService.saveNotice(storeId, userId, title, content);
+        Long noticeId = noticeService.saveNotice(storeId, userId, title, content);
 
         return ResponseEntity.ok(new ResponseBody(
                 "공지가 정상적으로 등록되었습니다.",
-                userId,
+                noticeId,
                 storeId,
+                userId,
                 title,
                 content
         ));
@@ -102,15 +103,17 @@ public class NoticeController {
     @Getter
     public static class ResponseBody {
         private String message;
-        private Long userId;
+        private Long noticeId;
         private Long storeId;
+        private Long userId;
         private String title;
         private String content;
 
-        public ResponseBody(String message, Long userId, Long storeId, String title, String content) {
+        public ResponseBody(String message, Long noticeId, Long storeId, Long userId, String title, String content) {
             this.message = message;
-            this.userId = userId;
+            this.noticeId = noticeId;
             this.storeId = storeId;
+            this.userId = userId;
             this.title = title;
             this.content = content;
         }
