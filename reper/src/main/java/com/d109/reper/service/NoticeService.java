@@ -5,6 +5,7 @@ import com.d109.reper.domain.Notice;
 import com.d109.reper.domain.Store;
 import com.d109.reper.domain.User;
 import com.d109.reper.repository.NoticeRepository;
+import com.d109.reper.repository.StoreEmployeeRepository;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
-
+    private final StoreEmployeeRepository storeEmployeeRepository;
     // 공지 등록
     @Transactional
     public Long saveNotice(Long storeId, Long userId, String title, String content) {
@@ -32,10 +33,10 @@ public class NoticeService {
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("User Not Found"));
 
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("Store Not Found"));
 
         if (!store.getOwner().getUserId().equals(user.getUserId())) {
             throw new IllegalArgumentException("User is not the owner of this store");
@@ -68,20 +69,45 @@ public class NoticeService {
 
 
     // 공지 단건 조회
-    public Notice findOneNotice(Long noticeId) {
-        // 내가 다니는(알바생), 내 매장(사장)이 아닌 공지 조회 못하게 - ing
-        return noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("NoticeNotFound"));
+    public Notice findOneNotice(Long noticeId, Long storeId, Long userId) {
+        if (noticeId == null || storeId ==null || userId ==null) {
+            throw new IllegalArgumentException("noticeId, storeId, userId는 필수입니다.");
+        }
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new IllegalArgumentException("Notice Not Found"));
+
+        if (!notice.getStore().getStoreId().equals(storeId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 공지는 해당 매장에 속하지 않습니다.");
+        }
+
+        if (!isAuthorizedUser(store, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
+        }
+
+        return notice;
     }
 
 
     // 매장별 전체 공지 조회
-    public List<Notice> findNotices(Long storeId) {
-        storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found"));
-        // 매장은 등록되어있는데 공지가 하나도 없으면? 빈값가나? 오류 안나나?
-        // 내가 다니는(알바생), 내 매장(사장)이 아닌 공지 조회 못하게 - ing
+    public List<Notice> findNotices(Long storeId, Long userId) {
+        if (storeId == null || userId ==null) {
+            throw new IllegalArgumentException("storeId, userId는 필수입니다.");
+        }
 
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found"));
+
+        User user = userRepository.findById(userId)
+                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (!isAuthorizedUser(store, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
+        }
         return noticeRepository.findAllByStore_StoreId(storeId);
     }
 
@@ -94,13 +120,13 @@ public class NoticeService {
         }
 
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("NoticeNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("Notice Not Found"));
 
         storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("Store Not Found"));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("User Not Found"));
 
         if (!notice.getStore().getStoreId().equals(storeId)) {
             throw new IllegalArgumentException("해당 가게에 속한 공지가 아닙니다.");
@@ -136,7 +162,6 @@ public class NoticeService {
                 message,
                 notice.getNoticeId(),
                 notice.getStore().getStoreId(),
-                userId,
                 notice.getTitle(),
                 notice.getContent());
     }
@@ -162,5 +187,15 @@ public class NoticeService {
         noticeRepository.delete(notice);
     }
 
+    // 사용자가 해당 매장과 관련이 있는지 검증 로직
+    private boolean isAuthorizedUser(Store store, User user) {
+        // 사장인지 확인
+        if (store.getOwner().equals(user)) {
+            return true;
+        }
+        // 알바생인지 확인
+        return storeEmployeeRepository.existsByUser_UserIdAndStore_StoreIdAndIsEmployedTrue(user.getUserId(), store.getStoreId());
+
+    }
 
 }

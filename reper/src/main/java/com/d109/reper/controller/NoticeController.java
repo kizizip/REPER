@@ -34,7 +34,6 @@ public class NoticeController {
                 "공지가 정상적으로 등록되었습니다.",
                 noticeId,
                 storeId,
-                userId,
                 title,
                 content
         ));
@@ -43,11 +42,14 @@ public class NoticeController {
     @GetMapping("/{noticeId}")
     @Operation(summary = "{noticeId}에 해당하는 공지 하나를 조회합니다.")
     public ResponseEntity<ResponseBodyOne> findOneNotice(
-            @PathVariable Long noticeId) {
+            @PathVariable Long noticeId,
+            @PathVariable Long storeId,
+            @RequestParam Long userId) {
 
-        Notice notice = noticeService.findOneNotice(noticeId);
+        Notice notice = noticeService.findOneNotice(noticeId, storeId, userId);
 
         return ResponseEntity.ok(new ResponseBodyOne(
+                notice.getNoticeId(),
                 notice.getTitle(),
                 notice.getContent()));
     }
@@ -55,8 +57,9 @@ public class NoticeController {
     @GetMapping
     @Operation(summary = "{storeId}에 해당하는 전체 공지를 조회합니다.")
     public ResponseEntity<List<ResponseBodyAll>> findNotices(
-            @PathVariable Long storeId) {
-        List<Notice> notices = noticeService.findNotices(storeId);
+            @PathVariable Long storeId,
+            @RequestParam Long userId) {
+        List<Notice> notices = noticeService.findNotices(storeId, userId);
 
         List<ResponseBodyAll> response = List.of(new ResponseBodyAll(
                 storeId,
@@ -105,15 +108,13 @@ public class NoticeController {
         private String message;
         private Long noticeId;
         private Long storeId;
-        private Long userId;
         private String title;
         private String content;
 
-        public ResponseBody(String message, Long noticeId, Long storeId, Long userId, String title, String content) {
+        public ResponseBody(String message, Long noticeId, Long storeId, String title, String content) {
             this.message = message;
             this.noticeId = noticeId;
             this.storeId = storeId;
-            this.userId = userId;
             this.title = title;
             this.content = content;
         }
@@ -122,10 +123,12 @@ public class NoticeController {
     // 조회 하나 응답
     @Getter
     public static class ResponseBodyOne {
+        private Long noticeId;
         private String title;
         private String content;
 
-        public ResponseBodyOne(String title, String content) {
+        public ResponseBodyOne(Long noticeId, String title, String content) {
+            this.noticeId = noticeId;
             this.title = title;
             this.content = content;
         }
