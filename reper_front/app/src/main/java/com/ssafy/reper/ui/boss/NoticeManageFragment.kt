@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentNoticeManageBinding
@@ -31,10 +33,23 @@ class NoticeManageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initNotiAdater()
+        initSpinner()
 
-        binding.notiList.layoutManager = LinearLayoutManager(requireContext())
-        binding.notiList.adapter = NotiAdapter()
+        binding.notiFgBackIcon.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+    }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Fragment가 파괴될 때 BottomNavigationView 다시 보이게 하기
+        (activity as MainActivity).showBottomNavigation()
+
+        _binding = null
+    }
+
+    fun initSpinner() {
         val notiSpinner = binding.notiFgSpinner
         val notis = arrayOf("제목", "내용")
 
@@ -49,7 +64,12 @@ class NoticeManageFragment : Fragment() {
         notiSpinner.adapter = adapter
 
         notiSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 val selectedItem = notis[position]
                 // 선택된 항목 처리
             }
@@ -58,18 +78,16 @@ class NoticeManageFragment : Fragment() {
                 // 아무것도 선택되지 않았을 때의 처리
             }
         }
-
-        binding.notiFgBackIcon.setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        // Fragment가 파괴될 때 BottomNavigationView 다시 보이게 하기
-        (activity as MainActivity).showBottomNavigation()
-
-        _binding = null
+    fun initNotiAdater() {
+        binding.notiList.layoutManager = LinearLayoutManager(requireContext())
+        binding.notiList.adapter = NotiAdapter(object : NotiAdapter.ItemClickListener {
+            override fun onClick(position: Int) {
+                findNavController().navigate(R.id.writeNotiFragment)
+                Toast.makeText(requireContext(), "공지 $position 클릭됨", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
 

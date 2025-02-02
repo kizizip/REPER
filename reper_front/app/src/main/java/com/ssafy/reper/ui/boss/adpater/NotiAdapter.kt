@@ -6,12 +6,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.databinding.ItemNotiBinding
 import com.ssafy.reper.ui.mypage.MyAccessStoreListAdapter.ItemClickListener
 
-class NotiAdapter(private val itemClickListener: ItemClickListener) :
+class NotiAdapter(val itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<NotiAdapter.NotiViewHolder>() {
 
     // ViewHolder
-    class NotiViewHolder(val binding: ItemNotiBinding, val itemClickListener: ItemClickListener) :
-        RecyclerView.ViewHolder(binding.root) {
+    inner class NotiViewHolder(
+        val binding: ItemNotiBinding,
+        val itemClickListener: ItemClickListener
+    ) : RecyclerView.ViewHolder(binding.root) {
         init {
             // 아이템 클릭 리스너 설정
             binding.root.setOnClickListener {
