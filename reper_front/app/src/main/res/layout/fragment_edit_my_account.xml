@@ -41,7 +41,7 @@
             android:fontFamily="@font/pretendard_regular"
             android:text="아이디"
             android:textColor="@color/darkgreen"
-            android:textSize="18sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
@@ -57,6 +57,9 @@
             android:paddingEnd="24dp"
             android:textColor="@color/black"
             android:textSize="16sp"
+            android:focusable="false"
+            android:editable="false"
+            android:inputType="none"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView12" />
@@ -69,7 +72,7 @@
             android:fontFamily="@font/pretendard_regular"
             android:text="이름"
             android:textColor="@color/darkgreen"
-            android:textSize="18sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_et_id" />
 
@@ -85,6 +88,8 @@
             android:paddingEnd="24dp"
             android:textColor="@color/black"
             android:textSize="16sp"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView13" />
@@ -97,7 +102,7 @@
             android:fontFamily="@font/pretendard_regular"
             android:text="전화번호"
             android:textColor="@color/darkgreen"
-            android:textSize="18sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_et_name" />
 
@@ -113,6 +118,8 @@
             android:paddingEnd="24dp"
             android:textColor="@color/black"
             android:textSize="16sp"
+            android:singleLine="true"
+            android:imeOptions="actionDone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView14" />
@@ -125,7 +132,7 @@
             android:fontFamily="@font/pretendard_regular"
             android:text="내 권한 수정"
             android:textColor="@color/darkgreen"
-            android:textSize="18sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_et_tel" />
 
@@ -151,22 +158,15 @@
 
         <FrameLayout
             android:id="@+id/editmyaccount_fm_fl_ten_edit"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
+            android:background="@drawable/btn"
+            android:clickable="true"
+            android:focusable="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_sv">
-
-            <ImageButton
-                android:id="@+id/allrecipe_fm_btn_edit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@android:color/transparent"
-                android:src="@drawable/btn"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -188,7 +188,10 @@
             android:fontFamily="@font/pretendard_regular"
             android:text="회원탈퇴"
             android:textColor="@color/darkgray"
-            android:textSize="16sp"
+            android:textSize="14sp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground"
             app:layout_constraintEnd_toEndOf="@+id/editmyaccount_fm_fl_ten_edit"
             app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_fl_ten_edit" />
     </androidx.constraintlayout.widget.ConstraintLayout>

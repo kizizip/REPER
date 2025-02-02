@@ -49,6 +49,8 @@ class AllRecipeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        mainActivity.showBottomNavigation()
+
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
         // 카테고리 spinner

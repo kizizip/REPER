@@ -2,6 +2,7 @@ package com.ssafy.reper.ui.recipe
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.databinding.FragmentStepRecipeBinding
 import com.ssafy.reper.ui.MainActivity
 
+private const val TAG = "StepRecipeFragment_정언"
 class StepRecipeFragment : Fragment() {
 
     private lateinit var mainActivity: MainActivity
@@ -43,7 +45,6 @@ class StepRecipeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mainActivity.showBottomNavigation()
         _stepRecipeBinding = null
     }
 }

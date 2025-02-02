@@ -13,9 +13,8 @@
 
         <ImageView
             android:id="@+id/imageView4"
-            android:layout_width="510dp"
-            android:layout_height="290dp"
-            android:layout_marginTop="-24dp"
+            android:layout_width="800dp"
+            android:layout_height="300dp"
             android:src="@drawable/mypage_header"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -32,8 +31,9 @@
 
             <ImageButton
                 android:id="@+id/mypage_fm_btn_bell"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="20dp"
+                android:layout_height="24dp"
+                android:layout_marginTop="20dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/mypage_bell_btn"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -47,7 +47,7 @@
                 android:fontFamily="@font/pretendard_semibold"
                 android:text="000사장"
                 android:textColor="@color/yellow"
-                android:textSize="28sp"
+                android:textSize="24sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/mypage_fm_btn_bell" />
 
@@ -57,7 +57,7 @@
                 android:fontFamily="@font/pretendard_semibold"
                 android:text="님,"
                 android:textColor="@color/white"
-                android:textSize="28sp"
+                android:textSize="24sp"
                 app:layout_constraintBottom_toBottomOf="@+id/mypage_fm_tv_yellow"
                 app:layout_constraintStart_toEndOf="@+id/mypage_fm_tv_yellow"
                 app:layout_constraintTop_toTopOf="@+id/mypage_fm_tv_yellow" />
@@ -69,21 +69,28 @@
                 android:fontFamily="@font/pretendard_semibold"
                 android:text="안녕하세요!"
                 android:textColor="@color/white"
-                android:textSize="28sp"
+                android:textSize="24sp"
                 app:layout_constraintStart_toStartOf="@+id/mypage_fm_tv_yellow"
                 app:layout_constraintTop_toBottomOf="@+id/mypage_fm_tv_yellow" />
 
-            <Button
-                style="@style/Widget.Material3.Button.OutlinedButton"
+
+            <TextView
+                android:id="@+id/mypage_fm_btn_logout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/pretendard_regular"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/mypage_white_btn"
+                android:fontFamily="@font/pretendard_semibold"
+                android:gravity="center"
                 android:text="로그아웃"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="8dp"
                 android:textColor="@color/white"
-                android:textSize="16sp"
+                android:textSize="12sp"
+                android:clickable="true"
+                android:focusable="true"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView6"
-                app:strokeColor="@color/white" />
+                app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -91,7 +98,7 @@
             android:id="@+id/textView7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
+            android:layout_marginStart="48dp"
             android:layout_marginTop="40dp"
             android:fontFamily="@font/pretendard_regular"
             android:text="매장 수 : "
@@ -111,49 +118,54 @@
             app:layout_constraintStart_toEndOf="@+id/textView7"
             app:layout_constraintTop_toTopOf="@+id/textView7" />
 
-        <Button
+        <TextView
             android:id="@+id/mypage_fm_btn_boss_menu"
-            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="40dp"
             android:visibility="visible"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
             android:text="사장님 메뉴"
             android:textColor="@color/darkgray"
-            android:textSize="16sp"
-            app:strokeColor="@color/darkgray"
-            android:fontFamily="@font/pretendard_regular"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="@drawable/mypage_black_btn"
+            android:fontFamily="@font/pretendard_semibold"
             app:layout_constraintBottom_toBottomOf="@+id/textView7"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/textView7" />
 
-        <Button
+        <TextView
             android:id="@+id/mypage_fm_btn_request_menu"
-            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
             android:layout_marginEnd="40dp"
             android:visibility="gone"
-            android:fontFamily="@font/pretendard_regular"
+            android:fontFamily="@font/pretendard_semibold"
             android:text="권한 요청"
             android:textColor="@color/darkgray"
-            android:textSize="16sp"
+            android:textSize="12sp"
+            android:background="@drawable/mypage_black_btn"
+            android:gravity="center"
             app:layout_constraintBottom_toBottomOf="@+id/mypage_fm_tv_store_num"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/mypage_fm_tv_store_num"
-            app:strokeColor="@color/darkgray" />ㅎ
+            app:layout_constraintTop_toTopOf="@+id/mypage_fm_tv_store_num"/>
 
         <Spinner
             android:id="@+id/mypage_fm_sp"
             android:overlapAnchor="false"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="72dp"
             android:layout_marginStart="40dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="40dp"
-            android:paddingHorizontal="24dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="40dp"
             android:spinnerMode="dropdown"
-            android:background="@drawable/mypage_store_list"
+            android:background="@drawable/mypage_spinner_background"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView7" />
@@ -174,7 +186,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/mypage_fm_btn_notice"
-                android:layout_width="110dp"
+                android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:background="@drawable/mypage_btn_back"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -200,7 +212,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:fontFamily="@font/pretendard_regular"
+                    android:fontFamily="@font/pretendard_semibold"
                     android:text="공지내역"
                     android:textColor="@color/black"
                     android:textSize="16sp"
@@ -211,7 +223,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/mypage_fm_btn_recipe"
-                android:layout_width="110dp"
+                android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:background="@drawable/mypage_btn_back"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -236,7 +248,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:fontFamily="@font/pretendard_regular"
+                    android:fontFamily="@font/pretendard_semibold"
                     android:text="레시피 보기"
                     android:textColor="@color/black"
                     android:textSize="16sp"
@@ -247,7 +259,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/mypage_fm_btn_edit"
-                android:layout_width="110dp"
+                android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:background="@drawable/mypage_btn_back"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -258,8 +270,8 @@
 
                 <ImageView
                     android:id="@+id/imageView8"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginBottom="32dp"
                     android:src="@drawable/mypage_editmy_btn"
@@ -272,7 +284,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:fontFamily="@font/pretendard_regular"
+                    android:fontFamily="@font/pretendard_semibold"
                     android:text="정보 수정"
                     android:textColor="@color/black"
                     android:textSize="16sp"

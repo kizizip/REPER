@@ -7,6 +7,7 @@
     tools:context=".ui.recipe.FullRecipeFragment">
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        android:id="@+id/fullrecipe_fm_slideuppanel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
@@ -102,12 +103,17 @@
             android:id="@+id/fullrecipe_fm_slide_layout"
             android:layout_width="match_parent"
             android:layout_height="800dp"
-            android:padding="40dp"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
+            android:paddingTop="40dp"
+            android:paddingBottom="80dp"
             android:background="@drawable/fullrecipe_slidinguppanel">
 
-            <ScrollView
+            <com.ssafy.reper.ui.recipe.LockableNestedScrollView
+                android:id="@+id/scrollView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:scrollbars="vertical">
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
@@ -183,11 +189,13 @@
                         app:layout_constraintStart_toStartOf="@+id/fullrecipe_fm_tv_ingredients"
                         app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_tv_ingredients" />
 
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/fullrecipe_fm_rv_recipe"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_marginTop="16dp"
+                        android:nestedScrollingEnabled="false"
                         app:layout_constraintStart_toStartOf="@+id/textView10"
                         app:layout_constraintTop_toBottomOf="@+id/textView10" />
 
@@ -215,7 +223,7 @@
                         app:layout_constraintStart_toStartOf="@+id/textView11"
                         app:layout_constraintTop_toBottomOf="@+id/textView11" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
-            </ScrollView>
+            </com.ssafy.reper.ui.recipe.LockableNestedScrollView>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 

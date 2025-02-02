@@ -34,7 +34,6 @@ class AllRecipeListAdapter (var recipeList:MutableList<String>, val itemClickLis
 
             // 전체 클릭시 -> recipe 전환
             binding.root.setOnClickListener{
-                Log.d(TAG, "bindInfo:123 ")
                 itemClickListener.onClick(1, layoutPosition)
             }
         }
