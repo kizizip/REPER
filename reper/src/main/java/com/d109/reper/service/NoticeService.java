@@ -169,6 +169,9 @@ public class NoticeService {
     // 공지 삭제
     @Transactional
     public void deleteNotice(Long noticeId, Long storeId, Long userId) {
+        if (noticeId == null || storeId == null || userId ==null) {
+            throw new IllegalArgumentException("noticeId, storeId, userId는 필수입니다.");
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
@@ -178,12 +181,14 @@ public class NoticeService {
 
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("NoticeNotFound"));
-        // 공지 매장의 owner의 userId가 로그인한 userId랑 다를때 - 작동 잘함
+
         if (!notice.getStore().getOwner().getUserId().equals(user.getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "공지 삭제 권한이 없습니다.");
         }
-        // 뭔가 예외처리 되어서 안되야 하는데 삭제 됨.코드 수정했으니 다시 확인해보기
-            // storedId 랑 noticeId.storeId랑 다른데 삭제 됨 예외처리 하기
+
+        if (!notice.getStore().getStoreId().equals(store.getStoreId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 가게에 속한 공지가 아닙니다.");
+        }
         noticeRepository.delete(notice);
     }
 
