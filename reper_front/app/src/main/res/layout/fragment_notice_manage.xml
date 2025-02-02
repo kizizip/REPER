@@ -63,7 +63,7 @@
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:hint="공지를 입력해보세요."
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
 
             <ImageButton
