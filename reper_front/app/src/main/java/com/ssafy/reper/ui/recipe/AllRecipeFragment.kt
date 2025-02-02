@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter
 import android.widget.GridLayout
 import android.widget.TextView
 import androidx.fragment.app.replace
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -113,16 +114,12 @@ class AllRecipeFragment : Fragment() {
             // 아이템을 눌렀을 때
             else if(id == 1){
                 if(allRecipeBinding.allrecipeFmFullRecipeTab.isSelected == true){
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.activityMainFragmentContainer, FullRecipeFragment())
-                        .addToBackStack(null)
-                        .commit()
+                    findNavController().navigate(R.id.fullRecipeFragment)
+
                 }
                 else if(allRecipeBinding.allrecipeFmStepRecipeTab.isSelected == true){
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.activityMainFragmentContainer, StepRecipeFragment())
-                        .addToBackStack(null)
-                        .commit()
+                    findNavController().navigate(R.id.stepRecipeFragment)
+
                 }
             }
         }

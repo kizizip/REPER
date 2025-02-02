@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.databinding.FragmentMyPageBinding
@@ -78,10 +79,7 @@ class MyPageFragment : Fragment() {
 
     fun initEvent(){
         myPageBinding.mypageFmBtnBossMenu.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.activityMainFragmentContainer, BossFragment())
-                .addToBackStack(null)
-                .commit()
+            findNavController().navigate(R.id.bossFragment)
         }
 
         myPageBinding.mypageFmBtnLogout.setOnClickListener {
@@ -102,10 +100,7 @@ class MyPageFragment : Fragment() {
         }
 
         myPageBinding.mypageFmBtnEdit.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.activityMainFragmentContainer, EditMyAccountFragment())
-                .addToBackStack(null)
-                .commit()
+            findNavController().navigate(R.id.editMyAccountFragment)
         }
     }
 }

@@ -102,4 +102,8 @@ dependencies {
 
     // lottie
     implementation ("com.airbnb.android:lottie-compose:6.5.0")
+
+    //jet pack navi
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
 }

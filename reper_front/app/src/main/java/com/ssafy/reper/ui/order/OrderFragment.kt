@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.data.local.HomeOrderModel
@@ -154,12 +155,9 @@ class OrderFragment : Fragment() {
 
                 // BottomNavigationView 숨기기
                 (activity as MainActivity).hideBottomNavigation()
-                
-                // OrderRecipeFragment로 이동
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.activityMainFragmentContainer, OrderRecipeFragment())
-                    .addToBackStack(null)
-                    .commit()
+
+                findNavController().navigate(R.id.orderRecipeFragment)
+
             }
         }
 

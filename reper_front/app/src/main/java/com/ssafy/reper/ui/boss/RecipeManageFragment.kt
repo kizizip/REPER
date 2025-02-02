@@ -30,6 +30,10 @@ class RecipeManageFragment : Fragment() {
 
         binding.recipeFgRV.layoutManager = LinearLayoutManager(requireContext())
         binding.recipeFgRV.adapter = RecipeAdapter()
+
+        binding.recipeFgBackIcon.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
     }
 
 

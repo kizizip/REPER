@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.data.local.HomeAnnouncementModel
@@ -21,10 +20,10 @@ import com.ssafy.reper.ui.home.adapter.RVHomeLikeRecipeAdapter
 import com.ssafy.reper.ui.home.adapter.RVHomeOrderAdapter
 import android.os.Handler
 import android.os.Looper
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.NoticeManageFragment
-import com.ssafy.reper.ui.order.OrderRecipeFragment
 import com.ssafy.reper.ui.recipe.AllRecipeFragment
 
 class HomeFragment : Fragment() {
@@ -125,11 +124,8 @@ class HomeFragment : Fragment() {
             // BottomNavigationView 숨기기
             (activity as MainActivity).hideBottomNavigation()
 
-            // NoticeManageFragment로 이동
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.activityMainFragmentContainer, NoticeManageFragment())
-                .addToBackStack(null)
-                .commit()
+            findNavController().navigate(R.id.noticeManageFragment)
+
 
         }
 
@@ -179,13 +175,9 @@ class HomeFragment : Fragment() {
 
         // 레시피 더 보러가기 클릭시
         binding.fragmentHomeLikeRecipeText.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.activityMainFragmentContainer, AllRecipeFragment())
-                .commit()
+            findNavController().navigate(R.id.allRecipeFragment)
 
-            (activity as MainActivity).getBottomNavigationView().selectedItemId = R.id.recipe_icon
         }
-
 
         // 현재 진행중인 주문 코드!!!
         orderItems.add(

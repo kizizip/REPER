@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -123,10 +124,8 @@ class FullRecipeFragment : Fragment() {
     fun initAdapter() {
         // allrecipe item 클릭 이벤트 리스너
         fullRecipeListAdapter = FullRecipeListAdapter(mutableListOf()) { position ->
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.activityMainFragmentContainer, StepRecipeFragment())
-                .addToBackStack(null)
-                .commit()
+            findNavController().navigate(R.id.stepRecipeFragment)
+
         }
 
         fullRecipeBinding.fullrecipeFmRvRecipe.apply {

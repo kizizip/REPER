@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ssafy.reper.R
@@ -48,8 +49,6 @@ class BossFragment : Fragment() {
         binding.accessFalseList.adapter = AccessAdapter(nonAcessEmpolyees)
 
 
-
-
         // Spinner 설정
         val spinner = binding.bossFgStoreSpiner
         val userTypes = arrayOf("메가커피 구미 인동점", "메가커피 구미 진평점")
@@ -77,31 +76,22 @@ class BossFragment : Fragment() {
 
 
         binding.bossFgNoticeWrite.setOnClickListener {
-            val fragment = WriteNotiFragment()
-
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.activityMainFragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
+            findNavController().navigate(R.id.writeNotiFragment)
         }
 
 
         binding.bossFgNoticeList.setOnClickListener {
-            val fragment = NoticeManageFragment()
+            findNavController().navigate(R.id.noticeManageFragment)
 
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.activityMainFragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
         }
 
         binding.bossFgRecipeManage.setOnClickListener {
-            val fragment = RecipeManageFragment()
+            findNavController().navigate(R.id.recipeManageFragment)
 
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.activityMainFragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
+        }
+
+        binding.recipeFgBackIcon.setOnClickListener {
+            parentFragmentManager.popBackStack()
         }
 
 

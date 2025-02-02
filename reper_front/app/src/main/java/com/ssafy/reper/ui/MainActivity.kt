@@ -1,20 +1,27 @@
 package com.ssafy.reper.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.setupWithNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.ActivityMainBinding
-import com.ssafy.reper.ui.recipe.FullRecipeFragment
 import com.ssafy.reper.ui.home.HomeFragment
 import com.ssafy.reper.ui.mypage.MyPageFragment
 import com.ssafy.reper.ui.order.OrderFragment
 import com.ssafy.reper.ui.recipe.AllRecipeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.flow.count
+
+private const val TAG = "MainActivity_싸피"
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,46 +38,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 초기 Fragment 설정
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.activityMainFragmentContainer, HomeFragment())
-            .commit()
-
-        // bottom_menue의 아이템 선택 리스너 설정
-        binding.activityMainBottomMenu.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                // HomeFragment로 이동
-                R.id.home_icon -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.activityMainFragmentContainer, HomeFragment())
-                        .commit()
-                    true
-                }
-                // RecipeFragment로 이동
-                R.id.recipe_icon -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.activityMainFragmentContainer, AllRecipeFragment())
-                        .commit()
-                    true
-                }
-                // OrderFragment로 이동
-                R.id.order_icon -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.activityMainFragmentContainer, OrderFragment())
-                        .commit()
-                    true
-                }
-                // MyPageFragment로 이동
-                R.id.mypage_icon -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.activityMainFragmentContainer, MyPageFragment())
-                        .commit()
-                    true
-                }
-
-                else -> false // 그 외의 경우 처리해 주지 않음
-            }
+        val navController =
+            supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer)
+                ?.findNavController()
+        navController?.let {
+            binding.activityMainBottomMenu.setupWithNavController(it)
         }
+
+
     }
 
     fun hideBottomNavigation() {
@@ -88,21 +63,22 @@ class MainActivity : AppCompatActivity() {
 
 
     // backstack에 아무것도없는 상태에서 뒤로가기 버튼을 눌렀을때
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        // 현재 BackStack에 있는 Fragment 개수 확인
-        if (supportFragmentManager.backStackEntryCount == 0) {
-            // 2초 이내에 뒤로가기 버튼을 한 번 더 누르면 앱 종료
-            if (System.currentTimeMillis() - backPressedTime < 2000) {
-                finish()
-                return
-            }
-            
-            // 뒤로가기 버튼을 처음 누를 때
-            Toast.makeText(this, "한 번 더 누르면 앱이 종료됩니다.", Toast.LENGTH_SHORT).show()
-            backPressedTime = System.currentTimeMillis()
-        } else {
-            super.onBackPressed()
-        }
-    }
+    //이거 컨트롤러랑 같이 쓸수없음,,,,supportFragmentManager는 컨트롤러 안의 백스텍을 세는게아니라서,..
+//    @Deprecated("Deprecated in Java")
+//    override fun onBackPressed() {
+//        // 현재 BackStack에 있는 Fragment 개수 확인
+//        if (supportFragmentManager.backStackEntryCount == 0) {
+//            // 2초 이내에 뒤로가기 버튼을 한 번 더 누르면 앱 종료
+//            if (System.currentTimeMillis() - backPressedTime < 2000) {
+//                finish()
+//                return
+//            }
+//
+//            // 뒤로가기 버튼을 처음 누를 때
+//            Toast.makeText(this, "한 번 더 누르면 앱이 종료됩니다.", Toast.LENGTH_SHORT).show()
+//            backPressedTime = System.currentTimeMillis()
+//        } else {
+//            super.onBackPressed()
+//        }
+//    }
 }
