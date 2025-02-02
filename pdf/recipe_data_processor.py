@@ -3,6 +3,7 @@ import json
 import requests # spring boot로 전송하기 위해 추가
 from openai import OpenAI
 import fitz
+import numpy as np
 from dotenv import load_dotenv 
 from flask import Flask, request, jsonify
 
@@ -12,6 +13,80 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
 
+# 애니메이션 목록 및 임베딩 관련 함수들
+# 미리 정의한 애니메이션 목록: 각 항목은 키워드와 URL을 포함
+ANIMATIONS = [
+    {"keyword": "요거트 블렌더 간다", "url": "https://cdn.lottielab.com/l/Dybf1Je8jZjR1L.json"},
+    {"keyword": "사이다 붓다", "url": "https://cdn.lottielab.com/l/6Y3CtYEieXZZrx.json"},
+    {"keyword": "얼음 담다", "url": "https://cdn.lottielab.com/l/7Hr5gt1NZkp3ci.json"},
+    {"keyword": "얼음컵 준비", "url": "https://cdn.lottielab.com/l/6QbraoGrKFWZwG.json"},
+    {"keyword": "티백 컵에 담다", "url": "https://cdn.lottielab.com/l/72bFfMRVK8HRpz.json"},
+    {"keyword": "아이스티 붓다", "url": "https://cdn.lottielab.com/l/ErsA1gsymfKrp6.json"},
+    {"keyword": "딸기 블렌더 간다", "url": "https://cdn.lottielab.com/l/4gZp1dQ4pj4mB1.json"},
+    {"keyword": "물 붓다", "url": "https://cdn.lottielab.com/l/3ByZp4zyFxH5L6.json"},
+    {"keyword": "스팀우유 붓다", "url": "https://cdn.lottielab.com/l/C5V62488EpY7ZK.json"},
+    {"keyword": "우유 붓다", "url": "https://cdn.lottielab.com/l/CUbn1kkAFg2Mry.json"},
+    {"keyword": "추출한 샷 컵에 붓다", "url": "https://cdn.lottielab.com/l/DnWc3zyzDZBhAx.json"},
+    {"keyword": "블루베리 블렌더 간다", "url": "https://cdn.lottielab.com/l/FFMJLV74Qm6bfo.json"},
+    {"keyword": "자바칩 블렌더 간다", "url": "https://cdn.lottielab.com/l/ENtDzinSoQZDPq.json"},
+    {"keyword": "민트초코 블렌더 간다", "url": "https://cdn.lottielab.com/l/95Dg6EC3kRfgri.json"},
+    {"keyword": "쿠앤크 블렌더 간다", "url": "https://cdn.lottielab.com/l/7XThKYcimpCMMt.json"},
+    {"keyword": "우유 스팀", "url": "https://cdn.lottielab.com/l/9R9pCXFPnWSKTU.json"},
+    {"keyword": "휘핑크림", "url": "https://cdn.lottielab.com/l/FJ5ab6hdNstTRJ.json"},
+    {"keyword": "바닐라 시럽 펌프", "url": "https://cdn.lottielab.com/l/4kq2VaFenuZhLs.json"},
+    {"keyword": "초코 파우더 컵", "url": "https://cdn.lottielab.com/l/7FQ8q41J2syYBB.json"},
+    {"keyword": "초코 파우더", "url": "https://cdn.lottielab.com/l/BmkF6MHBAZSQdW.json"},
+    {"keyword": "헤이즐넛 시럽 펌프", "url": "https://cdn.lottielab.com/l/CQQ78SacnAXP8k.json"},
+    {"keyword": "카라멜 드리즐링", "url": "https://cdn.lottielab.com/l/EVPfK3e5skieMi.json"},
+    {"keyword": "카라멜 시럽 펌프", "url": "https://cdn.lottielab.com/l/qXGCejGzgtaXe0.json"},
+    {"keyword": "고구마 파우더 컵", "url": "https://cdn.lottielab.com/l/Co1f3bNMNDtEar.json"},
+    {"keyword": "요거트 파우더 컵", "url": "https://cdn.lottielab.com/l/4dN1uJNg62XiKZ.json"},
+    {"keyword": "딸기 베이스 컵", "url": "https://cdn.lottielab.com/l/2Y6Ggm7jWcNaJ6.json"},
+    {"keyword": "레몬청 스푼", "url": "https://cdn.lottielab.com/l/A95CqnJxqAfT79.json"},
+    {"keyword": "자몽청 스푼", "url": "https://cdn.lottielab.com/l/CLut8Kky51eJ7B.json"},
+    {"keyword": "우유거품 스푼", "url": "https://cdn.lottielab.com/l/3Zb2Fu2gKEqwdu.json"},
+    {"keyword": "대추청 스푼", "url": "https://cdn.lottielab.com/l/6Tm6WxmBktLg6d.json"},
+    {"keyword": "초코소스 스푼", "url": "https://cdn.lottielab.com/l/81ckDCvhP5kb4H.json"},
+    {"keyword": "에스프레소 추출", "url": "https://cdn.lottielab.com/l/7s4iHVxukkaC57.json"},
+    {"keyword": "카라멜소스 스푼", "url": "https://cdn.lottielab.com/l/9p7bDTV4ad7gPo.json"}
+]
+
+
+def get_embedding(text, model="text-embedding-ada-002"):
+    response = client.embeddings.create(input=[text], model=model)
+    embedding = response.data[0].embedding
+    return np.array(embedding)
+
+def cosine_similarity(vec_a, vec_b):
+    """
+    두 벡터 간의 코사인 유사도를 계산
+    """
+    return np.dot(vec_a, vec_b) / (np.linalg.norm(vec_a) * np.linalg.norm(vec_b))
+
+# 애니메이션 목록에 대해 미리 임베딩 계산 후 캐시
+ANIMATION_EMBEDDINGS = {}
+for anim in ANIMATIONS:
+    ANIMATION_EMBEDDINGS[anim["url"]] = get_embedding(anim["keyword"])
+
+def map_animation_url(instruction, threshold=0.87):
+    """
+    주어진 instruction에 대해 임베딩을 계산한 후,
+    캐시된 애니메이션 임베딩과의 코사인 유사도를 비교하여
+    가장 유사한 애니메이션의 URL을 반환
+    임계값(threshold) 이상일 경우 URL을, 아니면 None을 반환
+    """
+    if not instruction or instruction.strip() == "":
+        return None
+    instruction_embedding = get_embedding(instruction)
+    best_similarity = 0.0
+    best_url = None
+    for url, anim_embedding in ANIMATION_EMBEDDINGS.items():
+        similarity = cosine_similarity(instruction_embedding, anim_embedding)
+        if similarity > best_similarity:
+            best_similarity = similarity
+            best_url = url
+    return best_url if best_similarity >= threshold else None
+
 
 # PDF 파일에서 텍스트 추출
 def extract_text_from_pdf(pdf_path):
@@ -20,7 +95,7 @@ def extract_text_from_pdf(pdf_path):
     return text
 
 
-# GPT API를 사용해 레시피 데이터를 JSON으로 변환환
+# GPT API를 사용해 레시피 데이터를 JSON으로 변환
 def process_recipe_text(text):
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -83,7 +158,15 @@ def process_recipe_text(text):
                                     "recipeSteps": {
                                         "type": "array",
                                         "minItems": 1,
-                                        "items": {"type": "string"}
+                                        "items": {
+                                            "type": "object",
+                                            "properties" : {
+                                                "instruction" : {"type": "string"}
+                                                # The animationUrl field will be added later.
+                                            },
+                                            "required": ["instruction"],
+                                            "additionalPropertie": False
+                                        }
                                     }
                                 },
                                 "required": ["recipeName", "category", "type", "ingredients", "recipeSteps"],
@@ -100,7 +183,8 @@ def process_recipe_text(text):
     return response.choices[0].message.content
 
 
-# spring boot로 JSON 데이터 전송
+
+# Spring Boot로 JSON 데이터 전송 함수
 def send_json_to_spring(data):
     SPRING_BOOT_URL = "http://localhost:8080/api/stores/1/recipes"
     headers = {"Content-Type" : "application/json"}
@@ -112,19 +196,38 @@ def send_json_to_spring(data):
         print(f"Spring Boot 전송 실패! 상태 코드: {response.status_code}, 응답: {response.text}")
 
 
+
 # PDF 파일을 업로드 하면 JSON 변환 후 반환
 @app.route("/upload", methods=["POST"])
 def upload_file():
-    file = request.files["file"]
+    file = request.files.get("file")
     if file:
-        file_path = "C:/Users/SSAFY/Desktop/행복한카페 메뉴 레시피.pdf"
+        # 파일을 임시 경로(예: "temp.pdf")에 저장
+        file_path = "temp.pdf"
         file.save(file_path)
-        text = extract_text_from_pdf(file_path)
-        structured_data = json.loads(process_recipe_text(text)) 
         
-        send_json_to_spring(structured_data)
+        # PDF에서 텍스트 추출
+        text = extract_text_from_pdf(file_path)
+        
+        # GPT API로 JSON 구조 생성
+        structured_json = process_recipe_text(text)
+        data = json.loads(structured_json)
+        
+        # 각 레시피 스텝에 대해 animationUrl 매핑 수행
+        for recipe in data.get("recipes", []):
+            for step in recipe.get("recipeSteps", []):
+                instruction = step.get("instruction", "")
+                animation_url = map_animation_url(instruction)
+                if animation_url:
+                    step["animationUrl"] = animation_url
+        
+        # 최종 JSON 데이터를 Spring Boot로 전송
+        send_json_to_spring(data)
+        return jsonify(data)
+    else:
+        return jsonify({"error": "파일이 없습니다."}), 400
 
-        return jsonify(structured_data)
-    
+
+# 애플리케이션 실행
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
