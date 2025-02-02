@@ -68,7 +68,7 @@ ANIMATION_EMBEDDINGS = {}
 for anim in ANIMATIONS:
     ANIMATION_EMBEDDINGS[anim["url"]] = get_embedding(anim["keyword"])
 
-def map_animation_url(instruction, threshold=0.87):
+def map_animation_url(instruction, threshold=0.85):
     """
     주어진 instruction에 대해 임베딩을 계산한 후,
     캐시된 애니메이션 임베딩과의 코사인 유사도를 비교하여
@@ -86,6 +86,18 @@ def map_animation_url(instruction, threshold=0.87):
             best_similarity = similarity
             best_url = url
     return best_url if best_similarity >= threshold else None
+
+
+# # 레시피 이미지 생성
+# def generate_recipe_image(recipe_name):
+#     response = client.images.generate(
+#         model="dall-e-3",
+#         prompt=f"A high-quality realistic image of {recipe_name} coffee drink.",
+#         size="1024x1024",
+#         quality="standard",
+#         n=1,
+#     )
+#     return response.data[0].url if response.data else None
 
 
 # PDF 파일에서 텍스트 추출
@@ -215,6 +227,7 @@ def upload_file():
         
         # 각 레시피 스텝에 대해 animationUrl 매핑 수행
         for recipe in data.get("recipes", []):
+            # recipe["recipeImg"] = generate_recipe_image(recipe["recipeName"])
             for step in recipe.get("recipeSteps", []):
                 instruction = step.get("instruction", "")
                 animation_url = map_animation_url(instruction)

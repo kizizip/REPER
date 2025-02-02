@@ -41,7 +41,7 @@ public class RecipeService {
             for (int i = 0; i < originalSteps.size(); i++) {
                 RecipeStep originalStep = originalSteps.get(i);
                 RecipeStep step = new RecipeStep();
-                
+
                 step.setInstruction(originalStep.getInstruction());
                 step.setAnimationUrl(originalStep.getAnimationUrl());
                 step.setStepNumber(i + 1);
