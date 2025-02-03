@@ -26,10 +26,10 @@ public class StoreController {
     // 사장님이 가진 모든 매장 조회
     @GetMapping("/owner/{userId}")
     @Operation(summary = "OWNER인 {userId}에 해당하는 모든 store를 조회합니다.")
-    public ResponseEntity<List<StoreResponseAll>> findNotices(
+    public ResponseEntity<List<StoreResponseAll>> findOwnerStores(
             @PathVariable Long userId) {
 
-        List<Store> stores = storeService.findStores(userId);
+        List<Store> stores = storeService.findOwnerStores(userId);
 
         List<StoreResponseAll> response = stores.stream()
                 .map(store -> new StoreResponseAll(store.getStoreId(), store.getStoreName()))
