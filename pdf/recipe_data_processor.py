@@ -1,11 +1,11 @@
-import os
-import json
-import requests # spring boot로 전송하기 위해 추가
-from openai import OpenAI
-import fitz
-import numpy as np
-from dotenv import load_dotenv 
-from flask import Flask, request, jsonify
+import os                                  # 운영 체제와 상호 작용 (에: 환경 변수 로드드)
+import json                                # json 데이터 변환
+import requests                            # spring boot로 전송
+from openai import OpenAI                  # gpt api
+import fitz                                # pdf 파일에서 텍스트 추출
+import numpy as np                         # 벡터 연산 및 코사인 유사도 계산
+from dotenv import load_dotenv             # .env 파일에서 환경 변수 로드
+from flask import Flask, request, jsonify  # rest api 서버 구현현
 
 # .env 파일 로드
 load_dotenv()
@@ -91,7 +91,7 @@ def map_animation_url(instruction, threshold=0.85):
 # # 레시피 이미지 생성
 # def generate_recipe_image(recipe_name):
 #     response = client.images.generate(
-#         model="dall-e-3",
+#         model="dall-e-2",
 #         prompt=f"A high-quality realistic image of {recipe_name} coffee drink.",
 #         size="1024x1024",
 #         quality="standard",

@@ -2,7 +2,9 @@ package com.d109.reper.controller;
 
 import com.d109.reper.domain.Ingredient;
 import com.d109.reper.domain.Recipe;
+import com.d109.reper.domain.Store;
 import com.d109.reper.service.RecipeService;
+import com.d109.reper.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +18,20 @@ import java.util.List;
 public class RecipeController {
 
     private final RecipeService recipeService;
+    private final StoreService storeService;
 
-    //레시피 등록
+    //레시피 저장: python에서 변환된 json 데이터 저장
     @PostMapping("/stores/{storeId}/recipes")
-    public ResponseEntity<Void> createRecipes(@PathVariable Long storeId, @RequestBody List<Recipe> recipes) {
+    public ResponseEntity<Void> createRecipes(
+            @PathVariable Long storeId,
+            @RequestBody List<Recipe> recipes) {
+
+        Store store = storeService.findById(storeId);
+
+        for (Recipe recipe : recipes) {
+            recipe.setStore(store);
+        }
+
         recipeService.saveRecipes(recipes);
         return ResponseEntity.ok().build();
     }
@@ -27,7 +39,8 @@ public class RecipeController {
 
     //레시피 조회(가게별)
     @GetMapping("/stores/{storeId}/recipes")
-    public ResponseEntity<List<Recipe>> getRecipeByStore(@PathVariable Long storeId) {
+    public ResponseEntity<List<Recipe>> getRecipeByStore(
+            @PathVariable Long storeId) {
         return ResponseEntity.ok(recipeService.findRecipesByStore(storeId));
     }
 

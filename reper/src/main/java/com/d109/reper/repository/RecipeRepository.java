@@ -13,17 +13,11 @@ public class RecipeRepository {
 
     private final EntityManager em;
 
-    //레시피 등록(단건)
+    //레시피 저장(단건)
     public void save(Recipe recipe) {
         em.persist(recipe);
     }
 
-    //레시피 등록
-    public void saveAll(List<Recipe> recipes) {
-        for (Recipe recipe : recipes) {
-            em.persist(recipe);
-        }
-    }
 
     //레시피 조회(가게별)
     public List<Recipe> findByStore(Long storeId) {

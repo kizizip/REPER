@@ -26,8 +26,9 @@ public class Recipe {
     private RecipeCategory category; // ENUM [COFFEE, NON_COFFEE, ADE, TEA, SMOOTHIE, FRAPPE]
 
     @Enumerated(EnumType.STRING)
-    private RecipeType type; // ENUM [ICE, HOT, NONE]
+    private RecipeType type; // ENUM [ICE, HOT]
 
+    @Column(length = 2000)
     private String recipeImg;
 
     private LocalDateTime createdAt;
