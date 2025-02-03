@@ -1,5 +1,9 @@
 package com.d109.reper.domain;
 
+<<<<<<< HEAD
+=======
+import com.fasterxml.jackson.annotation.JsonIgnore;
+>>>>>>> feat/#15(back)-createRandomOrder
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,11 +15,12 @@ import java.util.List;
 @Getter @Setter
 public class Store {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long storeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User owner;
 
     private String  storeName;
@@ -26,6 +31,10 @@ public class Store {
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreEmployee> storeEmployees = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
+
 
     //연관관계 메서드
     //가입 요청 메서드 (storeEmployee 추가)
@@ -46,6 +55,5 @@ public class Store {
             user.getStores().add(this);
         }
     }
-
 
 }

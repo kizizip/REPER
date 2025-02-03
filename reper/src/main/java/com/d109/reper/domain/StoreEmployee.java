@@ -20,4 +20,8 @@ public class StoreEmployee {
     private Store store;
 
     private boolean isEmployed; // 승인여부
+
+    public void setIsEmployed(boolean isEmployed) {
+        this.isEmployed = isEmployed;
+    }
 }

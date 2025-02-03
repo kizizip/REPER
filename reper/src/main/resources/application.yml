@@ -17,3 +17,9 @@ spring:
 logging.level:
   org.hibernate.SQL: debug # (개발 환경) SQL 로그 출력
   org.hibernate.orm.jdbc.bind: trace # (개발 환경) SQL 바인딩 값 출력
+
+springdoc.override-with-gㅐㅕㅑeneric-response: false
+
+kakao:
+  client_id: 11a435ceceba6f2724e9f7b1b9b69f5b
+  redirect_uri: http://localhost:8080/api/auth/callback

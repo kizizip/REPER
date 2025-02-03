@@ -13,7 +13,7 @@ import java.util.List;
 @Getter @Setter
 public class Recipe {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long recipeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
