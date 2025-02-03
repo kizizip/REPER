@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.navigation.fragment.findNavController
@@ -39,6 +40,25 @@ class FullRecipeFragment : Fragment() {
         mainActivity = context as MainActivity
     }
 
+    //캡쳐방지 코드입니다! 메시지 내용은 수정불가능,, 핸드폰내에 저장된 메시지가 뜨는 거라고 하네요
+    override fun onResume() {
+        super.onResume()
+        activity?.window?.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+        Log.d("BossFragment", "FLAG_SECURE 설정")
+
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+        activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        Log.d("BossFragment", "FLAG_SECURE 해제")
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
