@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter @Setter
 public class Notice {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long noticeId;
 
     @ManyToOne(fetch = FetchType.LAZY)

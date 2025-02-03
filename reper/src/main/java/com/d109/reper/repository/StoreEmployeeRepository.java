@@ -13,4 +13,7 @@ public interface StoreEmployeeRepository extends JpaRepository<StoreEmployee, Lo
     boolean existsByStoreAndUser(Store store, User user); //해당 조합 존재 확인
     Optional<StoreEmployee> findByStoreAndUser(Store store, User user);
 
+    // 특정 유저가 특정 매장에서 근무 중인지 확인
+    boolean existsByUser_UserIdAndStore_StoreIdAndIsEmployedTrue(Long userId, Long storeId);
 }
+
