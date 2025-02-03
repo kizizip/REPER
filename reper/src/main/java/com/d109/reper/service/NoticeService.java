@@ -27,7 +27,7 @@ public class NoticeService {
     private final StoreEmployeeRepository storeEmployeeRepository;
     // 공지 등록
     @Transactional
-    public Long saveNotice(Long storeId, Long userId, String title, String content) {
+    public Notice saveNotice(Long storeId, Long userId, String title, String content) {
         if (storeId == null || storeId <=0 || userId == null || userId <= 0) {
             throw new IllegalArgumentException("storeId, userId는 필수이고, 1이상의 값이어야 합니다.");
         }
@@ -64,7 +64,7 @@ public class NoticeService {
             throw new RuntimeException("Notice 등록 실패: ID가 생성되지 않았습니다.");
         }
 
-        return saveNotice.getNoticeId();
+        return saveNotice;
     }
 
 
@@ -163,7 +163,8 @@ public class NoticeService {
                 notice.getNoticeId(),
                 notice.getStore().getStoreId(),
                 notice.getTitle(),
-                notice.getContent());
+                notice.getContent(),
+                notice.getUpdatedAt());
     }
 
     // 공지 삭제

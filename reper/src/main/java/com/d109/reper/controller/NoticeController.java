@@ -2,13 +2,16 @@ package com.d109.reper.controller;
 
 import com.d109.reper.domain.Notice;
 import com.d109.reper.service.NoticeService;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @RestController
@@ -28,15 +31,15 @@ public class NoticeController {
         String title = requestBody.get("title").toString();
         String content = requestBody.get("content").toString();
 
-        Long noticeId = noticeService.saveNotice(storeId, userId, title, content);
+        Notice notice = noticeService.saveNotice(storeId, userId, title, content);
 
         return ResponseEntity.ok(new ResponseBody(
                 "공지가 정상적으로 등록되었습니다.",
-                noticeId,
+                notice.getNoticeId(),
                 storeId,
                 title,
-                content
-        ));
+                content,
+                notice.getUpdatedAt()));
     }
 
     @GetMapping("/{noticeId}")
@@ -110,13 +113,17 @@ public class NoticeController {
         private Long storeId;
         private String title;
         private String content;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        private LocalDateTime updatedAt;
 
-        public ResponseBody(String message, Long noticeId, Long storeId, String title, String content) {
+        public ResponseBody(String message, Long noticeId, Long storeId, String title, String content, LocalDateTime updatedAt) {
             this.message = message;
             this.noticeId = noticeId;
             this.storeId = storeId;
             this.title = title;
             this.content = content;
+            this.updatedAt = updatedAt;
+
         }
     }
 
