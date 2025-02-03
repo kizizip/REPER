@@ -1,9 +1,6 @@
 package com.d109.reper.domain;
 
-<<<<<<< HEAD
-=======
 import com.fasterxml.jackson.annotation.JsonIgnore;
->>>>>>> feat/#15(back)-createRandomOrder
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
