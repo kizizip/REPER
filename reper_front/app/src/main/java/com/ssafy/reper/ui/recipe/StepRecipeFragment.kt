@@ -32,15 +32,12 @@ class StepRecipeFragment : Fragment() {
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
         )
-        Log.d("BossFragment", "FLAG_SECURE 설정")
-
 
     }
 
     override fun onPause() {
         super.onPause()
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        Log.d("BossFragment", "FLAG_SECURE 해제")
     }
 ////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
