@@ -143,6 +143,12 @@ public class UserController {
 
     // 비밀번호 변경
 //    @PatchMapping("/{userId}/{password}")
+//    public ResponseEntity<Boolean> updatePassword(@PathVariable Long userId, @PathVariable String password, @RequestBody PasswordUpdateRequest passwordUpdateRequest) {
+//        Map<String, Object> userInfo = userService.getUserInfo(userId);
+//        if () { // 기존 비밀번호와 일치한다면
+//
+//        }
+//    }
 
 
     // 회원 탈퇴
@@ -203,6 +209,16 @@ public class UserController {
         public String getPhone() {
             return phone;
         }
+    }
+
+
+    public static class PasswordUpdateRequest {
+
+        @Setter
+        @Schema(description = "변경할 비밀번호", example = "newpassword")
+        private String password;
+
+        public String getPassword() { return password; }
     }
 
 
