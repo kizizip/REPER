@@ -95,16 +95,28 @@
 
 
         <TextView
+            android:id="@+id/textView15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16sp"
+            android:layout_marginRight="20sp"
             android:fontFamily="@font/pretendard_regular"
             android:text="1분전"
             android:textColor="@color/lightgray"
             android:textSize="12sp"
-            android:layout_marginTop="16sp"
-            android:layout_marginRight="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/rv_order_recipe_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:buttonTint="@color/checkbox_tint_selector"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
