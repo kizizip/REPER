@@ -85,7 +85,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginBottom="20dp"
-            app:layout_constraintBottom_toTopOf="@+id/appCompatButton"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout"
             app:layout_constraintTop_toBottomOf="@+id/view">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -97,17 +97,43 @@
         </FrameLayout>
 
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/appCompatButton"
-            android:layout_width="match_parent"
-            android:layout_height="49.36dp"
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
             android:layout_marginBottom="80dp"
-            android:background="@drawable/login_button"
-            android:fontFamily="@font/pretendard_semibold"
-            android:text="주문 완료"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent" >
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/order_recipe_fragment_go_recipe_btn"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:background="@drawable/medium_red_button"
+                android:fontFamily="@font/pretendard_semibold"
+                android:text="레시피보기"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/order_recipe_fragment_complete_order_btn"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:background="@drawable/medium_green_button"
+                android:fontFamily="@font/pretendard_semibold"
+                android:text="주문 완료"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+
+
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
