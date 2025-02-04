@@ -14,7 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -94,7 +98,7 @@ public class NoticeService {
 
 
     // 매장별 전체 공지 조회
-    public List<Notice> findNotices(Long storeId, Long userId) {
+    public List<NoticeController.ResponseNotices> findNotices(Long storeId, Long userId) {
         if (storeId == null || userId ==null) {
             throw new IllegalArgumentException("storeId, userId는 필수입니다.");
         }
@@ -108,13 +112,27 @@ public class NoticeService {
         if (!isAuthorizedUser(store, user)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
         }
-        return noticeRepository.findAllByStore_StoreId(storeId);
+
+        List<Notice> notices = noticeRepository.findAllByStore_StoreId(storeId);
+        LocalDateTime now = LocalDateTime.now();
+
+        List<NoticeController.ResponseNotices.NoticeResponse> sortedNotices = notices.stream()
+                .sorted(Comparator.comparing(Notice::getUpdatedAt).reversed()) // 최신순 정렬
+                .map(notice -> new NoticeController.ResponseNotices.NoticeResponse(
+                        notice.getNoticeId(),
+                        notice.getTitle(),
+                        notice.getContent(),
+                        formatTimeAgo(notice.getUpdatedAt(), now) // timeAgo 필드 추가
+                ))
+                .collect(Collectors.toList());
+
+        return List.of(new NoticeController.ResponseNotices(storeId, sortedNotices));
     }
 
 
     // 공지 수정
     @Transactional
-    public NoticeController.ResponseBody updateNotice(Long noticeId, Long storeId, Long userId, String newTitle, String newContent) {
+    public NoticeController.ResponseNoticeSave updateNotice(Long noticeId, Long storeId, Long userId, String newTitle, String newContent) {
         if (noticeId == null || storeId == null || userId ==null) {
             throw new IllegalArgumentException("noticeId, storeId, userId는 필수입니다.");
         }
@@ -156,9 +174,14 @@ public class NoticeService {
             isUpdated = true;
         }
 
+        // 변경된 내용이 있으면 updatedAt 갱신
+        if (isUpdated) {
+            notice.setUpdatedAt(LocalDateTime.now());
+        }
+
         String message = isUpdated ? "공지 수정 완료" : "변경된 내용이 없습니다.";
 
-        return new NoticeController.ResponseBody(
+        return new NoticeController.ResponseNoticeSave(
                 message,
                 notice.getNoticeId(),
                 notice.getStore().getStoreId(),
@@ -175,13 +198,13 @@ public class NoticeService {
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("User NotF Found"));
 
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("Store Not Found"));
 
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("NoticeNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("Notice Not Found"));
 
         if (!notice.getStore().getOwner().getUserId().equals(user.getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "공지 삭제 권한이 없습니다.");
@@ -202,6 +225,25 @@ public class NoticeService {
         // 알바생인지 확인
         return storeEmployeeRepository.existsByUser_UserIdAndStore_StoreIdAndIsEmployedTrue(user.getUserId(), store.getStoreId());
 
+    }
+
+    // 전체 공지 조회시 updatedAt 최신순으로 정렬 및 timeAgo 계산 로직
+    private String formatTimeAgo(LocalDateTime updatedAt, LocalDateTime now) {
+        Duration duration = Duration.between(updatedAt, now);
+        long seconds = duration.getSeconds();
+        long minutes = duration.toMinutes();
+        long hours = duration.toHours();
+        long days = duration.toDays();
+
+        if (seconds < 60) {
+            return seconds + "초 전";
+        } else if (minutes < 60) {
+            return minutes + "분 전";
+        } else if (hours < 24) {
+            return hours + "시간 전";
+        } else {
+            return days + "일 전";
+        }
     }
 
 }

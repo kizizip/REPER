@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class NoticeController {
 
     @PostMapping
     @Operation(summary = "{storeId}에 해당하는 공지를 생성합니다.")
-    public ResponseEntity<ResponseBody> createNotice(
+    public ResponseEntity<ResponseNoticeSave> createNotice(
             @PathVariable Long storeId,
             @RequestBody Map<String, Object> requestBody) {
 
@@ -33,7 +34,7 @@ public class NoticeController {
 
         Notice notice = noticeService.saveNotice(storeId, userId, title, content);
 
-        return ResponseEntity.ok(new ResponseBody(
+        return ResponseEntity.ok(new ResponseNoticeSave(
                 "공지가 정상적으로 등록되었습니다.",
                 notice.getNoticeId(),
                 storeId,
@@ -44,33 +45,27 @@ public class NoticeController {
 
     @GetMapping("/{noticeId}")
     @Operation(summary = "{noticeId}에 해당하는 공지 하나를 조회합니다.")
-    public ResponseEntity<ResponseBodyOne> findOneNotice(
+    public ResponseEntity<ResponseNoticeOne> findOneNotice(
             @PathVariable Long noticeId,
             @PathVariable Long storeId,
             @RequestParam Long userId) {
 
         Notice notice = noticeService.findOneNotice(noticeId, storeId, userId);
 
-        return ResponseEntity.ok(new ResponseBodyOne(
+        return ResponseEntity.ok(new ResponseNoticeOne(
                 notice.getNoticeId(),
                 notice.getTitle(),
-                notice.getContent()));
+                notice.getContent(),
+                notice.getUpdatedAt()));
     }
 
     @GetMapping
     @Operation(summary = "{storeId}에 해당하는 전체 공지를 조회합니다.")
-    public ResponseEntity<List<ResponseBodyAll>> findNotices(
+    public ResponseEntity<List<ResponseNotices>> findNotices(
             @PathVariable Long storeId,
             @RequestParam Long userId) {
-        List<Notice> notices = noticeService.findNotices(storeId, userId);
 
-        List<ResponseBodyAll> response = List.of(new ResponseBodyAll(
-                storeId,
-                notices.stream()
-                        .map(notice -> new ResponseBodyAll.NoticeResponse(
-                                notice.getNoticeId(), notice.getTitle(), notice.getContent()))
-                        .toList()
-        ));
+        List<ResponseNotices> response = noticeService.findNotices(storeId, userId);
 
         return ResponseEntity.ok(response);
     }
@@ -78,7 +73,7 @@ public class NoticeController {
 
     @PutMapping("/{noticeId}")
     @Operation(summary = "{noticeId}에 해당하는 공지를 수정합니다.")
-    public ResponseEntity<NoticeController.ResponseBody> updateNotice(
+    public ResponseEntity<NoticeController.ResponseNoticeSave> updateNotice(
             @PathVariable Long storeId,
             @PathVariable Long noticeId,
             @RequestBody Map<String, Object> requestBody) {
@@ -87,13 +82,13 @@ public class NoticeController {
         String title = (String) requestBody.get("title");
         String content = (String) requestBody.get("content");
 
-        NoticeController.ResponseBody responseBody = noticeService.updateNotice(noticeId, storeId, userId, title, content);
+        NoticeController.ResponseNoticeSave responseBody = noticeService.updateNotice(noticeId, storeId, userId, title, content);
         return ResponseEntity.ok(responseBody);
     }
 
     @DeleteMapping("/{noticeId}")
     @Operation(summary = "{noticeId}에 해당하는 공지를 삭제합니다.")
-    public ResponseEntity<String> deleteNotice(
+    public ResponseEntity<Void> deleteNotice(
             @PathVariable Long noticeId,
             @PathVariable Long storeId,
             @RequestBody Map<String, Object> requestBody) {
@@ -101,22 +96,25 @@ public class NoticeController {
 
         noticeService.deleteNotice(noticeId, storeId, userId);
 
-        return ResponseEntity.ok("공지 삭제 완료");
+        System.out.println("공지 삭제 완료");
+
+        return ResponseEntity.noContent().build();
     }
+
 
     // Response DTO
         //성공 응답 형식
     @Getter
-    public static class ResponseBody {
+    public static class ResponseNoticeSave {
         private String message;
         private Long noticeId;
         private Long storeId;
         private String title;
         private String content;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd' 'HH:mm")
         private LocalDateTime updatedAt;
 
-        public ResponseBody(String message, Long noticeId, Long storeId, String title, String content, LocalDateTime updatedAt) {
+        public ResponseNoticeSave(String message, Long noticeId, Long storeId, String title, String content, LocalDateTime updatedAt) {
             this.message = message;
             this.noticeId = noticeId;
             this.storeId = storeId;
@@ -129,25 +127,28 @@ public class NoticeController {
 
     // 조회 하나 응답
     @Getter
-    public static class ResponseBodyOne {
+    public static class ResponseNoticeOne {
         private Long noticeId;
         private String title;
         private String content;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd' 'HH:mm")
+        private LocalDateTime updatedAt;
 
-        public ResponseBodyOne(Long noticeId, String title, String content) {
+        public ResponseNoticeOne(Long noticeId, String title, String content, LocalDateTime updatedAt) {
             this.noticeId = noticeId;
             this.title = title;
             this.content = content;
+            this.updatedAt = updatedAt;
         }
     }
 
     // 매장별 전체 조회 응답
     @Getter
-    public static class ResponseBodyAll {
+    public static class ResponseNotices {
         private Long storeId;
         private List<NoticeResponse> notices;
 
-        public ResponseBodyAll(Long storeId, List<NoticeResponse> notices) {
+        public ResponseNotices(Long storeId, List<NoticeResponse> notices) {
             this.storeId = storeId;
             this.notices = notices;
         }
@@ -157,11 +158,13 @@ public class NoticeController {
             private Long noticeId;
             private String title;
             private String content;
+            private String timgeAgo;
 
-            public NoticeResponse(Long noticeId, String title, String content) {
+            public NoticeResponse(Long noticeId, String title, String content, String timgeAgo) {
                 this.noticeId = noticeId;
                 this.title = title;
                 this.content = content;
+                this.timgeAgo = timgeAgo;
             }
         }
     };

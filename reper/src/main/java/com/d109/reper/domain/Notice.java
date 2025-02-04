@@ -25,11 +25,12 @@ public class Notice {
 
     private String content;
 
+
     private LocalDateTime updatedAt;
 
     @PrePersist
-    @PreUpdate
-    protected void onUpdate() {
+    protected void onCreate() {
+
         this.updatedAt = LocalDateTime.now();
     }
 }
