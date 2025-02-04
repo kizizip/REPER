@@ -22,7 +22,7 @@ public class StoreService {
     private final UserRepository userRepository;
 
     // 사장님이 가진 모든 매장 조회
-    public List<Store> findStores(Long userId) {
+    public List<Store> findOwnerStores(Long userId) {
         if (userId == null) {
             throw new IllegalArgumentException("userId는 필수입니다.");
         }
