@@ -36,7 +36,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
-	implementation 'io.swagger.core.v3:swagger-annotations:2.2.10'  // 추가
+	//implementation 'io.swagger.core.v3:swagger-annotations:2.2.10'  // 추가
 	implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.7.0'
 
 	// Spring security
