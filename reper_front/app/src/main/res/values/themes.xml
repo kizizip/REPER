@@ -1,0 +1,17 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Reper" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/lightgreen</item>
+        <item name="colorSecondary">@color/green</item>
+        <!-- Customize your light theme here. -->
+        <item name="android:fontFamily">@font/pretendard_regular</item>
+    </style>
+
+    <style name="Theme.Reper" parent="Base.Theme.Reper" />
+
+    <style name="Theme.MyApp" parent="Theme.MaterialComponents.DayNight">
+        <item name="materialButtonStyle">@style/BaseToggleButtonStyle</item>
+    </style>
+
+
+</resources>
