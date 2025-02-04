@@ -197,8 +197,8 @@ def process_recipe_text(text):
 
 
 # Spring Boot로 JSON 데이터 전송 함수
-def send_json_to_spring(data):
-    SPRING_BOOT_URL = "http://localhost:8080/api/stores/1/recipes"
+def send_json_to_spring(data, store_id):
+    SPRING_BOOT_URL = f"http://localhost:8080/api/stores/{store_id}/recipes"
     headers = {"Content-Type" : "application/json"}
     response = requests.post(SPRING_BOOT_URL, headers=headers, json=data["recipes"]) # JSON 데이터 중 recipes 리스트만 전송
 
@@ -213,6 +213,8 @@ def send_json_to_spring(data):
 @app.route("/upload", methods=["POST"])
 def upload_file():
     file = request.files.get("file")
+    store_id = request.form.get("storeId")
+
     if file:
         # 파일을 임시 경로(예: "temp.pdf")에 저장
         file_path = "temp.pdf"
@@ -235,7 +237,7 @@ def upload_file():
                     step["animationUrl"] = animation_url
         
         # 최종 JSON 데이터를 Spring Boot로 전송
-        send_json_to_spring(data)
+        send_json_to_spring(data, store_id)
         return jsonify(data)
     else:
         return jsonify({"error": "파일이 없습니다."}), 400
