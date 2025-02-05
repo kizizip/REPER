@@ -3,10 +3,11 @@ package com.ssafy.reper.ui.boss.adpater
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.ssafy.reper.data.dto.Notice
 import com.ssafy.reper.databinding.ItemNotiBinding
 import com.ssafy.reper.ui.mypage.MyAccessStoreListAdapter.ItemClickListener
 
-class NotiAdapter(val itemClickListener: ItemClickListener) :
+class NotiAdapter(var noticeList: List<Notice>,val itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<NotiAdapter.NotiViewHolder>() {
 
     // ViewHolder
@@ -32,12 +33,12 @@ class NotiAdapter(val itemClickListener: ItemClickListener) :
 
     override fun onBindViewHolder(holder: NotiViewHolder, position: Int) {
         // 여기서 실제 데이터 바인딩을 진행하면 됩니다.
-        holder.binding.itemNotiTitle.text = "😊멋쟁이 공지가 들어갈 자리입니다😊"
-        holder.binding.itemNotiTime.text = "1분전"
+        holder.binding.itemNotiTitle.text = noticeList[position].title
+        holder.binding.itemNotiTime.text = noticeList[position].timgeAgo
     }
 
     override fun getItemCount(): Int {
-        return 20
+        return noticeList.size
     }
 
     // 클릭 리스너 인터페이스

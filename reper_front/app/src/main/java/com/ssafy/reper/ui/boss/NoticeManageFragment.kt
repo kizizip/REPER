@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
@@ -19,7 +20,7 @@ import com.ssafy.reper.ui.MainActivity
 class NoticeManageFragment : Fragment() {
     private var _binding: FragmentNoticeManageBinding? = null
     private val binding get() = _binding!!
-    private lateinit var mainActivity: MainActivity
+    private val noticeViewModel: NoticeViewModel by activityViewModels()
 
 
     override fun onCreateView(
@@ -29,11 +30,14 @@ class NoticeManageFragment : Fragment() {
         _binding = FragmentNoticeManageBinding.inflate(inflater, container, false)
 
         return binding.root
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+        noticeViewModel.init(1,1)
         initNotiAdater()
         initSpinner()
 
@@ -83,12 +87,21 @@ class NoticeManageFragment : Fragment() {
 
     fun initNotiAdater() {
         binding.notiList.layoutManager = LinearLayoutManager(requireContext())
-        binding.notiList.adapter = NotiAdapter(object : NotiAdapter.ItemClickListener {
+        val notiAdapter = NotiAdapter( emptyList() , object : NotiAdapter.ItemClickListener {
             override fun onClick(position: Int) {
                 findNavController().navigate(R.id.writeNotiFragment)
                 Toast.makeText(requireContext(), "공지 $position 클릭됨", Toast.LENGTH_SHORT).show()
             }
         })
+
+        binding.notiList.adapter = notiAdapter
+
+        noticeViewModel.noticeList.observe(viewLifecycleOwner, { newList ->
+            notiAdapter.noticeList = newList
+            notiAdapter.notifyDataSetChanged()
+        })
+
+
     }
 
 

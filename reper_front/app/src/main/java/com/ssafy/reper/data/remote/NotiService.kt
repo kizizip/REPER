@@ -8,16 +8,17 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface NotiService {
 
     //가게에 해당하는 모든 공지를 가져옵니다.
     @GET("stores/{storeId}/notices")
-    suspend fun getAllNotice(@Path("storeId") storeId: Int, @Body userId: Int) : StoreNoticeResponse
+    suspend fun getAllNotice(@Path("storeId") storeId: Int, @Query("userId") userId: Int) :List<StoreNoticeResponse>
 
     // notiId에 해당하는 공지를 가져옵니다.
     @GET("stores/{storeId}/notices/{noticeId}")
-    suspend fun getNotice(@Path("storeId") storeId: Int, @Path("noticeId") noticeId:Int, @Body userId : Int): Notice
+    suspend fun getNotice(@Path("storeId") storeId: Int, @Path("noticeId") noticeId:Int, @Query("userId") userId: Int): Notice
 
     //가게에 공지를 등록한다.
     @POST("stores/{storeId}/notices")

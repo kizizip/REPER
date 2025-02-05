@@ -1,6 +1,7 @@
 package com.ssafy.reper.data.remote
 
-import com.ssafy.smartstore_jetpack.base.ApplicationClass
+import ApplicationClass
+
 
 
 class RetrofitUtil {

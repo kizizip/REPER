@@ -40,8 +40,9 @@ class NoticeViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = RetrofitUtil.noticeService.getAllNotice(storeId, userId)
-                _noticeList.postValue(response.notices)
+                _noticeList.postValue(response.get(0).notices)
             } catch (e: Exception) {
+                Log.d(TAG, "getAllNotice: ${e.message}")
                 Log.d(TAG, "getNotice: 공지 리스트 업로드 실패")
             }
         }
