@@ -1,6 +1,7 @@
 package com.ssafy.reper.data.dto
 
 data class StoreNoticeResponse(
-    val notices: List<Notice>,
-    val storeId: Int
+    val storeId: Int,
+    val notices: List<Notice>
+
 )

@@ -19,6 +19,7 @@ import com.ssafy.reper.ui.MainActivity
 class NoticeManageFragment : Fragment() {
     private var _binding: FragmentNoticeManageBinding? = null
     private val binding get() = _binding!!
+    private lateinit var mainActivity: MainActivity
 
 
     override fun onCreateView(

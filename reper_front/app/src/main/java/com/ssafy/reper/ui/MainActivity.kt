@@ -6,7 +6,9 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -19,6 +21,7 @@ import com.ssafy.reper.ui.mypage.MyPageFragment
 import com.ssafy.reper.ui.order.OrderFragment
 import com.ssafy.reper.ui.recipe.AllRecipeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.ssafy.reper.ui.boss.NoticeViewModel
 import kotlinx.coroutines.flow.count
 
 private const val TAG = "MainActivity_싸피"
@@ -27,6 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장
+    private val noticeViewModel: NoticeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -64,6 +68,7 @@ class MainActivity : AppCompatActivity() {
 
     // backstack에 아무것도없는 상태에서 뒤로가기 버튼을 눌렀을때
     //이거 컨트롤러랑 같이 쓸수없음,,,,supportFragmentManager는 컨트롤러 안의 백스텍을 세는게아니라서,..
+
 //    @Deprecated("Deprecated in Java")
 //    override fun onBackPressed() {
 //        // 현재 BackStack에 있는 Fragment 개수 확인

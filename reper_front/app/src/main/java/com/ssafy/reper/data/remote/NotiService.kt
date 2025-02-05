@@ -11,31 +11,24 @@ import retrofit2.http.Path
 
 interface NotiService {
 
+    //가게에 해당하는 모든 공지를 가져옵니다.
+    @GET("stores/{storeId}/notices")
+    suspend fun getAllNotice(@Path("storeId") storeId: Int, @Body userId: Int) : StoreNoticeResponse
 
     // notiId에 해당하는 공지를 가져옵니다.
     @GET("stores/{storeId}/notices/{noticeId}")
-    suspend fun getNotice(@Path("storeId") storeId: String, @Path("noticeId") noticeId:String): StoreNoticeResponse
+    suspend fun getNotice(@Path("storeId") storeId: Int, @Path("noticeId") noticeId:Int, @Body userId : Int): Notice
 
-    //
+    //가게에 공지를 등록한다.
+    @POST("stores/{storeId}/notices")
+    suspend fun createNotice(@Path("storeId") storeId: Int, @Body userId: Int, @Body title: String, @Body content: String)
 
-//    // 특정 도시락 아이디에 해당하는 쇼핑 카트 아이템 조회
-//    @GET("rest/shoppingCart/dosirack/{dosirackId}")
-//    suspend fun getCartItemsByDosirock(@Path("dosirackId") dosirackId: Int): List<CartOnly>
-//
-//    // 쇼핑 카트에 아이템 추가
-//    @POST("rest/shoppingCart")
-//    suspend fun addCartItem(@Body shoppingCart: CartOnly)
-//
-//    // 쇼핑 카트 아이템 수정
-//    @PUT("rest/shoppingCart/{cartId}")
-//    suspend fun updateCartItem(@Path("cartId") cartId: Int, @Body shoppingCart: CartOnly)
-//
-//    // 쇼핑 카트 아이템 삭제
-//    @DELETE("rest/shoppingCart/{cartId}")
-//    suspend fun removeCartItem(@Path("cartId") cartId: Int)
-//
-//    // 모든 쇼핑 카트 아이템 조회
-//    @GET("rest/shoppingCart")
-//    suspend fun getAllCartItems(): List<CartOnly>
+    //공지를 수정한다.
+    @PUT("stores/{storeId}/notices/{noticeId}")
+    suspend fun modifyNotice(@Path("storeId") storeId: Int, @Path("noticeId") noticeId:Int, @Body userId : Int, @Body title: String, @Body content: String)
+
+    //공지를 삭제한다.
+    @DELETE("stores/{storeId}/notices/{noticeId}")
+    suspend fun deleteNotice(@Path("storeId") storeId: Int, @Path("noticeId") noticeId:Int, @Body userId : Int)
 
 }
