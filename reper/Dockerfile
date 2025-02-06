@@ -11,9 +11,6 @@ COPY ${JAR_FILE_PATH} app.jar
 # .yaml local/prod 프로필 분리 구조일때 실행할 프로필 지정 prod(=운영)
 ENV USE_PROFILE prod
 
-# init.sql을 컨테이너 내부로 복사
-COPY init.sql /docker-entrypoint-initdb.d/
-
 # 이미지 빌드 명령
 ENTRYPOINT ["java", "-Dspring.profiles.active=${USE_PROFILE}", "-jar", "app.jar"]
 

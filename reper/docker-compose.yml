@@ -2,6 +2,9 @@ services:
   mysql:
     image: mysql:8.0
     container_name: mysql
+    build:
+      context: ./reper/mysql  # MySQL Dockerfile이 있는 디렉터리 지정
+      dockerfile: Dockerfile
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: jeongeoneya0831!
@@ -13,7 +16,6 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql  # MySQL 데이터 저장
       - mysql_config:/etc/mysql/conf.d  # MySQL 설정 파일 저장
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app-network
 
