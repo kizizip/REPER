@@ -11,7 +11,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create # (개발환경) -> (운영 환경) validation/none
+      ddl-auto: update # (개발환경) -> (운영 환경) validation/none
     datasource:
       initialization-mode: always
     properties:
