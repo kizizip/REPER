@@ -53,11 +53,10 @@ public class UserController {
         user.setPhone(joinRequest.getPhone());
         user.setRole(joinRequest.getRoleEnum());  // Enum 변환
 
-        int res = userService.insertMember(user);
-        log.info("res ::: 0", res);
+        Long userId = userService.insertMember(user);
 
-        if (res == 1) {
-            return ResponseEntity.ok(true);
+        if (userId != null) {
+            return ResponseEntity.ok(userId);
         } else {
             throw new RuntimeException("회원가입 실패");
         }
@@ -144,16 +143,6 @@ public class UserController {
             throw new RuntimeException("서버 오류 발생");
         }
     }
-
-
-    // 비밀번호 변경
-//    @PatchMapping("/{userId}/{password}")
-//    public ResponseEntity<Boolean> updatePassword(@PathVariable Long userId, @PathVariable String password, @RequestBody PasswordUpdateRequest passwordUpdateRequest) {
-//        Map<String, Object> userInfo = userService.getUserInfo(userId);
-//        if () { // 기존 비밀번호와 일치한다면
-//
-//        }
-//    }
 
 
     // 회원 탈퇴
