@@ -1,42 +1,43 @@
 package com.ssafy.reper.ui.order
 
-import android.content.Intent
+import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.data.local.HomeOrderModel
-import com.ssafy.reper.databinding.FragmentHomeBinding
 import com.ssafy.reper.databinding.FragmentOrderBinding
-import com.ssafy.reper.ui.home.adapter.RVHomeOrderAdapter
 import com.ssafy.reper.ui.MainActivity
+import com.ssafy.reper.ui.home.adapter.RVHomeOrderAdapter
 
 class OrderFragment : Fragment() {
 
-    private var _binding: FragmentOrderBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var mainActivity: MainActivity
+
+    private var _orderBinding: FragmentOrderBinding? = null
+    private val orderBinding get() = _orderBinding!!
 
     // HomeOrderModel 재사용
     private val orderItems = mutableListOf<HomeOrderModel>()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mainActivity = context as MainActivity
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
 
-        _binding = FragmentOrderBinding.inflate(inflater, container, false)
-        return binding.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        _orderBinding = FragmentOrderBinding.inflate(inflater, container, false)
+        return orderBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -44,7 +45,7 @@ class OrderFragment : Fragment() {
 
 
         // 주문 날짜 Spinner 설정
-        val dateSpinner = binding.fragmentOrderDateSpinner
+        val dateSpinner = orderBinding.fragmentOrderDateSpinner
         val dates = arrayOf("2025.01.20", "2025.01.19", "2025.01.18")
 
         val adapter = ArrayAdapter(
@@ -144,7 +145,7 @@ class OrderFragment : Fragment() {
         )
 
         // RVHomeOrderAdapter 재사용
-        val rvOrder = binding.fragmentOrderRvOrder
+        val rvOrder = orderBinding.fragmentOrderRvOrder
         val rvOrderAdapter = RVHomeOrderAdapter(orderItems)
 
         rvOrder.adapter = rvOrderAdapter
@@ -166,7 +167,7 @@ class OrderFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        _orderBinding = null
     }
 
 }
