@@ -1,8 +1,8 @@
 # 프로젝트 Java 버전에 맞는 openjdk 이미지 설정
 FROM openjdk:17-jdk-slim
 
-# DB Dependencies 설정 (MySQL 클라이언트로 변경)
-RUN apt-get update && apt-get install -y mysql-client && rm -rf /var/lib/apt/lists/*
+# DB Dependencies 설정 (mariadb와 mysql-client은 같은것...)
+RUN apt-get update && apt-get install -y mariadb-client && rm -rf /var/lib/apt/lists/*
 
 # gradle 빌드를 하면 build/libs 하위에 *.jar 생성됨. 해당 '*.jar'를 'app.jar'로 cpoy
 ARG JAR_FILE_PATH=build/libs/*.jar 
