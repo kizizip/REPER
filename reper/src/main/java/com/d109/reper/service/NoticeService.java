@@ -4,6 +4,8 @@ import com.d109.reper.controller.NoticeController;
 import com.d109.reper.domain.Notice;
 import com.d109.reper.domain.Store;
 import com.d109.reper.domain.User;
+import com.d109.reper.elasticsearch.NoticeDocument;
+import com.d109.reper.elasticsearch.NoticeSearchRepository;
 import com.d109.reper.repository.NoticeRepository;
 import com.d109.reper.repository.StoreEmployeeRepository;
 import com.d109.reper.repository.StoreRepository;
@@ -29,6 +31,8 @@ public class NoticeService {
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final StoreEmployeeRepository storeEmployeeRepository;
+    private final NoticeSearchRepository noticeSearchRepository;
+
 
     // 공지 등록
     @Transactional
@@ -60,6 +64,16 @@ public class NoticeService {
         notice.setTitle(title);
         notice.setContent(content);
         Notice saveNotice = noticeRepository.save(notice);
+
+        // 엘라스틱서치에 인덱싱
+        NoticeDocument noticeDocument = new NoticeDocument();
+        noticeDocument.setNoticeId(saveNotice.getNoticeId());
+        noticeDocument.setStoreId(storeId);
+        noticeDocument.setTitle(title);
+        noticeDocument.setContent(content);
+        noticeDocument.setUpdatedAt(saveNotice.getUpdatedAt());
+
+        noticeSearchRepository.save(noticeDocument);
 
         if (saveNotice == null) {
             throw new RuntimeException("Notice 등록 실패: save() 결과가 null입니다.");
@@ -217,6 +231,32 @@ public class NoticeService {
         }
         noticeRepository.delete(notice);
     }
+
+
+    // Elasticsearch에서 공지 제목 검색
+    public List<NoticeDocument> searchNotices(Long storeId, String keyword) {
+        return noticeSearchRepository.findByStoreIdAndTitleContainingOrderByUpdatedAtDesc(storeId, keyword);
+    }
+
+
+    // Elasticsearch test위한 더미 데이터 동기화용
+    @Transactional
+    public void syncNoticesToElasticsearch() {
+        List<Notice> allNotices = noticeRepository.findAll();  // MySQL에서 모든 공지 가져오기
+
+        for (Notice notice : allNotices) {
+            NoticeDocument noticeDocument = new NoticeDocument();
+            noticeDocument.setNoticeId(notice.getNoticeId());
+            noticeDocument.setStoreId(notice.getStore().getStoreId());
+            noticeDocument.setUserId(notice.getUser().getUserId());
+            noticeDocument.setTitle(notice.getTitle());
+            noticeDocument.setContent(notice.getContent());
+            noticeDocument.setUpdatedAt(notice.getUpdatedAt());
+
+            noticeSearchRepository.save(noticeDocument);
+        }
+    }
+
 
     // 사용자가 해당 매장과 관련이 있는지 검증 로직
     private boolean isAuthorizedUser(Store store, User user) {

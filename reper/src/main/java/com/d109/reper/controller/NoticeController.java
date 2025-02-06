@@ -1,11 +1,13 @@
 package com.d109.reper.controller;
 
 import com.d109.reper.domain.Notice;
+import com.d109.reper.elasticsearch.NoticeDocument;
 import com.d109.reper.service.NoticeService;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ import java.util.Map;
 public class NoticeController {
 
     private final NoticeService noticeService;
+
 
     @PostMapping
     @Operation(summary = "{storeId}에 해당하는 공지를 생성합니다.")
@@ -99,6 +102,16 @@ public class NoticeController {
         System.out.println("공지 삭제 완료");
 
         return ResponseEntity.noContent().build();
+    }
+
+
+    // 공지 제목 검색 API
+    @GetMapping("/search")
+    @Operation(summary = "{storeId}에 해당하는 공지를 검색합니다.")
+    public List<NoticeDocument> searchNotices(
+            @PathVariable Long storeId,
+            @RequestParam("noticeTitle") String keyword) {
+        return noticeService.searchNotices(storeId,keyword);
     }
 
 
