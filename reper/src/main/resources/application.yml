@@ -15,13 +15,14 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
 
   elasticsearch:
-    uris: https://localhost:9200  # HTTPS 사용 (보안 적용됨)
+    uris: http://localhost:9200  # (보안 적용될땐 https로 바꾸기)
     username: elastic
     password: ${ELASTIC_PASSWORD}
     ssl:
-      enabled: true
-      certificate: classpath:certs/elasticsearch.crt
-      key: classpath:certs/elasticsearch.key
+      enabled: false
+#      ca-certificate: classpath:docker/certs/ca.crt
+#      key: classpath:certs/elasticsearch.key
+#      certificate: classpath:certs/elasticsearch.crt
 
 logging.level:
   org.hibernate.SQL: debug # (개발 환경) SQL 로그 출력

@@ -5,13 +5,28 @@ services:
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=true
-      - ELASTIC_PASSWORD=ssafyd109  # 관리자 비밀번호 설정 (필수)
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false  # TLS(SSL) 활성화
+#      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/instance/instance.key
+#      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/instance/instance.crt
+#      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca.crt
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+#    env_file:
+#      - .env
     ports:
       - "9200:9200"
 #      - "9300:9300"  # 노드 간 통신 (보통 필요 없음)
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+#      - ./certs:/usr/share/elasticsearch/config/certs
+      - ./docker/logs:/usr/share/elasticsearch/logs
     networks:
       - elastic_network
+
 networks:
   elastic_network:
     driver: bridge
+
+volumes:
+  elastic_data:
+    driver: local
