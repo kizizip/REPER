@@ -4,7 +4,7 @@ spring:
   config:
     import: optional:application-secrets.yml
   datasource:
-    url: jdbc:mysql://i12d109.p.ssafy.io/reper?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://i12d109.p.ssafy.io:13790/reper?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ssafy
     password: jeongeoneya0831!
     driver-class-name: com.mysql.cj.jdbc.Driver
