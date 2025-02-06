@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: jeongeoneya0831!
+      MYSQL_DATABASE: reper
+      MYSQL_USER: ssafy
+      MYSQL_PASSWORD: aoreoya5!^^
+    ports:
+      - "75913:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql  # MySQL 데이터 저장
+      - mysql_config:/etc/mysql/conf.d  # MySQL 설정 파일 저장
+    networks:
+      - app-network
+
+  app:
+    image: reper-server
+    container_name: reper-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mydatabase?serverTimezone=UTC&useSSL=false
+      SPRING_DATASOURCE_USERNAME: ssafy
+      SPRING_DATASOURCE_PASSWORD: aoreoya5!^^
+    ports:
+      - "48620:8080"
+    depends_on:
+      - mysql
+    volumes:
+      - app_logs:/app/logs  # Spring Boot 로그 저장
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:  # MySQL 데이터 저장 볼륨
+  mysql_config:  # MySQL 설정 파일 저장 볼륨
+  app_logs:  # Spring Boot 애플리케이션 로그 저장 볼륨
+
+networks:
+  app-network:
