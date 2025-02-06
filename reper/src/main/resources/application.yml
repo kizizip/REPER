@@ -16,8 +16,11 @@ spring:
 
   elasticsearch:
     uris: http://localhost:9200  # (보안 적용될땐 https로 바꾸기)
-    username: elastic
-    password: ${ELASTIC_PASSWORD}
+    socket-timeout: 60s
+    username: ""  # 보안 비활성화에선 빈 값
+    password: ""
+#    username: elastic
+#    password: ${ELASTIC_PASSWORD}
     ssl:
       enabled: false
 #      ca-certificate: classpath:docker/certs/ca.crt
