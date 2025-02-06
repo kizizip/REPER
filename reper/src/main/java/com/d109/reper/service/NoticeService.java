@@ -29,6 +29,7 @@ public class NoticeService {
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final StoreEmployeeRepository storeEmployeeRepository;
+
     // 공지 등록
     @Transactional
     public Notice saveNotice(Long storeId, Long userId, String title, String content) {
@@ -122,6 +123,7 @@ public class NoticeService {
                         notice.getNoticeId(),
                         notice.getTitle(),
                         notice.getContent(),
+                        notice.getUpdatedAt(),
                         formatTimeAgo(notice.getUpdatedAt(), now) // timeAgo 필드 추가
                 ))
                 .collect(Collectors.toList());

@@ -111,7 +111,7 @@ public class NoticeController {
         private Long storeId;
         private String title;
         private String content;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd' 'HH:mm")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd' 'HH:mm")
         private LocalDateTime updatedAt;
 
         public ResponseNoticeSave(String message, Long noticeId, Long storeId, String title, String content, LocalDateTime updatedAt) {
@@ -131,7 +131,7 @@ public class NoticeController {
         private Long noticeId;
         private String title;
         private String content;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd' 'HH:mm")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd' 'HH:mm")
         private LocalDateTime updatedAt;
 
         public ResponseNoticeOne(Long noticeId, String title, String content, LocalDateTime updatedAt) {
@@ -158,12 +158,15 @@ public class NoticeController {
             private Long noticeId;
             private String title;
             private String content;
+            @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
+            private LocalDateTime updatedAt;
             private String timgeAgo;
 
-            public NoticeResponse(Long noticeId, String title, String content, String timgeAgo) {
+            public NoticeResponse(Long noticeId, String title, String content, LocalDateTime updatedAt, String timgeAgo) {
                 this.noticeId = noticeId;
                 this.title = title;
                 this.content = content;
+                this.updatedAt = updatedAt;
                 this.timgeAgo = timgeAgo;
             }
         }
