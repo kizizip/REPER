@@ -3,7 +3,11 @@ package com.d109.reper.controller;
 import com.d109.reper.domain.Recipe;
 import com.d109.reper.domain.Store;
 import com.d109.reper.repository.StoreRepository;
+import com.d109.reper.response.RecipeResponseDto;
 import com.d109.reper.service.RecipeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
@@ -30,8 +34,33 @@ public class RecipeController {
 
     //레시피 파일 업로드 + python 서버로 전송
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "레시피 파일 업로드",
+            description = """
+                    레시피 파일 업로드 -> python 서버로 전송 -> 레시피 저장((POST)/stores/{storeId}/recipes)까지 연결됨
+                    그냥 이것만 실행하시면 저장까지 가능.
+                    """
+            )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The recipe has been successfully saved."),
+            @ApiResponse(responseCode = "400", description = "Required part 'file' is not present."),
+            @ApiResponse(responseCode = "400", description = "Store not found for the given storeId."),
+            @ApiResponse(responseCode = "500", description = "Error processing the file."),
+            @ApiResponse(responseCode = "500", description = "Python server response error.")
+    })
     public ResponseEntity<String> uploadRecipeFile(@RequestParam("file") MultipartFile file,
                                                    @RequestParam("storeId") Long storeId) {
+
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Required part 'file' is not present.");
+        }
+
+        boolean storeExists = storeRepository.existsById(storeId);
+        if (!storeExists) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Store not found for the given storeId.");
+        }
+
         try {
             // http 요청 헤더 설정
             HttpHeaders headers = new HttpHeaders();
@@ -55,23 +84,26 @@ public class RecipeController {
 
             // python 서버에서 받은 응답 반환
             if (response.getStatusCode() == HttpStatus.OK) {
-                return ResponseEntity.ok(response.getBody());
+                return ResponseEntity.ok().body("The recipe has been successfully saved.");
             } else {
-                return ResponseEntity.status(response.getStatusCode()).body("Python 서버 응답 오류");
+                return ResponseEntity.status(response.getStatusCode()).body("Python server response error.");
             }
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 처리 중 오류 발생");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the file.");
         }
     }
+
 
     // 레시피 저장
     @PostMapping("/stores/{storeId}/recipes")
     public ResponseEntity<Void> createRecipes(@PathVariable Long storeId,
                                               @RequestBody List<Recipe> recipes) {
-        Store store = storeRepository.findById(storeId).orElseThrow(); // Store 조회
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new IllegalArgumentException("Store not found for the given storeId.")); // Store 조회
+
         for (Recipe recipe : recipes) {
             recipe.setStore(store); // storeId를 Recipe에 연결하여 특정 매장에 속하도록 설정
         }
+
         recipeService.saveRecipes(recipes);
         return ResponseEntity.ok().build();
     }
@@ -79,21 +111,44 @@ public class RecipeController {
 
     //레시피 조회(가게별)
     @GetMapping("/stores/{storeId}/recipes")
-    public ResponseEntity<List<Recipe>> getRecipeByStore(
-            @PathVariable Long storeId) {
-        return ResponseEntity.ok(recipeService.findRecipesByStore(storeId));
+    @Operation(summary = "레시피 조회(가게별)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "json"),
+            @ApiResponse(responseCode = "404", description = "Store not found.")
+    })
+    public ResponseEntity<List<RecipeResponseDto>> getRecipeByStore(@PathVariable Long storeId) {
+        List<Recipe> recipes = recipeService.findRecipesByStore(storeId);
+
+        List<RecipeResponseDto> responses = recipes.stream()
+                .map(RecipeResponseDto::new)
+                .toList();
+
+        return ResponseEntity.ok(responses);
     }
+
 
     //레시피 조회(단건)
     @GetMapping("/recipes/{recipeId}")
-    public ResponseEntity<Recipe> getRecipe(@PathVariable Long recipeId) {
-        return ResponseEntity.ok(recipeService.findRecipe(recipeId));
+    @Operation(summary = "레시피 조회(단건)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "json"),
+            @ApiResponse(responseCode = "404", description = "Recipe not found.")
+    })
+    public ResponseEntity<RecipeResponseDto> getRecipe(@PathVariable Long recipeId) {
+        Recipe recipe = recipeService.findRecipe(recipeId);
+        return ResponseEntity.ok(new RecipeResponseDto(recipe));
     }
+
 
     //레시피 삭제(단건)
     @DeleteMapping("/recipes/{recipeId}")
-    public ResponseEntity<Void> deleteRecipe(@PathVariable Long recipeId) {
+    @Operation(summary = "레시피 삭제(단건)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Recipe successfully deleted."),
+            @ApiResponse(responseCode = "404", description = "Recipe not found.")
+    })
+    public ResponseEntity<String> deleteRecipe(@PathVariable Long recipeId) {
         recipeService.deleteRecipe(recipeId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body("Recipe successfully deleted.");
     }
 }
