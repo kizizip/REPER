@@ -9,13 +9,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.TextView
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
-import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.databinding.FragmentBossBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.AccessAdapter
@@ -35,6 +36,11 @@ class BossFragment : Fragment() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+
+    }
 
 
     override fun onCreateView(
@@ -43,11 +49,11 @@ class BossFragment : Fragment() {
     ): View? {
         _binding = FragmentBossBinding.inflate(inflater, container, false)
         return binding.root
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         (activity as MainActivity).hideBottomNavigation()
         initAdapter()
         moveFragment()
@@ -129,8 +135,9 @@ class BossFragment : Fragment() {
 
 
     private fun moveFragment() {
-        binding.bossFgNoticeWrite.setOnClickListener {
-            findNavController().navigate(R.id.writeNotiFragment)
+        binding.bossFgStoreAdd.setOnClickListener {
+            findNavController().navigate(R.id.storeManage)
+
         }
 
 
@@ -144,7 +151,7 @@ class BossFragment : Fragment() {
 
         }
 
-        binding.recipeFgBackIcon.setOnClickListener {
+        binding.storeFgBackIcon.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
     }
@@ -173,6 +180,9 @@ class BossFragment : Fragment() {
         }
         dialog.show()
     }
+
+
+
 
 
 }

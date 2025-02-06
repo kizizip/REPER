@@ -1,28 +1,17 @@
 package com.ssafy.reper.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModel
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.ActivityMainBinding
-import com.ssafy.reper.ui.home.HomeFragment
-import com.ssafy.reper.ui.mypage.MyPageFragment
-import com.ssafy.reper.ui.order.OrderFragment
-import com.ssafy.reper.ui.recipe.AllRecipeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ssafy.reper.ui.boss.NoticeViewModel
-import kotlinx.coroutines.flow.count
+import com.ssafy.reper.ui.boss.BossViewModel
 
 private const val TAG = "MainActivity_싸피"
 
@@ -31,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장
     private val noticeViewModel: NoticeViewModel by viewModels()
+    private val bossViewModel: BossViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 

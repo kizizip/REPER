@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.databinding.ItemEmployeeBinding
 
 class AccessAdapter(

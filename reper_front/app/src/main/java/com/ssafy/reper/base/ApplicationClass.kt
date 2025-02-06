@@ -10,7 +10,11 @@ import java.util.concurrent.TimeUnit
 class ApplicationClass : Application() {
     companion object {
         // ipconfig를 통해 ip확인하기
-        const val SERVER_URL = "http://192.168.1.181:8080/api/"
+
+        //집
+        //const val SERVER_URL = "http://192.168.1.181:8080/api/"
+        //강의장
+        const val SERVER_URL = "http://192.168.100.102:8080/api/"
 
         // retrofit을 lazy로 변경하여 안전하게 초기화
         val retrofit: Retrofit by lazy {

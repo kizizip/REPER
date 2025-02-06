@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Notice
+import com.ssafy.reper.data.dto.NoticeRequest
 import com.ssafy.reper.data.remote.RetrofitUtil
 import kotlinx.coroutines.launch
 
@@ -17,10 +18,6 @@ class NoticeViewModel : ViewModel() {
     private val _noticeList = MutableLiveData<List<Notice>>()
     val noticeList: LiveData<List<Notice>> get() = _noticeList
 
-    fun setNoticeList(notiList : List<Notice>) {
-        _noticeList.value = notiList
-    }
-
 
     //단건공지
     private val _clickNotice = MutableLiveData<Notice?>()
@@ -30,6 +27,7 @@ class NoticeViewModel : ViewModel() {
     fun setClickNotice(noti: Notice?) {
         _clickNotice.value = noti
     }
+
 
     fun init(storeId: Int, userId: Int){
         getAllNotice(storeId, userId)
@@ -43,7 +41,7 @@ class NoticeViewModel : ViewModel() {
                 _noticeList.postValue(response.get(0).notices)
             } catch (e: Exception) {
                 Log.d(TAG, "getAllNotice: ${e.message}")
-                Log.d(TAG, "getNotice: 공지 리스트 업로드 실패")
+                Log.d(TAG, "getAllNotice: 공지 리스트 업로드 실패")
             }
         }
     }
@@ -54,6 +52,7 @@ class NoticeViewModel : ViewModel() {
             try {
                 val response = RetrofitUtil.noticeService.getNotice(storeId,noticeId, userId)
                 _clickNotice.postValue(response)
+                getAllNotice(storeId, userId)
             } catch (e: Exception) {
                 Log.d(TAG, "getNotice: 공지 조회 실패")
             }
@@ -64,9 +63,11 @@ class NoticeViewModel : ViewModel() {
     fun createNotice(storeId: Int, userId: Int, title: String, content: String) {
         viewModelScope.launch {
             try {
-               RetrofitUtil.noticeService.createNotice(storeId, userId, title, content)
+               RetrofitUtil.noticeService.createNotice(storeId,  NoticeRequest(userId, title, content))
+                getAllNotice(storeId, userId)
             } catch (e: Exception) {
                 Log.d(TAG, "getNotice: 공지 생성 실패")
+                Log.d(TAG, "createNotice: ${e.message}")
             }
         }
     }
@@ -75,21 +76,25 @@ class NoticeViewModel : ViewModel() {
     fun modifyNotice(storeId: Int, userId: Int, noticeId:Int, title: String, content: String) {
         viewModelScope.launch {
             try {
-                RetrofitUtil.noticeService.modifyNotice(storeId, noticeId, userId, title, content)
+                RetrofitUtil.noticeService.modifyNotice(storeId, noticeId,  NoticeRequest(userId,title, content))
+                getAllNotice(storeId, userId)
             } catch (e: Exception) {
                 Log.d(TAG, "getNotice: 공지 수정 실패")
+                Log.d(TAG, "modifyNotice: ${e.message}")
             }
         }
     }
 
 
 
-    fun deleteNotice(storeId: Int, userId: Int, noticeId:Int) {
+    fun deleteNotice(storeId: Int, noticeId:Int, requestBody: Map<String, Int>) {
         viewModelScope.launch {
             try {
-                RetrofitUtil.noticeService.deleteNotice(storeId, noticeId, userId)
+                RetrofitUtil.noticeService.deleteNotice(storeId, noticeId, requestBody )
+                getAllNotice(storeId, 1)
             } catch (e: Exception) {
-                Log.d(TAG, "getNotice: 공지 수정 실패")
+                Log.d(TAG, "getNotice: 공지 삭제 실패")
+                Log.d(TAG, "deleteNotice: ${e.message}")
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.ssafy.reper.ui.boss
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +17,7 @@ import com.ssafy.reper.databinding.FragmentNoticeManageBinding
 import com.ssafy.reper.ui.boss.adpater.NotiAdapter
 import com.ssafy.reper.ui.MainActivity
 
-
+private const val TAG = "NoticeManageFragment"
 class NoticeManageFragment : Fragment() {
     private var _binding: FragmentNoticeManageBinding? = null
     private val binding get() = _binding!!
@@ -36,13 +37,16 @@ class NoticeManageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         noticeViewModel.init(1,1)
         initNotiAdater()
         initSpinner()
 
         binding.notiFgBackIcon.setOnClickListener {
             parentFragmentManager.popBackStack()
+        }
+
+        binding.addBtn.setOnClickListener {
+            findNavController().navigate(R.id.writeNotiFragment)
         }
     }
 
@@ -89,8 +93,12 @@ class NoticeManageFragment : Fragment() {
         binding.notiList.layoutManager = LinearLayoutManager(requireContext())
         val notiAdapter = NotiAdapter( emptyList() , object : NotiAdapter.ItemClickListener {
             override fun onClick(position: Int) {
-                findNavController().navigate(R.id.writeNotiFragment)
-                Toast.makeText(requireContext(), "공지 $position 클릭됨", Toast.LENGTH_SHORT).show()
+                val noticeList = noticeViewModel.noticeList.value // 현재 공지 리스트 가져오기
+
+                if (!noticeList.isNullOrEmpty() && position in noticeList.indices) {
+                    noticeViewModel.setClickNotice(noticeList[position])
+                    findNavController().navigate(R.id.writeNotiFragment)
+                }
             }
         })
 
@@ -100,7 +108,6 @@ class NoticeManageFragment : Fragment() {
             notiAdapter.noticeList = newList
             notiAdapter.notifyDataSetChanged()
         })
-
 
     }
 

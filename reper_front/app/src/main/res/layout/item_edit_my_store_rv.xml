@@ -18,8 +18,8 @@
         android:paddingVertical="18dp">
 
         <TextView
-            android:id="@+id/itemNotiTitle"
-            android:text="🔥내용🔥 멋쟁이 우리팀들 화이팅!!"
+            android:id="@+id/item_store_name"
+            android:text="구미인동점"
             android:textSize="16sp"
             android:fontFamily="@font/pretendard_regular"
             android:layout_width="wrap_content"
@@ -29,10 +29,10 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/item_noti_time"
-            android:text="1분전"
-            android:textSize="12sp"
-            android:textColor="@color/lightgray"
+            android:id="@+id/delete"
+            android:text="삭제"
+            android:textSize="16sp"
+            android:textColor="@color/orange"
             android:fontFamily="@font/pretendard_regular"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
