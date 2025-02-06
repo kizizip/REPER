@@ -20,7 +20,7 @@ services:
     image: reper-server
     container_name: reper-server
     build:
-      context: .
+      context: ./reper
       dockerfile: Dockerfile
     restart: always
     environment:
