@@ -4,7 +4,7 @@ spring:
   config:
     import: optional:application-secrets.yml
   datasource:
-    url: jdbc:mysql://mysql:75913/reper?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://mysql:13790/reper?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
