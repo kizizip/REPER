@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: jeongeoneya0831!
       MYSQL_DATABASE: reper
       MYSQL_USER: ssafy
-      MYSQL_PASSWORD: aoreoya5!^^
+      MYSQL_PASSWORD: jeongeoneya0831!
     ports:
       - "13790:3306"
     volumes:
@@ -28,7 +28,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mydatabase?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ssafy
-      SPRING_DATASOURCE_PASSWORD: aoreoya5!^^
+      SPRING_DATASOURCE_PASSWORD: jeongeoneya0831!
     ports:
       - "48620:8080"
     depends_on:
