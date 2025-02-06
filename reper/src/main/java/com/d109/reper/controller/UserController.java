@@ -3,6 +3,7 @@ package com.d109.reper.controller;
 import com.d109.reper.domain.User;
 import com.d109.reper.domain.UserRole;
 import com.d109.reper.service.UserService;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class UserController {
 
     //회원가입
     @PostMapping
-    @Operation(summary = "사용자 정보를 추가합니다. 성공하면 true를 리턴합니다. ", description = "모든 정보를 입력해야 회원가입이 가능합니다.")
+    @Operation(summary = "사용자 정보를 추가합니다. 성공하면 저장된 userId를 리턴합니다. ", description = "모든 정보를 입력해야 회원가입이 가능합니다.")
     public ResponseEntity<?> join(@RequestBody JoinRequest joinRequest) {
         log.info("insertMember::: {}", joinRequest);
 
@@ -260,6 +261,7 @@ public class UserController {
         }
 
         // UserRole Enum으로 변환
+        @JsonIgnore
         public UserRole getRoleEnum() {
             try {
                 return UserRole.valueOf(role.toUpperCase());
