@@ -13,7 +13,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql  # MySQL 데이터 저장
       - mysql_config:/etc/mysql/conf.d  # MySQL 설정 파일 저장
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:rw
     networks:
       - app-network
 
