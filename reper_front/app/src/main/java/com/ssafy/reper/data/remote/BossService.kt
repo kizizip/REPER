@@ -14,19 +14,22 @@ interface BossService {
     @GET("stores/owner/{userId}")
     suspend fun findBossStore(@Path("userId") userId :Int): List<BossStore>
 
-    @GET("stores/{storeId}/employees")
-    suspend fun allEmployee(@Path("storeId") storeId: Int): List<Employee>
-
-//    @DELETE("stores/{storeId}")
-//    suspend fun updateStore(@Path("storeId") storeId: Int)
-//
-//    @POST("stores")
-//    suspend fun addStore(@Body store : RequestStore)
-
-    @POST("stores/{storeId}/empployees/{userId}/approve")
-    suspend fun accessEmployee(@Path("storeId") storeId : Int, @Path ("userId") userUd : Int) : Boolean
+    @POST("stores")
+    suspend fun addStore(@Body store : RequestStore)
 
     @DELETE("stores/{storeId}/employees/{userId}")
     suspend fun deleteEmployee(@Path("storeId") storeId: Int, @Path("userId") userId: Int)
 
 }
+
+//    @GET("stores/{storeId}/employees")
+//    suspend fun allEmployee(@Path("storeId") storeId: Int): List<Employee>
+
+//    @DELETE("stores/{storeId}")
+//    suspend fun updateStore(@Path("storeId") storeId: Int)
+//
+//
+//    @POST("stores/{storeId}/empployees/{userId}/approve")
+//    suspend fun accessEmployee(@Path("storeId") storeId : Int, @Path ("userId") userUd : Int) : Boolean
+
+

@@ -12,9 +12,9 @@ class ApplicationClass : Application() {
         // ipconfig를 통해 ip확인하기
 
         //집
-        //const val SERVER_URL = "http://192.168.1.181:8080/api/"
+        const val SERVER_URL = "http://192.168.1.181:8080/api/"
         //강의장
-        const val SERVER_URL = "http://192.168.100.102:8080/api/"
+        //const val SERVER_URL = "http://192.168.100.102:8080/api/"
 
         // retrofit을 lazy로 변경하여 안전하게 초기화
         val retrofit: Retrofit by lazy {

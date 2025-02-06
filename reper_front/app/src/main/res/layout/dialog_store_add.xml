@@ -18,24 +18,7 @@
         android:inputType="text"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <ScrollView
-        android:id="@+id/store_RV"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_marginTop="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeAddET">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/request_access_d_rv"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
-    </ScrollView>
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -46,7 +29,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/store_RV">
+        app:layout_constraintTop_toBottomOf="@+id/storeAddET">
 
 
         <TextView

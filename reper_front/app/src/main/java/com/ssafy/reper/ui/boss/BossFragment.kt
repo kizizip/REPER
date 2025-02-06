@@ -14,20 +14,23 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.TextView
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentBossBinding
 import com.ssafy.reper.ui.MainActivity
-import com.ssafy.reper.ui.boss.adpater.AccessAdapter
+//import com.ssafy.reper.ui.boss.adpater.AccessAdapter
 
 class BossFragment : Fragment() {
     private var _binding: FragmentBossBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var accessAdapter: AccessAdapter
-    private lateinit var nonAccessAdapter: AccessAdapter
+//    private lateinit var accessAdapter: AccessAdapter
+//    private lateinit var nonAccessAdapter: AccessAdapter
     private lateinit var mainActivity: MainActivity
+    private val bossViewModel: BossViewModel by activityViewModels()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -35,13 +38,6 @@ class BossFragment : Fragment() {
             mainActivity = context
         }
     }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-
-    }
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -69,53 +65,48 @@ class BossFragment : Fragment() {
 
     private fun initAdapter() {
 
-        //나중에 라이브 데이터를 사용할 예정인 데이터 리스트....
-        val accessEmployees = mutableListOf(
-            Employee(name = "김정언", access = true),
-            Employee(name = "심근원", access = true),
-            Employee(name = "안주현", access = true)
-        )
+//        accessAdapter = AccessAdapter(accessEmployees, object : AccessAdapter.ItemClickListener {
+//            override fun onClick(position: Int) {
+//                //여기는 삭제 버튼뿐
+//                showDialog(accessEmployees[position].name)
+//            }
+//        })
+//
+//        nonAccessAdapter = AccessAdapter(nonAccessEmployees, object : AccessAdapter.ItemClickListener {
+//            override fun onClick(position: Int) {
+//                    //여기는 수락, 거절 버튼 두개있음
+//            }
+//        })
 
-        val nonAccessEmployees = mutableListOf(
-            Employee(name = "박재영", access = false),
-            Employee(name = "임지혜", access = false),
-            Employee(name = "이서현", access = false)
-        )
-
-        accessAdapter = AccessAdapter(accessEmployees, object : AccessAdapter.ItemClickListener {
-            override fun onClick(position: Int) {
-                //여기는 삭제 버튼뿐
-                showDialog(accessEmployees[position].name)
-            }
-        })
-
-        nonAccessAdapter = AccessAdapter(nonAccessEmployees, object : AccessAdapter.ItemClickListener {
-            override fun onClick(position: Int) {
-                    //여기는 수락, 거절 버튼 두개있음
-            }
-        })
-
-        binding.employeeList.layoutManager = LinearLayoutManager(requireContext())
-        binding.employeeList.adapter = accessAdapter
-
-        binding.accessFalseList.layoutManager = LinearLayoutManager(requireContext())
-        binding.accessFalseList.adapter = nonAccessAdapter
+//        binding.employeeList.layoutManager = LinearLayoutManager(requireContext())
+//        binding.employeeList.adapter = accessAdapter
+//
+//        binding.accessFalseList.layoutManager = LinearLayoutManager(requireContext())
+//        binding.accessFalseList.adapter = nonAccessAdapter
     }
 
     private fun initSpinner() {
         val spinner = binding.bossFgStoreSpiner
-        val userTypes = arrayOf("메가커피 구미 인동점", "메가커피 구미 진평점")
 
-        val adapter = ArrayAdapter(
-            requireContext(),
-            R.layout.order_spinner_item,
-            userTypes
-        ).apply {
-            setDropDownViewResource(R.layout.boss_spinner_item)
+        // 스토어 리스트 관찰 후 업데이트
+        bossViewModel.myStoreList.observe(viewLifecycleOwner) { storeList ->
+            val storeNames = storeList.map { it.storeName }
+
+            val adapter = ArrayAdapter(
+                requireContext(),
+                R.layout.order_spinner_item,
+                storeNames
+            ).apply {
+                setDropDownViewResource(R.layout.boss_spinner_item)
+            }
+
+            spinner.adapter = adapter
         }
 
-        spinner.adapter = adapter
+        // 데이터 요청
+        bossViewModel.getStoreList(1)
 
+        // 스피너 선택 이벤트 설정
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -123,8 +114,9 @@ class BossFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
-                val selectedItem = userTypes[position]
+                val selectedItem = spinner.adapter.getItem(position) as String
                 // 선택된 항목 처리
+                //여기서 공유된 데이터의 현재 가게 Id를 바꿔주어야 다른 화면들도 갱신될것!
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -132,6 +124,7 @@ class BossFragment : Fragment() {
             }
         }
     }
+
 
 
     private fun moveFragment() {

@@ -31,10 +31,14 @@ class WriteNotiFragment : Fragment() {
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        (activity as MainActivity).hideBottomNavigation()
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as MainActivity).hideBottomNavigation()
 
         //고객정보 사장인지 지원인지 따라 분기처리 필요 우선은 사장이라 생각하고 만듭니당
         if (noticeViewModel.clickNotice.value != null) {
@@ -83,7 +87,7 @@ class WriteNotiFragment : Fragment() {
 
         binding.notiWriteFgContentET.visibility = View.GONE
         binding.notiWriteFgTitleET.visibility = View.GONE
-        binding.notiWriteFgSaveBtn.visibility = View.GONE
+        binding.notiWriteFgSaveBtn.visibility = View.INVISIBLE
 
         binding.notiWriteFgTitleTV.visibility = View.VISIBLE
         binding.notiWriteFgContentTV.visibility = View.VISIBLE
@@ -99,6 +103,7 @@ class WriteNotiFragment : Fragment() {
         binding.notiWriteFgContentET.visibility = View.VISIBLE
         binding.notiWriteFgTitleET.visibility = View.VISIBLE
         binding.notiWriteFgSaveBtn.visibility = View.VISIBLE
+
 
         binding.notiWriteFgTitleTV.visibility = View.GONE
         binding.notiWriteFgContentTV.visibility = View.GONE

@@ -12,17 +12,23 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.TextView
+import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
+import com.ssafy.reper.databinding.FragmentBossBinding
+import com.ssafy.reper.databinding.FragmentStoreManageBinding
 import com.ssafy.reper.ui.MainActivity
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+import com.ssafy.reper.ui.boss.adpater.StoreAdapter
 
 
 class StoreManageFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
+    private var _binding: FragmentStoreManageBinding? = null
+    private val binding get() = _binding!!
+
+    private lateinit var storeAdapter: StoreAdapter
+    private val bossViewModel: BossViewModel by activityViewModels()
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -36,7 +42,25 @@ class StoreManageFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_store_manage, container, false)
+        _binding = FragmentStoreManageBinding.inflate(inflater, container, false)
+
+        return binding.root
+
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.storeFgBackIcon.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        binding.storeFgAddTv.setOnClickListener {
+            showStoreAddDialog()
+        }
+
+        initAdapter()
+
     }
 
 
@@ -59,7 +83,8 @@ class StoreManageFragment : Fragment() {
                         dialog.dismiss()
                     }
                     dialog.findViewById<View>(R.id.store_add_btn_positive).setOnClickListener {
-                        //가게 추가 로직
+                        bossViewModel.addStore(editText.text.toString(),1)
+                        dialog.dismiss()
                     }
                 }
                 true
@@ -86,5 +111,45 @@ class StoreManageFragment : Fragment() {
         dialog.show()
     }
 
+
+    private fun initAdapter() {
+        var storeList = bossViewModel.myStoreList.value!!
+        storeAdapter = StoreAdapter(storeList
+            , object : StoreAdapter.ItemClickListener {
+            override fun onClick(position: Int) {
+                showDialog(storeList[position].storeName)
+            }
+        })
+
+
+        binding.storeFgRV.layoutManager = LinearLayoutManager(requireContext())
+        binding.storeFgRV.adapter = storeAdapter
+
+    }
+
+
+    private fun showDialog(storeName: String) {
+        val dialog = Dialog(mainActivity)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setContentView(R.layout.dialog_delete)
+
+        // 텍스트를 변경하려는 TextView 찾기
+        val nameTextView = dialog.findViewById<TextView>(R.id.dialog_delete_bold_tv)
+        val middleTV = dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv)
+
+        // 텍스트 변경
+        nameTextView.text = "${storeName}"
+        middleTV.text = "의 정보를"
+
+
+        dialog.findViewById<View>(R.id.dialog_delete_cancle_btn).setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
+            bossViewModel.deleteStore(1,1)
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
 
 }

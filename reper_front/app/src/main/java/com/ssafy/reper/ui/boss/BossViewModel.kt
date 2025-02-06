@@ -1,18 +1,29 @@
 package com.ssafy.reper.ui.boss
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.ssafy.reper.data.dto.BossStore
 import com.ssafy.reper.data.dto.Employee
+import com.ssafy.reper.data.dto.Notice
+import com.ssafy.reper.data.dto.RequestStore
 import com.ssafy.reper.data.dto.StoreNoticeResponse
+import com.ssafy.reper.data.remote.RetrofitUtil
+import kotlinx.coroutines.launch
 
 private const val TAG = "BossViewModel"
 
 class BossViewModel: ViewModel() {
 
     //스토어 정보 리스트
-    private val _myStoreList = MutableLiveData<List<StoreNoticeResponse>>()
-    val myStoreList: MutableLiveData<List<StoreNoticeResponse>> get() = _myStoreList
+    private val _myStoreList = MutableLiveData<List<BossStore>>()
+    val myStoreList: MutableLiveData<List<BossStore>> get() = _myStoreList
+
+    fun setMyStoreList(list: List<BossStore>) {
+        _myStoreList.value = list
+    }
 
     //승인된 직원 리스트
     private val _accessList = MutableLiveData<List<Employee>>()
@@ -24,7 +35,49 @@ class BossViewModel: ViewModel() {
 
 
     fun getAllEmployee(storeId: Int){
-        
+
+
+    }
+
+    fun getStoreList(userId: Int){
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.bossService.findBossStore(userId)
+            }.onSuccess {
+                setMyStoreList(it)
+                Log.d(TAG, "getStoreList: ${it}")
+            }.onFailure {
+                Log.d(TAG, "getStoreList: ${it.message}")
+            }
+
+        }
+
+    }
+
+
+    fun addStore(storeName: String, userId: Int){
+        viewModelScope.launch {
+         runCatching {
+             RetrofitUtil.bossService.addStore(RequestStore(userId, storeName))
+         }.onSuccess {
+             getStoreList(userId)
+         }.onFailure {
+             Log.d(TAG, "addStore: ${it.message}")
+         }
+        }
+    }
+
+    fun deleteStore(storeId: Int, userId: Int){
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.bossService.deleteEmployee(storeId,userId)
+            }.onSuccess {
+                getStoreList(userId)
+            }.onFailure {
+                Log.d(TAG, "deleteStore: ${it.message}")
+            }
+        }
+
     }
 
 
