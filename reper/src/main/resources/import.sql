@@ -1,138 +1,3 @@
-drop database if exists reper;
-
--- 트랜잭션 설정 분리
-select @@global.transaction_isolation, @@transaction_isolation;
-set @@transaction_isolation="read-committed";
-
--- 데이터베이스 생성 및 사용
-create database reper;
-use reper;
-
-CREATE TABLE `orders` (
-    `order_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `order_date` TIMESTAMP NULL,
-    `store_id` INTEGER NOT NULL,
-    `is_completed` BOOLEAN NULL,
-    PRIMARY KEY (`order_id`)
-);
-
-CREATE TABLE `order_detail` (
-    `order_detail_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `recipe_id` INTEGER NOT NULL,
-    `order_id` INTEGER NOT NULL,
-    `quantity` INTEGER NULL,
-    `customer_request` TEXT NULL,
-    PRIMARY KEY (`order_detail_id`)
-);
-
-CREATE TABLE `ingredient` (
-    `ingredient_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `recipe_id` INTEGER NOT NULL,
-    `ingredient_name` VARCHAR(255) NULL,
-    PRIMARY KEY (`ingredient_id`)
-);
-
-CREATE TABLE `notice` (
-    `notice_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
-    `store_id` INTEGER NOT NULL,
-    `title` VARCHAR(255) NULL,
-    `content` TEXT NULL,
-    `updated_at` TIMESTAMP NULL,
-    PRIMARY KEY (`notice_id`)
-);
-
-CREATE TABLE `animation` (
-    `animation_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `keyword` VARCHAR(255) NULL,
-    `animation_url` VARCHAR(255) NULL,
-    PRIMARY KEY (`animation_id`)
-);
-
-CREATE TABLE `user` (
-    `user_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `email` VARCHAR(255) NULL,
-    `password` VARCHAR(255) NULL,
-    `username` VARCHAR(100) NULL,
-    `phone` VARCHAR(20) NULL,
-    `role` VARCHAR(50) NULL COMMENT 'OWNER, STAFF',
-    `created_at` TIMESTAMP NULL,
-    PRIMARY KEY (`user_id`)
-);
-
-CREATE TABLE `user_favorite_recipe` (
-    `favorite_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
-    `recipe_id` INTEGER NOT NULL,
-    PRIMARY KEY (`favorite_id`)
-);
-
-CREATE TABLE `recipe` (
-    `recipe_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `store_id` INTEGER NOT NULL,
-    `recipe_name` VARCHAR(255) NULL,
-    `category` VARCHAR(50) NULL COMMENT 'COFFEE, NON_COFFEE, ADE, TEA, SMOOTHIE, FRAPPE',
-    `type` VARCHAR(50) NULL COMMENT 'ICE, HOT, NONE',
-    `recipe_img` VARCHAR(255) NULL,
-    `created_at` TIMESTAMP NULL,
-    PRIMARY KEY (`recipe_id`)
-);
-
-CREATE TABLE `store` (
-    `store_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
-    `store_name` VARCHAR(255) NULL,
-    PRIMARY KEY (`store_id`)
-);
-
-CREATE TABLE `store_employee` (
-    `user_id` INTEGER NOT NULL,
-    `store_id` INTEGER NOT NULL,
-    `is_employed` BOOLEAN NULL,
-    PRIMARY KEY (`user_id`, `store_id`)
-);
-
-CREATE TABLE `recipe_step` (
-    `recipe_step_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `recipe_id` INTEGER NOT NULL,
-    `step_number` INTEGER NULL,
-    `instruction` TEXT NULL,
-    `animation_url` VARCHAR(255) NULL,
-    `created_at` TIMESTAMP NULL,
-    `updated_at` TIMESTAMP NULL,
-    PRIMARY KEY (`recipe_step_id`)
-);
-
-CREATE TABLE `attendance` (
-    `attendance_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
-    `store_id` INTEGER NOT NULL,
-    `check_in` TIMESTAMP NULL,
-    `check_out` TIMESTAMP NULL,
-    `date` DATE NULL,
-    `work_hours` FLOAT NULL,
-    `is_checked_in` BOOLEAN NULL,
-    PRIMARY KEY (`attendance_id`)
-);
-
--- 외래 키 추가
-ALTER TABLE `orders` ADD CONSTRAINT `FK_ORDERS_STORE` FOREIGN KEY (`store_id`) REFERENCES `store`(`store_id`);
-ALTER TABLE `order_detail` ADD CONSTRAINT `FK_ORDER_DETAIL_ORDER` FOREIGN KEY (`order_id`) REFERENCES `orders`(`order_id`);
-ALTER TABLE `order_detail` ADD CONSTRAINT `FK_ORDER_DETAIL_RECIPE` FOREIGN KEY (`recipe_id`) REFERENCES `recipe`(`recipe_id`);
-ALTER TABLE `ingredient` ADD CONSTRAINT `FK_INGREDIENT_RECIPE` FOREIGN KEY (`recipe_id`) REFERENCES `recipe`(`recipe_id`);
-ALTER TABLE `notice` ADD CONSTRAINT `FK_NOTICE_STORE` FOREIGN KEY (`store_id`) REFERENCES `store`(`store_id`);
-ALTER TABLE `notice` ADD CONSTRAINT `FK_NOTICE_USER` FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`);
-ALTER TABLE `user_favorite_recipe` ADD CONSTRAINT `FK_USER_FAVORITE_USER` FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`);
-ALTER TABLE `user_favorite_recipe` ADD CONSTRAINT `FK_USER_FAVORITE_RECIPE` FOREIGN KEY (`recipe_id`) REFERENCES `recipe`(`recipe_id`);
-ALTER TABLE `recipe` ADD CONSTRAINT `FK_RECIPE_STORE` FOREIGN KEY (`store_id`) REFERENCES `store`(`store_id`);
-ALTER TABLE `store` ADD CONSTRAINT `FK_STORE_USER` FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`);
-ALTER TABLE `store_employee` ADD CONSTRAINT `FK_STORE_EMPLOYEE_USER` FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`);
-ALTER TABLE `store_employee` ADD CONSTRAINT `FK_STORE_EMPLOYEE_STORE` FOREIGN KEY (`store_id`) REFERENCES `store`(`store_id`);
-ALTER TABLE `recipe_step` ADD CONSTRAINT `FK_RECIPE_STEP_RECIPE` FOREIGN KEY (`recipe_id`) REFERENCES `recipe`(`recipe_id`);
-ALTER TABLE `attendance` ADD CONSTRAINT `FK_ATTENDANCE_USER` FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`);
-ALTER TABLE `attendance` ADD CONSTRAINT `FK_ATTENDANCE_STORE` FOREIGN KEY (`store_id`) REFERENCES `store`(`store_id`);
-
-
 INSERT INTO user (created_at, email, password, phone, role, user_name) VALUES
 (NOW(), 'owner1@example.com', 'password123', '010-1234-5678', 'OWNER', 'John Doe'),
 (NOW(), 'staff1@example.com', 'password123', '010-2345-6789', 'STAFF', 'Jane Smith'),
@@ -154,7 +19,7 @@ INSERT INTO Store (store_id, user_id, store_name) VALUES
 (7, 3, 'Golden Spoon'),
 (8, 4, 'Urban Eats'),
 (9, 4, 'Mountain Grill'),
-(10, 4, 'jihyejcafe');;
+(10, 4, 'jihyejcafe');
 
 INSERT INTO orders (order_id, order_date, store_id, is_completed) VALUES (1, '2025-01-16 10:51:29', 1, true);
 INSERT INTO orders (order_id, order_date, store_id, is_completed) VALUES (2, '2025-01-14 10:51:29', 1, true);
@@ -216,5 +81,3 @@ INSERT INTO store_employee (user_id, store_id, is_employed) VALUES
 ((SELECT user_id FROM user WHERE email = 'staff3@example.com'), 4, true),
 ((SELECT user_id FROM user WHERE email = 'staff2@example.com'), 1, false),
 ((SELECT user_id FROM user WHERE email = 'staff4@example.com'), 5, true);
-
-commit;

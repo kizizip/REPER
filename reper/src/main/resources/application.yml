@@ -12,6 +12,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update # (개발환경) -> (운영 환경) validation/none
+    datasource:
+      initialization-mode: always
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
