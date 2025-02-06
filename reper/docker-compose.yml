@@ -14,6 +14,7 @@ services:
       - mysql_data:/var/lib/mysql  # MySQL 데이터 저장
       - mysql_config:/etc/mysql/conf.d  # MySQL 설정 파일 저장
       - ./my.cnf:/etc/mysql/my.cnf
+    command: --default-authentication-plugin=mysql_native_password
     networks:
       - app-network
 
@@ -25,7 +26,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mydatabase?serverTimezone=UTC&useSSL=false
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mydatabase?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ssafy
       SPRING_DATASOURCE_PASSWORD: aoreoya5!^^
     ports:
