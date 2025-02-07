@@ -11,7 +11,7 @@ class ApplicationClass : Application() {
         // 실제 서버 IP 주소를 사용해야 합니다
         // 예: 컴퓨터의 IP 주소 (ipconfig나 ifconfig로 확인)
         // const val SERVER_URL = "http://10.0.2.2:8080/"  // 안드로이드 에뮬레이터용
-        const val SERVER_URL = "http://192.168.50.42:8080/api/"  // 실제 기기용 (컴퓨터의 IP 주소)
+        const val SERVER_URL = "http://i12d109.p.ssafy.io:48620/api/"
         lateinit var retrofit: Retrofit
     }
 

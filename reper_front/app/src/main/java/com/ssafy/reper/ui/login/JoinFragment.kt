@@ -20,6 +20,7 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import com.ssafy.reper.data.dto.JoinRequest
+import com.ssafy.reper.data.dto.RequestStore
 
 
 class JoinFragment : Fragment() {
@@ -342,6 +343,16 @@ class JoinFragment : Fragment() {
                             role = role,
                         )
                         val response = RetrofitUtil.authService.join(joinRequest)
+
+                        if (binding.FragmentJoinStoreInfoInput.text.toString().isNotEmpty()) {
+                            val storeRequest = RequestStore(
+                                ownerId = response,
+                                storeName = binding.FragmentJoinStoreInfoInput.text.toString()
+                            )
+                            val storeResponse = RetrofitUtil.bossService.addStore(storeRequest)
+                        }
+
+                        Toast.makeText(requireContext(), "회원가입 성공", Toast.LENGTH_SHORT).show()
 
                         // LoginFragment로 이동
                         parentFragmentManager.beginTransaction()
