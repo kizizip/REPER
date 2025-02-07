@@ -173,14 +173,14 @@ public class NoticeController {
             private String content;
             @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
             private LocalDateTime updatedAt;
-            private String timgeAgo;
+            private String timeAgo;
 
-            public NoticeResponse(Long noticeId, String title, String content, LocalDateTime updatedAt, String timgeAgo) {
+            public NoticeResponse(Long noticeId, String title, String content, LocalDateTime updatedAt, String timeAgo) {
                 this.noticeId = noticeId;
                 this.title = title;
                 this.content = content;
                 this.updatedAt = updatedAt;
-                this.timgeAgo = timgeAgo;
+                this.timeAgo = timeAgo;
             }
         }
     };
