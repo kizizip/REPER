@@ -1,6 +1,7 @@
 package com.d109.reper.controller;
 
 import com.d109.reper.domain.Store;
+import com.d109.reper.elasticsearch.StoreDocument;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,10 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +34,15 @@ public class StoreController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
+    }
+
+
+    // Elasticsearch 매장 제목 검색 기능
+    @GetMapping("/search")
+    @Operation(summary = "storeName으로 모든 매장을 검색합니다.")
+    public List<StoreDocument> searchStores(
+            @RequestParam("storeName") String keyword) {
+        return storeService.searchStoreByName(keyword);
     }
 
 
