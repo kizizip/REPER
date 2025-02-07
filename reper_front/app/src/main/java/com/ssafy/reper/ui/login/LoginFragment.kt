@@ -1,14 +1,43 @@
 package com.ssafy.reper.ui.login
 
+import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ssafy.reper.R
+import com.ssafy.reper.data.dto.LoginRequest
+import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.databinding.FragmentLoginBinding
 import com.ssafy.reper.ui.MainActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import com.google.gson.Gson
+import com.ssafy.reper.data.dto.ErrorResponse
+import android.graphics.drawable.GradientDrawable
+import android.nfc.Tag
+import android.widget.EditText
+import com.kakao.sdk.auth.model.OAuthToken
+import com.kakao.sdk.common.model.ClientError
+import com.kakao.sdk.common.model.ClientErrorCause
+import com.kakao.sdk.common.util.Utility
+import com.kakao.sdk.user.UserApiClient
+import com.kakao.sdk.user.model.User
+import com.ssafy.reper.data.dto.JoinRequest
+import com.ssafy.reper.data.dto.KakaoLoginRequest
+import com.ssafy.reper.data.dto.UserInfo
+import com.ssafy.reper.data.remote.KakaoApi
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+
+private const val TAG = "LoginFragment_레퍼"
 
 class LoginFragment : Fragment() {
 
@@ -17,7 +46,6 @@ class LoginFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(
@@ -32,14 +60,18 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        var keyHash = Utility.getKeyHash(requireContext())
+        Log.i("kjwTest", "keyHash: $keyHash")
+
+
         // 로그인 버튼 클릭 시 로그인 처리
         val loginBtn = binding.fragmentLoginLoginBtn
         loginBtn.setOnClickListener {
-            // 로그인 버튼 클릭시 메인 화면으로 이동 - (추후 로직 수정 필요)
-            val intent = Intent(activity, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            activity?.finish()
+
+            // 로그인 요청 호출
+            login(binding.fragmentLoginEamilInput.text.toString(),
+                binding.fragmentLoginPasswordInput.text.toString())
+
         }
 
         // ActivityLoginJoinText 클릭 시 새로운 LoginFragment로 이동
@@ -52,6 +84,229 @@ class LoginFragment : Fragment() {
                 .commit()
         }
 
+        // 소셜 로그인(카카오)
+        binding.fragmentLoginKakaoLoginIcon.setOnClickListener {
+            // 카카오 로그인 요청 호출
+            loginWithKakao()
+        }
+    }
+
+
+    //로그인 수행
+    private fun loginWithKakao() {
+        val mCallback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
+            if (error != null) {
+                Log.e(TAG, "로그인 실패: $error")
+            } else if (token != null) {
+                Log.d(TAG, "로그인 accessToken: ${token.accessToken}")
+                sendToServer(token.accessToken)
+            }
+        }
+
+        if (UserApiClient.instance.isKakaoTalkLoginAvailable(requireContext())) {
+            UserApiClient.instance.loginWithKakaoTalk(requireContext()) { token, error ->
+                if (error != null) {
+                    Log.e(TAG, "카카오톡 로그인 실패: $error")
+                    UserApiClient.instance.loginWithKakaoAccount(
+                        requireContext(),
+                        callback = mCallback
+                    )
+                } else {
+                    Log.d(TAG, "로그인 accessToken: ${token?.accessToken}")
+                    sendToServer(token!!.accessToken)
+                }
+            }
+        } else {
+            UserApiClient.instance.loginWithKakaoAccount(requireContext(), callback = mCallback)
+        }
+    }
+
+
+    //DB에 회원정보가 없다면 회원가입 수행,
+    //회원정보가 존재한다면 로그인 수행합니다.
+    //회원가입 직후 바로 로그인되는 로직 추가 필요합니다. (혹은 Toast로 가입 완료 띄우든가...)
+    private fun sendToServer(accessToken: String) {
+        lifecycleScope.launch {
+            try {
+                val user = getUserInfo()
+
+                val nickname = user.kakaoAccount?.profile?.nickname ?: "닉네임 없음"
+                val email = user.kakaoAccount?.email ?: throw Exception("이메일 정보가 필요합니다.")
+
+                Log.d(TAG, "유저 정보 불러오기 완료: ${nickname} ${email}")
+                // 이메일 중복 확인
+                val isEmailDuplicate = RetrofitUtil.authService.checkEmail(email)
+
+                if (!isEmailDuplicate) {
+                    // 중복이 아닐 경우 회원가입 진행
+                    val userDto = JoinRequest(
+                        email = email,
+                        userName = nickname,
+                        password = "", //비밀번호는 카카오 관할이므로 DB상 공란 (혹시 모르니 로그인화면 비밀번호 공란 방지 처리 부탁합니다)
+                        phone = "", //카카오 api로는 못 받아오므로, 기본값 설정
+                        role = "STAFF" // 기본값 설정
+                    )
+
+                    val isInserted = RetrofitUtil.authService.join(userDto)
+
+                } else {
+                    // 중복일 경우 로그인 처리
+                    val request = KakaoLoginRequest(accessToken, email, nickname)
+                    Log.d(TAG, "카카오 로그인 요청: $request")
+                    val response = RetrofitUtil.kakaoService.kakaoLogin(request)
+                    Log.d(TAG, "로그인 성공: ${response.message}")
+                    //프론트 여러분, 여기까지 하면 로그에는 null이라고 찍힐 겁니다... 그건 제가 해결을 못 했습니다 죄송
+                    //하지만 email, nickname은 잘 불러옵니다... 이거면 충분하지 않나요?
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "sendToServer: 서버 요청 실패 ${e.message}")
+            }
+        }
+    }
+
+
+    // 사용자 email, nickname 불러오기
+    private suspend fun getUserInfo(): User {
+        Log.d(TAG, "getUserInfo: ")
+        return suspendCancellableCoroutine { cont ->
+            UserApiClient.instance.me { user, error ->
+                if (error != null) {
+                    Log.e(TAG, "sendToServer: 사용자 정보 조회 실패 $error")
+                    cont.resumeWithException(error)
+                } else {
+                    cont.resume(user ?: throw Exception("User data is null"))
+                }
+            }
+        }
+
+    }
+
+
+    private fun Int.dpToPx(context: Context): Int {
+        return (this * context.resources.displayMetrics.density).toInt()
+    }
+
+
+    /**
+     * 입력 필드의 시각적 상태를 업데이트하는 함수
+     * @param inputField 업데이트할 EditText
+     * @param isError 에러 상태 여부
+     * @param isEmpty 필드가 비어있는지 여부
+     */
+    private fun updateInputFieldState(
+        inputField: EditText,
+        isError: Boolean,
+        isEmpty: Boolean = false
+    ) {
+        // 상태에 따른 색상 결정
+        val color = when {
+            isError || isEmpty -> "#F26547"  // 에러 상태나 빈 필드일 때 빨간색
+            else -> "#C7C7C7"  // 정상 상태일 때 회색
+        }
+        val borderColor = when {
+            isError || isEmpty -> "#F26547"  // 에러 상태나 빈 필드일 때 빨간색
+            else -> "#000000"  // 정상 상태일 때 검정색
+        }
+        
+        // EditText 스타일 적용
+        inputField.apply {
+            setHintTextColor(Color.parseColor(color))
+            background = GradientDrawable().apply {
+                setStroke(1.dpToPx(requireContext()), Color.parseColor(borderColor))
+                cornerRadius = 12.dpToPx(requireContext()).toFloat()
+                setColor(Color.WHITE)
+            }
+        }
+    }
+
+    /**
+     * 로그인 프로세스를 시작하는 함수
+     */
+    private fun login(email: String, password: String) {
+        lifecycleScope.launch {
+            try {
+                handleLoginAttempt(email, password)
+            } catch (e: HttpException) {
+                handleLoginError(e)
+            }
+        }
+    }
+
+    /**
+     * 실제 로그인 시도를 처리하는 함수
+     */
+    private suspend fun handleLoginAttempt(email: String, password: String) {
+        val loginRequest = LoginRequest(email, password)
+        val response = RetrofitUtil.authService.login(loginRequest)
+
+        if (response.loginIdCookie.isNotEmpty()) {
+            saveLoginCookie(response.loginIdCookie)
+            navigateToMainActivity()
+        }
+    }
+
+    /**
+     * 로그인 쿠키를 SharedPreferences에 저장하는 함수
+     */
+    private fun saveLoginCookie(loginIdCookie: String) {
+        requireContext().getSharedPreferences("login_info", Context.MODE_PRIVATE)
+            .edit()
+            .putString("login_id_cookie", loginIdCookie)
+            .apply()
+    }
+
+    /**
+     * 메인 액티비티로 이동하는 함수
+     */
+    private fun navigateToMainActivity() {
+        startActivity(Intent(requireContext(), MainActivity::class.java))
+        requireActivity().finish()
+    }
+
+    /**
+     * 로그인 에러를 처리하는 함수
+     */
+    private fun handleLoginError(e: HttpException) {
+        val errorBody = e.response()?.errorBody()?.string()
+        val errorResponse = Gson().fromJson(errorBody, ErrorResponse::class.java)
+
+        when (errorResponse.message) {
+            "email 혹은 password 누락" -> handleEmptyFieldsError()
+            else -> handleInvalidCredentialsError()
+        }
+    }
+
+    /**
+     * 빈 필드 에러를 처리하는 함수
+     * 이메일이나 비밀번호가 입력되지 않았을 때 호출
+     */
+    private fun handleEmptyFieldsError() {
+        val emailEmpty = binding.fragmentLoginEamilInput.text.isEmpty()
+        val passwordEmpty = binding.fragmentLoginPasswordInput.text.isEmpty()
+
+        // 각 필드의 상태 업데이트
+        updateInputFieldState(binding.fragmentLoginEamilInput, isError = false, isEmpty = emailEmpty)
+        updateInputFieldState(binding.fragmentLoginPasswordInput, isError = false, isEmpty = passwordEmpty)
+
+        Toast.makeText(requireContext(), "email/password를 입력해주세요", Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * 잘못된 인증 정보 에러를 처리하는 함수
+     * 이메일/비밀번호가 일치하지 않을 때 호출
+     */
+    private fun handleInvalidCredentialsError() {
+        with(binding) {
+            // 입력 필드 초기화
+            fragmentLoginPasswordInput.setText("")
+            fragmentLoginPasswordInput.requestFocus()
+
+            // 에러 상태로 UI 업데이트
+            updateInputFieldState(fragmentLoginEamilInput, isError = true)
+            updateInputFieldState(fragmentLoginPasswordInput, isError = true)
+        }
+        Toast.makeText(requireContext(), "로그인 실패", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
