@@ -59,8 +59,8 @@ class RecipeManageFragment : Fragment() {
             "프라프치노"
         )
 
-        binding.recipeFgAddRV.layoutManager = LinearLayoutManager(requireContext())
-        binding.recipeFgAddRV.adapter =
+        binding.recipeFgRV.layoutManager = LinearLayoutManager(requireContext())
+        binding.recipeFgRV.adapter =
             RecipeAdapter(menuList, object : RecipeAdapter.ItemClickListener {
                 override fun onItemClick(position: Int) {
                     showDialog(menuList[position])
@@ -68,7 +68,7 @@ class RecipeManageFragment : Fragment() {
                 }
             })
 
-        binding.storeFgBackIcon.setOnClickListener {
+        binding.recipeFgBackIcon.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
     }

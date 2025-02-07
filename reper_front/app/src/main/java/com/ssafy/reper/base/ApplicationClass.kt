@@ -1,50 +1,30 @@
-import android.Manifest
+package com.ssafy.reper
+
 import android.app.Application
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import okhttp3.OkHttpClient
+import com.kakao.sdk.common.KakaoSdk
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 
+private const val TAG = "ApplicationClass_싸피"
 class ApplicationClass : Application() {
     companion object {
-        // ipconfig를 통해 ip확인하기
-
-        const val SERVER_URL = "http://i12d109.p.ssafy.io:48620/api/"
-
-        // retrofit을 lazy로 변경하여 안전하게 초기화
-        val retrofit: Retrofit by lazy {
-            val okHttpClient = OkHttpClient.Builder()
-                .readTimeout(5000, TimeUnit.MILLISECONDS)
-                .connectTimeout(5000, TimeUnit.MILLISECONDS)
-                .build()
-
-            Retrofit.Builder()
-                .baseUrl(SERVER_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson)) // gson을 여기서 사용
-                .client(okHttpClient)
-                .build()
-        }
-
-        // Gson 객체를 companion object 안에 선언
-        val gson: Gson = GsonBuilder()
-            .setLenient()
-            .create()
-
-        // 모든 퍼미션 관련 배열
-        val requiredPermissions = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_ADVERTISE,
-            Manifest.permission.BLUETOOTH_CONNECT
-        )
+        // 실제 서버 IP 주소를 사용해야 합니다
+        // 예: 컴퓨터의 IP 주소 (ipconfig나 ifconfig로 확인)
+        // const val SERVER_URL = "http://10.0.2.2:8080/"  // 안드로이드 에뮬레이터용
+        const val SERVER_URL = "http://192.168.50.42:8080/api/"  // 실제 기기용 (컴퓨터의 IP 주소)
+        lateinit var retrofit: Retrofit
     }
 
     override fun onCreate() {
         super.onCreate()
-        // onCreate()에서 초기화가 이루어지기 때문에 lazy initialization은
-        // 처음 사용하는 시점에 안전하게 처리됩니다.
+
+        // Kakao SDK 초기화
+        KakaoSdk.init(this, "4c4f7b722cd48d5d961a6048769dc5e6")
+
+        // Retrofit 초기화
+        retrofit = Retrofit.Builder()
+            .baseUrl(SERVER_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
     }
 }

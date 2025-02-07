@@ -1,7 +1,6 @@
 package com.ssafy.reper.ui.boss
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
@@ -17,11 +15,10 @@ import com.ssafy.reper.databinding.FragmentNoticeManageBinding
 import com.ssafy.reper.ui.boss.adpater.NotiAdapter
 import com.ssafy.reper.ui.MainActivity
 
-private const val TAG = "NoticeManageFragment"
+
 class NoticeManageFragment : Fragment() {
     private var _binding: FragmentNoticeManageBinding? = null
     private val binding get() = _binding!!
-    private val noticeViewModel: NoticeViewModel by activityViewModels()
 
 
     override fun onCreateView(
@@ -31,27 +28,24 @@ class NoticeManageFragment : Fragment() {
         _binding = FragmentNoticeManageBinding.inflate(inflater, container, false)
 
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        noticeViewModel.init(1,1)
         initNotiAdater()
         initSpinner()
 
         binding.notiFgBackIcon.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-
-        binding.addBtn.setOnClickListener {
-            findNavController().navigate(R.id.writeNotiFragment)
-        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Fragment가 파괴될 때 BottomNavigationView 다시 보이게 하기
+        (activity as MainActivity).showBottomNavigation()
+
         _binding = null
     }
 
@@ -88,29 +82,12 @@ class NoticeManageFragment : Fragment() {
 
     fun initNotiAdater() {
         binding.notiList.layoutManager = LinearLayoutManager(requireContext())
-        val notiAdapter = NotiAdapter( emptyList() , object : NotiAdapter.ItemClickListener {
+        binding.notiList.adapter = NotiAdapter(object : NotiAdapter.ItemClickListener {
             override fun onClick(position: Int) {
-                val noticeList = noticeViewModel.noticeList.value // 현재 공지 리스트 가져오기
-
-                if (!noticeList.isNullOrEmpty() && position in noticeList.indices) {
-                    noticeViewModel.setClickNotice(noticeList[position])
-                    findNavController().navigate(R.id.writeNotiFragment)
-                }
+                findNavController().navigate(R.id.writeNotiFragment)
+                Toast.makeText(requireContext(), "공지 $position 클릭됨", Toast.LENGTH_SHORT).show()
             }
         })
-
-        binding.notiList.adapter = notiAdapter
-
-        noticeViewModel.noticeList.observe(viewLifecycleOwner, { newList ->
-            notiAdapter.noticeList = newList
-            notiAdapter.notifyDataSetChanged()
-        })
-
-    }
-
-
-    fun searchNotice(){
-
     }
 
 

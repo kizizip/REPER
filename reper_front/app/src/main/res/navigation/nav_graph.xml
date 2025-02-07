@@ -70,10 +70,5 @@
         android:name="com.ssafy.reper.ui.boss.RecipeManageFragment"
         android:label="fragment_recipe_manage"
         tools:layout="@layout/fragment_recipe_manage" />
-    <fragment
-        android:id="@+id/storeManage"
-        android:name="com.ssafy.reper.ui.boss.StoreManageFragment"
-        android:label="fragment_store_manage"
-        tools:layout="@layout/fragment_store_manage" />
 
 </navigation>

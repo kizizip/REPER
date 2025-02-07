@@ -61,7 +61,7 @@
     </ScrollView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/store_add_content"
+        android:id="@+id/request_access_d_cl_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
@@ -71,7 +71,7 @@
         app:layout_constraintTop_toBottomOf="@+id/request_access_d_sv">
 
         <TextView
-            android:id="@+id/add_store_name"
+            android:id="@+id/request_access_d_tv_store_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -91,8 +91,8 @@
             android:text="에"
             android:textColor="@color/black"
             android:textSize="16sp"
-            app:layout_constraintStart_toEndOf="@+id/add_store_name"
-            app:layout_constraintTop_toTopOf="@+id/add_store_name" />
+            app:layout_constraintStart_toEndOf="@+id/request_access_d_tv_store_name"
+            app:layout_constraintTop_toTopOf="@+id/request_access_d_tv_store_name" />
 
         <TextView
             android:id="@+id/textView16"
@@ -100,12 +100,12 @@
             android:layout_height="wrap_content"
             android:text="권한을 요청하시겠습니까?"
             app:layout_constraintEnd_toEndOf="@+id/textView17"
-            app:layout_constraintStart_toStartOf="@+id/add_store_name"
-            app:layout_constraintTop_toBottomOf="@+id/add_store_name" />
+            app:layout_constraintStart_toStartOf="@+id/request_access_d_tv_store_name"
+            app:layout_constraintTop_toBottomOf="@+id/request_access_d_tv_store_name" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/store_add_btn_positive"
+        android:id="@+id/request_access_d_btn_positive"
         android:layout_width="130dp"
         android:layout_height="52dp"
         android:layout_marginStart="8dp"
@@ -113,8 +113,8 @@
         android:background="@drawable/request_btn_yes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/store_add_btn_cancel"
-        app:layout_constraintTop_toBottomOf="@+id/store_add_content">
+        app:layout_constraintStart_toEndOf="@+id/request_access_d_btn_cancel"
+        app:layout_constraintTop_toBottomOf="@+id/request_access_d_cl_tv">
 
         <TextView
             android:layout_width="wrap_content"
@@ -130,14 +130,14 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/store_add_btn_cancel"
+        android:id="@+id/request_access_d_btn_cancel"
         android:layout_width="130dp"
         android:layout_height="52dp"
         android:background="@drawable/request_btn_no"
-        app:layout_constraintEnd_toStartOf="@+id/store_add_btn_positive"
+        app:layout_constraintEnd_toStartOf="@+id/request_access_d_btn_positive"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/store_add_btn_positive">
+        app:layout_constraintTop_toTopOf="@+id/request_access_d_btn_positive">
 
         <TextView
             android:layout_width="wrap_content"
