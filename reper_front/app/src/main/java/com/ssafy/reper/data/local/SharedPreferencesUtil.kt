@@ -69,6 +69,8 @@ package com.ssafy.reper.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.ssafy.reper.data.dto.LoginResponse
+import com.ssafy.reper.data.dto.UserInfo
 
 class SharedPreferencesUtil(context: Context) {
     private var preferences: SharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
@@ -79,6 +81,24 @@ class SharedPreferencesUtil(context: Context) {
 
     fun saveUserCookie(cookie: String) {
         preferences.edit().putString(KEY_USER_COOKIE, cookie).apply()
+    }
+
+    //사용자 정보 저장
+    fun addUser(userinfo: UserInfo){
+        val editor = preferences.edit()
+        editor.putLong("userId", userinfo.userId)
+        editor.putString("username", userinfo.username)
+        editor.putString("role",userinfo.role)
+        editor.apply()
+    }
+
+    // 사용자 정보 가져오기 (수정 필요)
+    fun getUser(): LoginResponse {
+        return LoginResponse(
+            userId = preferences.getLong("userId", 0),
+            username = preferences.getString("username", ""),
+            role = preferences.getString("role", ""),
+        )
     }
 
     companion object {

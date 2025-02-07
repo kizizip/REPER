@@ -21,18 +21,13 @@ import retrofit2.HttpException
 import com.google.gson.Gson
 import com.ssafy.reper.data.dto.ErrorResponse
 import android.graphics.drawable.GradientDrawable
-import android.nfc.Tag
 import android.widget.EditText
 import com.kakao.sdk.auth.model.OAuthToken
-import com.kakao.sdk.common.model.ClientError
-import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.common.util.Utility
 import com.kakao.sdk.user.UserApiClient
 import com.kakao.sdk.user.model.User
 import com.ssafy.reper.data.dto.JoinRequest
 import com.ssafy.reper.data.dto.KakaoLoginRequest
-import com.ssafy.reper.data.dto.UserInfo
-import com.ssafy.reper.data.remote.KakaoApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -240,9 +235,12 @@ class LoginFragment : Fragment() {
         val loginRequest = LoginRequest(email, password)
         val response = RetrofitUtil.authService.login(loginRequest)
 
-        if (response.loginIdCookie.isNotEmpty()) {
-            saveLoginCookie(response.loginIdCookie)
-            navigateToMainActivity()
+        // loginIdCookie가 null이 아니고 비어있지 않을 때만 처리
+        response.loginIdCookie?.let { cookie ->
+            if (cookie.isNotEmpty()) {
+                saveLoginCookie(cookie)
+                navigateToMainActivity()
+            }
         }
     }
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "685089603172",
+    "project_id": "reper-85ea0",
+    "storage_bucket": "reper-85ea0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:685089603172:android:15e601f789c50bb461a971",
+        "android_client_info": {
+          "package_name": "com.ssafy.reper"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJuc41uuifVnowA60Z0yimiETIZ4W1FLY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
