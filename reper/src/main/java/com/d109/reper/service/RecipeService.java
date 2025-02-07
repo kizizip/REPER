@@ -3,7 +3,9 @@ package com.d109.reper.service;
 import com.d109.reper.domain.Ingredient;
 import com.d109.reper.domain.Recipe;
 import com.d109.reper.domain.RecipeStep;
+import com.d109.reper.domain.Store;
 import com.d109.reper.repository.RecipeRepository;
+import com.d109.reper.repository.StoreRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -14,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,6 +25,7 @@ import java.util.List;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final StoreRepository storeRepository;
     private final EntityManager em;
 
     private static final Logger logger = LoggerFactory.getLogger(RecipeService.class);
@@ -28,10 +33,10 @@ public class RecipeService {
     // 레시피 저장
     @Transactional
     public void saveRecipes(List<Recipe> recipes) {
-        logger.info("트랜잭션 시작 - 레시피 저장");
+//        logger.info("트랜잭션 시작 - 레시피 저장");
 
         for (Recipe recipe : recipes) {
-            logger.info("레시피 저장: {}", recipe.getRecipeName());
+//            logger.info("레시피 저장: {}", recipe.getRecipeName());
             recipe.setCreatedAt(LocalDateTime.now());
 
             // 레시피 단계(RecipeStep) 처리
@@ -61,23 +66,42 @@ public class RecipeService {
             }
 
             recipeRepository.save(recipe);
-            logger.info("레시피 저장 완료: {}", recipe.getRecipeName());
+//            logger.info("레시피 저장 완료: {}", recipe.getRecipeName());
         }
     }
 
     // 레시피 조회(가게별)
     public List<Recipe> findRecipesByStore(Long storeId) {
+        Optional<Store> store = storeRepository.findById(storeId);
+
+        if (store.isEmpty()) {
+            throw new NoSuchElementException("Store not found.");
+        }
+
         return recipeRepository.findByStore(storeId);
     }
 
     // 레시피 단건 조회
     public Recipe findRecipe(Long recipeId) {
-        return recipeRepository.findOne(recipeId);
+        Recipe recipe = recipeRepository.findOne(recipeId);
+
+        if (recipe == null) {
+            throw new NoSuchElementException("Recipe not found.");
+        }
+
+        return recipe;
     }
 
     // 레시피 단건 삭제
     @Transactional
     public void deleteRecipe(Long recipeId) {
+
+        Recipe recipe = recipeRepository.findOne(recipeId);
+
+        if (recipe == null) {
+            throw new NoSuchElementException("Recipe not found.");
+        }
+
         recipeRepository.delete(recipeId);
     }
 }
