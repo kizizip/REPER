@@ -16,6 +16,22 @@ services:
     networks:
       - app-network
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1  # 최신 버전 적용
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false  # TLS(SSL) 활성화
+      - ES_JAVA_OPTS=-Xms512m -Xmx15g
+    ports:
+      - "23159:9200"
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+      - ./logs:/usr/share/elasticsearch/logs
+    networks:
+      - elastic_network
+
   app:
     image: reper-server
     container_name: reper-server
@@ -40,6 +56,10 @@ volumes:
   mysql_data:  # MySQL 데이터 저장 볼륨
   mysql_config:  # MySQL 설정 파일 저장 볼륨
   app_logs:  # Spring Boot 애플리케이션 로그 저장 볼륨
+  elastic_data:
+    driver: local
 
 networks:
   app-network:
+  elastic_network:
+    driver: bridge
