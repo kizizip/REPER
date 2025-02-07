@@ -6,14 +6,16 @@ import com.d109.reper.domain.UserRole;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.repository.UserRepository;
 import com.d109.reper.request.StoreRequestDto;
+import com.d109.reper.response.StoreResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,17 +27,25 @@ public class StoreService {
 
     // 매장 정보 등록
     @Transactional
-    public Store createStore(StoreRequestDto storeRequestDto) {
+    public StoreResponseDto createStore(StoreRequestDto storeRequestDto) {
 
         User owner = userRepository.findById(storeRequestDto.getOwnerId()).orElseThrow();
 
-//        if (owner.getRole() != )
+        if (isStoreExists(storeRequestDto.getStoreName(), owner)) {
+            throw new IllegalStateException("The store already exists.");
+        }
+
+        if (owner.getRole() != UserRole.OWNER) {
+            throw new AccessDeniedException("Only users with role 'owner' can register a store.");
+        }
 
         Store store = new Store();
 
         store.setStoreName(storeRequestDto.getStoreName());
         store.setOwner(owner);
-        return storeRepository.save(store);
+
+        Store savedStore = storeRepository.save(store);
+        return new StoreResponseDto(savedStore);
     }
 
     // 존재하는 가게인지 확인(가게이름과 사장님으로)
@@ -47,10 +57,22 @@ public class StoreService {
     // 매장 검색
 
     // 매장 정보 조회(단건)
+    public StoreResponseDto getStore(Long storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NoSuchElementException("Store not found."));
+        return new StoreResponseDto(store);
+    }
 
-    // 매장 정보 수정
 
     // 매장 정보 삭제
+    @Transactional
+    public void deleteStore(Long storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NoSuchElementException("Store not found"));
+
+        storeRepository.delete(store);
+    }
+
 
     // 사장님이 가진 모든 매장 조회
     public List<Store> findStores(Long userId) {

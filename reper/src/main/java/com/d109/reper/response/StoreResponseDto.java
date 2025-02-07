@@ -2,6 +2,7 @@ package com.d109.reper.response;
 
 import com.d109.reper.domain.Store;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 public class StoreResponseDto {
@@ -14,4 +15,5 @@ public class StoreResponseDto {
         this.storeName = store.getStoreName();
         this.ownerId = store.getOwner().getUserId();
     }
+
 }
