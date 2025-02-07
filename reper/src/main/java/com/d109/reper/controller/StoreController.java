@@ -2,16 +2,16 @@ package com.d109.reper.controller;
 
 import com.d109.reper.domain.Store;
 import com.d109.reper.repository.StoreRepository;
+import com.d109.reper.request.StoreRequestDto;
+import com.d109.reper.response.StoreResponseDto;
 import com.d109.reper.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +22,22 @@ import java.util.stream.Collectors;
 public class StoreController {
 
     private final StoreService storeService;
+
+    // 매장 정보 등록
+    @PostMapping
+    @Operation(summary = "매장 정보 등록")
+    public ResponseEntity<StoreResponseDto> createStore(@RequestBody StoreRequestDto storeRequestDto) {
+        Store store = storeService.createStore(storeRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new StoreResponseDto(store));
+    }
+
+    // 매장 검색
+
+    // 매장 정보 조회(단건)
+
+    // 매장 정보 수정
+
+    // 매장 정보 삭제
 
     // 사장님이 가진 모든 매장 조회
     @GetMapping("/owner/{userId}")
