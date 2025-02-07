@@ -72,6 +72,7 @@
                 android:textSize="22sp" />
 
             <EditText
+                android:id="@+id/fragmentLoginEamilInput"
                 android:layout_width="match_parent"
                 android:layout_height="49.36dp"
                 android:layout_marginBottom="16dp"
@@ -80,17 +81,21 @@
                 android:inputType="textEmailAddress"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
+                android:text=""
                 android:textColorHint="#C4C4C4"
                 android:textSize="15.79sp" />
 
+
             <EditText
+                android:id="@+id/fragmentLoginPasswordInput"
                 android:layout_width="match_parent"
                 android:layout_height="49.36dp"
                 android:background="@drawable/edit_text_background"
                 android:hint="비밀번호를 입력해주세요."
-                android:inputType="textEmailAddress"
+                android:inputType="textPassword"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
+                android:text=""
                 android:textColorHint="#C4C4C4"
                 android:textSize="15.79sp" />
 
@@ -141,11 +146,13 @@
                 android:gravity="center">
 
                 <ImageView
+                    android:id="@+id/fragmentLoginKakaoLoginIcon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/kakao_logo" />
 
                 <ImageView
+                    android:id="@+id/fragmentLoginGoogleLoginIcon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/google_logo" />
