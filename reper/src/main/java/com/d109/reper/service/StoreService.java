@@ -42,6 +42,11 @@ public class StoreService {
 
     // Elasticsearch 매장 이름 검색
     public List<StoreDocument> searchStoreByName(String keyword) {
+
+        if (keyword == null) {
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
+
         return storeSearchRepository.findByStoreNameContaining(keyword);
     }
 

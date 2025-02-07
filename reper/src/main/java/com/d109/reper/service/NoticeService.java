@@ -234,8 +234,23 @@ public class NoticeService {
 
 
     // Elasticsearch에서 공지 제목 검색
-    public List<NoticeDocument> searchNotices(Long storeId, String keyword) {
+    public List<NoticeDocument> searchNoticesTitle(Long storeId, String keyword) {
+
+        if (keyword == null) {
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
+
         return noticeSearchRepository.findByStoreIdAndTitleContainingOrderByUpdatedAtDesc(storeId, keyword);
+    }
+
+    // Elasticsearch에서 공지 내용 검색
+    public List<NoticeDocument> searchNoticesContent(Long storeId, String keyword) {
+
+        if (keyword == null) {
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
+
+        return noticeSearchRepository.findByStoreIdAndContentContainingOrderByUpdatedAtDesc(storeId, keyword);
     }
 
 

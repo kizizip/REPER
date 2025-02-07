@@ -10,4 +10,7 @@ public interface NoticeSearchRepository extends ElasticsearchRepository<NoticeDo
 
     //제목으로 공지 검색 및 최근순 정렬
     List<NoticeDocument> findByStoreIdAndTitleContainingOrderByUpdatedAtDesc(Long storeId, String keyword);
+
+    //공지 내용으로 검색 및 최근순 정렬
+    List<NoticeDocument> findByStoreIdAndContentContainingOrderByUpdatedAtDesc(Long storedId, String keyword);
 }

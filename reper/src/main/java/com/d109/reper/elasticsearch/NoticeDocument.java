@@ -24,4 +24,5 @@ public class NoticeDocument {
 
     @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
+
 }
