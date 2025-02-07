@@ -58,6 +58,7 @@ volumes:
   mysql_config:  # MySQL 설정 파일 저장 볼륨
   app_logs:  # Spring Boot 애플리케이션 로그 저장 볼륨
   elastic_data:
+  elasticsearch_logs:
 
 networks:
   app-network:
