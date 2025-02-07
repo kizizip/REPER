@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +21,7 @@ import com.ssafy.reper.databinding.FragmentStoreManageBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.StoreAdapter
 
-
+private const val TAG = "StoreManageFragment"
 class StoreManageFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private var _binding: FragmentStoreManageBinding? = null
@@ -59,11 +60,8 @@ class StoreManageFragment : Fragment() {
         binding.storeFgAddTv.setOnClickListener {
             showStoreAddDialog()
         }
-
         initAdapter()
-
     }
-
 
 
     private fun showStoreAddDialog() {
@@ -74,7 +72,8 @@ class StoreManageFragment : Fragment() {
 
         val editText = dialog.findViewById<EditText>(R.id.storeAddET)
         dialog.findViewById<ImageView>(R.id.add_btn).setOnClickListener{
-                if (editText.text != null){
+                if (editText.text.equals("")){
+                    Log.d(TAG, "showStoreAddDialog: ${editText.text}")
                     dialog.findViewById<View>(R.id.store_add_content).visibility = View.VISIBLE
                     dialog.findViewById<TextView>(R.id.add_store_name).text = editText.text.toString()
 
@@ -93,6 +92,7 @@ class StoreManageFragment : Fragment() {
                         dialog.dismiss()
                     }
                     dialog.findViewById<View>(R.id.store_add_btn_positive).setOnClickListener {
+                        Log.d(TAG, "showStoreAddDialog:${editText.text} ")
                         Toast.makeText(requireContext(), "가게명을 입력해주세요.", Toast.LENGTH_SHORT).show()
                     }
                 }

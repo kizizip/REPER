@@ -36,6 +36,8 @@ class BossViewModel: ViewModel() {
 
     }
 
+
+
     fun getStoreList(userId: Int){
         viewModelScope.launch {
             runCatching {
@@ -67,9 +69,9 @@ class BossViewModel: ViewModel() {
     fun deleteStore(storeId: Int, userId: Int){
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.bossService.deleteEmployee(storeId,userId)
+                RetrofitUtil.bossService.deleteEmployee(storeId)
             }.onSuccess {
-                getStoreList(userId)
+
             }.onFailure {
                 Log.d(TAG, "deleteStore: ${it.message}")
             }

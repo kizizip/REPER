@@ -20,7 +20,7 @@ interface BossService {
 
     //기존의 가게를 삭제함
     @DELETE("stores/{storeId}/employees/{userId}")
-    suspend fun deleteEmployee(@Path("storeId") storeId: Int, @Path("userId") userId: Int)
+    suspend fun deleteEmployee(@Path("storeId") storeId: Int)
 
 }
 
