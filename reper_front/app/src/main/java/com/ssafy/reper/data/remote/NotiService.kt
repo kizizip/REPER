@@ -45,4 +45,7 @@ interface NotiService {
         @Body requestBody: Map<String, Int>
     ): Response<Void?>
 
+    @GET("stores/{storeId}/notices/search")
+    suspend fun searchNotice(@Path("storeId") storeId : Int, @Body noticeTitle: String): List<StoreNoticeResponse>
+
 }

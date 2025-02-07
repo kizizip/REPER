@@ -11,7 +11,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="60dp"
+        android:layout_marginBottom="80dp"
         android:paddingHorizontal="24dp">
 
 
@@ -53,7 +53,7 @@
             android:id="@+id/store_fg_RV"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="36dp"
             android:scrollbarFadeDuration="0"
             android:scrollbarThumbVertical="@drawable/scroll_bar"
             android:scrollbars="vertical"

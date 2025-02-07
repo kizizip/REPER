@@ -14,6 +14,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
@@ -31,6 +32,8 @@ class BossFragment : Fragment() {
 //    private lateinit var nonAccessAdapter: AccessAdapter
     private lateinit var mainActivity: MainActivity
     private val bossViewModel: BossViewModel by activityViewModels()
+    var userId = 1
+    var storeId = 1
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -104,7 +107,7 @@ class BossFragment : Fragment() {
         }
 
         // 데이터 요청
-        bossViewModel.getStoreList(1)
+        bossViewModel.getStoreList(userId)
 
         // 스피너 선택 이벤트 설정
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -169,6 +172,7 @@ class BossFragment : Fragment() {
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
             //레시피 삭제 로직작성
+            Toast.makeText(requireContext(), "레시피 등록 완료", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
         }
         dialog.show()

@@ -11,7 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
@@ -25,9 +27,10 @@ class StoreManageFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private var _binding: FragmentStoreManageBinding? = null
     private val binding get() = _binding!!
-
     private lateinit var storeAdapter: StoreAdapter
     private val bossViewModel: BossViewModel by activityViewModels()
+    var userId = 1
+    var storeId = 1
 
 
     override fun onAttach(context: Context) {
@@ -72,9 +75,7 @@ class StoreManageFragment : Fragment() {
         dialog.findViewById<View>(R.id.store_add_content).visibility = View.GONE
 
         val editText = dialog.findViewById<EditText>(R.id.storeAddET)
-
-        editText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
+        dialog.findViewById<ImageView>(R.id.add_btn).setOnClickListener{
                 if (editText.text != null){
                     dialog.findViewById<View>(R.id.store_add_content).visibility = View.VISIBLE
                     dialog.findViewById<TextView>(R.id.add_store_name).text = editText.text.toString()
@@ -83,21 +84,20 @@ class StoreManageFragment : Fragment() {
                         dialog.dismiss()
                     }
                     dialog.findViewById<View>(R.id.store_add_btn_positive).setOnClickListener {
-                        bossViewModel.addStore(editText.text.toString(),1)
+                        bossViewModel.addStore(editText.text.toString(),userId)
+                        dialog.dismiss()
+                        Toast.makeText(requireContext(), "가게 등록 완료", Toast.LENGTH_SHORT).show()
+
+                    }
+                }else{
+
+                    dialog.findViewById<View>(R.id.store_add_btn_cancel).setOnClickListener {
                         dialog.dismiss()
                     }
+                    dialog.findViewById<View>(R.id.store_add_btn_positive).setOnClickListener {
+                        Toast.makeText(requireContext(), "가게명을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                    }
                 }
-                true
-            } else {
-                dialog.findViewById<View>(R.id.store_add_btn_cancel).setOnClickListener {
-                    dialog.dismiss()
-                }
-                dialog.findViewById<View>(R.id.store_add_btn_positive).setOnClickListener {
-                    dialog.dismiss()
-                }
-                false
-
-            }
         }
 
 
@@ -146,8 +146,10 @@ class StoreManageFragment : Fragment() {
             dialog.dismiss()
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-            bossViewModel.deleteStore(1,1)
+            bossViewModel.deleteStore(storeId,userId)
             dialog.dismiss()
+            Toast.makeText(requireContext(), "가게 삭제 완료", Toast.LENGTH_SHORT).show()
+
         }
         dialog.show()
     }

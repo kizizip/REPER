@@ -3,10 +3,10 @@ package com.ssafy.reper.ui.boss.adpater
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.ssafy.reper.data.dto.BossStore
+import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.databinding.ItemEditMyStoreRvBinding
 
-class StoreAdapter (var storeList: List<BossStore>, val itemClickListener: ItemClickListener) :
+class StoreAdapter (var storeList: List<Store>, val itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<StoreAdapter.StoreViewHolder>() {
 
     // ViewHolder

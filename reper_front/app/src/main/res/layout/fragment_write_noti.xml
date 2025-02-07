@@ -159,9 +159,10 @@
             style="@style/titleFontStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="60dp"
+            android:layout_marginBottom="80dp"
             android:background="@drawable/butto_main"
             android:text="저장"
+            android:textSize="20sp"
             android:textColor="@color/bgwhite"
             app:layout_constraintBottom_toBottomOf="parent"
             tools:layout_editor_absoluteX="24dp" />
@@ -172,9 +173,10 @@
             style="@style/titleFontStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="60dp"
+            android:layout_marginBottom="80dp"
             android:background="@drawable/butto_main"
             android:text="수정"
+            android:textSize="20sp"
             android:textColor="@color/bgwhite"
             app:layout_constraintBottom_toBottomOf="parent"
             tools:layout_editor_absoluteX="24dp" />

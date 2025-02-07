@@ -52,9 +52,6 @@ class NoticeManageFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Fragment가 파괴될 때 BottomNavigationView 다시 보이게 하기
-        (activity as MainActivity).showBottomNavigation()
-
         _binding = null
     }
 
@@ -108,6 +105,11 @@ class NoticeManageFragment : Fragment() {
             notiAdapter.noticeList = newList
             notiAdapter.notifyDataSetChanged()
         })
+
+    }
+
+
+    fun searchNotice(){
 
     }
 

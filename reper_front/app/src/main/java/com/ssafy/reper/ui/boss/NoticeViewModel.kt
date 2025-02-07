@@ -39,6 +39,7 @@ class NoticeViewModel : ViewModel() {
             try {
                 val response = RetrofitUtil.noticeService.getAllNotice(storeId, userId)
                 _noticeList.postValue(response.get(0).notices)
+                Log.d(TAG, "getAllNotice: ${_noticeList.value}")
             } catch (e: Exception) {
                 Log.d(TAG, "getAllNotice: ${e.message}")
                 Log.d(TAG, "getAllNotice: 공지 리스트 업로드 실패")
@@ -97,6 +98,19 @@ class NoticeViewModel : ViewModel() {
                 Log.d(TAG, "deleteNotice: ${e.message}")
             }
         }
+    }
+
+    fun searchNotice(storeId: Int, noticeTitle:String){
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.noticeService.searchNotice(storeId, noticeTitle)
+            }.onSuccess {
+
+            }.onFailure {
+
+            }
+        }
+
     }
 
 

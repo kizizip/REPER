@@ -10,9 +10,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.Notice
-import com.ssafy.reper.data.dto.NoticeRequest
-import com.ssafy.reper.databinding.FragmentNoticeManageBinding
-import com.ssafy.reper.databinding.FragmentRecipeManageBinding
 import com.ssafy.reper.databinding.FragmentWriteNotiBinding
 import com.ssafy.reper.ui.MainActivity
 
@@ -21,6 +18,8 @@ class WriteNotiFragment : Fragment() {
     private var _binding: FragmentWriteNotiBinding? = null
     private val binding get() = _binding!!
     private val noticeViewModel: NoticeViewModel by activityViewModels()
+    var userId = 1
+    var storeId = 1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,16 +65,17 @@ class WriteNotiFragment : Fragment() {
                 parentFragmentManager.popBackStack()
                 findNavController().navigate(R.id.noticeManageFragment)
             }
-
         }
 
         binding.notiWriteFgDeleteTv.setOnClickListener {
-            noticeViewModel.deleteNotice(1, noticeViewModel.clickNotice.value!!.noticeId,
-                 mapOf("userId" to 1) )
+            noticeViewModel.deleteNotice(storeId, noticeViewModel.clickNotice.value!!.noticeId,
+                 mapOf("userId" to userId) )
 
             parentFragmentManager.popBackStack()
+            Toast.makeText(requireContext(), "공지 삭제 완료", Toast.LENGTH_SHORT).show()
 
         }
+
     }
 
     //이부분이 사장님과 직원일때 달라져야하는 부분  직원 -> 삭제 버튼, 수정, 저장 아무 것도 안뜨게
@@ -84,6 +84,9 @@ class WriteNotiFragment : Fragment() {
         binding.textView.text = "공지 상세"
         binding.notiWriteFgTitleTV.text = notice.title
         binding.notiWriteFgContentTV.text = notice.content
+        binding.notiFgDate.text = notice.updatedAt
+        binding.notiFgDate.visibility = View.VISIBLE
+
 
         binding.notiWriteFgContentET.visibility = View.GONE
         binding.notiWriteFgTitleET.visibility = View.GONE
@@ -110,6 +113,7 @@ class WriteNotiFragment : Fragment() {
         binding.notiWriteFgModifyBtn.visibility = View.GONE
         binding.notiWriteFgDeleteTv.visibility = View.GONE
         binding.notiWriteFgDeleteTv.visibility = View.GONE
+        binding.notiFgDate.visibility = View.INVISIBLE
 
 
         if (noticeViewModel.clickNotice.value != null) {
@@ -125,16 +129,22 @@ class WriteNotiFragment : Fragment() {
     fun createNotice() {
         val title = binding.notiWriteFgTitleET.text.toString()
         val content = binding.notiWriteFgContentET.text.toString()
-        noticeViewModel.createNotice(1, 1, title, content)
+        noticeViewModel.createNotice(storeId, userId, title, content)
+
+        Toast.makeText(requireContext(), "공지 작성 완료", Toast.LENGTH_SHORT).show()
+
     }
 
     fun modifyNotice() {
         val title = binding.notiWriteFgTitleET.text.toString()
         val content = binding.notiWriteFgContentET.text.toString()
         noticeViewModel.modifyNotice(
-            1, 1,
+            storeId, userId,
             noticeViewModel.clickNotice.value!!.noticeId, title, content
         )
+
+        Toast.makeText(requireContext(), "공지 수정 완료", Toast.LENGTH_SHORT).show()
+
     }
 
 

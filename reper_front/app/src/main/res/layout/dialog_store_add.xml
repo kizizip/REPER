@@ -7,16 +7,31 @@
     android:background="@drawable/home_notice_dialog_back"
     android:padding="40dp">
 
-
+<LinearLayout
+    android:id="@+id/et_linear"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:orientation="horizontal"
+    app:layout_constraintTop_toTopOf="parent">
     <EditText
         android:id="@+id/storeAddET"
-        android:layout_width="match_parent"
+        android:layout_width="230dp"
+        android:layout_gravity="center"
         android:layout_height="wrap_content"
         android:hint="가게명을 입력해주세요."
-        android:layout_marginTop="24dp"
         android:imeOptions="actionDone"
         android:inputType="text"
-        app:layout_constraintTop_toTopOf="parent"/>
+       />
+
+    <ImageView
+        android:id="@+id/add_btn"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/baseline_add_24" />
+
+</LinearLayout>
 
 
 
@@ -29,7 +44,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeAddET">
+        app:layout_constraintTop_toBottomOf="@+id/et_linear">
 
 
         <TextView

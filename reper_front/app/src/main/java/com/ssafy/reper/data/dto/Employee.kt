@@ -7,4 +7,5 @@ data class Employee(
     val phone: Int,
     val role: String,
     val username: String
+    //승인여부 없음
 )
