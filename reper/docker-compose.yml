@@ -28,7 +28,7 @@ services:
       - "23159:9200"
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
-      - ./logs:/usr/share/elasticsearch/logs
+      - ./logs:/usr/share/elasticsearch/logs:rw
     networks:
       - elastic_network
 
