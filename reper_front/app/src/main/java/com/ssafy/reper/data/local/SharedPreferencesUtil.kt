@@ -69,8 +69,6 @@ package com.ssafy.reper.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
-import com.kakao.sdk.user.model.User
 import com.ssafy.reper.data.dto.LoginResponse
 import com.ssafy.reper.data.dto.UserInfo
 
