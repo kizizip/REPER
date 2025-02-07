@@ -39,9 +39,9 @@ public class StoreController {
 
     // Elasticsearch 매장 제목 검색 기능
     @GetMapping("/search")
-    @Operation(summary = "storeName으로 모든 매장을 검색합니다.")
+    @Operation(summary = "모든 매장 검색")
     public List<StoreDocument> searchStores(
-            @RequestParam("storeName") String keyword) {
+            @RequestParam("nameKeyword") String keyword) {
         return storeService.searchStoreByName(keyword);
     }
 
