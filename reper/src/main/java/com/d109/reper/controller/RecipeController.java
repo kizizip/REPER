@@ -30,7 +30,7 @@ public class RecipeController {
 
     // spring boot에서 다른 서버(python)로 http 요청을 보낼 때 사용
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final String PYTHON_SERVER_URL = "http://192.168.100.100:5000/upload";
+    private static final String PYTHON_SERVER_URL = "http://i12d109.p.ssafy.io:20250/upload";
 
     //레시피 파일 업로드 + python 서버로 전송
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
