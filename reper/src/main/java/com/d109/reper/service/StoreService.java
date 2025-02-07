@@ -3,6 +3,8 @@ package com.d109.reper.service;
 import com.d109.reper.domain.Store;
 import com.d109.reper.domain.User;
 import com.d109.reper.domain.UserRole;
+import com.d109.reper.elasticsearch.StoreDocument;
+import com.d109.reper.elasticsearch.StoreSearchRepository;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.repository.UserRepository;
 import com.d109.reper.request.StoreRequestDto;
@@ -24,6 +26,7 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final StoreSearchRepository storeSearchRepository;
 
     // 매장 정보 등록
     @Transactional
@@ -75,7 +78,7 @@ public class StoreService {
 
 
     // 사장님이 가진 모든 매장 조회
-    public List<Store> findStores(Long userId) {
+    public List<Store> findOwnerStores(Long userId) {
         if (userId == null) {
             throw new IllegalArgumentException("userId는 필수입니다.");
         }
@@ -88,6 +91,28 @@ public class StoreService {
         }
 
         return storeRepository.findAllByOwner(user);
+    }
+
+    // Elasticsearch 매장 이름 검색
+    public List<StoreDocument> searchStoreByName(String keyword) {
+        return storeSearchRepository.findByStoreNameContaining(keyword);
+    }
+
+    // Elasticsearch 매장 이름 검색 더미 데이터 test용 로직
+    @Transactional
+    public void syncStoresToElasticsearch() {
+        List<Store> stores = storeRepository.findAll();
+
+        List<StoreDocument> storeDocuments = stores.stream()
+                .map(store -> {
+                    StoreDocument doc = new StoreDocument();
+                    doc.setStoreId(store.getStoreId());
+                    doc.setStoreName(store.getStoreName());
+                    return doc;
+                })
+                .toList();
+
+        storeSearchRepository.saveAll(storeDocuments);
     }
 
 }

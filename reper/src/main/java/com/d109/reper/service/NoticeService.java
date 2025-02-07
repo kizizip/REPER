@@ -4,6 +4,8 @@ import com.d109.reper.controller.NoticeController;
 import com.d109.reper.domain.Notice;
 import com.d109.reper.domain.Store;
 import com.d109.reper.domain.User;
+import com.d109.reper.elasticsearch.NoticeDocument;
+import com.d109.reper.elasticsearch.NoticeSearchRepository;
 import com.d109.reper.repository.NoticeRepository;
 import com.d109.reper.repository.StoreEmployeeRepository;
 import com.d109.reper.repository.StoreRepository;
@@ -14,7 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,9 +31,12 @@ public class NoticeService {
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final StoreEmployeeRepository storeEmployeeRepository;
+    private final NoticeSearchRepository noticeSearchRepository;
+
+
     // 공지 등록
     @Transactional
-    public Long saveNotice(Long storeId, Long userId, String title, String content) {
+    public Notice saveNotice(Long storeId, Long userId, String title, String content) {
         if (storeId == null || storeId <=0 || userId == null || userId <= 0) {
             throw new IllegalArgumentException("storeId, userId는 필수이고, 1이상의 값이어야 합니다.");
         }
@@ -56,6 +65,16 @@ public class NoticeService {
         notice.setContent(content);
         Notice saveNotice = noticeRepository.save(notice);
 
+        // 엘라스틱서치에 인덱싱
+        NoticeDocument noticeDocument = new NoticeDocument();
+        noticeDocument.setNoticeId(saveNotice.getNoticeId());
+        noticeDocument.setStoreId(storeId);
+        noticeDocument.setTitle(title);
+        noticeDocument.setContent(content);
+        noticeDocument.setUpdatedAt(saveNotice.getUpdatedAt());
+
+        noticeSearchRepository.save(noticeDocument);
+
         if (saveNotice == null) {
             throw new RuntimeException("Notice 등록 실패: save() 결과가 null입니다.");
         }
@@ -64,7 +83,7 @@ public class NoticeService {
             throw new RuntimeException("Notice 등록 실패: ID가 생성되지 않았습니다.");
         }
 
-        return saveNotice.getNoticeId();
+        return saveNotice;
     }
 
 
@@ -94,7 +113,7 @@ public class NoticeService {
 
 
     // 매장별 전체 공지 조회
-    public List<Notice> findNotices(Long storeId, Long userId) {
+    public List<NoticeController.ResponseNotices> findNotices(Long storeId, Long userId) {
         if (storeId == null || userId ==null) {
             throw new IllegalArgumentException("storeId, userId는 필수입니다.");
         }
@@ -108,13 +127,28 @@ public class NoticeService {
         if (!isAuthorizedUser(store, user)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
         }
-        return noticeRepository.findAllByStore_StoreId(storeId);
+
+        List<Notice> notices = noticeRepository.findAllByStore_StoreId(storeId);
+        LocalDateTime now = LocalDateTime.now();
+
+        List<NoticeController.ResponseNotices.NoticeResponse> sortedNotices = notices.stream()
+                .sorted(Comparator.comparing(Notice::getUpdatedAt).reversed()) // 최신순 정렬
+                .map(notice -> new NoticeController.ResponseNotices.NoticeResponse(
+                        notice.getNoticeId(),
+                        notice.getTitle(),
+                        notice.getContent(),
+                        notice.getUpdatedAt(),
+                        formatTimeAgo(notice.getUpdatedAt(), now) // timeAgo 필드 추가
+                ))
+                .collect(Collectors.toList());
+
+        return List.of(new NoticeController.ResponseNotices(storeId, sortedNotices));
     }
 
 
     // 공지 수정
     @Transactional
-    public NoticeController.ResponseBody updateNotice(Long noticeId, Long storeId, Long userId, String newTitle, String newContent) {
+    public NoticeController.ResponseNoticeSave updateNotice(Long noticeId, Long storeId, Long userId, String newTitle, String newContent) {
         if (noticeId == null || storeId == null || userId ==null) {
             throw new IllegalArgumentException("noticeId, storeId, userId는 필수입니다.");
         }
@@ -156,14 +190,20 @@ public class NoticeService {
             isUpdated = true;
         }
 
+        // 변경된 내용이 있으면 updatedAt 갱신
+        if (isUpdated) {
+            notice.setUpdatedAt(LocalDateTime.now());
+        }
+
         String message = isUpdated ? "공지 수정 완료" : "변경된 내용이 없습니다.";
 
-        return new NoticeController.ResponseBody(
+        return new NoticeController.ResponseNoticeSave(
                 message,
                 notice.getNoticeId(),
                 notice.getStore().getStoreId(),
                 notice.getTitle(),
-                notice.getContent());
+                notice.getContent(),
+                notice.getUpdatedAt());
     }
 
     // 공지 삭제
@@ -174,13 +214,13 @@ public class NoticeService {
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("User NotF Found"));
 
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("StoreNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("Store Not Found"));
 
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("NoticeNotFound"));
+                .orElseThrow(() -> new IllegalArgumentException("Notice Not Found"));
 
         if (!notice.getStore().getOwner().getUserId().equals(user.getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "공지 삭제 권한이 없습니다.");
@@ -192,6 +232,31 @@ public class NoticeService {
         noticeRepository.delete(notice);
     }
 
+
+    // Elasticsearch에서 공지 제목 검색
+    public List<NoticeDocument> searchNotices(Long storeId, String keyword) {
+        return noticeSearchRepository.findByStoreIdAndTitleContainingOrderByUpdatedAtDesc(storeId, keyword);
+    }
+
+
+    // Elasticsearch test위한 더미 데이터 동기화용
+    @Transactional
+    public void syncNoticesToElasticsearch() {
+        List<Notice> allNotices = noticeRepository.findAll();  // MySQL에서 모든 공지 가져오기
+
+        for (Notice notice : allNotices) {
+            NoticeDocument noticeDocument = new NoticeDocument();
+            noticeDocument.setNoticeId(notice.getNoticeId());
+            noticeDocument.setStoreId(notice.getStore().getStoreId());
+            noticeDocument.setTitle(notice.getTitle());
+            noticeDocument.setContent(notice.getContent());
+            noticeDocument.setUpdatedAt(notice.getUpdatedAt());
+
+            noticeSearchRepository.save(noticeDocument);
+        }
+    }
+
+
     // 사용자가 해당 매장과 관련이 있는지 검증 로직
     private boolean isAuthorizedUser(Store store, User user) {
         // 사장인지 확인
@@ -201,6 +266,25 @@ public class NoticeService {
         // 알바생인지 확인
         return storeEmployeeRepository.existsByUser_UserIdAndStore_StoreIdAndIsEmployedTrue(user.getUserId(), store.getStoreId());
 
+    }
+
+    // 전체 공지 조회시 updatedAt 최신순으로 정렬 및 timeAgo 계산 로직
+    private String formatTimeAgo(LocalDateTime updatedAt, LocalDateTime now) {
+        Duration duration = Duration.between(updatedAt, now);
+        long seconds = duration.getSeconds();
+        long minutes = duration.toMinutes();
+        long hours = duration.toHours();
+        long days = duration.toDays();
+
+        if (seconds < 60) {
+            return seconds + "초 전";
+        } else if (minutes < 60) {
+            return minutes + "분 전";
+        } else if (hours < 24) {
+            return hours + "시간 전";
+        } else {
+            return days + "일 전";
+        }
     }
 
 }

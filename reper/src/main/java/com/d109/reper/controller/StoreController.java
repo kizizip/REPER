@@ -1,6 +1,7 @@
 package com.d109.reper.controller;
 
 import com.d109.reper.domain.Store;
+import com.d109.reper.elasticsearch.StoreDocument;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.request.StoreRequestDto;
 import com.d109.reper.response.StoreResponseDto;
@@ -57,7 +58,7 @@ public class StoreController {
     public ResponseEntity<List<StoreResponseDto>> findNotices(
             @PathVariable Long userId) {
 
-        List<Store> stores = storeService.findStores(userId);
+        List<Store> stores = storeService.findOwnerStores(userId);
 
         List<StoreResponseDto> response = stores.stream()
                 .map(StoreResponseDto::new)
@@ -66,5 +67,26 @@ public class StoreController {
         return ResponseEntity.ok(response);
     }
 
+
+    // Elasticsearch 매장 제목 검색 기능
+    @GetMapping("/search")
+    @Operation(summary = "storeName으로 모든 매장을 검색합니다.")
+    public List<StoreDocument> searchStores(
+            @RequestParam("storeName") String keyword) {
+        return storeService.searchStoreByName(keyword);
+    }
+
+
+    // ResponseBody
+    @Getter
+    public static class StoreResponseAll {
+        private final Long storeId;
+        private final String storeName;
+
+        public StoreResponseAll (Long storeId, String storeName) {
+           this.storeId = storeId;
+           this.storeName = storeName;
+        }
+    }
 
 }
