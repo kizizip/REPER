@@ -27,8 +27,9 @@ services:
     ports:
       - "23159:9200"
     volumes:
-      - elastic_data:/usr/share/elasticsearch/data
-      - ./logs:/usr/share/elasticsearch/logs:rw
+      - elastic_data:/elasticsearch/data
+      - elasticsearch_logs:/elasticsearch/logs:rw
+
     networks:
       - elastic_network
 
@@ -57,7 +58,6 @@ volumes:
   mysql_config:  # MySQL 설정 파일 저장 볼륨
   app_logs:  # Spring Boot 애플리케이션 로그 저장 볼륨
   elastic_data:
-    driver: local
 
 networks:
   app-network:
