@@ -1,7 +1,11 @@
 package com.ssafy.reper.data.dto
 
 data class Employee(
-    val name : String,
-    var access : Boolean
+    val created_at: String,
+    val email: String,
+    val id: Int,
+    val phone: Int,
+    val role: String,
+    val username: String
+    //승인여부 없음
 )
-//더미데이터를 위한 dto,,,,

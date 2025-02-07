@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.data.dto.RequestStore
+import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.data.remote.RetrofitUtil
 import kotlinx.coroutines.launch
 

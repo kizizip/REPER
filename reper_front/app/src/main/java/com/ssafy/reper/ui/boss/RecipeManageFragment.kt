@@ -2,23 +2,20 @@ package com.ssafy.reper.ui.boss
 
 import android.app.Dialog
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentRecipeManageBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.RecipeAdapter
-import com.ssafy.reper.ui.login.LoginActivity
 
 private const val TAG = "RecipeManageFragment_싸피"
 class RecipeManageFragment : Fragment() {
@@ -59,8 +56,8 @@ class RecipeManageFragment : Fragment() {
             "프라프치노"
         )
 
-        binding.recipeFgRV.layoutManager = LinearLayoutManager(requireContext())
-        binding.recipeFgRV.adapter =
+        binding.recipeFgAddRV.layoutManager = LinearLayoutManager(requireContext())
+        binding.recipeFgAddRV.adapter =
             RecipeAdapter(menuList, object : RecipeAdapter.ItemClickListener {
                 override fun onItemClick(position: Int) {
                     showDialog(menuList[position])
@@ -68,7 +65,7 @@ class RecipeManageFragment : Fragment() {
                 }
             })
 
-        binding.recipeFgBackIcon.setOnClickListener {
+        binding.storeFgBackIcon.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
     }

@@ -16,7 +16,7 @@
 
 
         <ImageView
-            android:id="@+id/recipe_fg_back_icon"
+            android:id="@+id/store_fg_back_icon"
             android:layout_width="24dp"
             android:layout_height="28dp"
             android:src="@drawable/baseline_arrow_back_ios_24"
@@ -31,7 +31,7 @@
             android:layout_marginLeft="16dp"
             android:layout_marginTop="60dp"
             android:text="레시피 관리"
-            app:layout_constraintStart_toEndOf="@+id/recipe_fg_back_icon"
+            app:layout_constraintStart_toEndOf="@+id/store_fg_back_icon"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -79,7 +79,7 @@
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recipe_fg_RV"
+            android:id="@+id/recipe_fg_add_RV"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="24dp"
