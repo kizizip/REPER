@@ -10,7 +10,8 @@ services:
 #      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/instance/instance.key
 #      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/instance/instance.crt
 #      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca.crt
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=-Xms512m -Xmx15g
+#      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
 #    env_file:
 #      - .env
     ports:
@@ -19,7 +20,7 @@ services:
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
 #      - ./certs:/usr/share/elasticsearch/config/certs
-      - ./docker/logs:/usr/share/elasticsearch/logs
+      - ./logs:/usr/share/elasticsearch/logs
     networks:
       - elastic_network
 
