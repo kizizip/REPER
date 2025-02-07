@@ -17,7 +17,6 @@ public class NoticeDocument {
     @Id
     private  Long noticeId;
 
-    private Long userId;
     private Long storeId;
 
     private String title;

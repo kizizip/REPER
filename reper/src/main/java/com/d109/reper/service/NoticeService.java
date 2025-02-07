@@ -248,7 +248,6 @@ public class NoticeService {
             NoticeDocument noticeDocument = new NoticeDocument();
             noticeDocument.setNoticeId(notice.getNoticeId());
             noticeDocument.setStoreId(notice.getStore().getStoreId());
-            noticeDocument.setUserId(notice.getUser().getUserId());
             noticeDocument.setTitle(notice.getTitle());
             noticeDocument.setContent(notice.getContent());
             noticeDocument.setUpdatedAt(notice.getUpdatedAt());
