@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter @Setter
 public class Notice {
@@ -22,4 +24,13 @@ public class Notice {
     private String title;
 
     private String content;
+
+
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+
+        this.updatedAt = LocalDateTime.now();
+    }
 }

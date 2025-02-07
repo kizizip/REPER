@@ -27,14 +27,14 @@ public class UserService {
 
 
     // 회원가입
-    public int insertMember(User user) {
+    public Long insertMember(User user) {
         // 패스워드 암호화
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // User를 저장하고, 저장된 User가 null이 아니면 성공으로 판단
         User savedUser = userRepository.save(user);
         logger.info("저장된 User: {}", savedUser);
-        return savedUser != null ? 1 : 0;
+        return savedUser != null ? savedUser.getUserId() : null;
     }
 
 

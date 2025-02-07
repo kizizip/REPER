@@ -1,14 +1,21 @@
 package com.d109.reper.service;
 
+import com.d109.reper.controller.StoreEmployeeController;
 import com.d109.reper.domain.Store;
 import com.d109.reper.domain.StoreEmployee;
 import com.d109.reper.domain.User;
+import com.d109.reper.domain.UserRole;
 import com.d109.reper.repository.StoreEmployeeRepository;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -99,6 +106,28 @@ public class StoreEmployeeService {
         }
 
         return storeEmployee;
+    }
+
+
+    // 특정 알바생이 근무하는 모든 매장 조회
+        //is_employed = true 인 매장들만 조회
+    public List<StoreEmployeeController.StaffStoresResponse> findStoresByEmployee(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("userId는 필수입니다.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User Not Found"));
+
+        if (!user.getRole().equals(UserRole.STAFF)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 user는 STAFF가 아닙니다.");
+        }
+
+        List<StoreEmployee> storeEmployees = storeEmployeeRepository.findByUserAndIsEmployedTrue(user);
+
+        return storeEmployees.stream()
+                .map(se -> new StoreEmployeeController.StaffStoresResponse(se.getStore()))
+                .collect(Collectors.toList());
     }
 
 }

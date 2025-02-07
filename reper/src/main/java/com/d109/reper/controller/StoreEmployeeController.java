@@ -1,6 +1,8 @@
 package com.d109.reper.controller;
 
+import com.d109.reper.domain.Store;
 import com.d109.reper.service.StoreEmployeeService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import com.d109.reper.domain.StoreEmployee;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/stores")
@@ -89,6 +93,18 @@ public class StoreEmployeeController {
     }
 
 
+    // 특정 알바생의 근무 매장 목록 조회
+    @GetMapping("/employees/{userId}")
+    @Operation(summary = "특정 알바생의 근무 매장 목록 조회", description ="STAFF인 {userId}가 isEmployed=ture인 모든 매장을 조회합니다.")
+    public ResponseEntity<List<StaffStoresResponse>> getStoresByEmployee(
+            @PathVariable Long userId) {
+
+        List<StaffStoresResponse> stores = storeEmployeeService.findStoresByEmployee(userId);
+
+        return ResponseEntity.ok(stores);
+    }
+
+
     // 성공 응답 형식
     public static class ResponseBody {
         private String message;
@@ -118,6 +134,17 @@ public class StoreEmployeeController {
 
         public boolean getIsEmployed() {
             return isEmployed;
+        }
+    }
+
+    @Getter
+    public static class StaffStoresResponse {
+        private Long storeId;
+        private String name;
+
+        public StaffStoresResponse(Store store) {
+            this.storeId = store.getStoreId();
+            this.name = store.getStoreName();
         }
     }
 }
