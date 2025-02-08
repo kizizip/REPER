@@ -158,6 +158,9 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("Notice Not Found"));
 
+        NoticeDocument elasticNotice = noticeSearchRepository.findByNoticeId(noticeId)
+                .orElseThrow(() -> new IllegalArgumentException("Elasticsearch에 해당 공지가 없습니다."));
+
         storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("Store Not Found"));
 
@@ -184,17 +187,21 @@ public class NoticeService {
 
         if (newTitle != null && !newTitle.equals(notice.getTitle())) {
             notice.setTitle(newTitle);
+            elasticNotice.setTitle(newTitle);
             isUpdated = true;
         }
 
         if (newContent != null && !newContent.equals(notice.getContent())) {
             notice.setContent(newContent);
+            elasticNotice.setContent(newContent);
             isUpdated = true;
         }
 
         // 변경된 내용이 있으면 updatedAt 갱신
         if (isUpdated) {
             notice.setUpdatedAt(LocalDateTime.now());
+            elasticNotice.setUpdatedAt(LocalDateTime.now());
+            noticeSearchRepository.save(elasticNotice);
         }
 
         String message = isUpdated ? "공지 수정 완료" : "변경된 내용이 없습니다.";
@@ -216,13 +223,16 @@ public class NoticeService {
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User NotF Found"));
+                .orElseThrow(() -> new IllegalArgumentException("User Not Found"));
 
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("Store Not Found"));
 
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("Notice Not Found"));
+
+        NoticeDocument elasticNotice = noticeSearchRepository.findByNoticeId(noticeId)
+                .orElseThrow(() -> new IllegalArgumentException("Elasticsearch에 해당 공지가 없습니다."));
 
         if (!notice.getStore().getOwner().getUserId().equals(user.getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "공지 삭제 권한이 없습니다.");
@@ -232,6 +242,7 @@ public class NoticeService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 가게에 속한 공지가 아닙니다.");
         }
         noticeRepository.delete(notice);
+        noticeSearchRepository.delete(elasticNotice);
     }
 
 

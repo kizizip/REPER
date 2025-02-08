@@ -53,6 +53,13 @@ public class StoreService {
         store.setOwner(owner);
 
         Store savedStore = storeRepository.save(store);
+
+        // 엘라스틱서치 DB에 등록
+        StoreDocument elasticStore = new StoreDocument();
+        elasticStore.setStoreId(savedStore.getStoreId());
+        elasticStore.setStoreName(savedStore.getStoreName());
+        storeSearchRepository.save(elasticStore);
+
         return new StoreResponseDto(savedStore);
     }
 
@@ -76,7 +83,11 @@ public class StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NoSuchElementException("Store not found"));
 
+        StoreDocument elasticStore = storeSearchRepository.findByStoreId(storeId)
+                        .orElseThrow(() -> new IllegalArgumentException("Elasticsearch에 해당 매장 정보가 없습니다."));
+
         storeRepository.delete(store);
+        storeSearchRepository.delete(elasticStore);
     }
 
 

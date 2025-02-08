@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -33,6 +34,9 @@ public class RecipeDocument {
 
     @Field(type = FieldType.Keyword)
     private String recipeImg;
+
+    @Transient
+    private Boolean likedRecipe;
 
     @Field(type = FieldType.Text) // analyzer = "nori", searchAnalyzer = "nori" nori tokenizer 임시 주석처리
     private List<String> ingredients;
