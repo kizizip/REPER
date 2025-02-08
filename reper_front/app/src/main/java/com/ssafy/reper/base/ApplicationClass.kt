@@ -1,4 +1,4 @@
-package com.ssafy.smartstore_jetpack.base
+package com.ssafy.reper.base
 
 import android.app.Application
 import com.google.gson.Gson
@@ -14,7 +14,7 @@ private const val TAG = "ApplicationClass_싸피"
 class ApplicationClass : Application() {
     companion object{
         // ipconfig를 통해 ip확인하기
-        const val SERVER_URL = "http://i12d109.p.ssafy.io:48620/"
+        const val SERVER_URL = "http://i12d109.p.ssafy.io:48620/api/"
 
         lateinit var sharedPreferencesUtil: SharedPreferencesUtil
         lateinit var retrofit: Retrofit

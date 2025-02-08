@@ -6,10 +6,10 @@ import retrofit2.http.Path
 
 interface OrderService {
     // 특정 매장의 전체 주문 조회
-    @GET("api/stores/{storeId}/orders")
+    @GET("stores/{storeId}/orders")
     suspend fun getAllOrder(@Path("storeId") storeId: Int):MutableList<Order>
 
     // 특정 매장의 주문 단건 조회
-    @GET("api/stores/{storeId}/orders/{orderId}")
+    @GET("stores/{storeId}/orders/{orderId}")
     suspend fun getOrder(@Path("storeId") storeId: Int, @Path("orderId") orderId: Int):Order
 }
