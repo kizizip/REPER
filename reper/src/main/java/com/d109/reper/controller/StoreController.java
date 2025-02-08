@@ -41,7 +41,7 @@ public class StoreController {
     @GetMapping("/search")
     @Operation(summary = "모든 매장 검색")
     public List<StoreDocument> searchStores(
-            @RequestParam("nameKeyword") String keyword) {
+            @RequestParam("storeName") String keyword) {
         return storeService.searchStoreByName(keyword);
     }
 
