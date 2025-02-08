@@ -22,7 +22,7 @@ public class RecipeDocument {
     @Field(type = FieldType.Long)
     private Long storeId;
 
-    @Field(type = FieldType.Text, analyzer = "nori", searchAnalyzer = "nori")
+    @Field(type = FieldType.Text) // analyzer = "nori", searchAnalyzer = "nori" nori tokenizer 임시 주석처리
     private String recipeName;
 
     @Field(type = FieldType.Keyword)
@@ -34,7 +34,7 @@ public class RecipeDocument {
     @Field(type = FieldType.Keyword)
     private String recipeImg;
 
-    @Field(type = FieldType.Text, analyzer = "nori", searchAnalyzer = "nori")
+    @Field(type = FieldType.Text) // analyzer = "nori", searchAnalyzer = "nori" nori tokenizer 임시 주석처리
     private List<String> ingredients;
 
 }
