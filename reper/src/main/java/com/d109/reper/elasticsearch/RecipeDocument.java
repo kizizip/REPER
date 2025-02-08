@@ -1,5 +1,6 @@
 package com.d109.reper.elasticsearch;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Document(indexName = "recipes")
 public class RecipeDocument {
 
