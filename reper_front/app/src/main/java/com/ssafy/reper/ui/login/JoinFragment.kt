@@ -10,7 +10,6 @@ import com.ssafy.reper.R
 import android.widget.ArrayAdapter
 import android.widget.AdapterView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.databinding.FragmentJoinBinding
@@ -349,7 +348,7 @@ class JoinFragment : Fragment() {
                                 ownerId = response,
                                 storeName = binding.FragmentJoinStoreInfoInput.text.toString()
                             )
-                            val storeResponse = RetrofitUtil.bossService.addStore(storeRequest)
+                            val storeResponse = RetrofitUtil.storeService.addStore(storeRequest)
                         }
 
                         Toast.makeText(requireContext(), "회원가입 성공", Toast.LENGTH_SHORT).show()

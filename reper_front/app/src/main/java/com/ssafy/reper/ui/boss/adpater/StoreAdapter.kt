@@ -1,10 +1,13 @@
 package com.ssafy.reper.ui.boss.adpater
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.databinding.ItemEditMyStoreRvBinding
+
+private const val TAG = "StoreAdapter_싸피"
 
 class StoreAdapter (var storeList: List<Store>, val itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<StoreAdapter.StoreViewHolder>() {
@@ -41,5 +44,12 @@ class StoreAdapter (var storeList: List<Store>, val itemClickListener: ItemClick
     // 클릭 리스너 인터페이스
     interface ItemClickListener {
         fun onClick(position: Int)
+    }
+
+    fun updateData(newList: List<Store>) {
+        storeList = emptyList()
+        storeList = newList
+        Log.d(TAG, "storeUpdateData: ${storeList}")
+        notifyDataSetChanged() // 데이터 변경 시 UI 갱신
     }
 }

@@ -1,10 +1,12 @@
 package com.ssafy.reper.ui.boss
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Employee
+import com.ssafy.reper.data.dto.Notice
 import com.ssafy.reper.data.dto.RequestStore
 import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.data.remote.RetrofitUtil
@@ -37,27 +39,24 @@ class BossViewModel: ViewModel() {
     }
 
 
-
     fun getStoreList(userId: Int){
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.bossService.findBossStore(userId)
+                RetrofitUtil.storeService.findBossStore(userId)
             }.onSuccess {
                 setMyStoreList(it)
                 Log.d(TAG, "getStoreList: ${it}")
             }.onFailure {
                 Log.d(TAG, "getStoreList: ${it.message}")
             }
-
         }
-
     }
 
 
     fun addStore(storeName: String, userId: Int){
         viewModelScope.launch {
          runCatching {
-             RetrofitUtil.bossService.addStore(RequestStore(userId, storeName))
+             RetrofitUtil.storeService.addStore(RequestStore(userId, storeName))
          }.onSuccess {
              getStoreList(userId)
          }.onFailure {
@@ -69,19 +68,15 @@ class BossViewModel: ViewModel() {
     fun deleteStore(storeId: Int, userId: Int){
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.bossService.deleteEmployee(storeId)
+                RetrofitUtil.storeService.deleteStore(storeId)
             }.onSuccess {
-
+                Log.d(TAG, "deleteStore: $it")
+                getStoreList(userId)
             }.onFailure {
                 Log.d(TAG, "deleteStore: ${it.message}")
             }
         }
 
     }
-
-
-
-
-
 
 }

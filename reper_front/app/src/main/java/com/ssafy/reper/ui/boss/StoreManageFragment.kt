@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
+import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.databinding.FragmentStoreManageBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.StoreAdapter
@@ -60,7 +61,13 @@ class StoreManageFragment : Fragment() {
         binding.storeFgAddTv.setOnClickListener {
             showStoreAddDialog()
         }
+
         initAdapter()
+
+        bossViewModel.myStoreList.observe(viewLifecycleOwner) { newStoreList ->
+            storeAdapter.updateData(newStoreList)
+        }
+
     }
 
 
@@ -71,33 +78,29 @@ class StoreManageFragment : Fragment() {
         dialog.findViewById<View>(R.id.store_add_content).visibility = View.GONE
 
         val editText = dialog.findViewById<EditText>(R.id.storeAddET)
-        dialog.findViewById<ImageView>(R.id.add_btn).setOnClickListener{
-                if (editText.text.equals("")){
-                    Log.d(TAG, "showStoreAddDialog: ${editText.text}")
-                    dialog.findViewById<View>(R.id.store_add_content).visibility = View.VISIBLE
-                    dialog.findViewById<TextView>(R.id.add_store_name).text = editText.text.toString()
+        val addButton = dialog.findViewById<TextView>(R.id.add_btn)
 
-                    dialog.findViewById<View>(R.id.store_add_btn_cancel).setOnClickListener {
-                        dialog.dismiss()
-                    }
-                    dialog.findViewById<View>(R.id.store_add_btn_positive).setOnClickListener {
-                        bossViewModel.addStore(editText.text.toString(),userId)
-                        dialog.dismiss()
-                        Toast.makeText(requireContext(), "가게 등록 완료", Toast.LENGTH_SHORT).show()
+        addButton.setOnClickListener {
+            val storeName = editText.text.toString().trim()//가게 이름의 공백 삭제
 
-                    }
-                }else{
+            if (storeName.isNotEmpty()) {//가게이름의 존재여부 확인
+                Log.d(TAG, "showStoreAddDialog: $storeName")
+                dialog.findViewById<View>(R.id.store_add_content).visibility = View.VISIBLE
+                dialog.findViewById<TextView>(R.id.add_store_name).text = storeName
 
-                    dialog.findViewById<View>(R.id.store_add_btn_cancel).setOnClickListener {
-                        dialog.dismiss()
-                    }
-                    dialog.findViewById<View>(R.id.store_add_btn_positive).setOnClickListener {
-                        Log.d(TAG, "showStoreAddDialog:${editText.text} ")
-                        Toast.makeText(requireContext(), "가게명을 입력해주세요.", Toast.LENGTH_SHORT).show()
-                    }
+                dialog.findViewById<View>(R.id.store_add_btn_cancel).setOnClickListener {
+                    dialog.dismiss()
                 }
+                dialog.findViewById<View>(R.id.store_add_btn_positive).setOnClickListener {
+                    bossViewModel.addStore(storeName, userId)
+                    dialog.dismiss()
+                    Toast.makeText(requireContext(), "가게 등록 완료", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Log.d(TAG, "showStoreAddDialog: 가게명이 입력되지 않음")
+                Toast.makeText(requireContext(), "가게명을 입력해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
-
 
         dialog.findViewById<View>(R.id.store_add_btn_cancel).setOnClickListener {
             dialog.dismiss()
@@ -110,23 +113,26 @@ class StoreManageFragment : Fragment() {
     }
 
 
+
     private fun initAdapter() {
-        var storeList = bossViewModel.myStoreList.value!!
-        storeAdapter = StoreAdapter(storeList
-            , object : StoreAdapter.ItemClickListener {
+        storeAdapter = StoreAdapter(emptyList(), object : StoreAdapter.ItemClickListener {
             override fun onClick(position: Int) {
-                showDialog(storeList[position].storeName)
+                showDialog(storeAdapter.storeList[position].storeName, storeAdapter.storeList[position].storeId)
             }
         })
-
 
         binding.storeFgRV.layoutManager = LinearLayoutManager(requireContext())
         binding.storeFgRV.adapter = storeAdapter
 
+        // ViewModel의 myStoreList를 관찰하여 변경될 때마다 Adapter에 데이터 업데이트
+        bossViewModel.myStoreList.observe(viewLifecycleOwner) { newStoreList ->
+            storeAdapter.updateData(newStoreList)
+        }
     }
 
 
-    private fun showDialog(storeName: String) {
+
+    private fun showDialog(storeName: String, deleteStoreId:Int) {
         val dialog = Dialog(mainActivity)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(R.layout.dialog_delete)
@@ -140,16 +146,23 @@ class StoreManageFragment : Fragment() {
         middleTV.text = "의 정보를"
 
 
+
+
         dialog.findViewById<View>(R.id.dialog_delete_cancle_btn).setOnClickListener {
             dialog.dismiss()
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-            bossViewModel.deleteStore(storeId,userId)
+            bossViewModel.deleteStore(deleteStoreId, userId)
+            Log.d(TAG, "showDialog: $deleteStoreId")
             dialog.dismiss()
             Toast.makeText(requireContext(), "가게 삭제 완료", Toast.LENGTH_SHORT).show()
-
+            initAdapter()
         }
         dialog.show()
     }
+
+
+
+
 
 }
