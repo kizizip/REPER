@@ -1,13 +1,14 @@
 package com.ssafy.reper.ui.boss.adpater
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
+import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.ItemRecipeBinding
 
 private const val TAG = "RecipeAdapter_싸피"
-class RecipeAdapter(var menuList: MutableList<String>,val itemClickListener: ItemClickListener) :
+class RecipeAdapter(var menuList: List<Recipe>, val itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
 
     // ViewHolder 클래스
@@ -15,7 +16,6 @@ class RecipeAdapter(var menuList: MutableList<String>,val itemClickListener: Ite
         RecyclerView.ViewHolder(binding.root) {
         init {
             binding.iconRecipeDelete.setOnClickListener {
-                Log.d(TAG, "어댑터는 클릭완: ")
                 itemClickListener.onItemClick(absoluteAdapterPosition)
             }
         }
@@ -33,11 +33,15 @@ class RecipeAdapter(var menuList: MutableList<String>,val itemClickListener: Ite
 
     override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
         // 데이터 바인딩
-        holder.binding.recipeItemName.text = menuList[position]
-        holder.binding.recpeAddDateTV.text = "2025.01.25"
+        holder.binding.recipeItemName.text = menuList[position].recipeName
+        holder.binding.recpeAddDateTV.text = menuList[position].type
     }
 
     override fun getItemCount(): Int {
         return menuList.size
+    }
+
+    fun updateData(recipeList: List<Recipe>) {
+        menuList = recipeList
     }
 }

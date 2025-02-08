@@ -5,5 +5,5 @@ data class Notice(
     val title: String,
     val content: String,
     val updatedAt: String,
-    val timgeAgo: String
+    val timeAgo: String
 )

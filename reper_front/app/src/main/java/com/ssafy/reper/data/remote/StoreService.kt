@@ -28,6 +28,9 @@ interface StoreService {
     @GET("store/search")
     suspend fun searchStore(@Query ("storeName")storeName : String) : List<Store>
 
+    @GET("stores/{storeId}/employees")
+    suspend fun allEmployee(@Path("storeId") storeId: Int): List<Employee>
+
 
 }
 

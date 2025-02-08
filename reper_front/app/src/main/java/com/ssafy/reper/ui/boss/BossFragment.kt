@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ import com.ssafy.reper.ui.MainActivity
 
 //import com.ssafy.reper.ui.boss.adpater.AccessAdapter
 
+private const val TAG = "BossFragment_싸피"
 class BossFragment : Fragment() {
     private var _binding: FragmentBossBinding? = null
     private val binding get() = _binding!!
@@ -29,8 +31,10 @@ class BossFragment : Fragment() {
 //    private lateinit var nonAccessAdapter: AccessAdapter
     private lateinit var mainActivity: MainActivity
     private val bossViewModel: BossViewModel by activityViewModels()
+
+ //sharedPreferencesUtil정보로 바꾸기
     var userId = 1
-    var storeId = 1
+    var storeId = 13
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -101,6 +105,11 @@ class BossFragment : Fragment() {
             }
 
             spinner.adapter = adapter
+            val selectedStoreName = storeList.find { it.storeId == storeId }?.storeName
+            selectedStoreName?.let {
+                val position = storeNames.indexOf(it)
+                spinner.setSelection(position)
+            }
         }
 
         // 데이터 요청
@@ -115,8 +124,10 @@ class BossFragment : Fragment() {
                 id: Long
             ) {
                 val selectedItem = spinner.adapter.getItem(position) as String
-                // 선택된 항목 처리
-                //여기서 공유된 데이터의 현재 가게 Id를 바꿔주어야 다른 화면들도 갱신될것!
+                val selectedStore = bossViewModel.myStoreList.value?.find { it.storeName == selectedItem }
+                storeId = selectedStore!!.storeId
+                //나중엔 sharedPreferencesUtil꺼 바꿔주기
+                Log.d(TAG, "onItemSelected: ${storeId}")
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -168,15 +179,10 @@ class BossFragment : Fragment() {
             dialog.dismiss()
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-            //레시피 삭제 로직작성
-            Toast.makeText(requireContext(), "레시피 등록 완료", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
         }
         dialog.show()
     }
-
-
-
-
 
 }

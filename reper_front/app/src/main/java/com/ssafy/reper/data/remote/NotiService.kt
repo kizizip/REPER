@@ -45,7 +45,12 @@ interface NotiService {
         @Body requestBody: Map<String, Int>
     ): Response<Void?>
 
-    @GET("stores/{storeId}/notices/search")
-    suspend fun searchNotice(@Path("storeId") storeId : Int, @Body noticeTitle: String): List<StoreNoticeResponse>
+    //제목으로 공지를 검색합니다
+    @GET("stores/{storeId}/notices/search/title")
+    suspend fun searchNoticeTitle(@Path("storeId") storeId : Int, @Query ("titleKeyword")titleKeyword: String): List<Notice>
+
+    //내용으로 공지를 검색합니다
+    @GET("stores/{storeId}/notices/search/content")
+    suspend fun searchNoticeContent(@Path("storeId") storeId : Int, @Query ("contentKeyword")contentKeyword: String): List<Notice>
 
 }

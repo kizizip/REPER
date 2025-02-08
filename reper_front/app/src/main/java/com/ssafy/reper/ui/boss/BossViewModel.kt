@@ -7,14 +7,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.data.dto.Notice
+import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RequestStore
 import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.data.remote.RetrofitUtil
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
+import kotlin.math.log
 
 private const val TAG = "BossViewModel"
 
-class BossViewModel: ViewModel() {
+class BossViewModel : ViewModel() {
 
     //스토어 정보 리스트
     private val _myStoreList = MutableLiveData<List<Store>>()
@@ -22,6 +25,14 @@ class BossViewModel: ViewModel() {
 
     fun setMyStoreList(list: List<Store>) {
         _myStoreList.value = list
+    }
+
+    //레세피 정보 리스트
+    private val _recipeList = MutableLiveData<List<Recipe>>()
+    val recipeList: MutableLiveData<List<Recipe>> get() = _recipeList
+
+    fun setRecipeList(list: List<Recipe>) {
+        _recipeList.value = list
     }
 
     //승인된 직원 리스트
@@ -33,13 +44,12 @@ class BossViewModel: ViewModel() {
     val waitingList: MutableLiveData<List<Employee>> get() = _waitingList
 
 
-    fun getAllEmployee(storeId: Int){
-
+    fun getAllEmployee(storeId: Int) {
 
     }
 
 
-    fun getStoreList(userId: Int){
+    fun getStoreList(userId: Int) {
         viewModelScope.launch {
             runCatching {
                 RetrofitUtil.storeService.findBossStore(userId)
@@ -53,19 +63,19 @@ class BossViewModel: ViewModel() {
     }
 
 
-    fun addStore(storeName: String, userId: Int){
+    fun addStore(storeName: String, userId: Int) {
         viewModelScope.launch {
-         runCatching {
-             RetrofitUtil.storeService.addStore(RequestStore(userId, storeName))
-         }.onSuccess {
-             getStoreList(userId)
-         }.onFailure {
-             Log.d(TAG, "addStore: ${it.message}")
-         }
+            runCatching {
+                RetrofitUtil.storeService.addStore(RequestStore(userId, storeName))
+            }.onSuccess {
+                getStoreList(userId)
+            }.onFailure {
+                Log.d(TAG, "addStore: ${it.message}")
+            }
         }
     }
 
-    fun deleteStore(storeId: Int, userId: Int){
+    fun deleteStore(storeId: Int, userId: Int) {
         viewModelScope.launch {
             runCatching {
                 RetrofitUtil.storeService.deleteStore(storeId)
@@ -77,6 +87,51 @@ class BossViewModel: ViewModel() {
             }
         }
 
+    }
+
+    fun uploadRecipe(storeId: Int, recipefile: MultipartBody.Part) {
+        var message = ""
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.recipeService.recipeUpload(storeId, recipefile)
+            }.onSuccess {
+                message =  "레시피 업로드 성공"
+                Log.d(TAG, "uploadRecipe: 성공")
+            }.onFailure {
+                Log.d(TAG, "uploadRecipe: ${it.message}")
+                message =  "레시피 업로드 실패"
+            }
+        }
+
+    }
+
+
+    fun getMenuList(storeId: Int) {
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.recipeService.getStoreRecipe(storeId)
+            }.onSuccess {
+                setRecipeList(it)
+                Log.d(TAG, "getMenuList: $it")
+            }.onFailure {
+                Log.d(TAG, "getMenuList: ${it.message}")
+            }
+        }
+    }
+
+    fun deleteRecipe(recipeId: Int):String {
+        var message = ""
+        viewModelScope.launch {
+         runCatching {
+             RetrofitUtil.recipeService.recipeDelete(recipeId)
+         }.onSuccess {
+           message =  "레시피 삭제 성공"
+         }.onFailure {
+             message =  "레시피 삭제실패"
+             Log.d(TAG, "deleteRecipe: 레시피 삭제실패")
+         }
+        }
+        return message
     }
 
 }

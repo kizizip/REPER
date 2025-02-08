@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.data.dto.Notice
 import com.ssafy.reper.databinding.ItemNotiBinding
-import com.ssafy.reper.ui.mypage.MyAccessStoreListAdapter.ItemClickListener
 
 class NotiAdapter(var noticeList: List<Notice>,val itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<NotiAdapter.NotiViewHolder>() {
@@ -34,7 +33,7 @@ class NotiAdapter(var noticeList: List<Notice>,val itemClickListener: ItemClickL
     override fun onBindViewHolder(holder: NotiViewHolder, position: Int) {
         // 여기서 실제 데이터 바인딩을 진행하면 됩니다.
         holder.binding.itemNotiTitle.text = noticeList[position].title
-        holder.binding.itemNotiTime.text = noticeList[position].timgeAgo
+        holder.binding.itemNotiTime.text = noticeList[position].timeAgo
     }
 
     override fun getItemCount(): Int {

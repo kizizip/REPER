@@ -15,6 +15,7 @@ import com.ssafy.reper.databinding.FragmentNoticeManageBinding
 import com.ssafy.reper.ui.boss.adpater.NotiAdapter
 
 private const val TAG = "NoticeManageFragment"
+
 class NoticeManageFragment : Fragment() {
     private var _binding: FragmentNoticeManageBinding? = null
     private val binding get() = _binding!!
@@ -34,7 +35,7 @@ class NoticeManageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        noticeViewModel.init(1,1)
+        noticeViewModel.init(1, 1)
         initNotiAdater()
         initSpinner()
 
@@ -54,12 +55,12 @@ class NoticeManageFragment : Fragment() {
 
     fun initSpinner() {
         val notiSpinner = binding.notiFgSpinner
-        val notis = arrayOf("제목", "내용")
+        val category = arrayOf("제목", "내용")
 
         val adapter = ArrayAdapter(
             requireContext(),
             R.layout.order_spinner_item,
-            notis
+            category
         ).apply {
             setDropDownViewResource(R.layout.boss_spinner_item)
         }
@@ -73,7 +74,7 @@ class NoticeManageFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
-                val selectedItem = notis[position]
+                val selectedItem = category[position]
                 // 선택된 항목 처리
             }
 
@@ -85,7 +86,7 @@ class NoticeManageFragment : Fragment() {
 
     fun initNotiAdater() {
         binding.notiList.layoutManager = LinearLayoutManager(requireContext())
-        val notiAdapter = NotiAdapter( emptyList() , object : NotiAdapter.ItemClickListener {
+        val notiAdapter = NotiAdapter(emptyList(), object : NotiAdapter.ItemClickListener {
             override fun onClick(position: Int) {
                 val noticeList = noticeViewModel.noticeList.value // 현재 공지 리스트 가져오기
 
@@ -106,7 +107,7 @@ class NoticeManageFragment : Fragment() {
     }
 
 
-    fun searchNotice(){
+    fun searchNotice() {
 
     }
 

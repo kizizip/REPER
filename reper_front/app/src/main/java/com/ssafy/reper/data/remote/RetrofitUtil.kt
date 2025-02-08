@@ -7,6 +7,7 @@ class RetrofitUtil {
     companion object{
         val noticeService = ApplicationClass.retrofit.create(NotiService::class.java)
         val storeService = ApplicationClass.retrofit.create(StoreService::class.java)
+        val recipeService = ApplicationClass.retrofit.create(RecipeService::class.java)
         val storeEmployeeService = ApplicationClass.retrofit.create(StoreEmployeeService::class.java)
 
         val authService = ApplicationClass.retrofit.create(AuthApi::class.java)
