@@ -2,6 +2,8 @@ package com.d109.reper.controller;
 
 import com.d109.reper.domain.Recipe;
 import com.d109.reper.domain.Store;
+import com.d109.reper.elasticsearch.NoticeDocument;
+import com.d109.reper.elasticsearch.RecipeDocument;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.response.RecipeResponseDto;
 import com.d109.reper.service.RecipeService;
@@ -151,4 +153,38 @@ public class RecipeController {
         recipeService.deleteRecipe(recipeId);
         return ResponseEntity.ok().body("Recipe successfully deleted.");
     }
+
+
+    // 가게별 레시피 검색
+    @GetMapping("/stores/{storeId}/recipes/search")
+    @Operation(summary = "레시피 검색")
+    public List<RecipeDocument> searchRecipeName(
+            @PathVariable Long storeId,
+            @RequestParam("recipeName") String keyword) {
+
+        return recipeService.searchRecipeName(storeId, keyword);
+    }
+
+
+    // 가게별 레시피에서 재료 포함 검색
+    @GetMapping("/stores/{storeId}/recipes/search/include")
+    @Operation(summary = "재료 포함 검색")
+    public List<RecipeDocument> searchIncludeIngredient(
+            @PathVariable Long storeId,
+            @RequestParam("ingredient") String keyword) {
+
+        return recipeService.searchIncludeIngredient(storeId, keyword);
+    }
+
+
+    // 재료 미포함 검색
+    @GetMapping("/stores/{storeId}/recipes/search/exclude")
+    @Operation(summary = "재료 미포함 검색")
+    public List<RecipeDocument> searchExcludeIngredient(
+            @PathVariable Long storeId,
+            @RequestParam("ingredient") String keyword) {
+
+        return recipeService.searchExcludeIngredient(storeId, keyword);
+    }
+
 }
