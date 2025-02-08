@@ -52,6 +52,22 @@ services:
       - app_logs:/app/logs  # Spring Boot 로그 저장
     networks:
       - app-network
+  
+  pdf-server:
+    image: pdf-server
+    container_name: pdf-server
+    build:
+      context: ./pdf
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - app
+    networks:
+      - app-network
 
 volumes:
   mysql_data:  # MySQL 데이터 저장 볼륨
