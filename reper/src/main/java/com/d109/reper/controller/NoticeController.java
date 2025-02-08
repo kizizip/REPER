@@ -105,13 +105,22 @@ public class NoticeController {
     }
 
 
-    // 공지 제목 검색 API
-    @GetMapping("/search")
-    @Operation(summary = "{storeId}에 해당하는 공지를 검색합니다.")
-    public List<NoticeDocument> searchNotices(
+    // 공지 제목 검색
+    @GetMapping("/search/title")
+    @Operation(summary = "공지 제목 검색")
+    public List<NoticeDocument> searchNoticesTitle(
             @PathVariable Long storeId,
-            @RequestParam("noticeTitle") String keyword) {
-        return noticeService.searchNotices(storeId,keyword);
+            @RequestParam("titleKeyword") String keyword) {
+        return noticeService.searchNoticesTitle(storeId,keyword);
+    }
+
+    // 공지 내용 검색
+    @GetMapping("/search/content")
+    @Operation(summary = "공지 내용 검색")
+    public List<NoticeDocument> searchNoticesContent(
+            @PathVariable Long storeId,
+            @RequestParam("contentKeyword") String keyword) {
+        return noticeService.searchNoticesContent(storeId,keyword);
     }
 
 
@@ -173,14 +182,14 @@ public class NoticeController {
             private String content;
             @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
             private LocalDateTime updatedAt;
-            private String timgeAgo;
+            private String timeAgo;
 
-            public NoticeResponse(Long noticeId, String title, String content, LocalDateTime updatedAt, String timgeAgo) {
+            public NoticeResponse(Long noticeId, String title, String content, LocalDateTime updatedAt, String timeAgo) {
                 this.noticeId = noticeId;
                 this.title = title;
                 this.content = content;
                 this.updatedAt = updatedAt;
-                this.timgeAgo = timgeAgo;
+                this.timeAgo = timeAgo;
             }
         }
     };

@@ -11,6 +11,8 @@ import com.d109.reper.repository.StoreEmployeeRepository;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -234,8 +236,45 @@ public class NoticeService {
 
 
     // Elasticsearch에서 공지 제목 검색
-    public List<NoticeDocument> searchNotices(Long storeId, String keyword) {
-        return noticeSearchRepository.findByStoreIdAndTitleContainingOrderByUpdatedAtDesc(storeId, keyword);
+    public List<NoticeDocument> searchNoticesTitle(Long storeId, String keyword) {
+
+        if (keyword == null) {
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
+
+        Pageable pageable = PageRequest.of(0, 1000);
+
+        List<NoticeDocument> notices = noticeSearchRepository
+                .findByStoreIdAndTitleContainingOrderByUpdatedAtDesc(storeId, keyword, pageable);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        for (NoticeDocument notice : notices) {
+            notice.setTimeAgo(formatTimeAgo(notice.getUpdatedAt(), now));
+        }
+
+        return notices;
+    }
+
+    // Elasticsearch에서 공지 내용 검색
+    public List<NoticeDocument> searchNoticesContent(Long storeId, String keyword) {
+
+        if (keyword == null) {
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
+
+        Pageable pageable = PageRequest.of(0, 1000);
+
+        List<NoticeDocument> notices = noticeSearchRepository
+                .findByStoreIdAndContentContainingOrderByUpdatedAtDesc(storeId, keyword, pageable);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        for (NoticeDocument notice : notices) {
+            notice.setTimeAgo(formatTimeAgo(notice.getUpdatedAt(), now));
+        }
+
+        return notices;
     }
 
 
