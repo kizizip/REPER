@@ -20,19 +20,23 @@ import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentBossBinding
 import com.ssafy.reper.ui.MainActivity
 
+
 //import com.ssafy.reper.ui.boss.adpater.AccessAdapter
 
 private const val TAG = "BossFragment_싸피"
+
 class BossFragment : Fragment() {
     private var _binding: FragmentBossBinding? = null
     private val binding get() = _binding!!
 
-//    private lateinit var accessAdapter: AccessAdapter
+    //    private lateinit var accessAdapter: AccessAdapter
 //    private lateinit var nonAccessAdapter: AccessAdapter
     private lateinit var mainActivity: MainActivity
     private val bossViewModel: BossViewModel by activityViewModels()
+    private val noticeViewModel: NoticeViewModel by activityViewModels()
 
- //sharedPreferencesUtil정보로 바꾸기
+
+    //sharedPreferencesUtil정보로 바꾸기
     var userId = 1
     var storeId = 13
 
@@ -59,6 +63,8 @@ class BossFragment : Fragment() {
         moveFragment()
         initSpinner()
 
+        noticeViewModel.type = ""
+
     }
 
 
@@ -68,7 +74,7 @@ class BossFragment : Fragment() {
     }
 
     private fun initAdapter() {
-
+//
 //        accessAdapter = AccessAdapter(accessEmployees, object : AccessAdapter.ItemClickListener {
 //            override fun onClick(position: Int) {
 //                //여기는 삭제 버튼뿐
@@ -81,7 +87,7 @@ class BossFragment : Fragment() {
 //                    //여기는 수락, 거절 버튼 두개있음
 //            }
 //        })
-
+//
 //        binding.employeeList.layoutManager = LinearLayoutManager(requireContext())
 //        binding.employeeList.adapter = accessAdapter
 //
@@ -124,7 +130,8 @@ class BossFragment : Fragment() {
                 id: Long
             ) {
                 val selectedItem = spinner.adapter.getItem(position) as String
-                val selectedStore = bossViewModel.myStoreList.value?.find { it.storeName == selectedItem }
+                val selectedStore =
+                    bossViewModel.myStoreList.value?.find { it.storeName == selectedItem }
                 storeId = selectedStore!!.storeId
                 //나중엔 sharedPreferencesUtil꺼 바꿔주기
                 Log.d(TAG, "onItemSelected: ${storeId}")
@@ -135,7 +142,6 @@ class BossFragment : Fragment() {
             }
         }
     }
-
 
 
     private fun moveFragment() {

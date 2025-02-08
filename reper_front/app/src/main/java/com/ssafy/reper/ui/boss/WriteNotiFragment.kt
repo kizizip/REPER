@@ -38,6 +38,8 @@ class WriteNotiFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        noticeViewModel.type = "noticeDetail"
+
 
         //고객정보 사장인지 지원인지 따라 분기처리 필요 우선은 사장이라 생각하고 만듭니당
         if (noticeViewModel.clickNotice.value != null) {

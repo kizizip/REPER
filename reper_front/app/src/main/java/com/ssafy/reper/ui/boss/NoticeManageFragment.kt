@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
@@ -20,22 +21,26 @@ class NoticeManageFragment : Fragment() {
     private var _binding: FragmentNoticeManageBinding? = null
     private val binding get() = _binding!!
     private val noticeViewModel: NoticeViewModel by activityViewModels()
-
+    var searchType = "제목"
+    var storeId = 1
+    var userId = 1
+    private lateinit var notiAdapter: NotiAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentNoticeManageBinding.inflate(inflater, container, false)
-
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        noticeViewModel.init(1, 1)
+        if(noticeViewModel.type.equals("")){
+            noticeViewModel.getAllNotice(storeId,userId)
+        }
+
         initNotiAdater()
         initSpinner()
 
@@ -46,6 +51,23 @@ class NoticeManageFragment : Fragment() {
         binding.addBtn.setOnClickListener {
             findNavController().navigate(R.id.writeNotiFragment)
         }
+
+        // 엔터키로 검색 실행
+        binding.notiFgSearchET.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+                val searchText = binding.notiFgSearchET.text.toString()
+                searchNotice(searchText)
+                true
+            } else {
+                false
+            }
+        }
+
+        // 버튼 클릭으로 검색 실행
+        binding.notiFgSearchBtn.setOnClickListener {
+            val searchText = binding.notiFgSearchET.text.toString()
+            searchNotice(searchText)
+        }
     }
 
     override fun onDestroyView() {
@@ -53,7 +75,7 @@ class NoticeManageFragment : Fragment() {
         _binding = null
     }
 
-    fun initSpinner() {
+    private fun initSpinner() {
         val notiSpinner = binding.notiFgSpinner
         val category = arrayOf("제목", "내용")
 
@@ -75,7 +97,7 @@ class NoticeManageFragment : Fragment() {
                 id: Long
             ) {
                 val selectedItem = category[position]
-                // 선택된 항목 처리
+                searchType = selectedItem
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -84,12 +106,15 @@ class NoticeManageFragment : Fragment() {
         }
     }
 
-    fun initNotiAdater() {
+    private fun initNotiAdater() {
+        if (noticeViewModel.noticeList.value.isNullOrEmpty()) {
+            noticeViewModel.init(storeId, userId)
+        }
+
         binding.notiList.layoutManager = LinearLayoutManager(requireContext())
-        val notiAdapter = NotiAdapter(emptyList(), object : NotiAdapter.ItemClickListener {
+        notiAdapter = NotiAdapter(emptyList(), object : NotiAdapter.ItemClickListener {
             override fun onClick(position: Int) {
                 val noticeList = noticeViewModel.noticeList.value // 현재 공지 리스트 가져오기
-
                 if (!noticeList.isNullOrEmpty() && position in noticeList.indices) {
                     noticeViewModel.setClickNotice(noticeList[position])
                     findNavController().navigate(R.id.writeNotiFragment)
@@ -100,16 +125,19 @@ class NoticeManageFragment : Fragment() {
         binding.notiList.adapter = notiAdapter
 
         noticeViewModel.noticeList.observe(viewLifecycleOwner, { newList ->
+            // 기존 데이터를 덮어쓰지 않고 새로운 리스트를 어댑터에 설정
             notiAdapter.noticeList = newList
-            notiAdapter.notifyDataSetChanged()
+            notiAdapter.notifyDataSetChanged() // 리스트 업데이트
         })
-
     }
 
-
-    fun searchNotice() {
-
+    // 검색 기능
+    private fun searchNotice(keyword: String) {
+        if (searchType == "제목") {
+            noticeViewModel.searchNoticeTitle(storeId, keyword)
+        } else {
+            noticeViewModel.searchNoticeContent(storeId, keyword)
+        }
     }
-
 
 }

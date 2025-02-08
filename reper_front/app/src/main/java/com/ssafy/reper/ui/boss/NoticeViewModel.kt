@@ -17,7 +17,9 @@ class NoticeViewModel : ViewModel() {
     //라이브 데이터로 관리될 공지 리스트
     private val _noticeList = MutableLiveData<List<Notice>>()
     val noticeList: LiveData<List<Notice>> get() = _noticeList
-
+    fun setNoticeList(notiList: List<Notice>) {
+        _noticeList.value = notiList
+    }
 
     //단건공지
     private val _clickNotice = MutableLiveData<Notice?>()
@@ -32,6 +34,8 @@ class NoticeViewModel : ViewModel() {
     fun init(storeId: Int, userId: Int){
         getAllNotice(storeId, userId)
     }
+
+    var type = ""
 
 
     fun getAllNotice(storeId: Int, userId: Int) {
@@ -100,12 +104,25 @@ class NoticeViewModel : ViewModel() {
         }
     }
 
-    fun searchNotice(storeId: Int, noticeTitle:String){
+    fun searchNoticeTitle(storeId: Int, noticeTitle:String){
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.noticeService.searchNotice(storeId, noticeTitle)
+                RetrofitUtil.noticeService.searchNoticeTitle(storeId, noticeTitle)
             }.onSuccess {
+                setNoticeList(it)
+            }.onFailure {
 
+            }
+        }
+
+    }
+
+    fun searchNoticeContent(storeId: Int, contentTitle:String){
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.noticeService.searchNoticeContent(storeId, contentTitle)
+            }.onSuccess {
+                setNoticeList(it)
             }.onFailure {
 
             }

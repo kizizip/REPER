@@ -156,7 +156,7 @@ class StoreManageFragment : Fragment() {
             Log.d(TAG, "showDialog: $deleteStoreId")
             dialog.dismiss()
             Toast.makeText(requireContext(), "가게 삭제 완료", Toast.LENGTH_SHORT).show()
-            initAdapter()
+            bossViewModel.getStoreList(userId)
         }
         dialog.show()
     }

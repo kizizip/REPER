@@ -27,26 +27,47 @@ class BossViewModel : ViewModel() {
         _myStoreList.value = list
     }
 
-    //레세피 정보 리스트
+    //레시피 정보 리스트
     private val _recipeList = MutableLiveData<List<Recipe>>()
     val recipeList: MutableLiveData<List<Recipe>> get() = _recipeList
 
     fun setRecipeList(list: List<Recipe>) {
         _recipeList.value = list
+        Log.d(TAG, "setRecipeList: $list")
     }
 
     //승인된 직원 리스트
     private val _accessList = MutableLiveData<List<Employee>>()
     val accessList: MutableLiveData<List<Employee>> get() = _accessList
+    fun getAccessEmployeeList(employees: List<Employee>){
+        _accessList.value = employees
+    }
 
-    //스토어 정보 리스트
+    //승인 대기중인 목록
     private val _waitingList = MutableLiveData<List<Employee>>()
-    val waitingList: MutableLiveData<List<Employee>> get() = _waitingList
+    val waitingList: LiveData<List<Employee>> get() = _waitingList
+
+    fun getWaitingEmployee(employees: List<Employee>) {
+        _waitingList.value = employees
+    }
+
 
 
     fun getAllEmployee(storeId: Int) {
-
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.storeService.allEmployee(storeId)
+            }.onSuccess {
+//                for (employee in it) {//권한으로 분기처리
+               getAccessEmployeeList(it)
+//
+//                }
+            }.onFailure {
+                Log.d(TAG, "Error: ${it.message}")
+            }
+        }
     }
+
 
 
     fun getStoreList(userId: Int) {
@@ -82,6 +103,7 @@ class BossViewModel : ViewModel() {
             }.onSuccess {
                 Log.d(TAG, "deleteStore: $it")
                 getStoreList(userId)
+                _myStoreList.postValue(_myStoreList.value) // 강제로 LiveData 갱신
             }.onFailure {
                 Log.d(TAG, "deleteStore: ${it.message}")
             }
@@ -89,20 +111,22 @@ class BossViewModel : ViewModel() {
 
     }
 
-    fun uploadRecipe(storeId: Int, recipefile: MultipartBody.Part) {
-        var message = ""
+    fun uploadRecipe(storeId: Int, recipeFile: MultipartBody.Part) {
+        Log.d(TAG, "uploadRecipe: 파일명=${recipeFile.headers}")
+        val requestBody = recipeFile.body
+        Log.d(TAG, "uploadRecipe: 파일 RequestBody 크기=${requestBody?.contentLength()} bytes")
+
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.recipeService.recipeUpload(storeId, recipefile)
+                val response = RetrofitUtil.recipeService.recipeUpload(storeId, recipeFile)
+                Log.d(TAG, "uploadRecipe: 서버 응답 = ${response}")
             }.onSuccess {
-                message =  "레시피 업로드 성공"
                 Log.d(TAG, "uploadRecipe: 성공")
+                getMenuList(storeId )
             }.onFailure {
-                Log.d(TAG, "uploadRecipe: ${it.message}")
-                message =  "레시피 업로드 실패"
+                Log.d(TAG, "uploadRecipe: 실패 - ${it.message}")
             }
         }
-
     }
 
 
@@ -119,19 +143,33 @@ class BossViewModel : ViewModel() {
         }
     }
 
-    fun deleteRecipe(recipeId: Int):String {
+    fun deleteRecipe(recipeId: Int, storeId: Int):String {
         var message = ""
         viewModelScope.launch {
          runCatching {
              RetrofitUtil.recipeService.recipeDelete(recipeId)
          }.onSuccess {
+             getMenuList(storeId)
            message =  "레시피 삭제 성공"
          }.onFailure {
              message =  "레시피 삭제실패"
-             Log.d(TAG, "deleteRecipe: 레시피 삭제실패")
+             Log.d(TAG, "deleteRecipe: ${it}")
          }
         }
         return message
+    }
+
+
+    fun searchRecipe(storeId: Int, recipeName: String){
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.recipeService.searchRecipe(storeId, recipeName)
+            }.onSuccess {
+                setRecipeList(it)
+            }.onFailure {
+                Log.d(TAG, "searchRecipe: ${it.message}")
+            }
+        }
     }
 
 }

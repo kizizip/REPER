@@ -11,15 +11,19 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kakao.sdk.common.KakaoSdk.type
+import com.kakao.sdk.friend.m.u
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentRecipeManageBinding
 import com.ssafy.reper.ui.MainActivity
@@ -78,25 +82,40 @@ class RecipeManageFragment : Fragment() {
         binding.storeFgBackIcon.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
+
+        binding.recipeSearchBarET.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                val query = binding.recipeSearchBarET.text.toString().trim()
+                if (query.isNotEmpty()) {
+                    bossViewModel.searchRecipe(storeId,query)
+                }
+                true  // 이벤트 소비 (키보드 내림)
+            } else {
+                false // 기본 동작 수행
+            }
+        }
+
     }
 
 
     private fun initAdapter() {
         // MenuList를 불러오기 전에 어댑터 초기화
+        bossViewModel.getMenuList(storeId)
+
         binding.recipeFgAddRV.layoutManager = LinearLayoutManager(requireContext())
         val recipeAdapter = RecipeAdapter(emptyList(), object : RecipeAdapter.ItemClickListener {
             override fun onItemClick(position: Int) {
                 val selectedRecipe = bossViewModel.recipeList.value?.get(position)
-                showDialog(selectedRecipe?.recipeName ?: "No Recipe", 1)//레시피 아이디가 존재하지않음.. 돌아오는 데이터에...
+                showDialog(selectedRecipe!!.recipeName, selectedRecipe!!.recipeId)//레시피 아이디가 존재하지않음.. 돌아오는 데이터에...
             }
         })
         binding.recipeFgAddRV.adapter = recipeAdapter
 
         bossViewModel.recipeList.observe(viewLifecycleOwner) {
             recipeAdapter.updateData(it)
+            recipeAdapter.notifyDataSetChanged() // 🔹 데이터 갱신 후 어댑터 갱신
         }
 
-        bossViewModel.getMenuList(storeId)
     }
 
     override fun onDestroyView() {
@@ -119,7 +138,9 @@ class RecipeManageFragment : Fragment() {
             dialog.dismiss()
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-           bossViewModel.deleteRecipe(recipeId)
+           bossViewModel.deleteRecipe(recipeId, storeId)
+            Toast.makeText(requireContext(), "레시피 삭제 완료", Toast.LENGTH_SHORT).show()
+            bossViewModel.getMenuList(storeId)
             dialog.dismiss()
         }
         dialog.show()
@@ -138,7 +159,6 @@ class RecipeManageFragment : Fragment() {
     private fun getFilePart(context: Context, uri: Uri): MultipartBody.Part? {
         val contentResolver = context.contentResolver
         val fileName = getFileName(context, uri) ?: return null
-
         val inputStream = contentResolver.openInputStream(uri) ?: return null
         val file = File(context.cacheDir, fileName)
         val outputStream = FileOutputStream(file)
@@ -147,7 +167,10 @@ class RecipeManageFragment : Fragment() {
         inputStream.close()
         outputStream.close()
 
-        val requestFile = RequestBody.create("application/pdf".toMediaTypeOrNull(), file)
+        // MIME 타입을 파일 확장자에 맞게 설정
+        val mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream"
+        val requestFile = RequestBody.create(mimeType.toMediaTypeOrNull(), file)
+
         return MultipartBody.Part.createFormData("file", file.name, requestFile)
     }
 

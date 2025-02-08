@@ -1,8 +1,8 @@
 package com.ssafy.reper.ui.boss.adpater
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.ItemRecipeBinding
@@ -35,6 +35,7 @@ class RecipeAdapter(var menuList: List<Recipe>, val itemClickListener: ItemClick
         // 데이터 바인딩
         holder.binding.recipeItemName.text = menuList[position].recipeName
         holder.binding.recpeAddDateTV.text = menuList[position].type
+        Log.d(TAG, "onBindViewHolder: ${menuList[position].recipeName}")
     }
 
     override fun getItemCount(): Int {
@@ -43,5 +44,7 @@ class RecipeAdapter(var menuList: List<Recipe>, val itemClickListener: ItemClick
 
     fun updateData(recipeList: List<Recipe>) {
         menuList = recipeList
+        Log.d(TAG, "updateData: $recipeList")
+        notifyDataSetChanged()  // 변경된 데이터를 RecyclerView에 반영
     }
 }

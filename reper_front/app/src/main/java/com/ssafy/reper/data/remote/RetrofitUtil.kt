@@ -1,10 +1,17 @@
 package com.ssafy.reper.data.remote
 
 import com.ssafy.reper.ApplicationClass
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 
 class RetrofitUtil {
     companion object{
+
+
+
         val noticeService = ApplicationClass.retrofit.create(NotiService::class.java)
         val storeService = ApplicationClass.retrofit.create(StoreService::class.java)
         val recipeService = ApplicationClass.retrofit.create(RecipeService::class.java)
