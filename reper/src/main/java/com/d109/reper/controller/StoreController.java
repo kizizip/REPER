@@ -5,6 +5,7 @@ import com.d109.reper.elasticsearch.StoreDocument;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.request.StoreRequestDto;
 import com.d109.reper.response.StoreResponseDto;
+import com.d109.reper.response.UserResponseDto;
 import com.d109.reper.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -32,7 +33,6 @@ public class StoreController {
         return ResponseEntity.ok(response);
     }
 
-    // 매장 검색
 
     // 매장 정보 조회(단건)
     @GetMapping("/{storeId}")
@@ -52,20 +52,25 @@ public class StoreController {
     }
 
 
+    // 특정 매장의 전체 직원 정보 조회
+    @GetMapping("/{storeId}/employees")
+    @Operation(summary = "특정 매장의 전체 직원 정보 조회")
+    public ResponseEntity<List<UserResponseDto>> getStoreEmployees(@PathVariable Long storeId) {
+        List<UserResponseDto> reponse = storeService.getStoreEmployees(storeId);
+
+        return ResponseEntity.ok(reponse);
+    }
+
+
     // 사장님이 가진 모든 매장 조회
     @GetMapping("/owner/{userId}")
     @Operation(summary = "OWNER인 {userId}에 해당하는 모든 store를 조회합니다.")
-    public ResponseEntity<List<StoreResponseDto>> findNotices(
-            @PathVariable Long userId) {
-
-        List<Store> stores = storeService.findOwnerStores(userId);
-
-        List<StoreResponseDto> response = stores.stream()
-                .map(StoreResponseDto::new)
-                .toList();
+    public ResponseEntity<List<StoreResponseDto>> findNotices(@PathVariable Long userId) {
+        List<StoreResponseDto> response = storeService.findOwnerStores(userId);
 
         return ResponseEntity.ok(response);
     }
+
 
 
     // Elasticsearch 매장 제목 검색 기능
