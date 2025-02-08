@@ -8,6 +8,7 @@ import com.d109.reper.domain.Recipe;
 import com.d109.reper.domain.RecipeStep;
 import com.d109.reper.domain.Store;
 import com.d109.reper.elasticsearch.RecipeDocument;
+import com.d109.reper.elasticsearch.RecipeEventListener;
 import com.d109.reper.elasticsearch.RecipeSearchRepository;
 import com.d109.reper.repository.RecipeRepository;
 import com.d109.reper.repository.StoreRepository;
@@ -34,6 +35,7 @@ public class RecipeService {
     private final StoreRepository storeRepository;
     private final RecipeSearchRepository recipeSearchRepository;
     private final ElasticsearchClient elasticsearchClient;
+    private final RecipeEventListener recipeEventListener;
     private final EntityManager em;
     private static final Logger logger = LoggerFactory.getLogger(RecipeService.class);
 
@@ -73,8 +75,11 @@ public class RecipeService {
                 recipe.addIngredient(newIngredient);
             }
 
-            recipeRepository.save(recipe);
+            Recipe savedRecipe = recipeRepository.save(recipe);
 //            logger.info("레시피 저장 완료: {}", recipe.getRecipeName());
+
+            // mySQL에 저장된 레시피 Elasticsearch DB에도 저장
+            recipeEventListener.saveRecipeToElasticsearch(savedRecipe);
         }
     }
 
@@ -110,7 +115,11 @@ public class RecipeService {
             throw new NoSuchElementException("Recipe not found.");
         }
 
+        RecipeDocument elasticRecipe = recipeSearchRepository.findByRecipeId(recipeId)
+                        .orElseThrow(() -> new IllegalArgumentException("Elasticsearch에 해당 레시피가 정보가 없습니다."));
+
         recipeRepository.delete(recipeId);
+        recipeSearchRepository.delete(elasticRecipe);
     }
 
 

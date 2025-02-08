@@ -5,6 +5,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RecipeSearchRepository extends ElasticsearchRepository<RecipeDocument, Long> {
@@ -15,9 +16,7 @@ public interface RecipeSearchRepository extends ElasticsearchRepository<RecipeDo
     // 가게별 레시피에서 재료 포함 검색
     List<RecipeDocument> findByStoreIdAndIngredientsContaining(Long storeId, String ingredient, Pageable pageable);
 
-    // 재료 미포함 검색
-    List<RecipeDocument> findByStoreIdAndIngredientsIsNotContaining(Long storeId, String ingredient);
-
+    Optional<RecipeDocument> findByRecipeId(Long recipeId);
 
 }
 
