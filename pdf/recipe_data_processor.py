@@ -204,7 +204,7 @@ def process_recipe_text(text):
 
 # Spring Boot로 JSON 데이터 전송 함수
 def send_json_to_spring(data, store_id):
-    SPRING_BOOT_URL = f"http://http://i12d109.p.ssafy.io:48620/api/stores/{store_id}/recipes"
+    SPRING_BOOT_URL = f"http://i12d109.p.ssafy.io:48620/api/stores/{store_id}/recipes"
     headers = {"Content-Type" : "application/json"}
     response = requests.post(SPRING_BOOT_URL, headers=headers, json=data["recipes"]) # JSON 데이터 중 recipes 리스트만 전송
 
