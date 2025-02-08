@@ -11,6 +11,8 @@ import com.d109.reper.repository.StoreEmployeeRepository;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -240,7 +242,9 @@ public class NoticeService {
             throw new IllegalArgumentException("검색어를 입력하세요.");
         }
 
-        return noticeSearchRepository.findByStoreIdAndTitleContainingOrderByUpdatedAtDesc(storeId, keyword);
+        Pageable pageable = PageRequest.of(0, 1000);
+
+        return noticeSearchRepository.findByStoreIdAndTitleContainingOrderByUpdatedAtDesc(storeId, keyword, pageable);
     }
 
     // Elasticsearch에서 공지 내용 검색
@@ -250,7 +254,9 @@ public class NoticeService {
             throw new IllegalArgumentException("검색어를 입력하세요.");
         }
 
-        return noticeSearchRepository.findByStoreIdAndContentContainingOrderByUpdatedAtDesc(storeId, keyword);
+        Pageable pageable = PageRequest.of(0, 1000);
+
+        return noticeSearchRepository.findByStoreIdAndContentContainingOrderByUpdatedAtDesc(storeId, keyword, pageable);
     }
 
 

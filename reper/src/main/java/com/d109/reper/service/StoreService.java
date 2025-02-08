@@ -8,6 +8,8 @@ import com.d109.reper.elasticsearch.StoreSearchRepository;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +49,9 @@ public class StoreService {
             throw new IllegalArgumentException("검색어를 입력하세요.");
         }
 
-        return storeSearchRepository.findByStoreNameContaining(keyword);
+        Pageable pageable = PageRequest.of(0, 1000);
+
+        return storeSearchRepository.findByStoreNameContaining(keyword, pageable);
     }
 
     // Elasticsearch 매장 이름 검색 더미 데이터 test용 로직
