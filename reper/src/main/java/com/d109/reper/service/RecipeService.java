@@ -74,7 +74,7 @@ public class RecipeService {
             }
 
             recipeRepository.save(recipe);
-//            logger.info("레시피 저장 완료: {}", recipe.getRecipeName());
+            logger.info("레시피 저장 완료: {}", recipe.getRecipeName());
         }
     }
 
