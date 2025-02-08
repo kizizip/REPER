@@ -80,16 +80,12 @@ public class StoreService {
     }
 
 
-    // 특정 매장의 전체 직원 정보 조회
+    // 특정 매장의 전체 알바생 정보 조회
     public List<UserResponseDto> getStoreEmployees(Long storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NoSuchElementException("Store not found"));
 
         List<UserResponseDto> employeeList = new ArrayList<>();
-
-        // 사장님 정보 추가
-        User owner = store.getOwner();
-        employeeList.add(new UserResponseDto(owner));
 
         // 직원 정보 추가
         List<UserResponseDto> employees = store.getStoreEmployees().stream()

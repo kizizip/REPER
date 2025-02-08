@@ -52,9 +52,9 @@ public class StoreController {
     }
 
 
-    // 특정 매장의 전체 직원 정보 조회
+    // 특정 매장의 전체 알바생 정보 조회
     @GetMapping("/{storeId}/employees")
-    @Operation(summary = "특정 매장의 전체 직원 정보 조회")
+    @Operation(summary = "특정 매장의 전체 알바생 정보 조회")
     public ResponseEntity<List<UserResponseDto>> getStoreEmployees(@PathVariable Long storeId) {
         List<UserResponseDto> reponse = storeService.getStoreEmployees(storeId);
 
