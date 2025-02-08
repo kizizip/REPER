@@ -7,9 +7,15 @@ import numpy as np                         # 벡터 연산 및 코사인 유사�
 from dotenv import load_dotenv             # .env 파일에서 환경 변수 로드
 from flask import Flask, request, jsonify  # rest api 서버 구현현
 
-# .env 파일 로드
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# 환경 변수에서 API Key 가져오기
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# API Key가 없을 경우 오류 발생 방지 (Jenkins 환경에서도 확인 가능)
+if not OPENAI_API_KEY:
+    raise ValueError("🚨 OPENAI_API_KEY가 설정되지 않았습니다! 환경 변수를 확인하세요.")
+
+# OpenAI API 클라이언트 생성
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 app = Flask(__name__)
 
