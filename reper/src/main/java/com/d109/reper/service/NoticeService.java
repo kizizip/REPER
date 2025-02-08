@@ -244,7 +244,16 @@ public class NoticeService {
 
         Pageable pageable = PageRequest.of(0, 1000);
 
-        return noticeSearchRepository.findByStoreIdAndTitleContainingOrderByUpdatedAtDesc(storeId, keyword, pageable);
+        List<NoticeDocument> notices = noticeSearchRepository
+                .findByStoreIdAndTitleContainingOrderByUpdatedAtDesc(storeId, keyword, pageable);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        for (NoticeDocument notice : notices) {
+            notice.setTimeAgo(formatTimeAgo(notice.getUpdatedAt(), now));
+        }
+
+        return notices;
     }
 
     // Elasticsearch에서 공지 내용 검색
@@ -256,7 +265,16 @@ public class NoticeService {
 
         Pageable pageable = PageRequest.of(0, 1000);
 
-        return noticeSearchRepository.findByStoreIdAndContentContainingOrderByUpdatedAtDesc(storeId, keyword, pageable);
+        List<NoticeDocument> notices = noticeSearchRepository
+                .findByStoreIdAndContentContainingOrderByUpdatedAtDesc(storeId, keyword, pageable);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        for (NoticeDocument notice : notices) {
+            notice.setTimeAgo(formatTimeAgo(notice.getUpdatedAt(), now));
+        }
+
+        return notices;
     }
 
 
