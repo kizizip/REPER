@@ -1,23 +1,26 @@
 package com.d109.reper.service;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.d109.reper.domain.Ingredient;
 import com.d109.reper.domain.Recipe;
 import com.d109.reper.domain.RecipeStep;
 import com.d109.reper.domain.Store;
-import com.d109.reper.elasticsearch.NoticeDocument;
 import com.d109.reper.elasticsearch.RecipeDocument;
 import com.d109.reper.elasticsearch.RecipeSearchRepository;
-import com.d109.reper.elasticsearch.StoreDocument;
 import com.d109.reper.repository.RecipeRepository;
 import com.d109.reper.repository.StoreRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,9 +33,10 @@ public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final StoreRepository storeRepository;
     private final RecipeSearchRepository recipeSearchRepository;
+    private final ElasticsearchClient elasticsearchClient;
     private final EntityManager em;
-
     private static final Logger logger = LoggerFactory.getLogger(RecipeService.class);
+
 
     // 레시피 저장
     @Transactional
@@ -112,19 +116,59 @@ public class RecipeService {
 
     // 가게별 레시피 검색
     public List<RecipeDocument> searchRecipeName(Long storeId, String keyword) {
-        return recipeSearchRepository.findByStoreIdAndRecipeNameContaining(storeId, keyword);
+
+        if (keyword == null) {
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
+
+        Pageable pageable = PageRequest.of(0, 1000);
+
+        return recipeSearchRepository.findByStoreIdAndRecipeNameContaining(storeId, keyword, pageable);
     }
 
 
     // 가게별 레시피에서 재료 포함 검색
     public List<RecipeDocument> searchIncludeIngredient(Long storeId, String keyword) {
-        return recipeSearchRepository.findByStoreIdAndIngredientsContaining(storeId, keyword);
+
+        if (keyword == null) {
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
+
+        Pageable pageable = PageRequest.of(0, 1000);
+
+        return recipeSearchRepository.findByStoreIdAndIngredientsContaining(storeId, keyword, pageable);
     }
 
 
     // 재료 미포함 검색
     public List<RecipeDocument> searchExcludeIngredient(Long storeId, String keyword) {
-        return recipeSearchRepository.findByStoreIdAndIngredientsIsNotContaining(storeId, keyword);
+        try {
+            SearchResponse<RecipeDocument> response = elasticsearchClient.search(s -> s
+                    .index("recipes")
+                    .query(q -> q
+                            .bool(b -> b
+                                    .must(m -> m.match(t -> t.field("storeId").query(storeId)))
+                                    .mustNot(n -> n.wildcard(w -> w.field("ingredients").value("*" + keyword + "*")))
+                            )
+                    )
+                            .size(1000),
+                    RecipeDocument.class
+            );
+
+            List<RecipeDocument> results = response.hits().hits().stream()
+                    .map(Hit::source)
+                    .toList();
+
+            if (results.isEmpty()) {
+                return List.of();
+            }
+
+            return results;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Elasticsearch 검색 중 오류 발생", e);
+        }
     }
 
 

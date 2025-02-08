@@ -180,11 +180,17 @@ public class RecipeController {
     // 재료 미포함 검색
     @GetMapping("/stores/{storeId}/recipes/search/exclude")
     @Operation(summary = "재료 미포함 검색")
-    public List<RecipeDocument> searchExcludeIngredient(
+    public ResponseEntity<List<RecipeDocument>> searchExcludeIngredient(
             @PathVariable Long storeId,
             @RequestParam("ingredient") String keyword) {
 
-        return recipeService.searchExcludeIngredient(storeId, keyword);
+        List<RecipeDocument> results = recipeService.searchExcludeIngredient(storeId, keyword);
+
+        if (results.isEmpty()) {
+            return  ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(results);
     }
 
 }
