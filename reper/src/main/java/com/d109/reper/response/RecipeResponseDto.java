@@ -9,17 +9,20 @@ import java.util.List;
 
 @Getter
 public class RecipeResponseDto {
+    private Long recipeId;
     private String recipeName;
     private RecipeCategory category;
     private RecipeType type;
-//    private String recipeImg;
+    private String recipeImg;
     private List<IngredientResponseDto> ingredients;
     private List<RecipeStepResponseDto> recipeSteps;
 
     public RecipeResponseDto(Recipe recipe) {
+        this.recipeId = recipe.getRecipeId();
         this.recipeName = recipe.getRecipeName();
         this.category = recipe.getCategory();
         this.type = recipe.getType();
+        this.recipeImg = getRecipeImg();
         this.ingredients = recipe.getIngredients().stream()
                 .map(IngredientResponseDto::new) //new IngredientResponseDto(Ingredient)
                 .toList();

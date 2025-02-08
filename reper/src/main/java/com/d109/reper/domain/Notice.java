@@ -25,7 +25,6 @@ public class Notice {
 
     private String content;
 
-
     private LocalDateTime updatedAt;
 
     @PrePersist
