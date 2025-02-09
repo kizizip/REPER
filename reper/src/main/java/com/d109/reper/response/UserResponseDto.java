@@ -13,13 +13,15 @@ public class UserResponseDto {
     private String email;
     private String phone;
     private UserRole role;
+    private boolean isEmployed;
 
 
-    public UserResponseDto(User user) {
+    public UserResponseDto(User user, boolean isEmployed) {
         this.userId = user.getUserId();
         this.userName = user.getUserName();
         this.email = user.getEmail();
         this.phone = user.getPhone();
         this.role = user.getRole();
+        this.isEmployed = isEmployed;
     }
 }
