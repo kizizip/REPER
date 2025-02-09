@@ -37,7 +37,6 @@ class OrderFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mainActivity = context as MainActivity
-        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,10 +59,6 @@ class OrderFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _orderBinding = null
-    }
-    override fun onDetach() {
-        super.onDetach()
-        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // 화면 회전 잠금 해제
     }
 
     // 데이터 초기화

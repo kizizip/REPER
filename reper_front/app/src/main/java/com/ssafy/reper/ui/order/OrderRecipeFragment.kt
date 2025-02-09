@@ -39,7 +39,6 @@ class OrderRecipeFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mainActivity = context as MainActivity
-        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,10 +64,6 @@ class OrderRecipeFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         _orderRecipebinding = null
-    }
-    override fun onDetach() {
-        super.onDetach()
-        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // 화면 회전 잠금 해제
     }
 
     // 이벤트 처리

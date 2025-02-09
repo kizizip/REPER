@@ -69,7 +69,6 @@ class AllRecipeFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mainActivity = context as MainActivity
-        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,10 +91,6 @@ class AllRecipeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _allRecipeBinding = null
-    }
-    override fun onDetach() {
-        super.onDetach()
-        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // 화면 회전 잠금 해제
     }
 
     fun initEvent(){
@@ -193,7 +188,8 @@ class AllRecipeFragment : Fragment() {
                         dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
                             // 클릭 이벤트 -> recipeId 전달
                             val bundle = Bundle().apply {
-                                putInt("recipeId", hot)
+                                putInt("whereAmICame", 1)
+                                putIntegerArrayList("recipeIdList", arrayListOf(hot))
                             }
                             findNavController().navigate(R.id.stepRecipeFragment, bundle)
                             dialog.dismiss()
@@ -201,7 +197,8 @@ class AllRecipeFragment : Fragment() {
                         dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).setOnClickListener {
                             // 클릭 이벤트 -> recipeId 전달
                             val bundle = Bundle().apply {
-                                putInt("recipeId", ice)
+                                putInt("whereAmICame", 1)
+                                putIntegerArrayList("recipeIdList", arrayListOf(ice))
                             }
                             findNavController().navigate(R.id.stepRecipeFragment, bundle)
                             dialog.dismiss()
