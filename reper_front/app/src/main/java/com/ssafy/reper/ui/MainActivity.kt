@@ -61,20 +61,20 @@ class MainActivity : AppCompatActivity() {
             binding.activityMainBottomMenu.setupWithNavController(it)
         }
 
-//
-//        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-//            if (!task.isSuccessful) {
-//                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
-//                return@OnCompleteListener
-//            }
-//
-//            val token = task.result
-//            CoroutineScope(Dispatchers.IO).launch {
-//                // 네트워크 작업이나 DB 저장 등 백그라운드에서 해야 하는 작업
-//                fcmViewModel.saveToken(UserToken(storeId, token, userId))
-//            }
-//            Log.d("FCMTOKEN", token)
-//        })
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            val token = task.result
+
+
+            fcmViewModel.saveToken(UserToken(storeId, token, userId))
+
+            Log.d("FCMTOKEN", token)
+        })
 
     }
 

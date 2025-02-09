@@ -38,7 +38,7 @@ class FcmViewModel:ViewModel() {
     fun sendToStoreFCM(storeId:Int, tile: String, content:String){
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.fcmService.sendToUser(storeId,tile,content)
+                RetrofitUtil.fcmService.sendToStore(storeId,tile,content)
             }.onSuccess {
                 Log.d(TAG, "saveToken: ${tile}")
             }.onFailure {

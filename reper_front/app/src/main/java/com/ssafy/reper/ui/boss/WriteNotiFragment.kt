@@ -135,7 +135,7 @@ class WriteNotiFragment : Fragment() {
         val title = binding.notiWriteFgTitleET.text.toString()
         val content = binding.notiWriteFgContentET.text.toString()
         noticeViewModel.createNotice(storeId, userId, title, content)
-//        fcmViewModel.sendToStoreFCM(storeId,"새로운 공지가 등록되었습니다.",title)
+        fcmViewModel.sendToStoreFCM(storeId,"새로운 공지가 등록되었습니다.",title)
 
         Toast.makeText(requireContext(), "공지 작성 완료", Toast.LENGTH_SHORT).show()
 
@@ -148,7 +148,7 @@ class WriteNotiFragment : Fragment() {
             storeId, userId,
             noticeViewModel.clickNotice.value!!.noticeId, title, content
         )
-//        fcmViewModel.sendToStoreFCM(storeId,"공지가 수정되었습니다.",title)
+        fcmViewModel.sendToStoreFCM(storeId,"공지가 수정되었습니다.",title)
 
         Toast.makeText(requireContext(), "공지 수정 완료", Toast.LENGTH_SHORT).show()
 
