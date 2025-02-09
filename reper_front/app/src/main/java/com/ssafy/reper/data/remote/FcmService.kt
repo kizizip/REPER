@@ -14,10 +14,10 @@ interface FcmService {
 
     //한명에게 알림 보내기
     @POST("fcm/sendToUser/{userId}")
-    suspend fun sendToUser(@Path("userId")userId: Int, @Query("title") title:String, @Query("content") content:String)
+    suspend fun sendToUser(@Path("userId")userId: Int, @Query("title") title:String, @Query("body") content:String)
 
     //가게직원 모두에게 알림보내기
     @POST("fcm/sendToStore/{storeId}")
-    suspend fun sendToStore(@Path("storeId")storeId: Int, @Query("title") title:String, @Query("content") content:String)
+    suspend fun sendToStore(@Path("storeId")storeId: Int, @Query("title") title:String, @Query("body") content:String)
 
 }

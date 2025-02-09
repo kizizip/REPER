@@ -1,35 +1,29 @@
 package com.ssafy.reper.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.gms.tasks.OnCompleteListener
-import com.ssafy.reper.R
-import com.ssafy.reper.databinding.ActivityMainBinding
-import com.ssafy.reper.ui.home.HomeFragment
-import com.ssafy.reper.ui.mypage.MyPageFragment
-import com.ssafy.reper.ui.order.OrderFragment
-import com.ssafy.reper.ui.recipe.AllRecipeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.messaging.FirebaseMessaging
+import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.UserToken
-import com.ssafy.reper.data.remote.RetrofitUtil
+import com.ssafy.reper.databinding.ActivityMainBinding
 import com.ssafy.reper.ui.boss.BossViewModel
 import com.ssafy.reper.ui.boss.NoticeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+
 
 private const val TAG = "MainActivity_싸피"
 
@@ -49,6 +43,12 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         super.onCreate(savedInstanceState)
+//        StrictMode.setThreadPolicy(
+//            ThreadPolicy.Builder()
+//                .detectAll()
+//                .penaltyLog()
+//                .build()
+//        )
 
         // View Binding 초기화
         binding = ActivityMainBinding.inflate(layoutInflater)

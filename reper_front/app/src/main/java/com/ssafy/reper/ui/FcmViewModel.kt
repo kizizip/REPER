@@ -23,12 +23,12 @@ class FcmViewModel:ViewModel() {
     }
 
 
-    fun sendToUserFCM(userId:Int, tile: String, content:String){
+    fun sendToUserFCM(userId:Int, title: String, content:String){
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.fcmService.sendToUser(userId,tile,content)
+                RetrofitUtil.fcmService.sendToUser(userId,title,content)
             }.onSuccess {
-                Log.d(TAG, "saveToken: ${tile}")
+                Log.d(TAG, "saveToken: ${title}")
             }.onFailure {
                 Log.d(TAG, "saveToken: ${it.message}")
             }
@@ -40,9 +40,9 @@ class FcmViewModel:ViewModel() {
             runCatching {
                 RetrofitUtil.fcmService.sendToStore(storeId,tile,content)
             }.onSuccess {
-                Log.d(TAG, "saveToken: ${tile}")
+                Log.d(TAG, "sendToStoreFCM: ${tile}")
             }.onFailure {
-                Log.d(TAG, "saveToken: ${it.message}")
+                Log.d(TAG, "sendToStoreFCM: ${it.message}")
             }
         }
     }

@@ -106,7 +106,7 @@ class RecipeManageFragment : Fragment() {
         val recipeAdapter = RecipeAdapter(emptyList(), object : RecipeAdapter.ItemClickListener {
             override fun onItemClick(position: Int) {
                 val selectedRecipe = bossViewModel.recipeList.value?.get(position)
-                showDialog(selectedRecipe!!.recipeName, selectedRecipe!!.recipeId)//레시피 아이디가 존재하지않음.. 돌아오는 데이터에...
+                showDialog(selectedRecipe!!.recipeName, selectedRecipe!!.recipeId)
             }
         })
         binding.recipeFgAddRV.adapter = recipeAdapter
