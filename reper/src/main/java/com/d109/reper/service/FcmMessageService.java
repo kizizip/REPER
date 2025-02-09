@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.FileInputStream;
@@ -20,8 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FcmMessageService {
 
-    private final String FCM_API_URL = "https://fcm.googleapis.com/v1/projects/YOUR_PROJECT_ID/messages:send";
-    private final String SERVICE_ACCOUNT_JSON_PATH = "path/to/your/reper-7e5b4-firebase-adminsdk-fbsvc-28c945b213.json";  // Firebase 서비스 계정 키 파일 경로
+    private final String FCM_API_URL = "https://fcm.googleapis.com/v1/projects/reper-7e5b4/messages:send";
+    private final String SERVICE_ACCOUNT_JSON_PATH = "src/main/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json";  // Firebase 서비스 계정 키 파일 경로
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -43,9 +44,10 @@ public class FcmMessageService {
     }
 
     /**
-     * 여러 사용자(FCM 요청 리스트)에게 FCM 메시지 보내기
+     * 여러 사용자에게 FCM 메시지 보내기
      */
     public void sendToMultipleUsers(List<FcmMessageRequest> requests) {
+        initialize();
         try {
             for (FcmMessageRequest request : requests) {
                 FcmMessageResponseDto messageDto = createFcmMessage(request);
@@ -57,9 +59,10 @@ public class FcmMessageService {
     }
 
     /**
-     * 한명에게 FCM 메시지 보내기
+     * 한 명에게 FCM 메시지 보내기
      */
     public void sendFcmMessage(FcmMessageRequest request) {
+        initialize();
         FcmMessageResponseDto messageDto = createFcmMessage(request);
         sendFcmNotification(messageDto);
     }
@@ -93,6 +96,10 @@ public class FcmMessageService {
             ResponseEntity<String> response = restTemplate.exchange(FCM_API_URL, HttpMethod.POST, request, String.class);
 
             log.info("FCM 메시지 응답: {}", response.getBody());
+            log.info("FCM 메시지 응답 상태 코드: {}", response.getStatusCode());
+
+        }catch (HttpClientErrorException e) {
+            log.error("HTTP 오류 발생: 상태 코드 - {}, 응답 본문 - {}", e.getStatusCode(), e.getResponseBodyAsString());
         } catch (Exception e) {
             log.error("FCM 메시지 전송 중 오류 발생: ", e);
         }
