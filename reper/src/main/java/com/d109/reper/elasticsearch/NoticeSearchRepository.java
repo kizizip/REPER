@@ -5,6 +5,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NoticeSearchRepository extends ElasticsearchRepository<NoticeDocument, Long> {
@@ -14,4 +15,7 @@ public interface NoticeSearchRepository extends ElasticsearchRepository<NoticeDo
 
     //공지 내용으로 검색 및 최근순 정렬
     List<NoticeDocument> findByStoreIdAndContentContainingOrderByUpdatedAtDesc(Long storedId, String keyword, Pageable pageable);
+
+    // noticeId에 맞는 공지 찾기
+    Optional<NoticeDocument> findByNoticeId(Long noticeId);
 }
