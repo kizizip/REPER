@@ -1,0 +1,65 @@
+{
+  "settings": {
+    "analysis": {
+      "tokenizer": {
+        "edge_ngram_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 1,
+          "max_gram": 20,
+          "token_chars": ["letter", "digit"]
+        },
+        "nori_tokenizer": {
+          "type": "nori_tokenizer",
+          "decompound_mode": "mixed"
+        }
+      },
+      "analyzer": {
+        "nori_analyzer": {
+          "type": "custom",
+          "tokenizer": "nori_tokenizer",
+          "filter": ["lowercase"]
+        },
+        "nori_edge_ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "edge_ngram_tokenizer",
+          "filter": ["lowercase"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "recipeId": {
+        "type": "long"
+      },
+      "storeId": {
+        "type": "long"
+      },
+      "recipeName": {
+        "type": "text",
+        "analyzer": "nori_analyzer",
+        "fields": {
+          "edge_ngram": {
+            "type": "text",
+            "analyzer": "nori_edge_ngram_analyzer"
+          },
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "category": {
+        "type": "keyword"
+      },
+      "recipeImg": {
+        "type": "keyword"
+      },
+      "ingredients": {
+        "type": "text"
+      }
+    }
+  }
+}
