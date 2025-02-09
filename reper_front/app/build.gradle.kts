@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.gms.google-services")
+
 }
 
 android {
@@ -108,6 +110,12 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
 
     implementation ("com.kakao.sdk:v2-all:2.20.0")  // 전체 모듈 설치, 2.11.0 버전부터 지원
+
+
+    //fcm관련
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation("com.google.firebase:firebase-analytics:21.0.0")
+    implementation ("com.google.firebase:firebase-messaging-ktx:23.4.1")
 
 
 }

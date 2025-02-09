@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.Notice
 import com.ssafy.reper.databinding.FragmentWriteNotiBinding
+import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
 
 
@@ -18,6 +20,7 @@ class WriteNotiFragment : Fragment() {
     private var _binding: FragmentWriteNotiBinding? = null
     private val binding get() = _binding!!
     private val noticeViewModel: NoticeViewModel by activityViewModels()
+    private val fcmViewModel: FcmViewModel by activityViewModels()
     var userId = 1
     var storeId = 1
 
@@ -132,6 +135,7 @@ class WriteNotiFragment : Fragment() {
         val title = binding.notiWriteFgTitleET.text.toString()
         val content = binding.notiWriteFgContentET.text.toString()
         noticeViewModel.createNotice(storeId, userId, title, content)
+//        fcmViewModel.sendToStoreFCM(storeId,"새로운 공지가 등록되었습니다.",title)
 
         Toast.makeText(requireContext(), "공지 작성 완료", Toast.LENGTH_SHORT).show()
 
@@ -144,6 +148,7 @@ class WriteNotiFragment : Fragment() {
             storeId, userId,
             noticeViewModel.clickNotice.value!!.noticeId, title, content
         )
+//        fcmViewModel.sendToStoreFCM(storeId,"공지가 수정되었습니다.",title)
 
         Toast.makeText(requireContext(), "공지 수정 완료", Toast.LENGTH_SHORT).show()
 

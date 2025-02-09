@@ -13,6 +13,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.gms.tasks.OnCompleteListener
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.ActivityMainBinding
 import com.ssafy.reper.ui.home.HomeFragment
@@ -20,9 +21,15 @@ import com.ssafy.reper.ui.mypage.MyPageFragment
 import com.ssafy.reper.ui.order.OrderFragment
 import com.ssafy.reper.ui.recipe.AllRecipeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.messaging.FirebaseMessaging
+import com.ssafy.reper.data.dto.UserToken
+import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.ui.boss.BossViewModel
 import com.ssafy.reper.ui.boss.NoticeViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivity_싸피"
 
@@ -32,7 +39,11 @@ class MainActivity : AppCompatActivity() {
     private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장
     private val noticeViewModel: NoticeViewModel by viewModels()
     private val bossViewModel: BossViewModel by viewModels()
-    
+    private val fcmViewModel: FcmViewModel by viewModels()
+
+    var userId = 1
+    var storeId = 1
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         enableEdgeToEdge()
@@ -50,6 +61,20 @@ class MainActivity : AppCompatActivity() {
             binding.activityMainBottomMenu.setupWithNavController(it)
         }
 
+//
+//        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+//            if (!task.isSuccessful) {
+//                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+//                return@OnCompleteListener
+//            }
+//
+//            val token = task.result
+//            CoroutineScope(Dispatchers.IO).launch {
+//                // 네트워크 작업이나 DB 저장 등 백그라운드에서 해야 하는 작업
+//                fcmViewModel.saveToken(UserToken(storeId, token, userId))
+//            }
+//            Log.d("FCMTOKEN", token)
+//        })
 
     }
 
