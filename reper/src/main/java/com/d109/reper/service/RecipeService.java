@@ -126,13 +126,13 @@ public class RecipeService {
     // 가게별 레시피 검색
     public List<RecipeDocument> searchRecipeName(Long storeId, String keyword) {
 
-        if (keyword == null) {
+        if (keyword == null || keyword.trim().isEmpty()) {
             throw new IllegalArgumentException("검색어를 입력하세요.");
         }
 
         Pageable pageable = PageRequest.of(0, 1000);
 
-        return recipeSearchRepository.findByStoreIdAndRecipeNameContaining(storeId, keyword, pageable);
+        return recipeSearchRepository.searchByStoreIdAndRecipeName(storeId, keyword, pageable);
     }
 
 
