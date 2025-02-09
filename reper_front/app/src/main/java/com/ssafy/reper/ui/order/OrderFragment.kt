@@ -24,7 +24,7 @@ class OrderFragment : Fragment() {
     // 주문 날짜 모음 yyyy-MM-dd 형식
     var orderDateList: MutableList<String> = mutableListOf()
 
-    private val viewModel: OrderFragmentViewModel by viewModels()
+    private val viewModel: OrderViewModel by viewModels()
 
     // 주문 리스트 recyclerView Adapter
     private lateinit var orderAdapter : OrderAdatper
@@ -107,7 +107,6 @@ class OrderFragment : Fragment() {
         orderBinding.fragmentOrderRvOrder.apply {
             viewModel.getOrders()
             viewModel.orderList.observe(viewLifecycleOwner) { orderList ->
-                Log.d(TAG, "initAdapter: ${orderList}")
                 orderAdapter.orderList.clear()
                 orderAdapter.recipeNameList.clear()
 
@@ -124,9 +123,6 @@ class OrderFragment : Fragment() {
                         }
                     }
                 }
-                Log.d(TAG, "dateList : ${orderDateList}")
-                Log.d(TAG, "orderList : ${orderAdapter.orderList}")
-                Log.d(TAG, "recipeNameList : ${orderAdapter.recipeNameList}")
                 adapter = orderAdapter
             }
         }

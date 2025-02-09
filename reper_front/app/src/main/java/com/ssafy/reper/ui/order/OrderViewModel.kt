@@ -1,19 +1,18 @@
 package com.ssafy.reper.ui.order
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Order
+import com.ssafy.reper.data.dto.OrderDetail
 import com.ssafy.reper.data.dto.Recipe
-import com.ssafy.reper.data.remote.RecipeService
 import com.ssafy.reper.data.remote.RetrofitUtil
 import kotlinx.coroutines.launch
 
 private const val TAG = "OrderFragmentViewModel_정언"
-class OrderFragmentViewModel : ViewModel() {
+class OrderViewModel : ViewModel() {
     private val orderService = RetrofitUtil.orderService
     private val recipeService = RetrofitUtil.recipeService
 
@@ -45,6 +44,42 @@ class OrderFragmentViewModel : ViewModel() {
             _recipeNameList.value = recipeList
             _orderList.value = orderList
             
+        }
+    }
+
+    private val _order =
+        MutableLiveData<Order>()
+    val order: LiveData<Order>
+        get() = _order
+
+    private val _recipeList =
+        MutableLiveData<MutableList<Recipe>>()
+    val recipeList: LiveData<MutableList<Recipe>>
+        get() = _recipeList
+
+    fun getOrder(orderId: Int){
+        viewModelScope.launch {
+            var item:Order
+            var list:MutableList<Recipe> = mutableListOf()
+            try {
+                item = orderService.getOrder(ApplicationClass.sharedPreferencesUtil.getStoreId(), orderId)
+                item.orderDetails?.let {
+                    it.sortBy { it.recipeId }
+                    for(detail in it){
+                        list.add(recipeService.getRecipe(detail.recipeId))
+                    }
+                }
+            }
+            catch (e:Exception){
+                item = Order(
+                    completed = false,
+                    orderDate = "",
+                    orderDetails = mutableListOf(),
+                    orderId = -1
+                )
+            }
+            _order.value = item
+            _recipeList.value = list
         }
     }
 }
