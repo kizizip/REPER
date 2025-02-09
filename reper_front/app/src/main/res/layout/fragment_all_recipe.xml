@@ -24,13 +24,15 @@
             android:text="레시피 검색"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
         <Spinner
             android:id="@+id/allrecipe_fm_sp"
-            android:layout_width="wrap_content"
+            android:layout_width="170dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="-8dp"
+            android:layout_marginEnd="4dp"
             android:overlapAnchor="false"
             android:spinnerMode="dialog"
+            android:background="@drawable/recipe_spinner_background"
             app:layout_constraintBottom_toBottomOf="@+id/textView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/textView" />

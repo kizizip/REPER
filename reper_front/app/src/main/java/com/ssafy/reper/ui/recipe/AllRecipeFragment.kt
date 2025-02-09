@@ -1,7 +1,13 @@
 package com.ssafy.reper.ui.recipe
 
+import android.app.Dialog
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -11,20 +17,46 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.GridLayout
+import android.widget.Spinner
 import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.replace
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.R
+import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.ui.MainActivity
+import com.ssafy.reper.ui.login.LoginActivity
+import com.ssafy.reper.ui.order.OrderViewModel
 import com.ssafy.smartstore_jetpack.util.CommonUtils.makeComma
+import kotlinx.coroutines.launch
 
 private const val TAG = "AllRecipeFragment_정언"
 class AllRecipeFragment : Fragment() {
+    ////////////////////////////////////
+    // - 라디오 그룹으로 필터 다시 만들기.
+    // - 재료 포함 제외 검색, 유사도 되는 건지 묻기.
+    //      1. 유사도 X -> 샷 과 같은 명확한 것으로 필터 변경
+    //      2. 유사도 O -> 현상 유지
+    // - 카테고리누르고 필터나 검색 눌렀을 때 rv 업데이트 되게 로직 변경 (현재: 카테고리를 누르면 rv 업데이트. ViewModel.recipeList가 업데이트 되면 initAdapter 호출 됨.!!!)
+    // - 검색 구현
+    // - 검색 버튼이 꼭 필요한가? 필터에서 하나 클릭하면 다이얼로그 꺼지면서 바로 검색되게 할 거임.
+    // - 즐겨찾기 구현
+    ////////////////////////////////////
+
+
+    var category : MutableList<String> = mutableListOf()
+
+    private val viewModel: RecipeViewModel by viewModels()
 
     // 레시피 리스트 recyclerView Adapter
     private lateinit var allRecipeListAdapter: AllRecipeListAdapter
@@ -37,44 +69,36 @@ class AllRecipeFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mainActivity = context as MainActivity
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _allRecipeBinding = FragmentAllRecipeBinding.inflate(inflater, container, false)
         return allRecipeBinding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // 이벤트 관리
+        initEvent()
+        // RecyclerView adapter 처리
+        initAdapter()
+    }
+    override fun onResume() {
+        super.onResume()
         mainActivity.showBottomNavigation()
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _allRecipeBinding = null
+    }
+    override fun onDetach() {
+        super.onDetach()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // 화면 회전 잠금 해제
+    }
 
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////
-        // 카테고리 spinner
-        val category = arrayOf("coffee", "non-coffee")
-        val myAdapter = ArrayAdapter(mainActivity, R.layout.item_allrecipe_spinner, category)
-
-        allRecipeBinding.allrecipeFmSp.adapter = myAdapter
-
-        allRecipeBinding.allrecipeFmSp.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                if (view == null) {
-                    return
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-
-            }
-        }
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    fun initEvent(){
         // 탭 초기 상태 설정 (단계별 레시피 선택)
         allRecipeBinding.allrecipeFmStepRecipeTab.isSelected = true
         allRecipeBinding.allrecipeFmFullRecipeTab.isSelected = false
@@ -83,43 +107,107 @@ class AllRecipeFragment : Fragment() {
         allRecipeBinding.allrecipeFmStepRecipeTab.setOnClickListener {
             allRecipeBinding.allrecipeFmStepRecipeTab.isSelected = true
             allRecipeBinding.allrecipeFmFullRecipeTab.isSelected = false
-            // 여기에 단계별 레시피 표시 로직 추가
         }
 
         allRecipeBinding.allrecipeFmFullRecipeTab.setOnClickListener {
             allRecipeBinding.allrecipeFmStepRecipeTab.isSelected = false
             allRecipeBinding.allrecipeFmFullRecipeTab.isSelected = true
-            // 여기에 전체 레시피 표시 로직 추가
         }
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////
-        // RecyclerView adapter 처리
-        initAdapter()
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        allRecipeBinding.allrecipeFmBtnFilter.setOnClickListener {
+            var howSearch = -1
+
+            val dialog = Dialog(mainActivity)
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog.setContentView(R.layout.dialog_ingredient_filter)
+            dialog.findViewById<View>(R.id.dialog_filter_cancel_btn).setOnClickListener {
+                dialog.dismiss()
+            }
+
+            val filterSpinner = dialog.findViewById<Spinner>(R.id.filter_spinner)
+            val filterSpinnerOptions = listOf("포함 검색", "제외 검색")
+            val adapter = ArrayAdapter(mainActivity, R.layout.item_allrecipe_spinner, filterSpinnerOptions)
+            filterSpinner.adapter = adapter
+            filterSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    val selectedItem = filterSpinnerOptions[position]
+                    if(selectedItem.equals("포함 검색")){
+                        howSearch = 0
+                    }
+                    else if(selectedItem.equals("제외 검색")){
+                        howSearch = 1
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
+            dialog.show()
+        }
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _allRecipeBinding = null
-    }
-
     fun initAdapter() {
         // allrecipe item 클릭 이벤트 리스너
-        allRecipeListAdapter = AllRecipeListAdapter(mutableListOf()) { id, position ->
+        allRecipeListAdapter = AllRecipeListAdapter(mutableListOf()) { id, recipeName ->
             // 즐겨찾기 버튼을 눌렀을 때
             if(id == 0){
 
             }
             // 아이템을 눌렀을 때
             else if(id == 1){
-                if(allRecipeBinding.allrecipeFmFullRecipeTab.isSelected == true){
-                    findNavController().navigate(R.id.fullRecipeFragment)
+                lifecycleScope.launch {
+                    val icehotList= viewModel.recipeList.value!!.filter { it.recipeName == recipeName }
 
-                }
-                else if(allRecipeBinding.allrecipeFmStepRecipeTab.isSelected == true){
-                    findNavController().navigate(R.id.stepRecipeFragment)
+                    if(allRecipeBinding.allrecipeFmFullRecipeTab.isSelected == true){
+                        // 클릭 이벤트 -> recipeId 전달
+                        val bundle = Bundle().apply {
+                            putIntegerArrayList("idList", icehotList.map { it.recipeId }.toCollection(ArrayList()))
+                        }
+                        findNavController().navigate(R.id.fullRecipeFragment, bundle)
 
+                    }
+                    else if(allRecipeBinding.allrecipeFmStepRecipeTab.isSelected == true){
+                        var ice = -1
+                        var hot = -1
+                        for(item in icehotList){
+                            if(item.type.equals("ICE")){
+                                ice = item.recipeId
+                            }
+                            else if(item.type.equals("HOT")){
+                                hot = item.recipeId
+                            }
+                        }
+
+
+                        val dialog = Dialog(mainActivity)
+                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        dialog.setContentView(R.layout.dialog_icehot)
+
+                        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.GONE
+                        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.GONE
+                        if(ice != -1){
+                            dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.VISIBLE
+                        }
+                        if(hot != -1){
+                            dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.VISIBLE
+                        }
+                        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
+                            // 클릭 이벤트 -> recipeId 전달
+                            val bundle = Bundle().apply {
+                                putInt("recipeId", hot)
+                            }
+                            findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                            dialog.dismiss()
+                        }
+                        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).setOnClickListener {
+                            // 클릭 이벤트 -> recipeId 전달
+                            val bundle = Bundle().apply {
+                                putInt("recipeId", ice)
+                            }
+                            findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                            dialog.dismiss()
+                        }
+                        dialog.show()
+                    }
                 }
             }
         }
@@ -127,11 +215,51 @@ class AllRecipeFragment : Fragment() {
         allRecipeBinding.allrecipeFmRv.apply {
             addItemDecoration(GridSpacingItemDecoration(2, 10)) // 2열, 20dp 간격
             layoutManager = GridLayoutManager(mainActivity, 2)
-            allRecipeListAdapter.recipeList = mutableListOf("아메리카노", "카페라떼", "초코라떼", "민트초코프라프치노", "대추차", "레몬에이드", "서현이가 좋아하는 아이스티", "그녀는 신이야")
-            adapter = allRecipeListAdapter
+
+            viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
+
+            viewModel.recipeList.observe(viewLifecycleOwner){
+                allRecipeListAdapter.recipeList = it.distinctBy { it.recipeName }.toMutableList()
+                adapter = allRecipeListAdapter
+
+                category.add("카테고리")
+                for(recipe in it){
+                    if(!category.contains(recipe.category)){
+                        category.add(recipe.category)
+                    }
+                }
+                initSpinner()
+            }
+        }
+    }
+    fun initSpinner(){
+        val myAdapter = ArrayAdapter(mainActivity, R.layout.item_allrecipe_spinner, category)
+
+        allRecipeBinding.allrecipeFmSp.adapter = myAdapter
+
+        val defaultPosition = category.indexOf("카테고리")
+        if (defaultPosition != -1) {
+            allRecipeBinding.allrecipeFmSp.setSelection(defaultPosition)
+        }
+
+        allRecipeBinding.allrecipeFmSp.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if(position == defaultPosition){
+                    allRecipeListAdapter.recipeList = viewModel.recipeList.value!!.distinctBy { it.recipeName }.toMutableList()
+                    allRecipeListAdapter.notifyDataSetChanged()
+                }
+                else{
+                    allRecipeListAdapter.recipeList = viewModel.recipeList.value!!.distinctBy { it.recipeName }.filter { it.category == category[position] }.toMutableList()
+                    allRecipeListAdapter.notifyDataSetChanged()
+
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 
+    // recyclerview Grid 형태 여백 주는 Class (Deco 용임)
     class GridSpacingItemDecoration(private val spanCount: Int, private val spacing: Int) :
         RecyclerView.ItemDecoration() {
 

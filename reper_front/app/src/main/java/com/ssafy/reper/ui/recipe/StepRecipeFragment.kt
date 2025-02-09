@@ -34,7 +34,6 @@ class StepRecipeFragment : Fragment() {
         )
 
     }
-
     override fun onPause() {
         super.onPause()
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
@@ -43,12 +42,10 @@ class StepRecipeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _stepRecipeBinding = FragmentStepRecipeBinding.inflate(inflater, container, false)
         return stepRecipeBinding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mainActivity.hideBottomNavigation()
@@ -57,7 +54,6 @@ class StepRecipeFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _stepRecipeBinding = null

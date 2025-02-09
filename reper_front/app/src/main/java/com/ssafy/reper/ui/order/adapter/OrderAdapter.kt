@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.OrderDetail
-import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.local.OrderRecipeModel
 import com.ssafy.reper.databinding.OrderSpinnerItemBinding
 import com.ssafy.reper.databinding.RvHomeOrderItemBinding
