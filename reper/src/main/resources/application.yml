@@ -23,6 +23,8 @@ spring:
 #    password: ${ELASTIC_PASSWORD}
     ssl:
       enabled: false
+    index:
+      auto-create-index: false
 #      ca-certificate: classpath:docker/certs/ca.crt
 #      key: classpath:certs/elasticsearch.key
 #      certificate: classpath:certs/elasticsearch.crt
