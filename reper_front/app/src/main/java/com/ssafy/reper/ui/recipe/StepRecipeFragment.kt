@@ -16,6 +16,7 @@ import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.databinding.FragmentStepRecipeBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.util.ViewModelSingleton
+import kotlin.math.min
 
 private const val TAG = "StepRecipeFragment_정언"
 class StepRecipeFragment : Fragment() {
@@ -25,6 +26,7 @@ class StepRecipeFragment : Fragment() {
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val viewModel: RecipeViewModel by viewModels()
 
+    // Bundle 변수
     lateinit var recipeIdList:ArrayList<Int>
     var whereAmICame = -1
 
@@ -112,60 +114,100 @@ class StepRecipeFragment : Fragment() {
 
         // 다음버튼이 눌릴 때.
         stepRecipeBinding.steprecipeFmBtnRight.setOnClickListener {
-            Log.d(TAG, "다음을 눌렀습니다.")
-            stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.VISIBLE
-            // 재료를 보여주고 있다면?
-            if(stepRecipeBinding.lottieAnimationView.visibility == View.GONE){
-                showOneStepRecipePortrait(mainViewModel.nowISeeRecipe.value!!, mainViewModel.nowISeeStep.value!!)
-            }
-            else{
-                // 현재 페이지가 마지막 레시피의 마지막 스탭일 때.
-                if(mainViewModel.selectedRecipeList.value?.get(mainViewModel.nowISeeRecipe.value!!)?.recipeSteps?.size!! > mainViewModel.nowISeeStep.value!!
-                    &&  mainViewModel.selectedRecipeList.value!!.size > mainViewModel.nowISeeRecipe.value!!){
-                    // 다음버튼 안 보이게
-                    stepRecipeBinding.steprecipeFmBtnRight.visibility = View.GONE
-                    showOneStepRecipePortrait(mainViewModel.nowISeeRecipe.value!!, mainViewModel.nowISeeStep.value!!.plus(1))
-                }
-                // 아직 다음 레시피가 있을 때.
-                else{
-                    Log.d(TAG, "아직 다음 레시피가 있습니다.")
-                    // 현재 레시피의 마지막 스탭일 떄.
-                    if(mainViewModel.selectedRecipeList.value?.get(mainViewModel.nowISeeRecipe.value!!)?.recipeSteps?.size == mainViewModel.nowISeeStep.value){
-                        Log.d(TAG, "현재 레시피의 마지막 스탭입니다.")
-                        // 다음 레시피를 본다.
-                        mainViewModel.setNowISeeRecipe(mainViewModel.nowISeeRecipe.value?.plus(1)!!)
-                        mainViewModel.setNowISeeStep(0)
-
-                        // 메뉴명 변경
-                        stepRecipeBinding.steprecipeFmTvMenuName?.setText(mainViewModel.selectedRecipeList.value?.get(mainViewModel.nowISeeRecipe.value!!)!!.recipeName)
-                        // 재료 출력
-                        showIngredientPortrait(mainViewModel.nowISeeRecipe.value!!)
-                    }
-                    // 아직 다음 스탭이 남아있을 때.
-                    else{
-                        Log.d(TAG, "아직 스탭이 남아있습니다.")
-                        // 현재 레시피의 다음 스탭을 본다.
-                        mainViewModel.setNowISeeStep(mainViewModel.nowISeeStep.value?.plus(1)!!)
-                        showOneStepRecipePortrait(mainViewModel.nowISeeRecipe.value!!, mainViewModel.nowISeeStep.value!!)
-                    }
-                }
-            }
-
+            nextEvent()
         }
 
-
-        // 1. 이전 스텝이 남앗을 때 -> 이전 스텝을 보여준다.
-        // 2. 내가 지금 첫번째 스텝이라 이전을 누르면 재료를 보여줘야할 때
-        // 3. 내가 지금 첫번째 레시피의 첫번째 스탭일 때 -> 이전버튼을 안보이게, 재료를 보여줌
-        // 4. 내가 지금 재료라 이전 레시피의 마지막 스텝을 보여줘야할때.
         // 이전 버튼이 눌릴 때.
         stepRecipeBinding.steprecipeFmBtnLeft.setOnClickListener {
-            Log.d(TAG, "이전을 눌렀습니다.")
-            stepRecipeBinding.steprecipeFmBtnRight.visibility = View.VISIBLE
+            prevEvent()
         }
     }
     fun initEventLand(){
 
+    }
+    // 1. 내가 지금 재료라서 스탭을 보여줘야 할 때
+    // 2. 내가 지금 스텝인데, 다음 스텝이 있을 때
+    // 3. 내가 지금 스텝인데, 마지막 스텝이라 다음 레시피의 재료를 보여줘야할 때
+    // 4. 내가 지금 스텝인데, 마지막 레시피의 마지막 스탭일때
+    fun nextEvent(){
+//        Log.d(TAG, "다음을 눌렀습니다. ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+        stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.VISIBLE
+
+        // 내가 지금 재료야! -> 다음 스탭 보여줘야함
+        if(stepRecipeBinding.lottieAnimationView.visibility == View.GONE){
+            mainViewModel.setNowISeeStep(mainViewModel.nowISeeStep.value!! + 1)
+//            Log.d(TAG, "나 재료야! ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+            showOneStepRecipePortrait(mainViewModel.nowISeeRecipe.value!!)
+        }
+        // 내가 지금 스탭이야
+        else{
+            // 다음 스탭이 있어!
+            if(mainViewModel.nowISeeStep.value!! < mainViewModel.recipeSteps.value!!.count() - 2){
+                mainViewModel.setNowISeeStep(mainViewModel.nowISeeStep.value!! + 1)
+//                Log.d(TAG, "나 다음 스탭 있어! ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+                showOneStepRecipePortrait(mainViewModel.nowISeeStep.value!!)
+            }
+            // 마지막 스탭인데, 다음 레시피가 있어!
+            else if(mainViewModel.nowISeeRecipe.value!! < mainViewModel.selectedRecipeList.value!!.count()  - 1){
+                mainViewModel.setNowISeeRecipe(mainViewModel.nowISeeRecipe.value!! + 1)
+                mainViewModel.setRecipeSteps(mainViewModel.nowISeeRecipe.value!!)
+                mainViewModel.setNowISeeStep(-1)
+//                Log.d(TAG, "나 다음 레시피 있어! ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+                showIngredientPortrait(mainViewModel.nowISeeRecipe.value!!)
+            }
+            // 내가 마지막 레시피의 마지막 스탭이야!
+            else{
+//                Log.d(TAG, "나 마지막 레시피의 마지막 스탭이야! ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+                mainViewModel.setNowISeeStep(mainViewModel.nowISeeStep.value!! + 1)
+                showOneStepRecipePortrait(mainViewModel.nowISeeStep.value!!)
+                stepRecipeBinding.steprecipeFmBtnRight.visibility = View.GONE
+            }
+        }
+    }
+    // 1. 내가 지금 재료라서 이전 레시피의 마지막 스탭을 보여줘야 할 때
+    // 2. 내가 지금 스텝인데, 이전 스텝이 있을 때
+    // 3. 내가 지금 스텝인데, 첫번쨰 스탭이라 현재 레시피의 재료를 보여줘야할 때
+    // 4. 내가 재료인데, 첫번쨰 레시피의 재료일때
+    fun prevEvent(){
+//        Log.d(TAG,"이전을 눌렀습니다. ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+        stepRecipeBinding.steprecipeFmBtnRight.visibility = View.VISIBLE
+
+        // 난 스탭인데!
+        if(stepRecipeBinding.lottieAnimationView.visibility == View.VISIBLE){
+            // 이전 스탭이 있어!
+            if(mainViewModel.nowISeeStep.value!! > 0){
+                mainViewModel.setNowISeeStep(mainViewModel.nowISeeStep.value!! - 1)
+//                Log.d(TAG, "나 이전에 스탭이 있어! ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+                showOneStepRecipePortrait(mainViewModel.nowISeeStep.value!!)
+            }
+            // 나 첫번째 스탭이라 재료 보여줘야해!
+            else{
+                mainViewModel.setNowISeeStep(-1)
+//                Log.d(TAG, "나 첫번째 스탭이라 이제 재료 보여야 해! ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+                showIngredientPortrait(mainViewModel.nowISeeRecipe.value!!)
+                // 나 이전 레시피가 있을 때!
+                if(mainViewModel.nowISeeRecipe.value!! <=  0){
+//                    Log.d(TAG, "나 첫번째 레시피의 재료야! ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+                    stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.GONE
+                }
+            }
+        }
+        //내가 재료인데!
+        else{
+            // 나 이전 레시피가 있을 때!
+            if(mainViewModel.nowISeeRecipe.value!! > 0){
+                mainViewModel.setNowISeeRecipe(mainViewModel.nowISeeRecipe.value!! - 1)
+                mainViewModel.setRecipeSteps(mainViewModel.nowISeeRecipe.value!!)
+                mainViewModel.setNowISeeStep(mainViewModel.recipeSteps.value!!.size - 1)
+//                Log.d(TAG, "나 재료인데, 이전 레시피가 있어! ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+                showOneStepRecipePortrait(mainViewModel.nowISeeStep.value!!)
+            }
+            // 첫번째 레시피의 재료일 때
+            else{
+//                Log.d(TAG, "나 첫번째 레시피의 재료야! ${mainViewModel.nowISeeRecipe.value} / ${mainViewModel.nowISeeStep.value}")
+                stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.GONE
+            }
+        }
     }
     // 재료 보이게
     fun showIngredientPortrait(recipeIdx:Int){
@@ -177,14 +219,16 @@ class StepRecipeFragment : Fragment() {
                 ingredientsText += ", ${item.ingredientName}"
             }
         }
+        stepRecipeBinding.steprecipeFmTvIngredient?.setText(ingredientsText)
     }
     // 레시피 보이게
-    fun showOneStepRecipePortrait(recipeIdx:Int, stepIdx:Int){
-        val recipeSteps = mainViewModel.selectedRecipeList.value?.get(recipeIdx)?.recipeSteps
+    fun showOneStepRecipePortrait(stepIdx:Int){
+        val recipeSteps = mainViewModel.recipeSteps.value!!
 
-        //로티
+        // 로티
         stepRecipeBinding.lottieAnimationView.visibility = View.VISIBLE
-        stepRecipeBinding.lottieAnimationView.setAnimationFromUrl(recipeSteps?.get(stepIdx)?.animationUrl)
+        stepRecipeBinding.lottieAnimationView.setAnimationFromUrl(recipeSteps.get(stepIdx)?.animationUrl)
+        // 레시피
         stepRecipeBinding.steprecipeFmTvIngredient?.visibility = View.VISIBLE
         stepRecipeBinding.steprecipeFmTvIngredient?.text = recipeSteps?.get(stepIdx)?.instruction
     }

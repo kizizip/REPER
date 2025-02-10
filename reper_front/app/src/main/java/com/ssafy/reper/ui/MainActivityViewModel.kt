@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
+import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.data.remote.RetrofitUtil
 import kotlinx.coroutines.launch
 
@@ -26,14 +27,14 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
                 for(id in recipeIdList){
                     list.add(recipeService.getRecipe(id))
                 }
-                setNowISeeStep(0)
-                setNowISeeRecipe(0)
             }
             catch (e:Exception){
                 Log.d(TAG, "error: ${e}")
                 list = mutableListOf()
             }
             _selectedRecipeList.value = list
+            setNowISeeRecipe(0)
+            setNowISeeStep(-1)
         }
     }
 
@@ -49,16 +50,25 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
     val nowISeeStep : LiveData<Int>
         get() = _nowISeeStep
 
-    fun setNowISeeStep(idx: Int){
-        _nowISeeStep.value = idx
+    fun setNowISeeStep(stepIdx: Int){
+        _nowISeeStep.value = stepIdx
     }
 
     private val _nowISeeRecipe = MutableLiveData<Int>()
     val nowISeeRecipe : LiveData<Int>
         get() = _nowISeeRecipe
 
-    fun setNowISeeRecipe(idx: Int){
-        _nowISeeRecipe.value = idx
+    fun setNowISeeRecipe(recipeIdx: Int){
+        _nowISeeRecipe.value = recipeIdx
+        setRecipeSteps(recipeIdx)
+    }
+
+    private val _recipeSteps = MutableLiveData<MutableList<RecipeStep>>()
+    val recipeSteps : LiveData<MutableList<RecipeStep>>
+        get() = _recipeSteps
+
+    fun setRecipeSteps(recipeIdx: Int){
+        _recipeSteps.value = _selectedRecipeList.value?.get(recipeIdx)?.recipeSteps
     }
 
 }
