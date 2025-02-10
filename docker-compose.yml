@@ -50,7 +50,7 @@ services:
       - mysql
     volumes:
       - app_logs:/app/logs
-      - ./src/main/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json:/app/config/firebase.json
+  - ./reper/src/main/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json:/app/config/firebase.json
     networks:
       - app-network
   
