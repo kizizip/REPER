@@ -43,7 +43,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://i12d109.p.ssafy.io:13790/reper?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ssafy
       SPRING_DATASOURCE_PASSWORD: jeongeoneya0831!
-      FIREBASE_CONFIG_PATH: /app/config/firebase.json  # Firebase JSON 경로 설정
+      FIREBASE_JSON: /app/config/firebase.json  # Firebase JSON 경로 설정
     ports:
       - "48620:8080"
     depends_on:
