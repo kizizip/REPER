@@ -22,7 +22,7 @@ interface StoreService {
 
     //기존의 가게를 삭제함
     @DELETE("stores/{storeId}")
-    suspend fun deleteStore(@Path("storeId") storeId: Int):String
+    suspend fun deleteStore(@Path("storeId") storeId: Int)
 
     //가게명으로 매장검색
     @GET("store/search")

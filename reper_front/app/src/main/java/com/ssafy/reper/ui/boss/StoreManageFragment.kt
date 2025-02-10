@@ -1,5 +1,6 @@
 package com.ssafy.reper.ui.boss
 
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
@@ -31,6 +32,7 @@ class StoreManageFragment : Fragment() {
     private val bossViewModel: BossViewModel by activityViewModels()
     var userId = 1
     var storeId = 1
+    private var storeAddDialog: AlertDialog? = null
 
 
     override fun onAttach(context: Context) {
@@ -72,6 +74,7 @@ class StoreManageFragment : Fragment() {
 
 
     private fun showStoreAddDialog() {
+        if (!isAdded) return
         val dialog = Dialog(mainActivity)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(R.layout.dialog_store_add)
@@ -113,7 +116,6 @@ class StoreManageFragment : Fragment() {
     }
 
 
-
     private fun initAdapter() {
         storeAdapter = StoreAdapter(emptyList(), object : StoreAdapter.ItemClickListener {
             override fun onClick(position: Int) {
@@ -124,9 +126,10 @@ class StoreManageFragment : Fragment() {
         binding.storeFgRV.layoutManager = LinearLayoutManager(requireContext())
         binding.storeFgRV.adapter = storeAdapter
 
-        // ViewModel의 myStoreList를 관찰하여 변경될 때마다 Adapter에 데이터 업데이트
+        // ViewModel 초기화 및 LiveData 관찰
         bossViewModel.myStoreList.observe(viewLifecycleOwner) { newStoreList ->
-            storeAdapter.updateData(newStoreList)
+            Log.d(TAG, "Updated store list: $newStoreList")
+            storeAdapter.updateData(newStoreList)  // 데이터가 변경되면 Adapter에 새 데이터 반영
         }
     }
 
@@ -146,8 +149,6 @@ class StoreManageFragment : Fragment() {
         middleTV.text = "의 정보를"
 
 
-
-
         dialog.findViewById<View>(R.id.dialog_delete_cancle_btn).setOnClickListener {
             dialog.dismiss()
         }
@@ -156,13 +157,14 @@ class StoreManageFragment : Fragment() {
             Log.d(TAG, "showDialog: $deleteStoreId")
             dialog.dismiss()
             Toast.makeText(requireContext(), "가게 삭제 완료", Toast.LENGTH_SHORT).show()
-            bossViewModel.getStoreList(userId)
         }
         dialog.show()
     }
 
+    override fun onDestroyView() {
+        storeAddDialog?.dismiss()  // 프래그먼트 종료 시 다이얼로그 닫기
+        storeAddDialog = null
+        super.onDestroyView()
 
-
-
-
+    }
 }

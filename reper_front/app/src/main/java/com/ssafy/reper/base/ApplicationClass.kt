@@ -7,13 +7,15 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-private const val TAG = "ApplicationClass_싸피"
+private const val TAG = "ApplicationClass_안주현"
 class ApplicationClass : Application() {
     companion object {
         // 실제 서버 IP 주소를 사용해야 합니다
         // 예: 컴퓨터의 IP 주소 (ipconfig나 ifconfig로 확인)
         // const val SERVER_URL = "http://10.0.2.2:8080/"  // 안드로이드 에뮬레이터용
-        const val SERVER_URL = "http://192.168.1.181:8080/api/"
+         //const val SERVER_URL = "http://192.168.100.102:8080/api/"  // 안드로이드 에뮬레이터용
+
+        const val SERVER_URL = "http://i12d109.p.ssafy.io:48620/api/"
 
         // Retrofit 객체를 여기서 선언
         lateinit var retrofit: Retrofit

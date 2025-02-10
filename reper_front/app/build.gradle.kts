@@ -117,5 +117,4 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics:21.0.0")
     implementation ("com.google.firebase:firebase-messaging-ktx:23.4.1")
 
-
 }

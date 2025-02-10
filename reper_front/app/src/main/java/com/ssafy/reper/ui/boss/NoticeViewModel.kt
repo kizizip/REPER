@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Notice
 import com.ssafy.reper.data.dto.NoticeRequest
 import com.ssafy.reper.data.remote.RetrofitUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 private const val TAG = "NoticeViewModel"
@@ -53,7 +54,7 @@ class NoticeViewModel : ViewModel() {
 
     //단건은 받아온 리스트의 정보를 넣는걸로!
     fun getNotice(storeId: Int, noticeId:Int, userId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch{
             try {
                 val response = RetrofitUtil.noticeService.getNotice(storeId,noticeId, userId)
                 _clickNotice.postValue(response)
@@ -105,7 +106,7 @@ class NoticeViewModel : ViewModel() {
     }
 
     fun searchNoticeTitle(storeId: Int, noticeTitle:String){
-        viewModelScope.launch {
+        viewModelScope.launch{
             runCatching {
                 RetrofitUtil.noticeService.searchNoticeTitle(storeId, noticeTitle)
             }.onSuccess {
@@ -118,7 +119,7 @@ class NoticeViewModel : ViewModel() {
     }
 
     fun searchNoticeContent(storeId: Int, contentTitle:String){
-        viewModelScope.launch {
+        viewModelScope.launch{
             runCatching {
                 RetrofitUtil.noticeService.searchNoticeContent(storeId, contentTitle)
             }.onSuccess {

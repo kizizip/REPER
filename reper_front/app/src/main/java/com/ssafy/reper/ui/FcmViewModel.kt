@@ -11,7 +11,7 @@ private const val TAG = "FcmViewModel_싸피"
 class FcmViewModel:ViewModel() {
 
     fun saveToken(userToken: UserToken){
-        viewModelScope.launch {
+        viewModelScope.launch{
             runCatching {
                 RetrofitUtil.fcmService.getUserToken(userToken)
             }.onSuccess {
@@ -24,13 +24,14 @@ class FcmViewModel:ViewModel() {
 
 
     fun sendToUserFCM(userId:Int, title: String, content:String){
-        viewModelScope.launch {
+        viewModelScope.launch{
             runCatching {
                 RetrofitUtil.fcmService.sendToUser(userId,title,content)
+                Log.d(TAG, "sendToUserFCM: 함수실행중")
             }.onSuccess {
-                Log.d(TAG, "saveToken: ${title}")
+                Log.d(TAG, "sendToUserFCM: ${title}")
             }.onFailure {
-                Log.d(TAG, "saveToken: ${it.message}")
+                Log.d(TAG, "sendToUserFCM: ${it.message}")
             }
         }
     }

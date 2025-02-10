@@ -47,9 +47,9 @@ class StoreAdapter (var storeList: List<Store>, val itemClickListener: ItemClick
     }
 
     fun updateData(newList: List<Store>) {
-        storeList = emptyList()
-        storeList = newList
-        Log.d(TAG, "storeUpdateData: ${storeList}")
+        storeList = newList  // 그냥 새로운 리스트를 할당
+        Log.d(TAG, "storeUpdateData: $storeList")
         notifyDataSetChanged() // 데이터 변경 시 UI 갱신
     }
+
 }

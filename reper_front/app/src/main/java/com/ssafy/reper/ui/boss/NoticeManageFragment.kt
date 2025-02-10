@@ -1,6 +1,8 @@
 package com.ssafy.reper.ui.boss
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,16 +28,23 @@ class NoticeManageFragment : Fragment() {
     var userId = 1
     private lateinit var notiAdapter: NotiAdapter
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentNoticeManageBinding.inflate(inflater, container, false)
+        Log.d("DEBUG", "onCreateView 시작")
+
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("DEBUG", "onViewCreated 시작")
+
+        Log.d("DEBUG", "onViewCreated 끝")
 
         if(noticeViewModel.type.equals("")){
             noticeViewModel.getAllNotice(storeId,userId)
@@ -73,6 +82,7 @@ class NoticeManageFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+
     }
 
     private fun initSpinner() {
@@ -106,6 +116,7 @@ class NoticeManageFragment : Fragment() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun initNotiAdater() {
         if (noticeViewModel.noticeList.value.isNullOrEmpty()) {
             noticeViewModel.init(storeId, userId)

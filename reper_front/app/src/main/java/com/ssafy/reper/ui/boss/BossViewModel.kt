@@ -11,6 +11,7 @@ import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RequestStore
 import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.data.remote.RetrofitUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 import kotlin.math.log
@@ -57,17 +58,44 @@ class BossViewModel : ViewModel() {
         viewModelScope.launch {
             runCatching {
                 RetrofitUtil.storeService.allEmployee(storeId)
-            }.onSuccess {
-//                for (employee in it) {//권한으로 분기처리
-               getAccessEmployeeList(it)
-//
-//                }
+            }.onSuccess { employees ->
+                val access = employees.filter { it.employed }  // employed가 true인 직원들
+                val waiting = employees.filter { !it.employed } // employed가 false인 직원들
+                getAccessEmployeeList(access)
+                getWaitingEmployee(waiting)
+                Log.d(TAG, "Access: $access")
+                Log.d(TAG, "Waiting: $waiting")
             }.onFailure {
                 Log.d(TAG, "Error: ${it.message}")
             }
         }
     }
 
+    fun deleteEmployee(storeId: Int,userId: Int){
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.storeEmployeeService.deleteEmployee(storeId, userId)
+            }.onSuccess {
+                Log.d(TAG, "deleteEmployee: 성공")
+                getAllEmployee(storeId)
+            }.onFailure {
+                Log.d(TAG, "deleteEmployee: ${it.message}")
+            }
+        }
+    }
+
+    fun acceptEmployee(storeId: Int,userId: Int){
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.storeEmployeeService.acceptEmployee(storeId, userId)
+            }.onSuccess {
+                Log.d(TAG, "acceptEmployee: 성공")
+                getAllEmployee(storeId)
+            }.onFailure {
+                Log.d(TAG, "acceptEmployee: ${it.message}")
+            }
+        }
+    }
 
 
     fun getStoreList(userId: Int) {
@@ -75,7 +103,7 @@ class BossViewModel : ViewModel() {
             runCatching {
                 RetrofitUtil.storeService.findBossStore(userId)
             }.onSuccess {
-                setMyStoreList(it)
+                _myStoreList.value = it
                 Log.d(TAG, "getStoreList: ${it}")
             }.onFailure {
                 Log.d(TAG, "getStoreList: ${it.message}")
@@ -102,8 +130,8 @@ class BossViewModel : ViewModel() {
                 RetrofitUtil.storeService.deleteStore(storeId)
             }.onSuccess {
                 Log.d(TAG, "deleteStore: $it")
+                Log.d(TAG, "Calling getStoreList(userId) after deletion")
                 getStoreList(userId)
-                _myStoreList.postValue(_myStoreList.value) // 강제로 LiveData 갱신
             }.onFailure {
                 Log.d(TAG, "deleteStore: ${it.message}")
             }
