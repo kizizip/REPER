@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Ingredient
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
@@ -32,6 +33,7 @@ class RecipeViewModel : ViewModel() {
                 list = recipeService.getAllRecipes(storeId)
             }
             catch (e:Exception){
+                Log.d(TAG, "error: ${e}")
                 list = mutableListOf()
             }
             _recipeList.value = list
@@ -90,6 +92,47 @@ class RecipeViewModel : ViewModel() {
                 result = mutableListOf()
             }
             _recipeList.value = result
+        }
+    }
+
+    private val _favoriteRecipeList =
+        MutableLiveData<MutableList<FavoriteRecipe>>()
+    val favoriteRecipeList: LiveData<MutableList<FavoriteRecipe>>
+        get() = _favoriteRecipeList
+
+    fun getLikeRecipes(storeId:Int, userId:Int){
+        viewModelScope.launch {
+            var list:MutableList<FavoriteRecipe>
+            try {
+                list = recipeService.getLikeRecipes(storeId, userId)
+            }
+            catch (e:Exception){
+                Log.d(TAG, "getLikeRecipes :error: ${e}")
+                list = mutableListOf()
+            }
+            _favoriteRecipeList.value = list
+        }
+    }
+
+    fun likeRecipe(userId:Int, recipeId:Int){
+        viewModelScope.launch {
+            try {
+                recipeService.likeRecipe(userId, recipeId)
+            }
+            catch (e:Exception){
+                Log.d(TAG, "likeRecipe :error: ${e}")
+            }
+        }
+    }
+
+    fun unLikeRecipe(userId:Int, recipeId:Int){
+        viewModelScope.launch {
+            try {
+                recipeService.unLikeRecipe(userId, recipeId)
+            }
+            catch (e:Exception){
+                Log.d(TAG, "unLikeRecipe : error: ${e}")
+            }
         }
     }
 }

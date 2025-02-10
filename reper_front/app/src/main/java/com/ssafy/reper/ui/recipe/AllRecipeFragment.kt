@@ -214,13 +214,16 @@ class AllRecipeFragment : Fragment() {
     }
     fun initAdapter() {
         // allrecipe item 클릭 이벤트 리스너
-        allRecipeListAdapter = AllRecipeListAdapter(mutableListOf()) { id, recipeName ->
+        allRecipeListAdapter = AllRecipeListAdapter(mutableListOf(), mutableListOf()) { id, recipeName, recipeId ->
             // 즐겨찾기 버튼을 눌렀을 때
             if(id == 0){
-
+                viewModel.likeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipeId)
+            }
+            else if(id == 1){
+                viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipeId)
             }
             // 아이템을 눌렀을 때
-            else if(id == 1){
+            else if(id == 2){
                 lifecycleScope.launch {
                     val icehotList= viewModel.recipeList.value!!.filter { it.recipeName == recipeName }
 
@@ -303,30 +306,38 @@ class AllRecipeFragment : Fragment() {
             layoutManager = GridLayoutManager(mainActivity, 2)
 
             viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
+            viewModel.getLikeRecipes(
+                ApplicationClass.sharedPreferencesUtil.getStoreId(),
+                ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
+            )
 
-            viewModel.recipeList.observe(viewLifecycleOwner){
-                if(it.isEmpty()){
+            viewModel.recipeList.observe(viewLifecycleOwner) {
+                if (it.isEmpty()) {
                     allRecipeBinding.allrecipeFmRv.visibility = View.GONE
                     allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
                     category.clear()
                     category.add("카테고리")
                     initSpinner()
-                }
-                else{
+                } else {
                     allRecipeBinding.allrecipeFmRv.visibility = View.VISIBLE
                     allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
 
-                    allRecipeListAdapter.recipeList = it.distinctBy { it.recipeName }.toMutableList()
-                    adapter = allRecipeListAdapter
+                    allRecipeListAdapter.recipeList =
+                        it.distinctBy { it.recipeName }.toMutableList()
                     category.clear()
                     category.add("카테고리")
-                    for(recipe in it){
-                        if(!category.contains(recipe.category)){
+                    for (recipe in it) {
+                        if (!category.contains(recipe.category)) {
                             category.add(recipe.category)
                         }
                     }
                     initSpinner()
                 }
+            }
+
+            viewModel.favoriteRecipeList.observe(viewLifecycleOwner) {
+                allRecipeListAdapter.favoriteRecipeList = it
+                adapter = allRecipeListAdapter
             }
         }
     }

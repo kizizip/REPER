@@ -1,9 +1,12 @@
 package com.ssafy.reper.data.remote
 
+import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeResponse
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -27,4 +30,16 @@ interface RecipeService {
     // 특정 매장의 레시피 재료 제외 검색
     @GET("stores/{storeId}/recipes/search/exclude")
     suspend fun searchRecipeExclude(@Path("storeId") storeId: Int, @Query("ingredient") ingredient:String) :MutableList<RecipeResponse>
+
+    // 즐겨찾기 레시피 등록
+    @POST("users/{userId}/favorites/recipe/{recipeId}")
+    suspend fun likeRecipe(@Path("userId") userId: Int, @Path("recipeId") recipeId:Int)
+
+    // 즐겨찾기 레시피 삭제
+    @DELETE("users/{userId}/favorites/recipe/{recipeId}")
+    suspend fun unLikeRecipe(@Path("userId") userId: Int, @Path("recipeId") recipeId:Int)
+
+    // 즐겨찾기 레시피 전체 조회
+    @GET("stores/{storeId}/user/{userId}/favorites")
+    suspend fun getLikeRecipes(@Path("storeId") storeId: Int, @Path("userId") userId:Int) :MutableList<FavoriteRecipe>
 }

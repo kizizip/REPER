@@ -40,7 +40,7 @@ class StepRecipeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // OrderFragment에서 bundle로 던진 orderId를 받음
-        whereAmICame = arguments?.getInt("whereAmICame") ?: -1
+        whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment
         recipeIdList = arguments?.getIntegerArrayList("recipeIdList") ?: arrayListOf(-1)
 
         initEvent()
