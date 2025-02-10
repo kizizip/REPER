@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/stores/{storeId}/orders")
@@ -49,5 +50,23 @@ public class OrderController {
         OrderResponseDto orderResponseDto = new OrderResponseDto(order);
 
         return ResponseEntity.ok(orderResponseDto);
+    }
+
+
+    // 특정 주문 단건 완료 처리
+    @PatchMapping("/{orderId}")
+    @Operation(summary = "주문 단건의 is_completed값을 true로 전환합니다. 성공시 true를 반환합니다.")
+    public ResponseEntity<?> completeOrder(@PathVariable Long orderId) {
+        try {
+            boolean result = orderService.updateOrder(orderId);
+
+            if (result) {
+                return ResponseEntity.ok(true);
+            } else {
+                throw new NoSuchElementException("해당하는 주문이 없음.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("서버 오류 발생");
+        }
     }
 }
