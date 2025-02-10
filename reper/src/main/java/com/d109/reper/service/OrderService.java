@@ -91,4 +91,21 @@ public class OrderService {
         return order;
     }
 
+
+    public boolean updateOrder(Long orderId) {
+        try {
+            Order order = orderRepository.findByOrderId(orderId)
+                    .orElseThrow(() -> new IllegalArgumentException("OrderNotFound"));
+
+            if (order != null) {
+                order.setCompleted(true);
+            }
+
+            orderRepository.save(order);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }
