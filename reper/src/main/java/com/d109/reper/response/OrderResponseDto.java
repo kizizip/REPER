@@ -10,14 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-//@Data
-//public class OrderResponseDto {
-//    private Long orderId;
-//    private LocalDateTime orderDate;
-//    private Long storeId;
-//    private boolean completed;
-//    private List<OrderDetailDto> orderDetails;
-
     @Getter
     @Setter
     @NoArgsConstructor
@@ -28,23 +20,24 @@ import java.util.stream.Collectors;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private LocalDateTime orderDate;
         private boolean isCompleted;
+        private boolean takeout;
         private List<OrderDetailDto> orderDetails;
 
         public OrderResponseDto(Order order) {
             this.orderId = order.getOrderId();
             this.orderDate = order.getOrderDate();
             this.isCompleted = order.isCompleted();
+            this.takeout = order.isTakeout();
             this.orderDetails = order.getOrderDetails().stream()
                     .map(OrderDetailDto::new)
                     .collect(Collectors.toList());
         }
-//    }
 
 
     @Getter
     @Setter
     @NoArgsConstructor
-                              @AllArgsConstructor
+    @AllArgsConstructor
     public class OrderDetailDto {
             private Long orderDetailId;
             private Long recipeId;
