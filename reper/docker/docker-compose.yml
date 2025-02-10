@@ -9,7 +9,7 @@ services:
 #      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/instance/instance.key
 #      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/instance/instance.crt
 #      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca.crt
-      - ES_JAVA_OPTS=-Xms512m -Xmx15g
+      - ES_JAVA_OPTS=-Xms4g -Xmx4g
 #      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
 #    env_file:
 #      - .env
