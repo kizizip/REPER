@@ -308,6 +308,9 @@ class AllRecipeFragment : Fragment() {
                 if(it.isEmpty()){
                     allRecipeBinding.allrecipeFmRv.visibility = View.GONE
                     allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
+                    category.clear()
+                    category.add("카테고리")
+                    initSpinner()
                 }
                 else{
                     allRecipeBinding.allrecipeFmRv.visibility = View.VISIBLE
