@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.Order
@@ -46,6 +47,16 @@ class OrderAdatper(var orderList:MutableList<Order>, var recipeNameList:MutableL
                 binding.rvHomeOrderTitle.text = "${recipeName} 외 ${totalQuantity - 1}잔"
             }
             binding.rvHomeOrderTime.text = getRelativeTime(item.orderDate)
+            binding.rvHomeOrderTakeout.let{
+                if(item.takeout){
+                    it.setText("포장")
+                    it.setTextColor(ContextCompat.getColor(binding.root.context, R.color.red))
+                }
+                else{
+                    it.setText("매장")
+                    it.setTextColor(ContextCompat.getColor(binding.root.context, R.color.green))
+                }
+            }
             binding.root.setOnClickListener{
                 itemClickListener.onClick(item.orderId)
             }

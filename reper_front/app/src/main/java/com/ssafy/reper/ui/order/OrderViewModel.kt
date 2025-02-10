@@ -75,7 +75,8 @@ class OrderViewModel : ViewModel() {
                     completed = false,
                     orderDate = "",
                     orderDetails = mutableListOf(),
-                    orderId = -1
+                    orderId = -1,
+                    takeout = false
                 )
             }
             _order.value = item

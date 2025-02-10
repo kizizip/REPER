@@ -89,6 +89,20 @@
             app:layout_constraintTop_toBottomOf="@+id/fragment_order_linear_layout2" />`
 
         <TextView
+            android:id="@+id/fragment_order_recipe_tv_takeout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:fontFamily="@font/pretendard_semibold"
+            android:text=""
+            android:textColor="@color/green"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView15"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textView15" />
+
+        <TextView
+            android:id="@+id/textView15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -111,6 +125,7 @@
             app:layout_constraintTop_toBottomOf="@+id/fragment_order_linear_layout2" />
 
         <FrameLayout
+            android:id="@+id/frameLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="4dp"

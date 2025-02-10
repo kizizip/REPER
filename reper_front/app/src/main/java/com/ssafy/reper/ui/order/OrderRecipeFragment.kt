@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
@@ -52,10 +53,10 @@ class OrderRecipeFragment : Fragment() {
         // OrderFragment에서 bundle로 던진 orderId를 받음
         orderId = arguments?.getInt("orderId") ?: -1
 
-        // 이벤트 처리
-        initEvent()
         // 어뎁터 처리
         initAdapter()
+        // 이벤트 처리
+        initEvent()
     }
     override fun onResume() {
         super.onResume()
@@ -108,6 +109,19 @@ class OrderRecipeFragment : Fragment() {
 
         orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.setOnClickListener {
             parentFragmentManager.popBackStack()
+        }
+
+        viewModel.order.observe(viewLifecycleOwner){order->
+            orderRecipebinding.fragmentOrderRecipeTvTakeout.let{
+                if(order.takeout){
+                    it.setText("포장")
+                    it.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+                }
+                else{
+                    it.setText("매장")
+                    it.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
+                }
+            }
         }
     }
     // 어뎁터 설정
