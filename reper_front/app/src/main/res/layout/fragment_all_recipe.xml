@@ -135,10 +135,24 @@
             android:background="@color/ligtgreen"
             app:layout_constraintTop_toBottomOf="@+id/allrecipe_fm_ll" />
 
+        <TextView
+            android:id="@+id/allrecipe_fm_tv_norecipe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:fontFamily="@font/pretendard_regular"
+            android:text="해당하는 레시피가 없습니다."
+            android:textColor="@color/lightgray"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/allrecipe_fm_rv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/allrecipe_fm_ll" />
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/allrecipe_fm_rv"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:visibility="visible"
             android:layout_marginTop="8dp"
             android:focusable="false"
             app:layout_constraintBottom_toBottomOf="parent"

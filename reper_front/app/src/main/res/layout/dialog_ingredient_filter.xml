@@ -7,8 +7,8 @@
     app:cardCornerRadius="16dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="350dp"
-        android:layout_height="400dp"
+        android:layout_width="330dp"
+        android:layout_height="380dp"
         android:padding="32dp">
 
         <TextView
@@ -129,33 +129,6 @@
                 android:paddingStart="2dp"
                 android:text="초콜릿"
                 android:layout_marginEnd="30dp"
-                android:textColor="@color/black"
-                android:textSize="16dp" />
-
-            <RadioButton
-                android:id="@+id/radio_condensed_milk"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:button="@null"
-                android:drawableLeft="@drawable/filter_radio_btn"
-                android:drawablePadding="10dp"
-                android:fontFamily="@font/pretendard_regular"
-                android:paddingStart="2dp"
-                android:text="연유"
-                android:textColor="@color/black"
-                android:textSize="16dp" />
-
-            <RadioButton
-                android:id="@+id/radio_banana"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:layout_columnSpan="1"
-                android:button="@null"
-                android:drawableLeft="@drawable/filter_radio_btn"
-                android:drawablePadding="10dp"
-                android:fontFamily="@font/pretendard_regular"
-                android:paddingStart="2dp"
-                android:text="바나나"
                 android:textColor="@color/black"
                 android:textSize="16dp" />
 

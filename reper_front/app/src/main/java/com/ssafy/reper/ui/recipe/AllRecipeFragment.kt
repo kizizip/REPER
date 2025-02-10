@@ -149,10 +149,8 @@ class AllRecipeFragment : Fragment() {
                 dialog.findViewById<RadioButton>(R.id.radio_coffee),
                 dialog.findViewById<RadioButton>(R.id.radio_chocolate),
                 dialog.findViewById<RadioButton>(R.id.radio_milk),
-                dialog.findViewById<RadioButton>(R.id.radio_condensed_milk),
                 dialog.findViewById<RadioButton>(R.id.radio_cream),
                 dialog.findViewById<RadioButton>(R.id.radio_strawberry),
-                dialog.findViewById<RadioButton>(R.id.radio_banana),
                 dialog.findViewById<RadioButton>(R.id.radio_lemon),
                 dialog.findViewById<RadioButton>(R.id.radio_blueberry),
                 dialog.findViewById<RadioButton>(R.id.radio_grapefruit)
@@ -199,23 +197,20 @@ class AllRecipeFragment : Fragment() {
         }
         allRecipeBinding.allrecipeFmEtSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                // text 공백 및 줄바꿈 제거
-                val inputText = s.toString().replace("\\s".toRegex(), "")
-                viewModel.searchRecipeName(ApplicationClass.sharedPreferencesUtil.getStoreId(), inputText)
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-
-
-        allRecipeBinding.allrecipeFmBtnSearch.setOnClickListener {
-            if(allRecipeBinding.allrecipeFmEtSearch.text.isNotBlank()){
-                val inputText = allRecipeBinding.allrecipeFmEtSearch.text.toString().replace("\\s".toRegex(), "")
-                viewModel.searchRecipeName(ApplicationClass.sharedPreferencesUtil.getStoreId(), inputText)
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // text 공백 및 줄바꿈 제거
+                val inputText = s?.trim().toString()
+                if(inputText.isBlank()){
+                    viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
+                }
+                else{
+                    viewModel.searchRecipeName(ApplicationClass.sharedPreferencesUtil.getStoreId(), inputText)
+                }
             }
-        }
-
+        })
     }
     fun initAdapter() {
         // allrecipe item 클릭 이벤트 리스너
@@ -310,16 +305,25 @@ class AllRecipeFragment : Fragment() {
             viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
 
             viewModel.recipeList.observe(viewLifecycleOwner){
-                allRecipeListAdapter.recipeList = it.distinctBy { it.recipeName }.toMutableList()
-                adapter = allRecipeListAdapter
-                category.clear()
-                category.add("카테고리")
-                for(recipe in it){
-                    if(!category.contains(recipe.category)){
-                        category.add(recipe.category)
-                    }
+                if(it.isEmpty()){
+                    allRecipeBinding.allrecipeFmRv.visibility = View.GONE
+                    allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
                 }
-                initSpinner()
+                else{
+                    allRecipeBinding.allrecipeFmRv.visibility = View.VISIBLE
+                    allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
+
+                    allRecipeListAdapter.recipeList = it.distinctBy { it.recipeName }.toMutableList()
+                    adapter = allRecipeListAdapter
+                    category.clear()
+                    category.add("카테고리")
+                    for(recipe in it){
+                        if(!category.contains(recipe.category)){
+                            category.add(recipe.category)
+                        }
+                    }
+                    initSpinner()
+                }
             }
         }
     }
@@ -342,7 +346,6 @@ class AllRecipeFragment : Fragment() {
                 else{
                     allRecipeListAdapter.recipeList = viewModel.recipeList.value!!.distinctBy { it.recipeName }.filter { it.category == category[position] }.toMutableList()
                     allRecipeListAdapter.notifyDataSetChanged()
-
                 }
             }
 
