@@ -35,6 +35,7 @@ import com.ssafy.reper.data.local.SharedPreferencesUtil
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import android.view.animation.AnimationUtils
 
 private const val TAG = "LoginFragment_레퍼"
 
@@ -58,6 +59,15 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // 초기에 모든 레이아웃을 숨김
+        binding.fragmentLoginLinearLayout1.alpha = 0f
+        binding.fragmentLoginLinearLayout2.alpha = 0f
+        binding.fragmentLoginLinearLayout3.alpha = 0f
+        binding.fragmentLoginLinearLayout4.alpha = 0f
+
+        // 순차적으로 애니메이션 실행
+        startSequentialAnimation()
 
         var keyHash = Utility.getKeyHash(requireContext())
         Log.i("kjwTest", "keyHash: $keyHash")
@@ -90,6 +100,37 @@ class LoginFragment : Fragment() {
         }
     }
 
+    private fun startSequentialAnimation() {
+        // 각 레이아웃별로 새로운 애니메이션 인스턴스 생성
+        val fadeSlideUp1 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp2 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp3 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp4 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        
+        // 첫 번째 레이아웃 애니메이션
+        binding.fragmentLoginLinearLayout1.postDelayed({
+            binding.fragmentLoginLinearLayout1.alpha = 1f
+            binding.fragmentLoginLinearLayout1.startAnimation(fadeSlideUp1)
+        }, 200)
+
+        // 두 번째 레이아웃 애니메이션
+        binding.fragmentLoginLinearLayout2.postDelayed({
+            binding.fragmentLoginLinearLayout2.alpha = 1f
+            binding.fragmentLoginLinearLayout2.startAnimation(fadeSlideUp2)
+        }, 500)  // 간격 축소: 700 -> 500
+
+        // 세 번째 레이아웃 애니메이션
+        binding.fragmentLoginLinearLayout3.postDelayed({
+            binding.fragmentLoginLinearLayout3.alpha = 1f
+            binding.fragmentLoginLinearLayout3.startAnimation(fadeSlideUp3)
+        }, 800)  // 간격 축소: 1200 -> 800
+
+        // 네 번째 레이아웃 애니메이션
+        binding.fragmentLoginLinearLayout4.postDelayed({
+            binding.fragmentLoginLinearLayout4.alpha = 1f
+            binding.fragmentLoginLinearLayout4.startAnimation(fadeSlideUp4)
+        }, 1100)  // 간격 축소: 1700 -> 1100
+    }
 
     //로그인 수행
     private fun loginWithKakao() {

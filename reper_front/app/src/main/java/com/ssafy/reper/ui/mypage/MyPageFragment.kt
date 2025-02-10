@@ -117,63 +117,70 @@ class MyPageFragment : Fragment() {
                 val dialog = Dialog(mainActivity)
                 dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                 dialog.setContentView(R.layout.dialog_request_access)
+
+                // 초기 상태 설정
+                dialog.findViewById<RecyclerView>(R.id.request_access_d_rv).visibility = View.GONE
+                dialog.findViewById<TextView>(R.id.request_access_d_no_result).visibility = View.VISIBLE
+
                 dialog.findViewById<EditText>(R.id.request_access_d_et)
                     .addTextChangedListener(object : TextWatcher {
-                        override fun beforeTextChanged(
-                            s: CharSequence?,
-                            start: Int,
-                            count: Int,
-                            after: Int
-                        ) {
-                        }
-
-                        override fun onTextChanged(
-                            s: CharSequence?,
-                            start: Int,
-                            before: Int,
-                            count: Int
-                        ) {
-                        }
-
+                        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                         override fun afterTextChanged(s: Editable?) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
                                     val searchText = s.toString()
                                     if (searchText.isNotEmpty()) {
                                         // 엘라스틱 서치
-                                        val storeList =
-                                            RetrofitUtil.storeService.searchAllStores(searchText)
+                                        val storeList = RetrofitUtil.storeService.searchAllStores(searchText)
                                         withContext(Dispatchers.Main) {
-                                            val recyclerView =
-                                                dialog.findViewById<RecyclerView>(R.id.request_access_d_rv)
-                                            recyclerView.layoutManager =
-                                                LinearLayoutManager(requireContext())
-                                            recyclerView.addItemDecoration(
-                                                DividerItemDecoration(
-                                                    requireContext(),
-                                                    DividerItemDecoration.VERTICAL
-                                                )
-                                            )
-
-                                            // 어댑터 설정 및 클릭 리스너 추가
-                                            val adapter = StoreSearchAdapter(storeList)
-                                            adapter.setOnItemClickListener { store ->
-                                                // 선택된 가게 이름을 TextView에 설정
-                                                dialog.findViewById<TextView>(R.id.request_access_d_tv_store_name).text =
-                                                    store.storeName
-                                                selectedStoreId = store.storeId
-
-                                                // 확인 메시지를 보여주는 레이아웃 표시
-                                                dialog.findViewById<ConstraintLayout>(R.id.request_access_d_cl_tv).visibility =
-                                                    View.VISIBLE
+                                            val recyclerView = dialog.findViewById<RecyclerView>(R.id.request_access_d_rv)
+                                            val noResultText = dialog.findViewById<TextView>(R.id.request_access_d_no_result)
+                                            
+                                            if (storeList.isEmpty()) {
+                                                // 검색 결과가 없을 때
+                                                recyclerView.visibility = View.GONE
+                                                noResultText.visibility = View.VISIBLE
+                                            } else {
+                                                // 검색 결과가 있을 때
+                                                recyclerView.visibility = View.VISIBLE
+                                                noResultText.visibility = View.GONE
                                                 
-                                                // 확인 버튼 활성화
-                                                dialog.findViewById<ConstraintLayout>(R.id.request_access_d_btn_positive).apply {
-                                                    isEnabled = true
-                                                    alpha = 1.0f  // 버튼 투명도를 원래대로 설정
+                                                recyclerView.layoutManager =
+                                                    LinearLayoutManager(requireContext())
+                                                recyclerView.addItemDecoration(
+                                                    DividerItemDecoration(
+                                                        requireContext(),
+                                                        DividerItemDecoration.VERTICAL
+                                                    )
+                                                )
+
+                                                // 어댑터 설정 및 클릭 리스너 추가
+                                                val adapter = StoreSearchAdapter(storeList)
+                                                adapter.setOnItemClickListener { store ->
+                                                    // 선택된 가게 이름을 TextView에 설정
+                                                    dialog.findViewById<TextView>(R.id.request_access_d_tv_store_name).text =
+                                                        store.storeName
+                                                    selectedStoreId = store.storeId
+
+                                                    // 확인 메시지를 보여주는 레이아웃 표시
+                                                    dialog.findViewById<ConstraintLayout>(R.id.request_access_d_cl_tv).visibility =
+                                                        View.VISIBLE
+                                                    
+                                                    // 확인 버튼 활성화
+                                                    dialog.findViewById<ConstraintLayout>(R.id.request_access_d_btn_positive).apply {
+                                                        isEnabled = true
+                                                        alpha = 1.0f  // 버튼 투명도를 원래대로 설정
+                                                    }
                                                 }
+                                                recyclerView.adapter = adapter
                                             }
-                                            recyclerView.adapter = adapter
+                                        }
+                                    } else {
+                                        // 검색어가 비어있을 때
+                                        withContext(Dispatchers.Main) {
+                                            dialog.findViewById<RecyclerView>(R.id.request_access_d_rv).visibility = View.GONE
+                                            dialog.findViewById<TextView>(R.id.request_access_d_no_result).visibility = View.VISIBLE
                                         }
                                     }
                                 } catch (e: Exception) {

@@ -31,6 +31,7 @@ import android.widget.Toast
 import com.ssafy.reper.data.dto.UpdateUserRequest
 import android.util.Log
 import com.ssafy.reper.data.dto.Store
+import android.view.animation.AnimationUtils
 
 class EditMyAccountFragment : Fragment() {
 
@@ -71,6 +72,29 @@ class EditMyAccountFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mainActivity.hideBottomNavigation()
+
+        // 초기에 모든 요소 숨김
+        editMyAccountBinding.editmyaccountFmBtnBack.alpha = 0f
+        editMyAccountBinding.textView9.alpha = 0f
+        
+        editMyAccountBinding.textView12.alpha = 0f
+        editMyAccountBinding.FragmentJoinPhoneError.alpha = 0f
+        editMyAccountBinding.editmyaccountFmEtId.alpha = 0f
+        
+        editMyAccountBinding.textView13.alpha = 0f
+        editMyAccountBinding.editmyaccountFmEtName.alpha = 0f
+        
+        editMyAccountBinding.textView14.alpha = 0f
+        editMyAccountBinding.editmyaccountFmEtTel.alpha = 0f
+        
+        editMyAccountBinding.editmyaccountFmTvMyaccess.alpha = 0f
+        editMyAccountBinding.editmyaccountFmSv.alpha = 0f
+        
+        editMyAccountBinding.editmyaccountFmFlTenEdit.alpha = 0f
+        editMyAccountBinding.editmyaccountFmTvDeleteaccount.alpha = 0f
+
+        // 순차적 애니메이션 시작
+        startSequentialAnimation()
 
         // 초기 상태: 로딩 화면 표시, 메인 콘텐츠 숨김
         showLoading()
@@ -313,5 +337,65 @@ class EditMyAccountFragment : Fragment() {
                 Toast.makeText(requireContext(), "매장 목록을 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun startSequentialAnimation() {
+        // 각 요소별로 새로운 애니메이션 인스턴스 생성
+        val fadeSlideUp1 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp2 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp3 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp4 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp5 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp6 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+
+        // 첫 번째 그룹 (뒤로가기 버튼, 타이틀)
+        editMyAccountBinding.editmyaccountFmBtnBack.postDelayed({
+            editMyAccountBinding.editmyaccountFmBtnBack.alpha = 1f
+            editMyAccountBinding.editmyaccountFmBtnBack.startAnimation(fadeSlideUp1)
+            editMyAccountBinding.textView9.alpha = 1f
+            editMyAccountBinding.textView9.startAnimation(fadeSlideUp1)
+        }, 200)
+
+        // 두 번째 그룹 (아이디 관련)
+        editMyAccountBinding.textView12.postDelayed({
+            editMyAccountBinding.textView12.alpha = 1f
+            editMyAccountBinding.textView12.startAnimation(fadeSlideUp2)
+            editMyAccountBinding.FragmentJoinPhoneError.alpha = 1f
+            editMyAccountBinding.FragmentJoinPhoneError.startAnimation(fadeSlideUp2)
+            editMyAccountBinding.editmyaccountFmEtId.alpha = 1f
+            editMyAccountBinding.editmyaccountFmEtId.startAnimation(fadeSlideUp2)
+        }, 500)
+
+        // 세 번째 그룹 (이름 관련)
+        editMyAccountBinding.textView13.postDelayed({
+            editMyAccountBinding.textView13.alpha = 1f
+            editMyAccountBinding.textView13.startAnimation(fadeSlideUp3)
+            editMyAccountBinding.editmyaccountFmEtName.alpha = 1f
+            editMyAccountBinding.editmyaccountFmEtName.startAnimation(fadeSlideUp3)
+        }, 800)
+
+        // 네 번째 그룹 (전화번호 관련)
+        editMyAccountBinding.textView14.postDelayed({
+            editMyAccountBinding.textView14.alpha = 1f
+            editMyAccountBinding.textView14.startAnimation(fadeSlideUp4)
+            editMyAccountBinding.editmyaccountFmEtTel.alpha = 1f
+            editMyAccountBinding.editmyaccountFmEtTel.startAnimation(fadeSlideUp4)
+        }, 1100)
+
+        // 다섯 번째 그룹 (내 권한 관련)
+        editMyAccountBinding.editmyaccountFmTvMyaccess.postDelayed({
+            editMyAccountBinding.editmyaccountFmTvMyaccess.alpha = 1f
+            editMyAccountBinding.editmyaccountFmTvMyaccess.startAnimation(fadeSlideUp5)
+            editMyAccountBinding.editmyaccountFmSv.alpha = 1f
+            editMyAccountBinding.editmyaccountFmSv.startAnimation(fadeSlideUp5)
+        }, 1400)
+
+        // 여섯 번째 그룹 (수정 버튼, 회원탈퇴)
+        editMyAccountBinding.editmyaccountFmFlTenEdit.postDelayed({
+            editMyAccountBinding.editmyaccountFmFlTenEdit.alpha = 1f
+            editMyAccountBinding.editmyaccountFmFlTenEdit.startAnimation(fadeSlideUp6)
+            editMyAccountBinding.editmyaccountFmTvDeleteaccount.alpha = 1f
+            editMyAccountBinding.editmyaccountFmTvDeleteaccount.startAnimation(fadeSlideUp6)
+        }, 1700)
     }
 }
