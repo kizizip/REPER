@@ -1,6 +1,7 @@
 package com.d109.reper.service;
 
 import com.d109.reper.domain.Store;
+import com.d109.reper.domain.StoreEmployee;
 import com.d109.reper.domain.User;
 import com.d109.reper.domain.UserRole;
 import com.d109.reper.elasticsearch.StoreDocument;
@@ -93,19 +94,14 @@ public class StoreService {
 
     // 특정 매장의 전체 알바생 정보 조회
     public List<UserResponseDto> getStoreEmployees(Long storeId) {
-        Store store = storeRepository.findById(storeId)
+        storeRepository.findById(storeId)
                 .orElseThrow(() -> new NoSuchElementException("Store not found"));
 
-        List<UserResponseDto> employeeList = new ArrayList<>();
+        List<StoreEmployee> storeEmployees = storeRepository.findAllEmployeesByStoreId(storeId);
 
-        // 직원 정보 추가
-        List<UserResponseDto> employees = store.getStoreEmployees().stream()
-                        .map(emp -> new UserResponseDto(emp.getUser()))
-                                .collect(Collectors.toList());
-
-        employeeList.addAll(employees);
-
-        return employeeList;
+        return storeEmployees.stream()
+                .map(se -> new UserResponseDto(se.getUser(), se.isEmployed()))
+                .collect(Collectors.toList());
     }
 
 

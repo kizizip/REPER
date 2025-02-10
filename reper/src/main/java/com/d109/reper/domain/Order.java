@@ -37,4 +37,5 @@ public class Order {
         orderDetails.add(orderDetail);
         orderDetail.setOrder(this);
     }
+
 }
