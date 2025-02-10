@@ -9,21 +9,28 @@ import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.util.TypedValue
+import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.GridLayout
+import android.widget.RadioButton
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.replace
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -110,7 +117,7 @@ class AllRecipeFragment : Fragment() {
         }
 
         allRecipeBinding.allrecipeFmBtnFilter.setOnClickListener {
-            var howSearch = -1
+            var howSearch = 0
 
             val dialog = Dialog(mainActivity)
             dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -121,7 +128,7 @@ class AllRecipeFragment : Fragment() {
 
             val filterSpinner = dialog.findViewById<Spinner>(R.id.filter_spinner)
             val filterSpinnerOptions = listOf("포함 검색", "제외 검색")
-            val adapter = ArrayAdapter(mainActivity, R.layout.item_allrecipe_spinner, filterSpinnerOptions)
+            val adapter = ArrayAdapter(mainActivity, R.layout.item_filter_spinner, filterSpinnerOptions)
             filterSpinner.adapter = adapter
             filterSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
@@ -137,8 +144,78 @@ class AllRecipeFragment : Fragment() {
                 override fun onNothingSelected(parent: AdapterView<*>) {}
             }
 
+            // RadioButton 리스트 가져오기
+            val radioButtons = listOf(
+                dialog.findViewById<RadioButton>(R.id.radio_coffee),
+                dialog.findViewById<RadioButton>(R.id.radio_chocolate),
+                dialog.findViewById<RadioButton>(R.id.radio_milk),
+                dialog.findViewById<RadioButton>(R.id.radio_condensed_milk),
+                dialog.findViewById<RadioButton>(R.id.radio_cream),
+                dialog.findViewById<RadioButton>(R.id.radio_strawberry),
+                dialog.findViewById<RadioButton>(R.id.radio_banana),
+                dialog.findViewById<RadioButton>(R.id.radio_lemon),
+                dialog.findViewById<RadioButton>(R.id.radio_blueberry),
+                dialog.findViewById<RadioButton>(R.id.radio_grapefruit)
+            )
+
+            // 하나만 선택되도록 설정
+            for(radio in radioButtons) {
+                radio.setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        allRecipeBinding.allrecipeFmEtSearch.setText(radio.text)
+                        for (otherRadio in radioButtons) {
+                            if (otherRadio != radio) {
+                                otherRadio.isChecked = false
+                            }
+                        }
+                        if(howSearch == 0){
+                            viewModel.searchRecipeIngredientInclude(
+                                ApplicationClass.sharedPreferencesUtil.getStoreId(),
+                                allRecipeBinding.allrecipeFmEtSearch.text.toString())
+                        }
+                        else if(howSearch == 1){
+                            viewModel.searchRecipeIngredientExclude(
+                                ApplicationClass.sharedPreferencesUtil.getStoreId(),
+                                allRecipeBinding.allrecipeFmEtSearch.text.toString())
+                        }
+                        dialog.dismiss()
+                    }
+                }
+            }
+
             dialog.show()
         }
+
+        allRecipeBinding.allrecipeFmEtSearch.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                view?.windowToken?.let {
+                    imm.hideSoftInputFromWindow(it, 0)
+                }
+                true // 이벤트 처리 완료
+            } else {
+                false // 기본 동작 유지
+            }
+        }
+        allRecipeBinding.allrecipeFmEtSearch.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                // text 공백 및 줄바꿈 제거
+                val inputText = s.toString().replace("\\s".toRegex(), "")
+                viewModel.searchRecipeName(ApplicationClass.sharedPreferencesUtil.getStoreId(), inputText)
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+
+        allRecipeBinding.allrecipeFmBtnSearch.setOnClickListener {
+            if(allRecipeBinding.allrecipeFmEtSearch.text.isNotBlank()){
+                val inputText = allRecipeBinding.allrecipeFmEtSearch.text.toString().replace("\\s".toRegex(), "")
+                viewModel.searchRecipeName(ApplicationClass.sharedPreferencesUtil.getStoreId(), inputText)
+            }
+        }
+
     }
     fun initAdapter() {
         // allrecipe item 클릭 이벤트 리스너
@@ -172,38 +249,55 @@ class AllRecipeFragment : Fragment() {
                             }
                         }
 
+                        if(ice != -1 && hot != -1){
+                            val dialog = Dialog(mainActivity)
+                            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                            dialog.setContentView(R.layout.dialog_icehot)
 
-                        val dialog = Dialog(mainActivity)
-                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                        dialog.setContentView(R.layout.dialog_icehot)
-
-                        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.GONE
-                        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.GONE
-                        if(ice != -1){
-                            dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.VISIBLE
-                        }
-                        if(hot != -1){
-                            dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.VISIBLE
-                        }
-                        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
-                            // 클릭 이벤트 -> recipeId 전달
-                            val bundle = Bundle().apply {
-                                putInt("whereAmICame", 1)
-                                putIntegerArrayList("recipeIdList", arrayListOf(hot))
+                            dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.GONE
+                            dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.GONE
+                            if(ice != -1){
+                                dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.VISIBLE
                             }
-                            findNavController().navigate(R.id.stepRecipeFragment, bundle)
-                            dialog.dismiss()
+                            if(hot != -1){
+                                dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.VISIBLE
+                            }
+                            dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
+                                // 클릭 이벤트 -> recipeId 전달
+                                val bundle = Bundle().apply {
+                                    putInt("whereAmICame", 1)
+                                    putIntegerArrayList("recipeIdList", arrayListOf(hot))
+                                }
+                                findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                                dialog.dismiss()
+                            }
+                            dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).setOnClickListener {
+                                // 클릭 이벤트 -> recipeId 전달
+                                val bundle = Bundle().apply {
+                                    putInt("whereAmICame", 1)
+                                    putIntegerArrayList("recipeIdList", arrayListOf(ice))
+                                }
+                                findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                                dialog.dismiss()
+                            }
+                            dialog.show()
                         }
-                        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).setOnClickListener {
+                        else if (ice != -1){
                             // 클릭 이벤트 -> recipeId 전달
                             val bundle = Bundle().apply {
                                 putInt("whereAmICame", 1)
                                 putIntegerArrayList("recipeIdList", arrayListOf(ice))
                             }
                             findNavController().navigate(R.id.stepRecipeFragment, bundle)
-                            dialog.dismiss()
                         }
-                        dialog.show()
+                        else if (hot != -1){
+                            // 클릭 이벤트 -> recipeId 전달
+                            val bundle = Bundle().apply {
+                                putInt("whereAmICame", 1)
+                                putIntegerArrayList("recipeIdList", arrayListOf(hot))
+                            }
+                            findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                        }
                     }
                 }
             }
@@ -218,7 +312,7 @@ class AllRecipeFragment : Fragment() {
             viewModel.recipeList.observe(viewLifecycleOwner){
                 allRecipeListAdapter.recipeList = it.distinctBy { it.recipeName }.toMutableList()
                 adapter = allRecipeListAdapter
-
+                category.clear()
                 category.add("카테고리")
                 for(recipe in it){
                     if(!category.contains(recipe.category)){

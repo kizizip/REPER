@@ -1,6 +1,7 @@
 package com.ssafy.reper.data.remote
 
 import com.ssafy.reper.data.dto.Recipe
+import com.ssafy.reper.data.dto.RecipeResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -17,13 +18,13 @@ interface RecipeService {
 
     // 특정 매장의 레시피 이름 검색
     @GET("stores/{storeId}/recipes/search")
-    suspend fun searchRecipeName(@Path("storeId") storeId: Int, @Query("recipeName") recipeName:String) :MutableList<Recipe>
+    suspend fun searchRecipeName(@Path("storeId") storeId: Int, @Query("recipeName") recipeName:String) :MutableList<RecipeResponse>
 
     // 특정 매장의 레시피 재료 포함 검색
     @GET("stores/{storeId}/recipes/search/include")
-    suspend fun searchRecipeInclude(@Path("storeId") storeId: Int, @Query("ingredient") ingredient:String) :MutableList<Recipe>
+    suspend fun searchRecipeInclude(@Path("storeId") storeId: Int, @Query("ingredient") ingredient:String):MutableList<RecipeResponse>
 
     // 특정 매장의 레시피 재료 제외 검색
-    @GET("stores/{storeId}/recipes/search")
-    suspend fun searchRecipeExclude(@Path("storeId") storeId: Int, @Query("ingredient") ingredient:String) :MutableList<Recipe>
+    @GET("stores/{storeId}/recipes/search/exclude")
+    suspend fun searchRecipeExclude(@Path("storeId") storeId: Int, @Query("ingredient") ingredient:String) :MutableList<RecipeResponse>
 }
