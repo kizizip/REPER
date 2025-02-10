@@ -143,21 +143,35 @@ public class RecipeService {
             throw new IllegalArgumentException("검색어를 입력하세요.");
         }
 
+        // 키워드 매핑
+        String mappedKeyword = switch (keyword) {
+            case "커피" -> "샷";
+            case "초콜릿" -> "초코";
+            default -> keyword;        // 나머지는 그대로 사용
+        };
+
         Pageable pageable = PageRequest.of(0, 1000);
 
-        return recipeSearchRepository.findByStoreIdAndIngredientsContaining(storeId, keyword, pageable);
+        return recipeSearchRepository.findByStoreIdAndIngredientsContaining(storeId, mappedKeyword, pageable);
     }
 
 
     // 재료 미포함 검색
     public List<RecipeDocument> searchExcludeIngredient(Long storeId, String keyword) {
         try {
+            // 키워드 매핑
+            String mappedKeyword = switch (keyword) {
+                case "커피" -> "샷";
+                case "초콜릿" -> "초코";
+                default -> keyword;
+            };
+
             SearchResponse<RecipeDocument> response = elasticsearchClient.search(s -> s
                     .index("recipes")
                     .query(q -> q
                             .bool(b -> b
                                     .must(m -> m.match(t -> t.field("storeId").query(storeId)))
-                                    .mustNot(n -> n.wildcard(w -> w.field("ingredients").value("*" + keyword + "*")))
+                                    .mustNot(n -> n.wildcard(w -> w.field("ingredients").value("*" + mappedKeyword + "*")))
                             )
                     )
                             .size(1000),
