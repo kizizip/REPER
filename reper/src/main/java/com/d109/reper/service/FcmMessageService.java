@@ -22,7 +22,7 @@ import java.util.List;
 public class FcmMessageService {
 
     private final String FCM_API_URL = "https://fcm.googleapis.com/v1/projects/reper-7e5b4/messages:send";
-    private final String SERVICE_ACCOUNT_JSON_PATH = System.getenv("FIREBASE_JSON_CREDENTIALS_ID");
+    private final String SERVICE_ACCOUNT_JSON_PATH = System.getenv("FIREBASE_JSON");
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -32,7 +32,7 @@ public class FcmMessageService {
     // 서비스 계정으로부터 액세스 토큰을 얻어오기 위한 초기화 작업
     public void initialize() {
         try {
-            String serviceAccountPath = System.getenv("FIREBASE_JSON_CREDENTIALS_ID");
+            String serviceAccountPath = System.getenv("FIREBASE_JSON");
             if (serviceAccountPath == null || serviceAccountPath.isEmpty()) {
                 throw new IllegalStateException("환경 변수 FIREBASE_JSON_CREDENTIALS_ID가 설정되지 않았습니다.");
             }
