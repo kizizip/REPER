@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Notice
 import com.ssafy.reper.data.dto.NoticeRequest
 import com.ssafy.reper.data.remote.RetrofitUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 private const val TAG = "NoticeViewModel"
@@ -17,7 +18,9 @@ class NoticeViewModel : ViewModel() {
     //라이브 데이터로 관리될 공지 리스트
     private val _noticeList = MutableLiveData<List<Notice>>()
     val noticeList: LiveData<List<Notice>> get() = _noticeList
-
+    fun setNoticeList(notiList: List<Notice>) {
+        _noticeList.value = notiList
+    }
 
     //단건공지
     private val _clickNotice = MutableLiveData<Notice?>()
@@ -33,9 +36,11 @@ class NoticeViewModel : ViewModel() {
         getAllNotice(storeId, userId)
     }
 
+    var type = ""
+
 
     fun getAllNotice(storeId: Int, userId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = RetrofitUtil.noticeService.getAllNotice(storeId, userId)
                 _noticeList.postValue(response.get(0).notices)
@@ -49,7 +54,7 @@ class NoticeViewModel : ViewModel() {
 
     //단건은 받아온 리스트의 정보를 넣는걸로!
     fun getNotice(storeId: Int, noticeId:Int, userId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = RetrofitUtil.noticeService.getNotice(storeId,noticeId, userId)
                 _clickNotice.postValue(response)
@@ -62,9 +67,9 @@ class NoticeViewModel : ViewModel() {
 
 
     fun createNotice(storeId: Int, userId: Int, title: String, content: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-               RetrofitUtil.noticeService.createNotice(storeId,  NoticeRequest(userId, title, content))
+                RetrofitUtil.noticeService.createNotice(storeId,  NoticeRequest(userId, title, content))
                 getAllNotice(storeId, userId)
             } catch (e: Exception) {
                 Log.d(TAG, "getNotice: 공지 생성 실패")
@@ -75,7 +80,7 @@ class NoticeViewModel : ViewModel() {
 
 
     fun modifyNotice(storeId: Int, userId: Int, noticeId:Int, title: String, content: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 RetrofitUtil.noticeService.modifyNotice(storeId, noticeId,  NoticeRequest(userId,title, content))
                 getAllNotice(storeId, userId)
@@ -89,7 +94,7 @@ class NoticeViewModel : ViewModel() {
 
 
     fun deleteNotice(storeId: Int, noticeId:Int, requestBody: Map<String, Int>) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 RetrofitUtil.noticeService.deleteNotice(storeId, noticeId, requestBody )
                 getAllNotice(storeId, 1)
@@ -100,12 +105,25 @@ class NoticeViewModel : ViewModel() {
         }
     }
 
-    fun searchNotice(storeId: Int, noticeTitle:String){
-        viewModelScope.launch {
+    fun searchNoticeTitle(storeId: Int, noticeTitle:String){
+        viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                RetrofitUtil.noticeService.searchNotice(storeId, noticeTitle)
+                RetrofitUtil.noticeService.searchNoticeTitle(storeId, noticeTitle)
             }.onSuccess {
+                setNoticeList(it)
+            }.onFailure {
 
+            }
+        }
+
+    }
+
+    fun searchNoticeContent(storeId: Int, contentTitle:String){
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                RetrofitUtil.noticeService.searchNoticeContent(storeId, contentTitle)
+            }.onSuccess {
+                setNoticeList(it)
             }.onFailure {
 
             }

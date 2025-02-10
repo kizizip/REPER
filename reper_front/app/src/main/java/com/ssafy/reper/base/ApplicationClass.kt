@@ -1,3 +1,5 @@
+package com.ssafy.reper.base
+
 import android.Manifest
 import android.app.Application
 import com.google.gson.Gson
@@ -6,6 +8,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+
 
 class ApplicationClass : Application() {
     companion object {
