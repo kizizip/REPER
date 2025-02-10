@@ -3,37 +3,51 @@ package com.ssafy.reper.ui.mypage
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.databinding.ItemEditMyAccountRvBinding
 
-class MyAccessStoreListAdapter (var accessStoreList:MutableList<String>, val itemClickListener:ItemClickListener) : RecyclerView.Adapter<MyAccessStoreListAdapter.AccessStoreListHolder>() {
-    inner class AccessStoreListHolder(private val binding: ItemEditMyAccountRvBinding) : RecyclerView.ViewHolder(binding.root){
-        fun bindInfo(position: Int){
-            val item = accessStoreList[position]
+class MyAccessStoreListAdapter(
+    var accessStoreList: MutableList<Store>,  // String 대신 Store 객체 리스트로 변경
+    val itemClickListener: ItemClickListener
+) : RecyclerView.Adapter<MyAccessStoreListAdapter.AccessStoreListHolder>() {
 
-            // 메뉴명 설정
-            binding.editmyaccountItemTvStoreName.text = item
+    inner class AccessStoreListHolder(private val binding: ItemEditMyAccountRvBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bindInfo(store: Store) {  // position 대신 Store 객체를 직접 받도록 수정
+            // 매장명 설정
+            binding.editmyaccountItemTvStoreName.text = store.storeName
 
+            // 매장명 클릭 시 삭제 다이얼로그 표시
+            binding.editmyaccountItemTvStoreName.setOnClickListener {
+                itemClickListener.onStoreClick(store, layoutPosition)
+            }
+
+            // 삭제 버튼 클릭 시
             binding.editmyaccountItemBtnDelte.setOnClickListener {
-                itemClickListener.onClick(layoutPosition)
-                accessStoreList.drop(layoutPosition)
+                itemClickListener.onDeleteClick(store, layoutPosition)
             }
         }
     }
 
-    //클릭 인터페이스 정의 사용하는 곳에서 만들어준다.
-    fun  interface ItemClickListener {
-        fun onClick(position: Int)
+    // 클릭 인터페이스 수정
+    interface ItemClickListener {
+        fun onStoreClick(store: Store, position: Int)
+        fun onDeleteClick(store: Store, position: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccessStoreListHolder {
-        return  AccessStoreListHolder (ItemEditMyAccountRvBinding.inflate(LayoutInflater.from(parent.context), parent,false))
+        return AccessStoreListHolder(
+            ItemEditMyAccountRvBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
     }
 
     override fun onBindViewHolder(holder: AccessStoreListHolder, position: Int) {
-        holder.bindInfo(position)
+        holder.bindInfo(accessStoreList[position])
     }
 
-    override fun getItemCount(): Int {
-        return accessStoreList.size
-    }
+    override fun getItemCount(): Int = accessStoreList.size
 }

@@ -329,7 +329,6 @@ class JoinFragment : Fragment() {
                 val password = binding.FragmentJoinPasswordInput.text.toString()
                 val phone = binding.FragmentJoinPhoneInput.text.toString()
                 val role = if(binding.FragmentJoinSpinnerUserType.selectedItem.toString() == "사장님") "OWNER" else "STAFF"
-                val roleEnum = binding.FragmentJoinStoreInfoInput.text.toString()
 
                 lifecycleScope.launch {
                     try {

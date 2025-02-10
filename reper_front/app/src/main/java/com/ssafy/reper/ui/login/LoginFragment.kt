@@ -22,12 +22,16 @@ import com.google.gson.Gson
 import com.ssafy.reper.data.dto.ErrorResponse
 import android.graphics.drawable.GradientDrawable
 import android.widget.EditText
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat.startActivity
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.util.Utility
 import com.kakao.sdk.user.UserApiClient
 import com.kakao.sdk.user.model.User
 import com.ssafy.reper.data.dto.JoinRequest
 import com.ssafy.reper.data.dto.KakaoLoginRequest
+import com.ssafy.reper.data.dto.UserInfo
+import com.ssafy.reper.data.local.SharedPreferencesUtil
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -141,17 +145,77 @@ class LoginFragment : Fragment() {
                         phone = "", //카카오 api로는 못 받아오므로, 기본값 설정
                         role = "STAFF" // 기본값 설정
                     )
-
                     val isInserted = RetrofitUtil.authService.join(userDto)
+                    Log.d(TAG, "카카오로그인 첫 사용자 회원가입 완료: ${nickname} ${email}")
+
+                    // 회원가입 완료 후 카카오 로그인 진행
+                    val request = KakaoLoginRequest(accessToken)
+                    val response = RetrofitUtil.kakaoService.kakaoLogin(request)
+                    Log.d(TAG, "카카오 로그인 성공: ${response}")
+
+                    // SharedPreferences에 사용자 정보 저장
+                    val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
+                    
+                    // null 체크 후 사용자 정보 저장
+                    val userInfo = UserInfo(
+                        userId = response.userId ?: -1L,  // null일 경우 -1L을 기본값으로 사용
+                        username = response.userName ?: "",  // null일 경우 빈 문자열 사용
+                        role = response.role ?: ""  // null일 경우 빈 문자열 사용
+                    )
+                    sharedPreferencesUtil.addUser(userInfo)
+                    
+                    // 저장된 정보 확인을 위한 로그
+                    val savedUser = sharedPreferencesUtil.getUser()
+                    Log.d(TAG, "저장된 사용자 정보 - userId: ${savedUser.userId}, username: ${savedUser.username}, role: ${savedUser.role}")
+                    
+                    // 메인 화면으로 이동
+                    navigateToMainActivity()
 
                 } else {
-                    // 중복일 경우 로그인 처리
-                    val request = KakaoLoginRequest(accessToken, email, nickname)
-                    Log.d(TAG, "카카오 로그인 요청: $request")
-                    val response = RetrofitUtil.kakaoService.kakaoLogin(request)
-                    Log.d(TAG, "로그인 성공: ${response.message}")
-                    //프론트 여러분, 여기까지 하면 로그에는 null이라고 찍힐 겁니다... 그건 제가 해결을 못 했습니다 죄송
-                    //하지만 email, nickname은 잘 불러옵니다... 이거면 충분하지 않나요?
+                    try {
+                        // 중복일 경우 로그인 처리
+                        val request = KakaoLoginRequest(accessToken)
+                        Log.d(TAG, "카카오 로그인 요청: $request")
+                        val response = RetrofitUtil.kakaoService.kakaoLogin(request)
+                        Log.d(TAG, "로그인 성공: ${response}")
+
+                        // SharedPreferences에 사용자 정보 저장
+                        val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
+                        
+                        // null 체크 후 사용자 정보 저장
+                        val userInfo = UserInfo(
+                            userId = response.userId ?: -1L,  // null일 경우 -1L을 기본값으로 사용
+                            username = response.userName ?: "",  // null일 경우 빈 문자열 사용
+                            role = response.role ?: ""  // null일 경우 빈 문자열 사용
+                        )
+                        sharedPreferencesUtil.addUser(userInfo)
+                        
+                        // 저장된 정보 확인을 위한 로그
+                        val savedUser = sharedPreferencesUtil.getUser()
+                        Log.d(TAG, "저장된 사용자 정보 - userId: ${savedUser.userId}, username: ${savedUser.username}, role: ${savedUser.role}")
+                        
+                        // 메인 화면으로 이동
+                        navigateToMainActivity()
+                    
+
+                    } catch (e: HttpException) {
+                        val errorBody = e.response()?.errorBody()?.string()
+                        Log.e(TAG, "카카오 로그인 실패 - 상태 코드: ${e.code()}")
+                        Log.e(TAG, "에러 응답: $errorBody")
+                        
+                        val errorMessage = when (e.code()) {
+                            400 -> "잘못된 요청입니다"
+                            401 -> "인증에 실패했습니다"
+                            404 -> "서비스를 찾을 수 없습니다"
+                            500 -> "서버 내부 오류가 발생했습니다"
+                            else -> "카카오 로그인에 실패했습니다"
+                        }
+                        
+                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "카카오 로그인 중 오류 발생: ${e.message}")
+                        Toast.makeText(requireContext(), "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
             } catch (e: Exception) {
@@ -234,24 +298,30 @@ class LoginFragment : Fragment() {
     private suspend fun handleLoginAttempt(email: String, password: String) {
         val loginRequest = LoginRequest(email, password)
         val response = RetrofitUtil.authService.login(loginRequest)
-
-        // loginIdCookie가 null이 아니고 비어있지 않을 때만 처리
+        
+        // SharedPreferences에 저장
+        val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
+        
+        // 쿠키 저장
         response.loginIdCookie?.let { cookie ->
-            if (cookie.isNotEmpty()) {
-                saveLoginCookie(cookie)
-                navigateToMainActivity()
-            }
+            sharedPreferencesUtil.saveUserCookie(cookie)
         }
-    }
+        
+        // 사용자 정보 저장
+        val userInfo = UserInfo(
+            userId = response.userId ?: -1L,  // null일 경우 -1L을 기본값으로 사용
+            username = response.username ?: "",  // null일 경우 빈 문자열 사용
+            role = response.role ?: ""  // null일 경우 빈 문자열 사용
+        )
+        sharedPreferencesUtil.addUser(userInfo)
+        
+        // 저장된 사용자 정보 확인을 위한 로그
+        val savedUser = sharedPreferencesUtil.getUser()
+        Log.d(TAG, "저장된 사용자 정보 - userId: ${savedUser.userId}, username: ${savedUser.username}, role: ${savedUser.role}")
+        Log.d(TAG, "저장된 사용자 쿠키: ${sharedPreferencesUtil.getUserCookie()}")
 
-    /**
-     * 로그인 쿠키를 SharedPreferences에 저장하는 함수
-     */
-    private fun saveLoginCookie(loginIdCookie: String) {
-        requireContext().getSharedPreferences("login_info", Context.MODE_PRIVATE)
-            .edit()
-            .putString("login_id_cookie", loginIdCookie)
-            .apply()
+        // 메인 화면으로 이동
+        navigateToMainActivity()
     }
 
     /**

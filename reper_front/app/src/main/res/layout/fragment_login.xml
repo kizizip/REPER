@@ -103,6 +103,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:visibility="invisible"
                 android:gravity="end"
                 android:text="비밀번호를 잊으셨나요?"
                 android:textColor="#1C4700" />

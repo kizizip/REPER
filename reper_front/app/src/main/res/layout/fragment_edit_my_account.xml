@@ -7,7 +7,9 @@
     android:background="@drawable/background"
     tools:context=".ui.mypage.EditMyAccountFragment">
 
+    <!-- 메인 콘텐츠 레이아웃 -->
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/editmyaccount_fm_main_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="40dp">
@@ -45,6 +47,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
+        <TextView
+            android:id="@+id/FragmentJoinPhoneError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_regular"
+            android:text="* 수정불가"
+            android:textColor="#F26547"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/editmyaccount_fm_et_id"
+            app:layout_constraintRight_toRightOf="parent" />
+
         <EditText
             android:id="@+id/editmyaccount_fm_et_id"
             android:layout_width="match_parent"
@@ -55,7 +68,7 @@
             android:hint="000000000@naver.com"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
-            android:textColor="@color/black"
+            android:textColor="@color/darkgray"
             android:textSize="16sp"
             android:focusable="false"
             android:editable="false"
@@ -83,7 +96,7 @@
             android:layout_marginTop="8dp"
             android:background="@drawable/editmyaccount_edittext_back"
             android:fontFamily="@font/pretendard_regular"
-            android:hint="김정언"
+            android:hint="홍길동"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
             android:textColor="@color/black"
@@ -113,7 +126,7 @@
             android:layout_marginTop="8dp"
             android:background="@drawable/editmyaccount_edittext_back"
             android:fontFamily="@font/pretendard_regular"
-            android:hint="010-0000-0000"
+            android:hint="01012345678"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
             android:textColor="@color/black"
@@ -148,12 +161,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/editmyaccount_fm_rv"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintBottom_toTopOf="@+id/editmyaccount_fm_fl_ten_edit"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_tv_myaccess" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
         </ScrollView>
 
         <FrameLayout
@@ -194,6 +203,22 @@
             android:background="?android:attr/selectableItemBackground"
             app:layout_constraintEnd_toEndOf="@+id/editmyaccount_fm_fl_ten_edit"
             app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_fl_ten_edit" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 로딩 화면 레이아웃 -->
+    <FrameLayout
+        android:id="@+id/editmyaccount_fm_loading_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/white"/>
+
+    </FrameLayout>
 
 </FrameLayout>
