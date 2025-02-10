@@ -50,7 +50,7 @@ services:
       - mysql
     volumes:
       - app_logs:/app/logs
-      - /absolute/path/to/firebase.json:/app/config/firebase.json  # 🔥 안전한 경로로 마운트
+      - ./src/main/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json:/app/config/firebase.json
     networks:
       - app-network
   
