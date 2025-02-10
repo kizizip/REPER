@@ -10,8 +10,8 @@
     tools:context=".ui.recipe.StepRecipeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:paddingBottom="60dp">
 
         <ImageButton
@@ -93,9 +93,10 @@
             android:id="@+id/constraintLayout2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@+id/textView2"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/steprecipe_fm_btn_left">
+            app:layout_constraintStart_toStartOf="parent">
 
             <ImageView
                 android:id="@+id/steprecipe_fm_iv_icon_custom"
@@ -124,26 +125,26 @@
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:fontFamily="@font/pretendard_regular"
             android:text="무단으로 복제, 유포 시 법적 처벌을 받을수 있습니다."
             android:textColor="@color/lightgray"
             android:textSize="12sp"
+            app:layout_constraintBottom_toTopOf="@+id/steprecipe_fm_tv_user"
             app:layout_constraintEnd_toEndOf="@+id/constraintLayout2"
-            app:layout_constraintStart_toStartOf="@+id/constraintLayout2"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
+            app:layout_constraintStart_toStartOf="@+id/constraintLayout2" />
 
         <TextView
             android:id="@+id/steprecipe_fm_tv_user"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
             android:fontFamily="@font/pretendard_regular"
             android:text="이용자 : 0000@naver.com"
             android:textColor="@color/lightgray"
             android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/textView2"
-            app:layout_constraintStart_toStartOf="@+id/textView2"
-            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+            app:layout_constraintStart_toStartOf="@+id/textView2" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/steprecipe_fm_btn_left"
@@ -181,10 +182,10 @@
             android:id="@+id/steprecipe_fm_btn_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
             android:layout_marginEnd="40dp"
             android:layout_marginBottom="40dp"
+            android:clickable="true"
+            android:focusable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 

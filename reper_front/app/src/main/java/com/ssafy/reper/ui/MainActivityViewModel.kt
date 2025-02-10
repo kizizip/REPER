@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivityViewModel_정언"
 class MainActivityViewModel(application: Application) :  AndroidViewModel(application) {
+
     private val recipeService = RetrofitUtil.recipeService
 
     private val _selectedRecipeList =
@@ -25,6 +26,8 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
                 for(id in recipeIdList){
                     list.add(recipeService.getRecipe(id))
                 }
+                setNowISeeStep(0)
+                setNowISeeRecipe(0)
             }
             catch (e:Exception){
                 Log.d(TAG, "error: ${e}")

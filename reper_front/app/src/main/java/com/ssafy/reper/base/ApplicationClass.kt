@@ -1,9 +1,13 @@
 package com.ssafy.reper.base
 
+import MainActivityViewModel
 import android.app.Application
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ssafy.reper.data.local.SharedPreferencesUtil
+import com.ssafy.reper.util.ViewModelSingleton
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -43,6 +47,11 @@ class ApplicationClass : Application() {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .client(okHttpClient)
             .build()
+
+        val viewModelStore = ViewModelStore()
+        ViewModelSingleton.mainActivityViewModel = ViewModelProvider(viewModelStore,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(this))
+            .get(MainActivityViewModel::class.java)
     }
     //GSon은 엄격한 json type을 요구하는데, 느슨하게 하기 위한 설정. success, fail이 json이 아니라 단순 문자열로 리턴될 경우 처리..
     val gson : Gson = GsonBuilder()
