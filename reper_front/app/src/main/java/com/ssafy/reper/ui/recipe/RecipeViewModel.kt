@@ -14,8 +14,10 @@ import com.ssafy.reper.data.dto.RecipeResponse
 import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.data.remote.RetrofitUtil.Companion.orderService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 
 private const val TAG = "RecipeViewModel_정언"
 class RecipeViewModel : ViewModel() {
@@ -105,9 +107,10 @@ class RecipeViewModel : ViewModel() {
             var list:MutableList<FavoriteRecipe>
             try {
                 list = recipeService.getLikeRecipes(storeId, userId)
+
             }
-            catch (e:Exception){
-                Log.d(TAG, "getLikeRecipes :error: ${e}")
+            catch (e: HttpException){
+                Log.d(TAG, "getLikeRecipes :error: ${e.response()?.errorBody().toString()}")
                 list = mutableListOf()
             }
             _favoriteRecipeList.value = list
@@ -131,8 +134,34 @@ class RecipeViewModel : ViewModel() {
                 recipeService.unLikeRecipe(userId, recipeId)
             }
             catch (e:Exception){
-                Log.d(TAG, "unLikeRecipe : error: ${e}")
+                Log.d(TAG, "unLikeRecipe : error: ${e.message.toString()}")
             }
         }
+    }
+
+    private val _recipe =
+        MutableLiveData<Recipe>()
+    val recipe: LiveData<Recipe>
+        get() = _recipe
+
+    fun getRecipe(recipeId: Int){
+        var recipe :Recipe = Recipe(
+            category = "",
+            ingredients = mutableListOf(),
+            recipeId = recipeId,
+            recipeImg = null,
+            recipeName = "",
+            recipeSteps = mutableListOf(),
+            type = ""
+        )
+        viewModelScope.launch {
+            try {
+                recipe = recipeService.getRecipe(recipeId)
+            }
+            catch (e:Exception){
+                Log.d(TAG, "getRecipe : error: ${e.message.toString()}")
+            }
+        }
+        _recipe.value = recipe
     }
 }

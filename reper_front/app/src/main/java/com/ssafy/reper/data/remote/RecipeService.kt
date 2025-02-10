@@ -3,6 +3,7 @@ package com.ssafy.reper.data.remote
 import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeResponse
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -32,14 +33,14 @@ interface RecipeService {
     suspend fun searchRecipeExclude(@Path("storeId") storeId: Int, @Query("ingredient") ingredient:String) :MutableList<RecipeResponse>
 
     // 즐겨찾기 레시피 등록
-    @POST("users/{userId}/favorites/recipe/{recipeId}")
+    @POST("user/{userId}/favorites/recipe/{recipeId}")
     suspend fun likeRecipe(@Path("userId") userId: Int, @Path("recipeId") recipeId:Int)
 
     // 즐겨찾기 레시피 삭제
-    @DELETE("users/{userId}/favorites/recipe/{recipeId}")
+    @DELETE("user/{userId}/favorites/recipe/{recipeId}")
     suspend fun unLikeRecipe(@Path("userId") userId: Int, @Path("recipeId") recipeId:Int)
 
     // 즐겨찾기 레시피 전체 조회
-    @GET("stores/{storeId}/user/{userId}/favorites")
-    suspend fun getLikeRecipes(@Path("storeId") storeId: Int, @Path("userId") userId:Int) :MutableList<FavoriteRecipe>
+    @GET("store/{storeId}/user/{userId}/favorites")
+    suspend fun getLikeRecipes(@Path("storeId") storeId: Int, @Path("userId") userId:Int) : MutableList<FavoriteRecipe>
 }

@@ -103,7 +103,7 @@ class SharedPreferencesUtil(context: Context) {
     // 사용자 정보 가져오기 (수정 필요)
     fun getUser(): LoginResponse {
         return LoginResponse(
-            userId = preferences.getLong("userId", 0),
+            userId = preferences.getLong("userId", 12),
             username = preferences.getString("username", ""),
             role = preferences.getString("role", ""),
         )
