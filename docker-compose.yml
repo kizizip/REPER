@@ -17,19 +17,18 @@ services:
       - app-network
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1  # 최신 버전 적용
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - xpack.security.http.ssl.enabled=false  # TLS(SSL) 활성화
+      - xpack.security.http.ssl.enabled=false
       - ES_JAVA_OPTS=-Xms512m -Xmx15g
     ports:
       - "23159:9200"
     volumes:
       - elastic_data:/elasticsearch/data
       - elasticsearch_logs:/elasticsearch/logs:rw
-
     networks:
       - elastic_network
 
@@ -44,12 +43,14 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://i12d109.p.ssafy.io:13790/reper?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ssafy
       SPRING_DATASOURCE_PASSWORD: jeongeoneya0831!
+      FIREBASE_CONFIG_PATH: /app/config/firebase.json  # Firebase JSON 경로 설정
     ports:
       - "48620:8080"
     depends_on:
       - mysql
     volumes:
-      - app_logs:/app/logs  # Spring Boot 로그 저장
+      - app_logs:/app/logs
+      - /absolute/path/to/firebase.json:/app/config/firebase.json  # 🔥 안전한 경로로 마운트
     networks:
       - app-network
   
@@ -70,9 +71,9 @@ services:
       - app-network
 
 volumes:
-  mysql_data:  # MySQL 데이터 저장 볼륨
-  mysql_config:  # MySQL 설정 파일 저장 볼륨
-  app_logs:  # Spring Boot 애플리케이션 로그 저장 볼륨
+  mysql_data:
+  mysql_config:
+  app_logs:
   elastic_data:
   elasticsearch_logs:
 
