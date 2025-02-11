@@ -29,7 +29,14 @@ public interface StoreSearchRepository extends ElasticsearchRepository<StoreDocu
                 "query": "?0"
               }
             }
-          }  
+          },
+          { 
+            "match": { 
+              "storeName.chosung": { 
+                "query": "?0"
+              }
+            }
+          }
         ]
       }
     }
