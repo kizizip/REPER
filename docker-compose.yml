@@ -56,10 +56,10 @@ services:
       - mysql
     volumes:
       - app_logs:/app/logs
-      - /run/secrets/firebase_json:/app/config/firebase.json  # Firebase JSON을 시크릿으로 마운트
+      - ./src/main/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json:/app/config/firebase.json  # Firebase JSON 파일을 로컬에서 마운트
     networks:
       - app-network
-  
+    
   pdf-server:
     image: pdf-server
     container_name: pdf-server
