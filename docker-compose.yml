@@ -1,15 +1,13 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
     container_name: mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password  # 시크릿 파일로 MySQL 루트 비밀번호 지정
+      MYSQL_ROOT_PASSWORD: jeongeoneya0831!
       MYSQL_DATABASE: reper
       MYSQL_USER: ssafy
-      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password  # 시크릿 파일로 MySQL 사용자 비밀번호 지정
+      MYSQL_PASSWORD: jeongeoneya0831!
     ports:
       - "13790:3306"
     volumes:
@@ -17,9 +15,6 @@ services:
       - mysql_config:/etc/mysql/conf.d  # MySQL 설정 파일 저장
     networks:
       - app-network
-    secrets:
-      - mysql_root_password
-      - mysql_password
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
@@ -42,8 +37,6 @@ services:
         elasticsearch-plugin install analysis-nori --batch;
       fi;
       /usr/local/bin/docker-entrypoint.sh eswrapper"
-    secrets:
-      - elasticsearch_password
 
   app:
     image: reper-server
@@ -55,20 +48,18 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://i12d109.p.ssafy.io:13790/reper?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ssafy
-      SPRING_DATASOURCE_PASSWORD_FILE: /run/secrets/mysql_password  # MySQL 비밀번호 시크릿 사용
-      FIREBASE_JSON_FILE: /run/secrets/firebase_json  # Firebase JSON 파일 시크릿 사용
+      SPRING_DATASOURCE_PASSWORD: jeongeoneya0831!
+      FIREBASE_JSON: /app/config/firebase.json  # Firebase JSON 경로 설정
     ports:
       - "48620:8080"
     depends_on:
       - mysql
     volumes:
       - app_logs:/app/logs
+      - ./src/main/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json:/app/config/firebase.json  # Firebase JSON 파일을 로컬에서 마운트
     networks:
       - app-network
-    secrets:
-      - mysql_password
-      - firebase_json
-
+    
   pdf-server:
     image: pdf-server
     container_name: pdf-server
@@ -77,7 +68,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY}  # 환경 변수를 통해 OpenAI API 키 전달
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     ports:
       - "20250:20250"
     depends_on:
@@ -96,13 +87,3 @@ networks:
   app-network:
   elastic_network:
     driver: bridge
-
-secrets:
-  mysql_root_password:
-    file: ./secrets/mysql_root_password.txt
-  mysql_password:
-    file: ./secrets/mysql_password.txt
-  firebase_json:
-    file: ./secrets/firebase.json
-  elasticsearch_password:
-    file: ./secrets/elasticsearch_password.txt
