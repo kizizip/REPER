@@ -14,7 +14,7 @@ ENV USE_PROFILE prod
 # 🔥 Firebase JSON을 환경 변수로 전달하여 파일을 저장하지 않음
 # 🔥 Jenkins Pipeline에서 ENV FIREBASE_JSON 값을 주입하도록 변경
 ARG FIREBASE_CRED
-ENV FIREBASE_JSON=""
+ENV FIREBASE_JSON=$FIREBASE_CRED
 
 # 이미지 빌드 명령
 ENTRYPOINT ["java", "-Dspring.profiles.active=${USE_PROFILE}", "-jar", "app.jar"]
