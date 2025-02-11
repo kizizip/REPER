@@ -56,7 +56,7 @@ services:
       - mysql
     volumes:
       - app_logs:/app/logs
-      - /run/secrets/firebase_json:/app/config/firebase.json  # Firebase JSON을 시크릿으로 마운트
+      - /app/config/firebase.json:/app/config/firebase.json
     networks:
       - app-network
   

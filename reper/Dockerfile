@@ -12,14 +12,15 @@ RUN mkdir -p /app/config
 ARG JAR_FILE_PATH=build/libs/*.jar
 COPY ${JAR_FILE_PATH} app.jar
 
-# Firebase Admin SDK JSON 파일을 컨테이너 내 경로에 복사
-COPY ./src/main/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json /app/resources/firebase/
-
 # .yaml local/prod 프로필 분리 구조일때 실행할 프로필 지정 prod(=운영)
 ENV USE_PROFILE prod
 
+# Firebase Admin SDK JSON 파일을 컨테이너 내 경로에 복사
+COPY ./src/main/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json /app/config/firebase.json
+
 # Firebase JSON 파일 경로를 환경 변수로 설정
-ENV FIREBASE_JSON=/app/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json
+ENV FIREBASE_JSON=/app/config/firebase.json
+
 
 # 이미지 빌드 명령
 ENTRYPOINT ["java", "-Dspring.profiles.active=${USE_PROFILE}", "-jar", "app.jar"]
