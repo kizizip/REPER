@@ -22,6 +22,12 @@ services:
 #      - ./logs:/usr/share/elasticsearch/logs
     networks:
       - elastic_network
+    command: >
+      bash -c "
+      if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
+        elasticsearch-plugin install analysis-nori --batch;
+      fi;
+      /usr/local/bin/docker-entrypoint.sh eswrapper"
 
 networks:
   elastic_network:
