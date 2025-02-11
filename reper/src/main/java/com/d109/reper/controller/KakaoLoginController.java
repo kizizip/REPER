@@ -1,6 +1,7 @@
 package com.d109.reper.controller;
 
 import com.d109.reper.domain.KakaoUserInfo;
+import com.d109.reper.response.KakaoLoginResponseDto;
 import com.d109.reper.response.KakaoUserInfoResponse;
 import com.d109.reper.domain.User;
 import com.d109.reper.domain.UserRole;
@@ -99,7 +100,7 @@ public class KakaoLoginController {
                 });
 
         //4. 사용자 정보 반환
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(new KakaoLoginResponseDto(user));
 
     }
 

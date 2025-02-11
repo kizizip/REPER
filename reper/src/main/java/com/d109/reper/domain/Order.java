@@ -25,6 +25,9 @@ public class Order {
     @Column(name = "is_completed")
     private boolean isCompleted;
 
+    @Column(name = "takeout")
+    private boolean takeout;
+
     // 양방향 관계 설정
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
@@ -37,4 +40,5 @@ public class Order {
         orderDetails.add(orderDetail);
         orderDetail.setOrder(this);
     }
+
 }
