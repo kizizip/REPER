@@ -72,4 +72,21 @@ public class UserTokenService {
         Optional<UserToken> userToken = userTokenRepository.findByUserId(userId);
         return userToken.map(UserToken::getToken).orElse(null);
     }
+
+    @Transactional
+    public void deleteTokensForStore(long storeId) {
+        List<UserToken> tokens = userTokenRepository.findByStoreId(storeId);
+        if (tokens != null && !tokens.isEmpty()) {
+            userTokenRepository.deleteAll(tokens);  // storeId에 해당하는 모든 토큰 삭제
+        }
+    }
+
+    /**
+     * userId에 해당하는 사용자의 FCM 토큰을 삭제하는 메서드
+     */
+    @Transactional
+    public void deleteTokenForUser(Long userId) {
+        Optional<UserToken> userToken = userTokenRepository.findByUserId(userId);
+        userToken.ifPresent(userTokenRepository::delete);  // userId에 해당하는 토큰 삭제
+    }
 }
