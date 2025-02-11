@@ -38,8 +38,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieComposition
+import com.airbnb.lottie.LottieCompositionFactory
 import com.ssafy.reper.R
 import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.login.LoginActivity
@@ -219,6 +222,7 @@ class AllRecipeFragment : Fragment() {
             if(id == 0){
                 viewModel.likeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipeId)
             }
+            // 즐겨찾기 제외 버튼을 눌렀을 떄
             else if(id == 1){
                 viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipeId)
             }
@@ -246,6 +250,13 @@ class AllRecipeFragment : Fragment() {
                                 hot = item.recipeId
                             }
                         }
+
+                        viewModel.getRecipe(ice)
+                        viewModel.recipe.observe(viewLifecycleOwner){
+                            preloadLottieAnimations(it.recipeSteps)
+                        }
+                        viewModel.getRecipe(hot)
+
 
                         if(ice != -1 && hot != -1){
                             val dialog = Dialog(mainActivity)
@@ -364,6 +375,18 @@ class AllRecipeFragment : Fragment() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+    }
+    private val lottieCache = mutableMapOf<String, LottieComposition?>()
+    // 미리 로티이미지를 로드
+    fun preloadLottieAnimations(recipeSteps: MutableList<RecipeStep>) {
+        for (step in recipeSteps) {
+            val animationUrl = step.animationUrl
+            if (lottieCache.containsKey(animationUrl)) continue // 이미 로드된 애니메이션은 건너뛰기
+
+            LottieCompositionFactory.fromUrl(context, animationUrl).addListener { composition ->
+                lottieCache[animationUrl] = composition // 미리 로드해서 저장
+            }
         }
     }
 
