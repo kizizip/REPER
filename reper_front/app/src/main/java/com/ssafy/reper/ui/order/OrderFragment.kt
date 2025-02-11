@@ -1,5 +1,6 @@
 package com.ssafy.reper.ui.order
 
+import MainActivityViewModel
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -16,6 +17,7 @@ import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentOrderBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.order.adapter.OrderAdatper
+import com.ssafy.reper.util.ViewModelSingleton
 
 private const val TAG = "OrderFragment_정언"
 class OrderFragment : Fragment() {

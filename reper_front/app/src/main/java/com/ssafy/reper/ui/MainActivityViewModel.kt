@@ -1,18 +1,22 @@
 import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.airbnb.lottie.LottieComposition
+import com.airbnb.lottie.LottieCompositionFactory
+import com.google.android.datatransport.runtime.firebase.transport.LogEventDropped
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.data.remote.RetrofitUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivityViewModel_정언"
 class MainActivityViewModel(application: Application) :  AndroidViewModel(application) {
-
     private val recipeService = RetrofitUtil.recipeService
 
     private val _selectedRecipeList =
@@ -68,7 +72,6 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
         get() = _recipeSteps
 
     fun setRecipeSteps(recipeIdx: Int){
-        _recipeSteps.value = _selectedRecipeList.value?.get(recipeIdx)?.recipeSteps
+         _recipeSteps.value = _selectedRecipeList.value?.get(recipeIdx)?.recipeSteps
     }
-
 }

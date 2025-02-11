@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kakao.sdk.common.KakaoSdk.type
 import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Ingredient
@@ -145,7 +146,7 @@ class RecipeViewModel : ViewModel() {
         get() = _recipe
 
     fun getRecipe(recipeId: Int){
-        var recipe :Recipe = Recipe(
+        var recipe = Recipe(
             category = "",
             ingredients = mutableListOf(),
             recipeId = recipeId,
@@ -157,9 +158,19 @@ class RecipeViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 recipe = recipeService.getRecipe(recipeId)
+                Log.d(TAG, "getRecipe: ${recipe}")
             }
             catch (e:Exception){
                 Log.d(TAG, "getRecipe : error: ${e.message.toString()}")
+                recipe = Recipe(
+                    category = "",
+                    ingredients = mutableListOf(),
+                    recipeId = recipeId,
+                    recipeImg = null,
+                    recipeName = "",
+                    recipeSteps = mutableListOf(),
+                    type = ""
+                )
             }
         }
         _recipe.value = recipe

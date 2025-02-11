@@ -1,5 +1,6 @@
 package com.ssafy.reper.ui.recipe
 
+import MainActivityViewModel
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -48,26 +49,15 @@ import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.login.LoginActivity
 import com.ssafy.reper.ui.order.OrderViewModel
+import com.ssafy.reper.util.ViewModelSingleton
 import com.ssafy.smartstore_jetpack.util.CommonUtils.makeComma
 import kotlinx.coroutines.launch
 
 private const val TAG = "AllRecipeFragment_정언"
 class AllRecipeFragment : Fragment() {
-    ////////////////////////////////////
-    // - 라디오 그룹으로 필터 다시 만들기.
-    // - 재료 포함 제외 검색, 유사도 되는 건지 묻기.
-    //      1. 유사도 X -> 샷 과 같은 명확한 것으로 필터 변경
-    //      2. 유사도 O -> 현상 유지
-    // - 카테고리누르고 필터나 검색 눌렀을 때 rv 업데이트 되게 로직 변경 (현재: 카테고리를 누르면 rv 업데이트. ViewModel.recipeList가 업데이트 되면 initAdapter 호출 됨.!!!)
-    // - 검색 구현
-    // - 검색 버튼이 꼭 필요한가? 필터에서 하나 클릭하면 다이얼로그 꺼지면서 바로 검색되게 할 거임.
-    // - 즐겨찾기 구현
-    ////////////////////////////////////
-
-
     var category : MutableList<String> = mutableListOf()
 
-    private val lottieViewModel : LottieViewModel by activityViewModels()
+    private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val viewModel: RecipeViewModel by viewModels()
 
     // 레시피 리스트 recyclerView Adapter
@@ -232,83 +222,57 @@ class AllRecipeFragment : Fragment() {
             else if(id == 2){
                 lifecycleScope.launch {
                     val icehotList= viewModel.recipeList.value!!.filter { it.recipeName == recipeName }
+                    var ice = -1
+                    var hot = -1
+                    for(item in icehotList){
+                        if(item.type.equals("ICE")){
+                            ice = item.recipeId
+                        }
+                        else if(item.type.equals("HOT")){
+                            hot = item.recipeId
+                        }
+                    }
 
                     if(allRecipeBinding.allrecipeFmFullRecipeTab.isSelected == true){
-                        // 클릭 이벤트 -> recipeId 전달
-                        val bundle = Bundle().apply {
-                            putIntegerArrayList("idList", icehotList.map { it.recipeId }.toCollection(ArrayList()))
-                        }
-                        findNavController().navigate(R.id.fullRecipeFragment, bundle)
-
+                        mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), mutableListOf(ice, hot))
                     }
                     else if(allRecipeBinding.allrecipeFmStepRecipeTab.isSelected == true){
-                        var ice = -1
-                        var hot = -1
-                        for(item in icehotList){
-                            if(item.type.equals("ICE")){
-                                ice = item.recipeId
-                            }
-                            else if(item.type.equals("HOT")){
-                                hot = item.recipeId
-                            }
-                        }
-
-                        viewModel.getRecipe(ice)
-                        viewModel.recipe.observe(viewLifecycleOwner){
-                            // 미리 필요한 로티이미지를 로드해놓음
-                            lottieViewModel.preloadLottieAnimations(requireContext(), it.recipeSteps)
-                        }
-                        viewModel.getRecipe(hot)
-
-
                         if(ice != -1 && hot != -1){
                             val dialog = Dialog(mainActivity)
                             dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                             dialog.setContentView(R.layout.dialog_icehot)
 
-                            dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.GONE
-                            dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.GONE
-                            if(ice != -1){
-                                dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.VISIBLE
-                            }
-                            if(hot != -1){
-                                dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.VISIBLE
-                            }
+                            dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.VISIBLE
+                            dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.VISIBLE
+
                             dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
-                                // 클릭 이벤트 -> recipeId 전달
-                                val bundle = Bundle().apply {
-                                    putInt("whereAmICame", 1)
-                                    putIntegerArrayList("recipeIdList", arrayListOf(hot))
-                                }
-                                findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                                ice = -1
+                                mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), mutableListOf(hot))
                                 dialog.dismiss()
                             }
                             dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).setOnClickListener {
-                                // 클릭 이벤트 -> recipeId 전달
-                                val bundle = Bundle().apply {
-                                    putInt("whereAmICame", 1)
-                                    putIntegerArrayList("recipeIdList", arrayListOf(ice))
-                                }
-                                findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                                hot = -1
+                                mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), mutableListOf(ice))
                                 dialog.dismiss()
                             }
                             dialog.show()
-                        }
-                        else if (ice != -1){
-                            // 클릭 이벤트 -> recipeId 전달
-                            val bundle = Bundle().apply {
-                                putInt("whereAmICame", 1)
-                                putIntegerArrayList("recipeIdList", arrayListOf(ice))
-                            }
-                            findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                        } else if (ice != -1){
+                            mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), mutableListOf(ice))
                         }
                         else if (hot != -1){
-                            // 클릭 이벤트 -> recipeId 전달
-                            val bundle = Bundle().apply {
-                                putInt("whereAmICame", 1)
-                                putIntegerArrayList("recipeIdList", arrayListOf(hot))
+                            mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), mutableListOf(hot))
+                        }
+                        mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
+                            if(ice !=-1 && hot != -1){
+                                Log.d(TAG, "why? ${ice} / ${hot}")
+                            }else{
+                                Log.d(TAG, "else? ${ice} / ${hot}")
+                                // 클릭 이벤트 -> 어디서 왔는지 전달
+                                val bundle = Bundle().apply {
+                                    putInt("whereAmICame", 1)
+                                }
+                                findNavController().navigate(R.id.stepRecipeFragment, bundle)
                             }
-                            findNavController().navigate(R.id.stepRecipeFragment, bundle)
                         }
                     }
                 }
