@@ -79,6 +79,60 @@
 
         </LinearLayout>
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/uploadBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/store_list_item"
+            app:cardCornerRadius="12dp"
+            android:layout_marginHorizontal="2dp"
+            android:visibility="gone"
+            app:cardElevation="4dp"
+            app:layout_constraintTop_toBottomOf="@+id/recipe_fg_search_noti">
+
+            <!-- LinearLayout 추가 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp">
+
+                <TextView
+                    android:id="@+id/fileName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:gravity="center"
+                    android:text="파일명"
+                    android:textColor="@color/darkgreen"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/uploadState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="레시피를 업로드 중입니다..."
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/successText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/pretendard_semibold"
+                    android:gravity="center"
+                    android:text="확인"
+                    android:textColor="@color/darkgray"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recipe_fg_add_RV"
             android:layout_width="match_parent"
@@ -88,7 +142,7 @@
             android:scrollbarThumbVertical="@drawable/scroll_bar"
             android:scrollbars="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recipe_fg_search_noti"
+            app:layout_constraintTop_toBottomOf="@+id/uploadBar"
             tools:layout_editor_absoluteX="32dp" />
 
 

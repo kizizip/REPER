@@ -19,13 +19,16 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kakao.sdk.common.KakaoSdk.type
 import com.kakao.sdk.friend.m.u
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentRecipeManageBinding
+import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.RecipeAdapter
 import okhttp3.MediaType
@@ -36,11 +39,13 @@ import java.io.File
 import java.io.FileOutputStream
 
 private const val TAG = "RecipeManageFragment_싸피"
+
 class RecipeManageFragment : Fragment() {
     private var _binding: FragmentRecipeManageBinding? = null
     private val binding get() = _binding!!
     private lateinit var mainActivity: MainActivity
     private val bossViewModel: BossViewModel by activityViewModels()
+    private val fcmViewModel: FcmViewModel by activityViewModels()
     var storeId = 1
 
 
@@ -51,14 +56,15 @@ class RecipeManageFragment : Fragment() {
         }
     }
 
-    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri = result.data?.data
-            uri?.let {
-                uploadFile(it)
+    private val filePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uri = result.data?.data
+                uri?.let {
+                    uploadFile(it)
+                }
             }
         }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -72,8 +78,41 @@ class RecipeManageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        bossViewModel.recipeLoad.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                null -> {
+                    binding.uploadBar.visibility = View.GONE
+                }
+                "success" -> {
+                    binding.uploadBar.visibility = View.VISIBLE
+                    binding.uploadState.text = "레시피 업로드 성공"
+                    binding.successText.visibility = View.VISIBLE
+                    binding.successText.text = "확인"
+                    binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.mainorange))
+                    binding.successText.setOnClickListener {
+                        binding.uploadBar.visibility = View.GONE
+                        bossViewModel.setRecipeLoad(null)
+                    }
+                }
+                "failure" -> {
+                    binding.uploadBar.visibility = View.VISIBLE
+                    binding.uploadState.text = "레시피 업로드 실패"
+                    binding.successText.visibility = View.VISIBLE
+                    binding.successText.text = "확인"
+                    binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
+                    binding.successText.setOnClickListener {
+                        binding.uploadBar.visibility = View.GONE
+                        bossViewModel.setRecipeLoad(null)
+                    }
+                }
+                "loading" -> {
+                    binding.successText.visibility = View.GONE
+                    binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
+                }
+            }
+        }
+
         binding.recipeFgAddTv.setOnClickListener {
-            //안드로이드 파일업로드, 일단은 500에러, 진행률도 fcm에서 얼마나 되고 있는지 알려주면 좋을거 같은딩(나의 생각)
             selectPdfFile()
         }
 
@@ -87,7 +126,7 @@ class RecipeManageFragment : Fragment() {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
                 val query = binding.recipeSearchBarET.text.toString().trim()
                 if (query.isNotEmpty()) {
-                    bossViewModel.searchRecipe(storeId,query)
+                    bossViewModel.searchRecipe(storeId, query)
                 }
                 true  // 이벤트 소비 (키보드 내림)
             } else {
@@ -123,7 +162,7 @@ class RecipeManageFragment : Fragment() {
         _binding = null
     }
 
-    private fun showDialog(menuName: String, recipeId : Int,) {
+    private fun showDialog(menuName: String, recipeId: Int) {
         val dialog = Dialog(mainActivity)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(R.layout.dialog_delete)
@@ -138,7 +177,7 @@ class RecipeManageFragment : Fragment() {
             dialog.dismiss()
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-           bossViewModel.deleteRecipe(recipeId, storeId)
+            bossViewModel.deleteRecipe(recipeId, storeId)
             Toast.makeText(requireContext(), "레시피 삭제 완료", Toast.LENGTH_SHORT).show()
             bossViewModel.getMenuList(storeId)
             dialog.dismiss()
@@ -186,13 +225,18 @@ class RecipeManageFragment : Fragment() {
         return null
     }
 
-    fun uploadFile(uri: Uri){
+    fun uploadFile(uri: Uri) {
 
         val filePart = getFilePart(requireContext(), uri)
         filePart?.let {
             bossViewModel.uploadRecipe(storeId, it)
+            binding.uploadBar.visibility = View.VISIBLE
+            val contentDisposition = it.headers?.get("Content-Disposition")
+            val fileName = contentDisposition?.substringAfter("filename=")?.replace("\"", "") ?: "알 수 없는 파일"
+            binding.fileName.text = fileName
+            bossViewModel.setRecipeLoad("loading")
         }
+
+
     }
-
-
 }
