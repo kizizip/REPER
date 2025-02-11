@@ -20,21 +20,16 @@ public interface RecipeSearchRepository extends ElasticsearchRepository<RecipeDo
           { 
             "bool": {
               "should": [
+                { "match": { "recipeName": "?1" }},
+                { "match": { "recipeName.ngram": "?1" }},
                 { 
-                  "match": { 
+                  "fuzzy": { 
                     "recipeName": { 
-                      "query": "?1",
+                      "value": "?1",
                       "fuzziness": "AUTO"
                     }
                   }
-                },        
-                { 
-                  "match": { 
-                    "recipeName.ngram": { 
-                      "query": "?1",
-                    }
-                  }
-                }  
+                }
               ]
             }
           }
