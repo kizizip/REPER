@@ -24,7 +24,7 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
     val selectedRecipeList: LiveData<MutableList<Recipe>>
         get() = _selectedRecipeList
 
-    fun getSelectedRecipes(storeId: Int, recipeIdList:MutableList<Int>){
+    fun getSelectedRecipes(recipeIdList:MutableList<Int>){
         viewModelScope.launch {
             var list: MutableList<Recipe> = mutableListOf()
             try {

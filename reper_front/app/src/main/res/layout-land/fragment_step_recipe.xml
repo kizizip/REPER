@@ -93,7 +93,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/steprecipe_fm_rv_ingredients"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="vertical"
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="32dp"
                 app:layout_constraintBottom_toTopOf="@+id/steprecipe_fm_btn_right"
@@ -103,20 +105,17 @@
 
             <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/lottieAnimationView"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
-                app:layout_constraintBottom_toTopOf="@+id/textView2"
+                app:layout_constraintBottom_toTopOf="@+id/steprecipe_fm_btn_right"
                 app:layout_constraintEnd_toEndOf="@+id/steprecipe_fm_land_tv_recipe"
                 app:layout_constraintStart_toStartOf="@+id/steprecipe_fm_land_tv_recipe"
                 app:layout_constraintTop_toBottomOf="@+id/steprecipe_fm_land_tv_recipe"
                 app:lottie_autoPlay="true"
                 app:lottie_loop="true"
-                app:lottie_url="https://cdn.lottielab.com/l/6Y3CtYEieXZZrx.json" />
+                app:lottie_url="https://cdn.lottielab.com/l/87fJhuooafErS0.json" />
 
 
             <TextView
@@ -247,14 +246,6 @@
                 app:layout_constraintStart_toEndOf="@+id/steprecipe_fm_iv_icon_custom"
                 app:layout_constraintTop_toTopOf="@+id/steprecipe_fm_iv_icon_custom" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
-
-
-
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

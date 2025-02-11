@@ -137,7 +137,7 @@ class OrderRecipeFragment : Fragment() {
 
         orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setOnClickListener {
             mainViewModel.setOrder(order)
-            mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), checkedRecipeIdList)
+            mainViewModel.getSelectedRecipes(checkedRecipeIdList)
             mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
                 val bundle = Bundle().apply {
                     putInt("whereAmICame", 2)

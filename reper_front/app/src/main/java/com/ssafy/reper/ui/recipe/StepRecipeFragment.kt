@@ -11,21 +11,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.base.ApplicationClass
-import com.ssafy.reper.data.dto.Ingredient
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.OrderDetail
+import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentStepRecipeBinding
 import com.ssafy.reper.ui.MainActivity
-import com.ssafy.reper.ui.order.adapter.OrderAdatper
 import com.ssafy.reper.util.ViewModelSingleton
-import kotlin.math.log
-import kotlin.math.min
 
 private const val TAG = "StepRecipeFragment_정언"
 class StepRecipeFragment : Fragment() {
@@ -41,6 +36,7 @@ class StepRecipeFragment : Fragment() {
     var totalRecipes =  0
     lateinit var order : Order
     lateinit var orderDetails: MutableList<OrderDetail>
+    lateinit var selectedRecipeList : MutableList<Recipe>
 
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val viewModel: RecipeViewModel by viewModels()
@@ -84,8 +80,10 @@ class StepRecipeFragment : Fragment() {
         mainViewModel.recipeSteps.observe(viewLifecycleOwner){
             totalSteps = it.count()
         }
+        selectedRecipeList = mainViewModel.selectedRecipeList.value!!
         totalRecipes = mainViewModel.selectedRecipeList.value?.count()!!
         mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
+            selectedRecipeList = it
             totalRecipes = it.count()
         }
 
@@ -94,11 +92,20 @@ class StepRecipeFragment : Fragment() {
         }
         else if(whereAmICame == 2) { // OrderRecipeFragment에서 옴
             mainActivity.requestedOrientation =
-                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // 화면 회전 잠금 해제
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // 화면 회전 잠금 해제
             order = mainViewModel.order.value!!
             orderDetails = order.orderDetails
         }
+
+        // 공통 이벤트 처리
         initEvent()
+
+        val orientation = resources.configuration.orientation
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) { // 가로모드 처리
+            eventLand()
+        } else { // 세로 모드 처리
+            eventPortrait()
+        }
     }
     //캡쳐방지 코드입니다! 메시지 내용은 수정불가능,, 핸드폰내에 저장된 메시지가 뜨는 거라고 하네요
     override fun onResume() {
@@ -125,44 +132,6 @@ class StepRecipeFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        // 화면이 회전되어 재구성될 가능성..
-        if(nowRecipeIdx == 0 && nowStepIdx == -1){
-            stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.GONE
-            stepRecipeBinding.steprecipeFmBtnRight.visibility = View.VISIBLE
-        }
-        else if(nowRecipeIdx >= totalRecipes - 1 && nowStepIdx >= totalSteps - 1){
-            stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.VISIBLE
-            stepRecipeBinding.steprecipeFmBtnRight.visibility = View.GONE
-        }
-
-        mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
-            if(whereAmICame == 1){
-                stepRecipeBinding.constraintLayout2.visibility = View.GONE // 추가사항 안보이게
-            }else{
-                stepRecipeBinding.constraintLayout4?.visibility = View.VISIBLE
-                stepRecipeBinding.steprecipeFmTvIndex.let{ it->
-                    if(order.takeout){
-                        it?.setText("포장")
-                        stepRecipeBinding.imageView?.setImageResource(R.drawable.steprecipe_land_red_index)
-                    }
-                    else{
-                        it?.setText("매장")
-                        stepRecipeBinding.imageView?.setImageResource(R.drawable.steprecipe_land_green_index)
-                    }
-                }
-                stepRecipeBinding.constraintLayout2.visibility = View.VISIBLE // 추가사항 안보이게
-                stepRecipeBinding.steprecipeFmTvCustom.setText(orderDetails.first().customerRequest)
-            }
-
-            stepRecipeBinding.lottieAnimationView.visibility = View.GONE
-            stepRecipeBinding.steprecipeFmTvStep?.visibility = View.GONE
-            stepRecipeBinding.steprecipeFmTvMenuName?.text = "${it.first().recipeName} ${it.first().type}"
-            stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.VISIBLE
-            stepRecipeBinding.steprecipeFmBtnRight.visibility = View.VISIBLE
-            stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.GONE
-
-            initAdapter(nowRecipeIdx)
-        }
         // 다음버튼이 눌릴 때.
         stepRecipeBinding.steprecipeFmBtnRight.setOnClickListener {
             nextEvent()
@@ -173,6 +142,69 @@ class StepRecipeFragment : Fragment() {
             prevEvent()
         }
 
+        // 이전, 다음 버튼 Visible 처리 (화면이 회전되어 재구성될 가능성..)
+        if(nowRecipeIdx == 0 && nowStepIdx == -1){
+            stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.GONE
+            stepRecipeBinding.steprecipeFmBtnRight.visibility = View.VISIBLE
+        }
+        else if(nowRecipeIdx >= totalRecipes - 1 && nowStepIdx >= totalSteps - 1){
+            stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.VISIBLE
+            stepRecipeBinding.steprecipeFmBtnRight.visibility = View.GONE
+        }
+        else{
+            stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.VISIBLE
+            stepRecipeBinding.steprecipeFmBtnRight.visibility = View.VISIBLE
+        }
+
+        // 추가사항 처리
+        if(whereAmICame == 1){
+            stepRecipeBinding.constraintLayout2.visibility = View.GONE // 추가사항 안보이게
+        }else{
+            stepRecipeBinding.constraintLayout2.visibility = View.VISIBLE // 추가사항 보이게
+            stepRecipeBinding.steprecipeFmTvCustom.setText(orderDetails[nowRecipeIdx].customerRequest)
+        }
+    }
+    fun eventPortrait(){
+        stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()}")
+        stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
+
+        if(nowStepIdx == -1){ // 재료를 보여줘야해!
+            showIngredient(nowRecipeIdx)
+        }
+        else{ // 레시피를 보여줘야해!
+            showOneStepRecipe(nowStepIdx)
+        }
+    }
+    fun eventLand(){
+        stepRecipeBinding.steprecipeFmLandTvUser?.setText("이용자 : ${ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()}")
+
+        if(whereAmICame == 1){
+            stepRecipeBinding.constraintLayout4?.visibility = View.GONE // 인덱스 안보이게
+        }
+        else if(whereAmICame == 2){
+            stepRecipeBinding.constraintLayout4?.visibility = View.VISIBLE // 인덱스 보이게
+            stepRecipeBinding.steprecipeFmTvIndex.let{ it->
+                var quantities = 0
+                for(item in orderDetails){
+                    quantities += item.quantity
+                }
+                if(order.takeout){
+                    it?.setText("포장 ${quantities}개")
+                    stepRecipeBinding.imageView?.setImageResource(R.drawable.steprecipe_land_red_index)
+                }
+                else{
+                    it?.setText("매장 ${quantities}개")
+                    stepRecipeBinding.imageView?.setImageResource(R.drawable.steprecipe_land_green_index)
+                }
+            }
+        }
+
+        if(nowStepIdx == -1){ // 재료를 보여줘야해!
+            showIngredient(nowRecipeIdx)
+        }
+        else{ // 레시피를 보여줘야해!
+            showOneStepRecipe(nowStepIdx)
+        }
     }
     // 1. 내가 지금 재료라서 스탭을 보여줘야 할 때
     // 2. 내가 지금 스텝인데, 다음 스텝이 있을 때
@@ -186,20 +218,20 @@ class StepRecipeFragment : Fragment() {
         when {
             // 다음 스텝이 존재하는 경우 → 다음 스텝으로 이동
             nowStepIdx < totalSteps - 1-> {
-                showOneStepRecipePortrait(nowStepIdx)
+                showOneStepRecipe(nowStepIdx)
             }
 
             nowStepIdx >= totalSteps && nowRecipeIdx < totalRecipes - 1-> {
                 mainViewModel.setNowISeeRecipe(nowRecipeIdx + 1)
                 mainViewModel.setRecipeSteps(nowRecipeIdx)
                 mainViewModel.setNowISeeStep(-1)
-                showIngredientPortrait(nowRecipeIdx)
+                showIngredient(nowRecipeIdx)
             }
 
             // 마지막 레시피의 마지막 스텝인 경우 → 버튼 비활성화
             else -> {
 //                Log.d(TAG, "마지막 레시피의 마지막 스텝 도달")
-                showOneStepRecipePortrait(nowStepIdx)
+                showOneStepRecipe(nowStepIdx)
                 stepRecipeBinding.steprecipeFmBtnRight.visibility = View.GONE
             }
         }
@@ -217,20 +249,20 @@ class StepRecipeFragment : Fragment() {
         when {
             // 이전 스텝이 존재하는 경우 → 이전 스텝으로 이동
             nowStepIdx >= 0-> {
-                showOneStepRecipePortrait(nowStepIdx)
+                showOneStepRecipe(nowStepIdx)
             }
 
             nowStepIdx < 0 && nowRecipeIdx > 0-> {
                 mainViewModel.setNowISeeRecipe(nowRecipeIdx - 1)
                 mainViewModel.setRecipeSteps(nowRecipeIdx)
                 mainViewModel.setNowISeeStep(totalSteps - 1)
-                showIngredientPortrait(nowRecipeIdx)
+                showIngredient(nowRecipeIdx)
             }
 
             nowStepIdx < 0  && nowRecipeIdx == 0->{
                 mainViewModel.setNowISeeStep(-1)
                 stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.GONE
-                showIngredientPortrait(nowRecipeIdx)
+                showIngredient(nowRecipeIdx)
             }
 
             else ->{
@@ -239,31 +271,51 @@ class StepRecipeFragment : Fragment() {
         }
     }
     // 재료 보이게
-    fun showIngredientPortrait(recipeIdx:Int){
+    fun showIngredient(recipeIdx:Int){
         stepRecipeBinding.lottieAnimationView.visibility = View.GONE
         stepRecipeBinding.steprecipeFmTvStep?.visibility = View.GONE
-        stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.VISIBLE
+        stepRecipeBinding.steprecipeFmLandTvRecipe?.text = "${selectedRecipeList.get(recipeIdx).recipeName} ${selectedRecipeList.get(recipeIdx).type}"
 
-        initAdapter(recipeIdx)
+        stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.VISIBLE
+        initIngredientsAdapter(recipeIdx)
     }
     // 레시피 보이게
-    fun showOneStepRecipePortrait(stepIdx:Int){
-        stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.GONE
+    fun showOneStepRecipe(stepIdx:Int){
         val recipeSteps = mainViewModel.recipeSteps.value!!
+
+        stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.GONE
 
         // 로티
         stepRecipeBinding.lottieAnimationView.visibility = View.VISIBLE
         stepRecipeBinding.lottieAnimationView.setAnimationFromUrl(recipeSteps.get(stepIdx)?.animationUrl)
         // 레시피
         stepRecipeBinding.steprecipeFmTvStep?.visibility = View.VISIBLE
-        stepRecipeBinding.steprecipeFmTvStep?.text = recipeSteps?.get(stepIdx)?.instruction
+        stepRecipeBinding.steprecipeFmTvStep?.setText(recipeSteps?.get(stepIdx)?.instruction)
+        stepRecipeBinding.steprecipeFmLandTvRecipe?.setText(recipeSteps?.get(stepIdx)?.instruction)
     }
 
-    // 어뎁터 설정
-    fun initAdapter(recipeIdx:Int) {
+    // 재료 어뎁터 설정
+    fun initIngredientsAdapter(recipeIdx:Int) {
         val ingredients = mainViewModel.selectedRecipeList.value?.get(recipeIdx)?.ingredients!!
 
         ingredientsAdapter = RecipeIngredientsAdapter(ingredients)
         stepRecipeBinding.steprecipeFmRvIngredients.adapter = ingredientsAdapter
     }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        val bundle = arguments
+
+        initEvent()
+        // 가로모드 UI 업데이트
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            findNavController().navigate(R.id.stepRecipeFragment, bundle)
+            eventLand()
+        } else { // 세로모드 UI 업데이트
+            eventPortrait()
+            findNavController().navigate(R.id.stepRecipeFragment, bundle)
+        }
+    }
+
 }

@@ -234,7 +234,7 @@ class AllRecipeFragment : Fragment() {
                     }
 
                     if(allRecipeBinding.allrecipeFmFullRecipeTab.isSelected == true){
-                        mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), mutableListOf(ice, hot))
+                        mainViewModel.getSelectedRecipes(mutableListOf(ice, hot))
                     }
                     else if(allRecipeBinding.allrecipeFmStepRecipeTab.isSelected == true){
                         if(ice != -1 && hot != -1){
@@ -247,20 +247,20 @@ class AllRecipeFragment : Fragment() {
 
                             dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
                                 ice = -1
-                                mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), mutableListOf(hot))
+                                mainViewModel.getSelectedRecipes(mutableListOf(hot))
                                 dialog.dismiss()
                             }
                             dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).setOnClickListener {
                                 hot = -1
-                                mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), mutableListOf(ice))
+                                mainViewModel.getSelectedRecipes(mutableListOf(ice))
                                 dialog.dismiss()
                             }
                             dialog.show()
                         } else if (ice != -1){
-                            mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), mutableListOf(ice))
+                            mainViewModel.getSelectedRecipes(mutableListOf(ice))
                         }
                         else if (hot != -1){
-                            mainViewModel.getSelectedRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), mutableListOf(hot))
+                            mainViewModel.getSelectedRecipes( mutableListOf(hot))
                         }
                         mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
                             if(ice !=-1 && hot != -1){
