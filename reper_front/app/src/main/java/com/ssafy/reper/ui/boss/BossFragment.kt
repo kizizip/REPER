@@ -87,7 +87,7 @@ class BossFragment : Fragment() {
 
             override fun onAcceptClick(position: Int) {
                 bossViewModel.acceptEmployee(storeId, accessAdapter.employeeList[position].userId)
-                fcmViewModel.sendToUserFCM(accessAdapter.employeeList[position].userId,"권한 허가 알림", "${storeName}에서 권한을 허락했습니다.")
+                fcmViewModel.sendToUserFCM(accessAdapter.employeeList[position].userId,"권한 허가 알림", "${storeName}에서 권한을 허락했습니다.","MyPageFragment",storeId)
 
             }
         })
@@ -101,7 +101,7 @@ class BossFragment : Fragment() {
 
             override fun onAcceptClick(position: Int) {
                 bossViewModel.acceptEmployee(storeId, nonAccessAdapter.employeeList[position].userId)
-                fcmViewModel.sendToUserFCM(nonAccessAdapter.employeeList[position].userId,"권한 허가 알림", "${storeName}에서 권한을 허락했습니다.")
+                fcmViewModel.sendToUserFCM(accessAdapter.employeeList[position].userId,"권한 허가 알림", "${storeName}에서 권한을 허락했습니다.","MyPageFragment",storeId)
 
             }
         })
@@ -222,7 +222,7 @@ class BossFragment : Fragment() {
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
             bossViewModel.deleteEmployee(storeId, userId )
-            fcmViewModel.sendToUserFCM(userId,"권한 삭제알림", "${storeName}에서 권한을 삭제했습니다.")
+            fcmViewModel.sendToUserFCM(userId,"권한 삭제알림", "${storeName}에서 권한을 삭제했습니다.","MyPageFragment", storeId)
             Toast.makeText(requireContext(), "권한 삭제 완료", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
         }

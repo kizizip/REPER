@@ -134,8 +134,12 @@ class WriteNotiFragment : Fragment() {
     fun createNotice() {
         val title = binding.notiWriteFgTitleET.text.toString()
         val content = binding.notiWriteFgContentET.text.toString()
+
+        val targetFragment = "NoticeWriteFragment"
+        val requestId = noticeViewModel.clickNotice.value?.noticeId
+
         noticeViewModel.createNotice(storeId, userId, title, content)
-        fcmViewModel.sendToStoreFCM(storeId,"새로운 공지가 등록되었습니다.",title)
+        fcmViewModel.sendToStoreFCM(storeId,"새로운 공지가 등록되었습니다.",title, targetFragment, 50)
 
         Toast.makeText(requireContext(), "공지 작성 완료", Toast.LENGTH_SHORT).show()
 
@@ -144,11 +148,15 @@ class WriteNotiFragment : Fragment() {
     fun modifyNotice() {
         val title = binding.notiWriteFgTitleET.text.toString()
         val content = binding.notiWriteFgContentET.text.toString()
+
+        val targetFragment = "NoticeWriteFragment"  // 이동할 프래그먼트 이름
+        val requestId = noticeViewModel.clickNotice.value!!.noticeId  // 수정된 공지의 ID
+
         noticeViewModel.modifyNotice(
             storeId, userId,
             noticeViewModel.clickNotice.value!!.noticeId, title, content
         )
-        fcmViewModel.sendToStoreFCM(storeId,"공지가 수정되었습니다.",title)
+        fcmViewModel.sendToStoreFCM(storeId,"공지가 수정되었습니다.",title, targetFragment, requestId)
 
         Toast.makeText(requireContext(), "공지 수정 완료", Toast.LENGTH_SHORT).show()
 

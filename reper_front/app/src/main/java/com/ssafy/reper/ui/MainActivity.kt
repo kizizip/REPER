@@ -1,11 +1,13 @@
 package com.ssafy.reper.ui
 
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.ssafy.reper.R
@@ -13,8 +15,11 @@ import com.ssafy.reper.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.reper.data.dto.UserToken
+import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.ui.boss.NoticeViewModel
 import com.ssafy.reper.ui.boss.BossViewModel
+import com.ssafy.reper.ui.home.HomeFragment
+import com.ssafy.reper.ui.order.OrderFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,6 +35,9 @@ class MainActivity : AppCompatActivity() {
     private val noticeViewModel: NoticeViewModel by viewModels()
     private val bossViewModel: BossViewModel by viewModels()
     private val fcmViewModel:FcmViewModel by viewModels()
+
+//    val sharedPreferencesUtil = SharedPreferencesUtil(this)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -58,6 +66,50 @@ class MainActivity : AppCompatActivity() {
             fcmViewModel.saveToken(UserToken(1, token, 1))
             Log.d("FCMTOKEN", token)
         }
+
+        // 📌 FCM에서 targetFragment 전달받았는지 확인 후, 해당 프래그먼트로 이동
+        val targetFragment = intent.getStringExtra("targetFragment")
+        if (targetFragment != null) {
+            when (targetFragment) {
+                "OrderFragment" -> {
+                    val orderId = intent.getStringExtra("requestId")!!.toInt()
+                    val bundle = Bundle().apply {
+                        putInt("orderId", orderId)  // orderId를 번들에 담기
+                    }
+                    navController?.navigate(R.id.orderFragment, bundle)
+                }
+                "NoticeFragment" -> {
+                    val noticeId = intent.getStringExtra("requestId")!!.toInt()
+                    navController?.navigate(R.id.noticeManageFragment)
+                    noticeViewModel.getNotice( 1,noticeId,  1)
+                }
+                "BossFragment" ->{
+//                    sharedPreferencesUtil.addStore(intent.getStringExtra("requestId")!!.toInt())
+                    navController?.navigate(R.id.bossFragment)
+                }
+                "RecipeManageFragment"->{
+//                    sharedPreferencesUtil.addStore(intent.getStringExtra("requestId")!!.toInt())
+                    navController?.navigate(R.id.recipeManageFragment)
+                }
+                "MyPageFragment"->{
+//                    sharedPreferencesUtil.addStore(intent.getStringExtra("requestId")!!.toInt())
+                    navController?.navigate(R.id.myPageFragment)
+                }
+                "" -> navController?.navigate(R.id.bossFragment)
+                else -> navController?.navigate(R.id.homeFragment) // 기본값
+            }
+        }
+
+        // FCM Token 비동기 처리
+        CoroutineScope(Dispatchers.Main).launch {
+            val token = withContext(Dispatchers.IO) {
+                getFCMToken()
+            }
+            fcmViewModel.saveToken(UserToken(1, token, 1))
+            Log.d("FCMTOKEN", token)
+        }
+
+
     }
 
     // FCM 토큰을 비동기적으로 가져오는 함수
@@ -69,8 +121,6 @@ class MainActivity : AppCompatActivity() {
             Log.e("FCM Error", "Fetching FCM token failed", e)
             ""
         }
-
-
 
     }
 

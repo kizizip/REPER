@@ -69,6 +69,7 @@ package com.ssafy.reper.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import com.ssafy.reper.data.dto.LoginResponse
 import com.ssafy.reper.data.dto.UserInfo
 
@@ -100,6 +101,22 @@ class SharedPreferencesUtil(context: Context) {
             role = preferences.getString("role", ""),
         )
     }
+
+
+    //스토어 정보 받아 오기
+    fun addStore(storeId: Int) {
+        val editor = preferences.edit()
+        editor.putInt("storeId", storeId)
+        editor.apply()
+        Log.d("SharedPreferencesUtil", "Store ID saved: $storeId")
+    }
+
+    fun getStore(): Int {
+        val storeId = preferences.getInt("storeId", 0)
+        Log.d("SharedPreferencesUtil", "Store ID retrieved: $storeId")
+        return storeId
+    }
+
 
     companion object {
         private const val SHARED_PREFERENCES_NAME = "reper_preference"

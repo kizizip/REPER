@@ -58,7 +58,6 @@ class NoticeViewModel : ViewModel() {
             try {
                 val response = RetrofitUtil.noticeService.getNotice(storeId,noticeId, userId)
                 _clickNotice.postValue(response)
-                getAllNotice(storeId, userId)
             } catch (e: Exception) {
                 Log.d(TAG, "getNotice: 공지 조회 실패")
             }

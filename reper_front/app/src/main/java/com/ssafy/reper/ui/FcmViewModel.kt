@@ -23,10 +23,10 @@ class FcmViewModel:ViewModel() {
     }
 
 
-    fun sendToUserFCM(userId:Int, title: String, content:String){
+    fun sendToUserFCM(userId: Int, title: String, content: String, targetFragment: String, requestId: Int){
         viewModelScope.launch{
             runCatching {
-                RetrofitUtil.fcmService.sendToUser(userId,title,content)
+                RetrofitUtil.fcmService.sendToUser(userId, title, content, targetFragment, requestId)
                 Log.d(TAG, "sendToUserFCM: 함수실행중")
             }.onSuccess {
                 Log.d(TAG, "sendToUserFCM: ${title}")
@@ -36,17 +36,18 @@ class FcmViewModel:ViewModel() {
         }
     }
 
-    fun sendToStoreFCM(storeId:Int, tile: String, content:String){
+    fun sendToStoreFCM(storeId: Int, title: String, content: String, targetFragment: String, requestId: Int) {
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.fcmService.sendToStore(storeId,tile,content)
+                RetrofitUtil.fcmService.sendToStore(storeId, title, content, targetFragment, requestId)
             }.onSuccess {
-                Log.d(TAG, "sendToStoreFCM: ${tile}")
+                Log.d(TAG, "sendToStoreFCM: ${title}")
             }.onFailure {
                 Log.d(TAG, "sendToStoreFCM: ${it.message}")
             }
         }
     }
+
 
 
 
