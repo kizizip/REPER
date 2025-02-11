@@ -132,7 +132,7 @@ public class StoreService {
 
         Pageable pageable = PageRequest.of(0, 1000);
 
-        return storeSearchRepository.findByStoreNameContaining(keyword, pageable);
+        return storeSearchRepository.findByStoreName(keyword, pageable);
     }
 
     // Elasticsearch 매장 이름 검색 더미 데이터 test용 로직

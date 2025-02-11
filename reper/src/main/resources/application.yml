@@ -25,6 +25,15 @@ spring:
     password: ""
     ssl:
       enabled: false
+    repositories:
+      enabled: true
+#    username: elastic
+#    password: ${ELASTIC_PASSWORD}
+#    index:
+#      auto-create-index: false
+#      ca-certificate: classpath:docker/certs/ca.crt
+#      key: classpath:certs/elasticsearch.key
+#      certificate: classpath:certs/elasticsearch.crt
 
 logging.level:
   org.hibernate.SQL: debug # (개발 환경) SQL 로그 출력
