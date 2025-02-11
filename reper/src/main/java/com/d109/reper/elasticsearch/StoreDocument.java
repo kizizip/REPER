@@ -15,9 +15,9 @@ public class StoreDocument {
     private Long storeId;
 
     @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_analyzer"),
+            mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_analyzer"),  // 기본 형태소 분석기
             otherFields = {
-                    @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "nori_edge_ngram_analyzer", searchAnalyzer = "nori_edge_ngram_analyzer")
+                    @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "nori_edge_ngram_analyzer", searchAnalyzer = "nori_edge_ngram_analyzer")  // 초성 검색용
             }
     )
     private String storeName;
