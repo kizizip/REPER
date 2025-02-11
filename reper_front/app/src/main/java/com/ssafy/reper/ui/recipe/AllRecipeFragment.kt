@@ -31,6 +31,7 @@ import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.replace
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -66,6 +67,7 @@ class AllRecipeFragment : Fragment() {
 
     var category : MutableList<String> = mutableListOf()
 
+    private val lottieViewModel : LottieViewModel by activityViewModels()
     private val viewModel: RecipeViewModel by viewModels()
 
     // 레시피 리스트 recyclerView Adapter
@@ -253,7 +255,8 @@ class AllRecipeFragment : Fragment() {
 
                         viewModel.getRecipe(ice)
                         viewModel.recipe.observe(viewLifecycleOwner){
-                            preloadLottieAnimations(it.recipeSteps)
+                            // 미리 필요한 로티이미지를 로드해놓음
+                            lottieViewModel.preloadLottieAnimations(requireContext(), it.recipeSteps)
                         }
                         viewModel.getRecipe(hot)
 
@@ -375,18 +378,6 @@ class AllRecipeFragment : Fragment() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
-    }
-    private val lottieCache = mutableMapOf<String, LottieComposition?>()
-    // 미리 로티이미지를 로드
-    fun preloadLottieAnimations(recipeSteps: MutableList<RecipeStep>) {
-        for (step in recipeSteps) {
-            val animationUrl = step.animationUrl
-            if (lottieCache.containsKey(animationUrl)) continue // 이미 로드된 애니메이션은 건너뛰기
-
-            LottieCompositionFactory.fromUrl(context, animationUrl).addListener { composition ->
-                lottieCache[animationUrl] = composition // 미리 로드해서 저장
-            }
         }
     }
 

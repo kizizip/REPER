@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -19,11 +20,13 @@ import com.ssafy.reper.ui.mypage.MyPageFragment
 import com.ssafy.reper.ui.order.OrderFragment
 import com.ssafy.reper.ui.recipe.AllRecipeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.ssafy.reper.ui.recipe.LottieViewModel
 import kotlinx.coroutines.flow.count
 
 private const val TAG = "MainActivity_싸피"
 
 class MainActivity : AppCompatActivity() {
+    val lottieViewModel : LottieViewModel by viewModels()
 
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장

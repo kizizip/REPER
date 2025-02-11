@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.databinding.FragmentStepRecipeBinding
@@ -23,6 +24,7 @@ class StepRecipeFragment : Fragment() {
     // 1. AllRecipe에서 넘어오면 세로만 가능하게 한다.
     // 2. OrderRecipe에서 넘어모녀
 
+    private val lottieViewModel : LottieViewModel by activityViewModels()
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val viewModel: RecipeViewModel by viewModels()
 
@@ -227,7 +229,15 @@ class StepRecipeFragment : Fragment() {
 
         // 로티
         stepRecipeBinding.lottieAnimationView.visibility = View.VISIBLE
-        stepRecipeBinding.lottieAnimationView.setAnimationFromUrl(recipeSteps.get(stepIdx)?.animationUrl)
+//        stepRecipeBinding.lottieAnimationView.setAnimationFromUrl(recipeSteps.get(stepIdx)?.animationUrl)
+        // 캐싱된 LottieComposition이 있으면 즉시 적용
+        lottieViewModel.lottieCache.observe(viewLifecycleOwner) { cache ->
+            if (cache.containsKey(animationUrl)) {
+                stepRecipeBinding.lottieAnimationView.setComposition(cache[animationUrl]!!)
+            } else {
+                stepRecipeBinding.lottieAnimationView.setAnimationFromUrl(animationUrl)
+            }
+        }
         // 레시피
         stepRecipeBinding.steprecipeFmTvIngredient?.visibility = View.VISIBLE
         stepRecipeBinding.steprecipeFmTvIngredient?.text = recipeSteps?.get(stepIdx)?.instruction
