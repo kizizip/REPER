@@ -62,6 +62,10 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setCompleted(false);
 
+        // takeout 여부를 랜덤으로 설정
+        boolean isTakeout = new Random().nextBoolean();
+        order.setTakeout(isTakeout);
+
         List<Recipe> recipes = recipeRepository.findAllRecipes();
         if (recipes.isEmpty()) {
             throw new IllegalStateException("No recipes available");
