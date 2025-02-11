@@ -4,6 +4,10 @@ FROM openjdk:17-jdk-slim
 # DB Dependencies 설정 (mariadb와 mysql-client은 같은것...)
 RUN apt-get update && apt-get install -y mariadb-client && rm -rf /var/lib/apt/lists/*
 
+#만들면 생기려나
+RUN mkdir -p /app/config
+
+
 # gradle 빌드를 하면 build/libs 하위에 *.jar 생성됨. 해당 '*.jar'를 'app.jar'로 copy
 ARG JAR_FILE_PATH=build/libs/*.jar
 COPY ${JAR_FILE_PATH} app.jar
