@@ -26,7 +26,7 @@ spring:
     ssl:
       enabled: false
     repositories:
-      enabled: true
+      enabled: false
 #    username: elastic
 #    password: ${ELASTIC_PASSWORD}
 #    index:
@@ -45,5 +45,4 @@ kakao:
   client_id: 11a435ceceba6f2724e9f7b1b9b69f5b
   redirect_uri: http://i12d109.p.ssafy.io:13790/api/auth/callback
 
-firebase:
-  config-path: /app/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json
+
