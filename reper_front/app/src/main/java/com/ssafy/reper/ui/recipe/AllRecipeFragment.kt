@@ -257,20 +257,22 @@ class AllRecipeFragment : Fragment() {
                             }
                             dialog.show()
                         } else if (ice != -1){
+                            Log.d(TAG, "ice")
                             mainViewModel.getSelectedRecipes(mutableListOf(ice))
                         }
                         else if (hot != -1){
-                            mainViewModel.getSelectedRecipes( mutableListOf(hot))
+                            Log.d(TAG, "hot")
+                            mainViewModel.getSelectedRecipes(mutableListOf(hot))
                         }
                         mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
-                            if(ice !=-1 && hot != -1){
-                                Log.d(TAG, "why? ${ice} / ${hot}")
-                            }else{
-                                Log.d(TAG, "else? ${ice} / ${hot}")
+                            if(ice == -1 || hot == -1){
+                                Log.d(TAG, "else? ${ice} / ${hot} ${it}")
                                 // 클릭 이벤트 -> 어디서 왔는지 전달
                                 val bundle = Bundle().apply {
                                     putInt("whereAmICame", 1)
                                 }
+                                mainViewModel.setNowISeeRecipe(0)
+                                mainViewModel.setNowISeeStep(-1)
                                 findNavController().navigate(R.id.stepRecipeFragment, bundle)
                             }
                         }

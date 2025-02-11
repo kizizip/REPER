@@ -91,8 +91,7 @@ class StepRecipeFragment : Fragment() {
             mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
         }
         else if(whereAmICame == 2) { // OrderRecipeFragment에서 옴
-            mainActivity.requestedOrientation =
-            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // 화면 회전 잠금 해제
+            mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // 화면 회전 잠금 해제
             order = mainViewModel.order.value!!
             orderDetails = order.orderDetails
         }
@@ -214,14 +213,15 @@ class StepRecipeFragment : Fragment() {
         stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.VISIBLE
 
         mainViewModel.setNowISeeStep(nowStepIdx + 1)
-//        Log.d(TAG, "다음을 눌렀습니다. Recipe: ${mainViewModel.nowISeeRecipe.value}, Step: ${mainViewModel.nowISeeStep.value}")
+        Log.d(TAG, "다음을 눌렀습니다. ${nowRecipeIdx}/${totalRecipes}, ${nowStepIdx}/${totalSteps}")
         when {
             // 다음 스텝이 존재하는 경우 → 다음 스텝으로 이동
-            nowStepIdx < totalSteps - 1-> {
+            nowStepIdx < totalSteps - 1 -> {
                 showOneStepRecipe(nowStepIdx)
             }
 
-            nowStepIdx >= totalSteps && nowRecipeIdx < totalRecipes - 1-> {
+            nowStepIdx >= totalSteps - 1 && nowRecipeIdx < totalRecipes - 1-> {
+                Log.d(TAG, "다음 레시피 보여주기!")
                 mainViewModel.setNowISeeRecipe(nowRecipeIdx + 1)
                 mainViewModel.setRecipeSteps(nowRecipeIdx)
                 mainViewModel.setNowISeeStep(-1)
@@ -230,7 +230,7 @@ class StepRecipeFragment : Fragment() {
 
             // 마지막 레시피의 마지막 스텝인 경우 → 버튼 비활성화
             else -> {
-//                Log.d(TAG, "마지막 레시피의 마지막 스텝 도달")
+                Log.d(TAG, "마지막 레시피의 마지막 스텝 도달")
                 showOneStepRecipe(nowStepIdx)
                 stepRecipeBinding.steprecipeFmBtnRight.visibility = View.GONE
             }

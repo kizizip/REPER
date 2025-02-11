@@ -30,13 +30,14 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
             try {
                 for(id in recipeIdList){
                     list.add(recipeService.getRecipe(id))
+                    Log.d(TAG, "getSelectedRecipes: $id ${list.first()}")
                 }
             }
             catch (e:Exception){
                 Log.d(TAG, "error: ${e}")
                 list = mutableListOf()
             }
-            _selectedRecipeList.value = list
+            _selectedRecipeList.postValue(list)
             setNowISeeRecipe(0)
             setNowISeeStep(-1)
         }
