@@ -9,7 +9,7 @@ services:
 #      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/instance/instance.key
 #      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/instance/instance.crt
 #      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca.crt
-      - ES_JAVA_OPTS=-Xms512m -Xmx15g
+      - ES_JAVA_OPTS=-Xms4g -Xmx4g
 #      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
 #    env_file:
 #      - .env
@@ -22,6 +22,12 @@ services:
 #      - ./logs:/usr/share/elasticsearch/logs
     networks:
       - elastic_network
+    command: >
+      bash -c "
+      if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
+        elasticsearch-plugin install analysis-nori --batch;
+      fi;
+      /usr/local/bin/docker-entrypoint.sh eswrapper"
 
 networks:
   elastic_network:

@@ -5,9 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 
 import java.util.List;
 
@@ -15,6 +13,7 @@ import java.util.List;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Document(indexName = "recipes")
+@Setting(settingPath = "recipes-index-settings.json")
 public class RecipeDocument {
 
     @Id
@@ -23,7 +22,13 @@ public class RecipeDocument {
     @Field(type = FieldType.Long)
     private Long storeId;
 
-    @Field(type = FieldType.Text) // analyzer = "nori", searchAnalyzer = "nori" nori tokenizer 임시 주석처리
+//    @Field(type = FieldType.Text, analyzer = "nori_edge_ngram_analyzer", searchAnalyzer = "nori_edge_ngram_analyzer")
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_analyzer"),  // 기본 형태소 분석기
+            otherFields = {
+                    @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "nori_edge_ngram_analyzer", searchAnalyzer = "nori_edge_ngram_analyzer")  // 초성 검색용
+            }
+    )
     private String recipeName;
 
     @Field(type = FieldType.Keyword)
@@ -38,7 +43,7 @@ public class RecipeDocument {
     @Transient
     private Boolean likedRecipe;
 
-    @Field(type = FieldType.Text) // analyzer = "nori", searchAnalyzer = "nori" nori tokenizer 임시 주석처리
+    @Field(type = FieldType.Text)
     private List<String> ingredients;
 
 }
