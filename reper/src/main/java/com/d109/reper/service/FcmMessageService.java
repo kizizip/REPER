@@ -24,7 +24,6 @@ import java.util.List;
 public class FcmMessageService {
 
     private final String FCM_API_URL = "https://fcm.googleapis.com/v1/projects/reper-7e5b4/messages:send";
-    private final String FIREBASE_JSON = System.getenv("FIREBASE_JSON");
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -34,12 +33,13 @@ public class FcmMessageService {
     // 서비스 계정으로부터 액세스 토큰을 얻어오기 위한 초기화 작업
     public void initialize() {
         try {
-            if (FIREBASE_JSON == null || FIREBASE_JSON.isEmpty()) {
-                throw new IllegalStateException("환경 변수 FIREBASE_JSON 설정되지 않았습니다.");
+            String firebaseJsonBase64 = System.getenv("FIREBASE_JSON");
+            if (firebaseJsonBase64 == null || firebaseJsonBase64.isEmpty()) {
+                throw new IllegalStateException("❌ 환경 변수 FIREBASE_JSON_BASE64가 설정되지 않았습니다.");
             }
 
             // 🔥 Base64 디코딩 추가
-            byte[] decodedJson = Base64.getDecoder().decode(FIREBASE_JSON);
+            byte[] decodedJson = Base64.getDecoder().decode(firebaseJsonBase64);
 
             GoogleCredentials credentials = GoogleCredentials.fromStream(
                             new ByteArrayInputStream(decodedJson))
