@@ -19,6 +19,7 @@ import android.graphics.drawable.GradientDrawable
 import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import com.ssafy.reper.data.dto.JoinRequest
 import com.ssafy.reper.data.dto.RequestStore
 import android.view.animation.AnimationUtils
@@ -38,7 +39,6 @@ class JoinFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
     }
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,6 +65,34 @@ class JoinFragment : Fragment() {
 
         // 순차적으로 애니메이션 실행
         startSequentialAnimation()
+
+        // 소셜로그인으로 회원가입시
+        val socialEmail = arguments?.getString("email")
+        val socialNickname = arguments?.getString("nickname")
+
+        if (socialEmail != null && socialNickname != null) {
+            // 이메일과 닉네임 설정
+            binding.FragmentJoinEmailInput.apply {
+                setText(socialEmail)
+                setTextColor(Color.BLACK)  // 텍스트 색상을 검은색으로 설정
+            }
+            binding.FragmentJoinNameInput.apply {
+                setText(socialNickname)
+                setTextColor(Color.BLACK)  // 텍스트 색상을 검은색으로 설정
+            }
+
+            // 이메일과 이름 입력 필드를 수정 불가능하게 설정
+            binding.FragmentJoinEmailInput.isEnabled = false
+            binding.FragmentJoinNameInput.isEnabled = false
+
+            // 이메일 중복 확인 버튼 비활성화
+            binding.FragmentJoinEmailCheckButton.isEnabled = false
+            binding.FragmentJoinEmailCheckButton.alpha = 0.5f
+
+            // 이메일과 이름 에러 상태 해제
+            isEmailError = false
+            isNameError = false
+        }
 
         // 이메일 중복 체크
         binding.FragmentJoinEmailCheckButton.setOnClickListener {
@@ -111,7 +139,7 @@ class JoinFragment : Fragment() {
         // 비밀번호 
         binding.FragmentJoinPasswordInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
@@ -164,12 +192,12 @@ class JoinFragment : Fragment() {
         // 이름
         binding.FragmentJoinNameInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
                 val name = s.toString()
-                
+
                 // 이름 입력 칸이 빈칸이 아니고, 입력 패턴에 맞지 않는다면 작동
                 if (name.isEmpty()) {
                     binding.FragmentJoinNameText.setTextColor(Color.parseColor("#F26547"))
@@ -245,7 +273,7 @@ class JoinFragment : Fragment() {
                             setColor(Color.WHITE)
                         }
                     }
-                }   
+                }
             }
         })
 
@@ -276,7 +304,7 @@ class JoinFragment : Fragment() {
                     showStoreInfoWithAnimation()
                 } else {
                     hideStoreInfoWithAnimation()
-                }   
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -290,7 +318,7 @@ class JoinFragment : Fragment() {
             // 회원가입 로직
             if (isEmailError || isPasswordError || isNameError || isPhoneError) {
                 Toast.makeText(requireContext(), "입력하신 내용을 다시 확인해주세요.", Toast.LENGTH_SHORT).show()
-                if(isEmailError) {
+                if (isEmailError) {
                     binding.FragmentJoinEmailText.setTextColor(Color.parseColor("#F26547"))
                     binding.FragmentJoinEmailInput.apply {
                         setHintTextColor(Color.parseColor("#F26547"))
@@ -333,7 +361,7 @@ class JoinFragment : Fragment() {
                             setColor(Color.WHITE)
                         }
                     }
-                }   
+                }
 
                 return@setOnClickListener
             } else {
@@ -342,7 +370,8 @@ class JoinFragment : Fragment() {
                 val email = binding.FragmentJoinEmailInput.text.toString()
                 val password = binding.FragmentJoinPasswordInput.text.toString()
                 val phone = binding.FragmentJoinPhoneInput.text.toString()
-                val role = if(binding.FragmentJoinSpinnerUserType.selectedItem.toString() == "사장님") "OWNER" else "STAFF"
+                val role =
+                    if (binding.FragmentJoinSpinnerUserType.selectedItem.toString() == "사장님") "OWNER" else "STAFF"
 
                 lifecycleScope.launch {
                     try {
@@ -352,7 +381,8 @@ class JoinFragment : Fragment() {
                             password = password,
                             userName = username,
                             // 앞 3글자 뒤와 맨 뒤에서 4번째 글자에 하이픈(-)을 추가
-                            phone = StringBuilder(phone).insert(3, "-").insert(phone.length - 3, "-").toString(),
+                            phone = StringBuilder(phone).insert(3, "-")
+                                .insert(phone.length - 3, "-").toString(),
                             role = role,
                         )
                         val response = RetrofitUtil.authService.join(joinRequest)
@@ -369,14 +399,15 @@ class JoinFragment : Fragment() {
 
                         // LoginFragment로 이동
                         parentFragmentManager.beginTransaction()
-                        .replace(R.id.activityLoginFragmentContainer, LoginFragment())
-                        .commit()
+                            .replace(R.id.activityLoginFragmentContainer, LoginFragment())
+                            .commit()
 
 
-                    } catch (e: Exception) {    
-                        Toast.makeText(requireContext(), "회원가입 실패 잠시후 재시도해 주세요", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "회원가입 실패 잠시후 재시도해 주세요", Toast.LENGTH_SHORT)
+                            .show()
                     }
-                }   
+                }
             }
         }
     }
@@ -385,7 +416,7 @@ class JoinFragment : Fragment() {
 
         val color = if (isError) "#F26547" else "#000000"
         val hintColor = if (isError) "#F26547" else "#C7C7C7"
-        
+
         binding.FragmentJoinEmailText.setTextColor(Color.parseColor(color))
         binding.FragmentJoinEmailInput.apply {
             if (isError) {
@@ -399,7 +430,7 @@ class JoinFragment : Fragment() {
                 setColor(Color.WHITE)
             }
         }
-        
+
         if (!isError) {
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         }
@@ -420,7 +451,7 @@ class JoinFragment : Fragment() {
         val fadeSlideUp5 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
         val fadeSlideUpText = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
         val fadeSlideUpBtn = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
-        
+
         // 타이틀 애니메이션
         binding.fragmentJoinTitle.postDelayed({
             binding.fragmentJoinTitle.alpha = 1f
@@ -474,7 +505,7 @@ class JoinFragment : Fragment() {
     private fun showStoreInfoWithAnimation() {
         binding.FragmentJoinStoreInfo.visibility = View.VISIBLE
         binding.FragmentJoinStoreInfo.alpha = 0f
-        
+
         val fadeSlideUp = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
         binding.FragmentJoinStoreInfo.startAnimation(fadeSlideUp)
         binding.FragmentJoinStoreInfo.animate()
@@ -487,7 +518,7 @@ class JoinFragment : Fragment() {
     private fun hideStoreInfoWithAnimation() {
         val fadeSlideDown = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_down)
         binding.FragmentJoinStoreInfo.startAnimation(fadeSlideDown)
-        
+
         binding.FragmentJoinStoreInfo.animate()
             .alpha(0f)
             .setDuration(500)

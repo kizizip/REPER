@@ -1,5 +1,6 @@
-//package com.ssafy.smartstore_jetpack.base
+//package com.ssafy.reper.base
 //
+//import com.ssafy.reper.ApplicationClass
 //import okhttp3.Interceptor
 //import okhttp3.Request
 //import okhttp3.Response

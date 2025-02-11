@@ -1,7 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+
+    id("com.google.gms.google-services")
 }
+
 
 android {
     namespace = "com.ssafy.reper"
@@ -109,5 +112,13 @@ dependencies {
 
     implementation ("com.kakao.sdk:v2-all:2.20.0") // 전체 모듈 설치, 2.11.0 버전부터 지원
 
+
+    // Firebase 라이브러리
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation ("com.google.firebase:firebase-auth-ktx")
+
+    // Google Play Services
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
 }

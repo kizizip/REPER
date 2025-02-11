@@ -257,6 +257,7 @@ class MyPageFragment : Fragment() {
                 val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
                 sharedPreferencesUtil.saveUserCookie("")
                 sharedPreferencesUtil.addUser(UserInfo("", 0, ""))
+                sharedPreferencesUtil.clearUserData()
 
                 Toast.makeText(requireContext(), "로그아웃 완료.", Toast.LENGTH_SHORT).show()
 

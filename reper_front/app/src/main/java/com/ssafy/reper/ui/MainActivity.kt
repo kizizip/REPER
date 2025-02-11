@@ -1,7 +1,10 @@
 package com.ssafy.reper.ui
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -14,11 +17,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.ActivityMainBinding
+import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.ui.home.HomeFragment
 import com.ssafy.reper.ui.mypage.MyPageFragment
 import com.ssafy.reper.ui.order.OrderFragment
 import com.ssafy.reper.ui.recipe.AllRecipeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.ssafy.reper.ui.login.LoginActivity
 import kotlinx.coroutines.flow.count
 
 private const val TAG = "MainActivity_싸피"
@@ -27,6 +32,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장
+    private lateinit var handler: Handler
+    private lateinit var sessionCheckRunnable: Runnable
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -45,7 +52,32 @@ class MainActivity : AppCompatActivity() {
             binding.activityMainBottomMenu.setupWithNavController(it)
         }
 
+        // 세션 체크 설정
+        setupSessionCheck()
+    }
 
+    private fun setupSessionCheck() {
+        handler = Handler(Looper.getMainLooper())
+        sessionCheckRunnable = Runnable {
+            checkSession()
+            handler.postDelayed(sessionCheckRunnable, 60000) // 1분마다 체크
+        }
+        handler.post(sessionCheckRunnable)
+    }
+
+    private fun checkSession() {
+        val sharedPreferencesUtil = SharedPreferencesUtil(this)
+        if (!sharedPreferencesUtil.isSessionValid()) {
+            // 세션 만료시 처리
+            sharedPreferencesUtil.clearUserData()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(sessionCheckRunnable)
     }
 
     fun hideBottomNavigation() {
