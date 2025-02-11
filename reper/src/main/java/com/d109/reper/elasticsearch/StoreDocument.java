@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.annotations.*;
 
 @Getter
 @Setter
-@Document(indexName = "stores_index")
+@Document(indexName = "stores")
 @Setting(settingPath = "recipes-index-settings.json")
 public class StoreDocument {
 
