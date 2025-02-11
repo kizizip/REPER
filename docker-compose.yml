@@ -31,6 +31,12 @@ services:
       - elasticsearch_logs:/elasticsearch/logs:rw
     networks:
       - elastic_network
+    command: >
+      bash -c "
+      if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
+        elasticsearch-plugin install analysis-nori --batch;
+      fi;
+      /usr/local/bin/docker-entrypoint.sh eswrapper"
 
   app:
     image: reper-server
