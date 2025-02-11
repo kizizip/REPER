@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,8 +38,11 @@ public class FcmMessageService {
                 throw new IllegalStateException("환경 변수 FIREBASE_JSON 설정되지 않았습니다.");
             }
 
+            // 🔥 Base64 디코딩 추가
+            byte[] decodedJson = Base64.getDecoder().decode(FIREBASE_JSON);
+
             GoogleCredentials credentials = GoogleCredentials.fromStream(
-                            new ByteArrayInputStream(FIREBASE_JSON.getBytes()))
+                            new ByteArrayInputStream(decodedJson))
                     .createScoped(Collections.singletonList("https://www.googleapis.com/auth/firebase.messaging"));
             AccessToken token = credentials.refreshAccessToken();
             oauth2AccessToken = token.getTokenValue();
