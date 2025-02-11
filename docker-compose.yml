@@ -56,7 +56,7 @@ services:
       - mysql
     volumes:
       - app_logs:/app/logs
-      - /run/jenkins-data/secrets/firebase_json:/app/config/firebase.json  # Firebase JSON을 시크릿으로 마운트
+      - /run/secrets/firebase_json:/app/config/firebase.json  # Firebase JSON을 시크릿으로 마운트
     networks:
       - app-network
   
