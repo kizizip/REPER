@@ -1,7 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.gms.google-services")
+
 }
+
 
 android {
     namespace = "com.ssafy.reper"
@@ -46,6 +49,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.work.runtime.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -106,4 +110,21 @@ dependencies {
     //jet pack navi
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
+
+    implementation ("com.kakao.sdk:v2-all:2.20.0")  // 전체 모듈 설치, 2.11.0 버전부터 지원
+
+
+    //fcm관련
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation("com.google.firebase:firebase-analytics:21.0.0")
+    implementation ("com.google.firebase:firebase-messaging-ktx:23.4.1")
+
+    // Firebase 라이브러리
+    // implementation("com.google.firebase:firebase-analytics") // implementation("com.google.firebase:firebase-analytics:21.0.0")
+    implementation("com.google.firebase:firebase-auth")
+    implementation ("com.google.firebase:firebase-auth-ktx")
+
+    // Google Play Services
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+
 }

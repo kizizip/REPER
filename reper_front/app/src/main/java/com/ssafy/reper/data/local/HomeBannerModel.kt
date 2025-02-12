@@ -6,4 +6,3 @@ data class HomeBannerModel (
         val homeBannerButtonText: String,
         val homeBannerButtonTextColor: Int
 )
-

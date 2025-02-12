@@ -16,6 +16,7 @@
     <color name="fontblack">#101A24</color>
     <color name="darkgray">#626262</color>
     <color name="lightgray">#C4C4C4</color>
+    <color name="morelightgray">#EBEBEB</color>
     <color name="banner_red">#ED3E3E</color>
     <color name="banner_green">#156651</color>
 </resources>
