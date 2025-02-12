@@ -22,15 +22,29 @@ import com.google.gson.Gson
 import com.ssafy.reper.data.dto.ErrorResponse
 import android.graphics.drawable.GradientDrawable
 import android.widget.EditText
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat.startActivity
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.util.Utility
 import com.kakao.sdk.user.UserApiClient
 import com.kakao.sdk.user.model.User
 import com.ssafy.reper.data.dto.JoinRequest
 import com.ssafy.reper.data.dto.KakaoLoginRequest
+import com.ssafy.reper.data.dto.UserInfo
+import com.ssafy.reper.data.local.SharedPreferencesUtil
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import android.view.animation.AnimationUtils
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.ktx.auth
 
 private const val TAG = "LoginFragment_레퍼"
 
@@ -38,6 +52,15 @@ class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
+
+    // Firebase 인증 객체 선언
+    private lateinit var auth: FirebaseAuth
+
+    // Google 로그인 클라이언트 선언
+    private lateinit var googleSignInClient: GoogleSignInClient
+
+    // Google 로그인 요청 코드 (onActivityResult에서 요청을 구분하기 위함)
+    private val RC_SIGN_IN = 9001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +78,27 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Firebase Auth 객체 초기화
+        auth = Firebase.auth
+
+        // Google 로그인 옵션 설정
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id)) // Google OAuth 2.0 클라이언트 ID 요청
+            .requestEmail() // 사용자 이메일 요청
+            .build()
+
+        // Google 로그인 클라이언트 초기화
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+
+        // 초기에 모든 레이아웃을 숨김
+        binding.fragmentLoginLinearLayout1.alpha = 0f
+        binding.fragmentLoginLinearLayout2.alpha = 0f
+        binding.fragmentLoginLinearLayout3.alpha = 0f
+        binding.fragmentLoginLinearLayout4.alpha = 0f
+
+        // 순차적으로 애니메이션 실행
+        startSequentialAnimation()
+
         var keyHash = Utility.getKeyHash(requireContext())
         Log.i("kjwTest", "keyHash: $keyHash")
 
@@ -64,8 +108,10 @@ class LoginFragment : Fragment() {
         loginBtn.setOnClickListener {
 
             // 로그인 요청 호출
-            login(binding.fragmentLoginEamilInput.text.toString(),
-                binding.fragmentLoginPasswordInput.text.toString())
+            login(
+                binding.fragmentLoginEamilInput.text.toString(),
+                binding.fragmentLoginPasswordInput.text.toString()
+            )
 
         }
 
@@ -74,7 +120,10 @@ class LoginFragment : Fragment() {
         joinText.setOnClickListener {
             // JoinFragment로 이동
             parentFragmentManager.beginTransaction()
-                .replace(R.id.activityLoginFragmentContainer, JoinFragment()) // container ID와 새로운 fragment를 설정
+                .replace(
+                    R.id.activityLoginFragmentContainer,
+                    JoinFragment()
+                ) // container ID와 새로운 fragment를 설정
                 .addToBackStack(null) // BackStack에 추가 (뒤로가기 시 이전 Fragment로 돌아갈 수 있음)
                 .commit()
         }
@@ -84,8 +133,45 @@ class LoginFragment : Fragment() {
             // 카카오 로그인 요청 호출
             loginWithKakao()
         }
+
+        // 소셜 로그인(구글)
+        binding.fragmentLoginGoogleLoginIcon.setOnClickListener {
+            // 구글 로그인 요청 호출
+            loginWithGoogle()
+        }
     }
 
+    private fun startSequentialAnimation() {
+        // 각 레이아웃별로 새로운 애니메이션 인스턴스 생성
+        val fadeSlideUp1 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp2 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp3 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        val fadeSlideUp4 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+
+        // 첫 번째 레이아웃 애니메이션
+        binding.fragmentLoginLinearLayout1.postDelayed({
+            binding.fragmentLoginLinearLayout1.alpha = 1f
+            binding.fragmentLoginLinearLayout1.startAnimation(fadeSlideUp1)
+        }, 200)
+
+        // 두 번째 레이아웃 애니메이션
+        binding.fragmentLoginLinearLayout2.postDelayed({
+            binding.fragmentLoginLinearLayout2.alpha = 1f
+            binding.fragmentLoginLinearLayout2.startAnimation(fadeSlideUp2)
+        }, 500)  // 간격 축소: 700 -> 500
+
+        // 세 번째 레이아웃 애니메이션
+        binding.fragmentLoginLinearLayout3.postDelayed({
+            binding.fragmentLoginLinearLayout3.alpha = 1f
+            binding.fragmentLoginLinearLayout3.startAnimation(fadeSlideUp3)
+        }, 800)  // 간격 축소: 1200 -> 800
+
+        // 네 번째 레이아웃 애니메이션
+        binding.fragmentLoginLinearLayout4.postDelayed({
+            binding.fragmentLoginLinearLayout4.alpha = 1f
+            binding.fragmentLoginLinearLayout4.startAnimation(fadeSlideUp4)
+        }, 1100)  // 간격 축소: 1700 -> 1100
+    }
 
     //로그인 수행
     private fun loginWithKakao() {
@@ -134,24 +220,75 @@ class LoginFragment : Fragment() {
 
                 if (!isEmailDuplicate) {
                     // 중복이 아닐 경우 회원가입 진행
-                    val userDto = JoinRequest(
-                        email = email,
-                        userName = nickname,
-                        password = "", //비밀번호는 카카오 관할이므로 DB상 공란 (혹시 모르니 로그인화면 비밀번호 공란 방지 처리 부탁합니다)
-                        phone = "", //카카오 api로는 못 받아오므로, 기본값 설정
-                        role = "STAFF" // 기본값 설정
-                    )
 
-                    val isInserted = RetrofitUtil.authService.join(userDto)
+                    // 회원가입창으로 이동
+                    val bundle = Bundle().apply {
+                        putString("email", email)
+                        putString("nickname", nickname)
+                    }
+                    val joinFragment = JoinFragment().apply {
+                        arguments = bundle
+                    }
+                    parentFragmentManager.beginTransaction()
+                        .replace(
+                            R.id.activityLoginFragmentContainer,
+                            joinFragment
+                        )
+                        .addToBackStack(null)
+                        .commit()
 
                 } else {
-                    // 중복일 경우 로그인 처리
-                    val request = KakaoLoginRequest(accessToken, email, nickname)
-                    Log.d(TAG, "카카오 로그인 요청: $request")
-                    val response = RetrofitUtil.kakaoService.kakaoLogin(request)
-                    Log.d(TAG, "로그인 성공: ${response.message}")
-                    //프론트 여러분, 여기까지 하면 로그에는 null이라고 찍힐 겁니다... 그건 제가 해결을 못 했습니다 죄송
-                    //하지만 email, nickname은 잘 불러옵니다... 이거면 충분하지 않나요?
+                    try {
+                        // 중복일 경우 로그인 처리
+                        val request = KakaoLoginRequest(accessToken)
+                        Log.d(TAG, "카카오 로그인 요청: $request")
+                        val response = RetrofitUtil.kakaoService.kakaoLogin(request)
+                        Log.d(TAG, "로그인 성공: ${response}")
+
+                        // SharedPreferences에 사용자 정보 저장
+                        val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
+
+                        // null 체크 후 사용자 정보 저장
+                        val userInfo = UserInfo(
+                            userId = response.userId ?: -1L,  // null일 경우 -1L을 기본값으로 사용
+                            username = response.userName ?: "",  // null일 경우 빈 문자열 사용
+                            role = response.role ?: ""  // null일 경우 빈 문자열 사용
+                        )
+                        sharedPreferencesUtil.addUser(userInfo)
+
+                        // 저장된 정보 확인을 위한 로그
+                        val savedUser = sharedPreferencesUtil.getUser()
+                        Log.d(
+                            TAG,
+                            "저장된 사용자 정보 - userId: ${savedUser.userId}, username: ${savedUser.username}, role: ${savedUser.role}"
+                        )
+
+                        // 메인 화면으로 이동
+                        navigateToMainActivity()
+
+
+                    } catch (e: HttpException) {
+                        val errorBody = e.response()?.errorBody()?.string()
+                        Log.e(TAG, "카카오 로그인 실패 - 상태 코드: ${e.code()}")
+                        Log.e(TAG, "에러 응답: $errorBody")
+
+                        val errorMessage = when (e.code()) {
+                            400 -> "잘못된 요청입니다"
+                            401 -> "인증에 실패했습니다"
+                            404 -> "서비스를 찾을 수 없습니다"
+                            500 -> "서버 내부 오류가 발생했습니다"
+                            else -> "카카오 로그인에 실패했습니다"
+                        }
+
+                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "카카오 로그인 중 오류 발생: ${e.message}")
+                        Toast.makeText(
+                            requireContext(),
+                            "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
 
             } catch (e: Exception) {
@@ -174,14 +311,74 @@ class LoginFragment : Fragment() {
                 }
             }
         }
-
     }
 
+
+    private fun loginWithGoogle() {
+        val signInIntent = googleSignInClient.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN) // Google 로그인 화면 실행행
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RC_SIGN_IN) {
+            // Google 로그인 결과 가져오기
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                // 로그인 성공시 Google 계정에서 ID 토큰 가져오기
+                val account = task.getResult(ApiException::class.java)
+                firebaseAuthWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                // 로그인 실패 시 오류 메시지를 표시
+                Toast.makeText(requireContext(), "구글 로그인 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // Google 로그인 성공 후 Firebase 인증 처리
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        // Google  자격 증명 객체 생성
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+
+        // Firebase Auth 인증 시도
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(requireActivity()) { task ->
+                if (task.isSuccessful) {
+                    // 인증 성공 시 Firebase 사용자 객체 가져오기
+                    val user = auth.currentUser
+                    updateUI(user) // UI 업데이트
+                } else {
+                    // 인증 실패 시 오류 메시지 표시
+                    Toast.makeText(requireContext(), "Firebase 인증 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+    // 로그인 성공 시 UI 업데이트 및 JoinFragment로 이동
+    private fun updateUI(user: FirebaseUser?) {
+        if (user != null) {
+
+            // 회원가입창으로 이동
+            val bundle = Bundle().apply {
+                putString("email", user.email)
+                putString("nickname", user.displayName)
+            }
+            val joinFragment = JoinFragment().apply {
+                arguments = bundle
+            }
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.activityLoginFragmentContainer, joinFragment)
+                .addToBackStack(null)
+                .commit()
+        } else {
+            Toast.makeText(requireContext(), "Firebase 인증 실패", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private fun Int.dpToPx(context: Context): Int {
         return (this * context.resources.displayMetrics.density).toInt()
     }
-
 
     /**
      * 입력 필드의 시각적 상태를 업데이트하는 함수
@@ -203,7 +400,7 @@ class LoginFragment : Fragment() {
             isError || isEmpty -> "#F26547"  // 에러 상태나 빈 필드일 때 빨간색
             else -> "#000000"  // 정상 상태일 때 검정색
         }
-        
+
         // EditText 스타일 적용
         inputField.apply {
             setHintTextColor(Color.parseColor(color))
@@ -235,23 +432,32 @@ class LoginFragment : Fragment() {
         val loginRequest = LoginRequest(email, password)
         val response = RetrofitUtil.authService.login(loginRequest)
 
-        // loginIdCookie가 null이 아니고 비어있지 않을 때만 처리
-        response.loginIdCookie?.let { cookie ->
-            if (cookie.isNotEmpty()) {
-                saveLoginCookie(cookie)
-                navigateToMainActivity()
-            }
-        }
-    }
+        // SharedPreferences에 저장
+        val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
 
-    /**
-     * 로그인 쿠키를 SharedPreferences에 저장하는 함수
-     */
-    private fun saveLoginCookie(loginIdCookie: String) {
-        requireContext().getSharedPreferences("login_info", Context.MODE_PRIVATE)
-            .edit()
-            .putString("login_id_cookie", loginIdCookie)
-            .apply()
+        // 쿠키 저장
+        response.loginIdCookie?.let { cookie ->
+            sharedPreferencesUtil.saveUserCookie(cookie)
+        }
+
+        // 사용자 정보 저장
+        val userInfo = UserInfo(
+            userId = response.userId ?: -1L,  // null일 경우 -1L을 기본값으로 사용
+            username = response.username ?: "",  // null일 경우 빈 문자열 사용
+            role = response.role ?: ""  // null일 경우 빈 문자열 사용
+        )
+        sharedPreferencesUtil.addUser(userInfo)
+
+        // 저장된 사용자 정보 확인을 위한 로그
+        val savedUser = sharedPreferencesUtil.getUser()
+        Log.d(
+            TAG,
+            "저장된 사용자 정보 - userId: ${savedUser.userId}, username: ${savedUser.username}, role: ${savedUser.role}"
+        )
+        Log.d(TAG, "저장된 사용자 쿠키: ${sharedPreferencesUtil.getUserCookie()}")
+
+        // 메인 화면으로 이동
+        navigateToMainActivity()
     }
 
     /**
@@ -284,8 +490,16 @@ class LoginFragment : Fragment() {
         val passwordEmpty = binding.fragmentLoginPasswordInput.text.isEmpty()
 
         // 각 필드의 상태 업데이트
-        updateInputFieldState(binding.fragmentLoginEamilInput, isError = false, isEmpty = emailEmpty)
-        updateInputFieldState(binding.fragmentLoginPasswordInput, isError = false, isEmpty = passwordEmpty)
+        updateInputFieldState(
+            binding.fragmentLoginEamilInput,
+            isError = false,
+            isEmpty = emailEmpty
+        )
+        updateInputFieldState(
+            binding.fragmentLoginPasswordInput,
+            isError = false,
+            isEmpty = passwordEmpty
+        )
 
         Toast.makeText(requireContext(), "email/password를 입력해주세요", Toast.LENGTH_SHORT).show()
     }

@@ -54,7 +54,7 @@
             android:id="@+id/fragmentLoginLinearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="80dp"
+            android:layout_marginTop="100dp"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -103,6 +103,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:visibility="invisible"
                 android:gravity="end"
                 android:text="비밀번호를 잊으셨나요?"
                 android:textColor="#1C4700" />
@@ -111,7 +112,7 @@
                 android:id="@+id/fragmentLoginLoginBtn"
                 android:layout_width="match_parent"
                 android:layout_height="49.36dp"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="20dp"
                 android:background="@drawable/login_button"
                 android:text="Log In"
                 android:textColor="#FFFFFF"
@@ -163,6 +164,7 @@
 
         <!-- 회원가입 하기 -->
         <LinearLayout
+            android:id="@+id/fragmentLoginLinearLayout4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"

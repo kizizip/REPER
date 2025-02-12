@@ -120,6 +120,7 @@ class StoreManageFragment : Fragment() {
         storeAdapter = StoreAdapter(emptyList(), object : StoreAdapter.ItemClickListener {
             override fun onClick(position: Int) {
                 showDialog(storeAdapter.storeList[position].storeName, storeAdapter.storeList[position].storeId)
+
             }
         })
 

@@ -7,6 +7,7 @@
     tools:context=".ui.mypage.MyPageFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white">
@@ -26,6 +27,7 @@
             android:layout_height="match_parent"
             android:padding="40dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/imageView4">
 
@@ -52,6 +54,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/mypage_fm_btn_bell" />
 
             <TextView
+                android:id="@+id/mypage_fm_tv_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/pretendard_semibold"
@@ -80,15 +83,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:background="@drawable/mypage_white_btn"
-                android:fontFamily="@font/pretendard_semibold"
-                android:gravity="center"
-                android:text="로그아웃"
-                android:paddingHorizontal="20dp"
-                android:paddingVertical="8dp"
-                android:textColor="@color/white"
-                android:textSize="12sp"
                 android:clickable="true"
                 android:focusable="true"
+                android:fontFamily="@font/pretendard_semibold"
+                android:gravity="center"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="8dp"
+                android:text="로그아웃"
+                android:textColor="@color/white"
+                android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView6" />
 

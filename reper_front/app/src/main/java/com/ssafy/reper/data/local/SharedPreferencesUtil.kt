@@ -76,6 +76,12 @@ import com.ssafy.reper.data.dto.UserInfo
 class SharedPreferencesUtil(context: Context) {
     private var preferences: SharedPreferences = context.applicationContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
+    companion object {
+        private const val SHARED_PREFERENCES_NAME = "reper_preference"
+        private const val KEY_USER_COOKIE = "user_cookie"
+    }
+
+
     fun getUserCookie(): String? {
         return preferences.getString(KEY_USER_COOKIE, null)
     }
@@ -97,16 +103,16 @@ class SharedPreferencesUtil(context: Context) {
         val editor = preferences.edit()
         editor.putLong("userId", userinfo.userId)
         editor.putString("username", userinfo.username)
-        editor.putString("role",userinfo.role)
+        editor.putString("role", userinfo.role)
         editor.apply()
     }
 
     // 사용자 정보 가져오기 (수정 필요)
     fun getUser(): LoginResponse {
         return LoginResponse(
-            userId = preferences.getLong("userId", 12),
-            username = preferences.getString("username", "test"),
-            role = preferences.getString("role", "Staff"),
+            userId = preferences.getLong("userId", -1L),
+            username = preferences.getString("username", ""),
+            role = preferences.getString("role", ""),
         )
     }
 
@@ -157,5 +163,16 @@ class SharedPreferencesUtil(context: Context) {
         private const val SHARED_PREFERENCES_NAME = "reper_preference"
         private const val KEY_USER_COOKIE = "user_cookie"
         private const val STORE_ID = "user_cookie"
+
+
+    // 모든 사용자 데이터 삭제
+    fun clearUserData() {
+        preferences.edit().apply {
+            remove(KEY_USER_COOKIE)
+            remove("userId")
+            remove("username")
+            remove("role")
+            apply()
+        }
     }
 }

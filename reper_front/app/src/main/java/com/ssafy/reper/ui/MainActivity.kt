@@ -1,6 +1,10 @@
 package com.ssafy.reper.ui
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
@@ -22,6 +26,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
+import com.ssafy.reper.R
+import com.ssafy.reper.databinding.ActivityMainBinding
+import com.ssafy.reper.data.local.SharedPreferencesUtil
+import com.ssafy.reper.ui.home.HomeFragment
+import com.ssafy.reper.ui.mypage.MyPageFragment
+import com.ssafy.reper.ui.order.OrderFragment
+import com.ssafy.reper.ui.recipe.AllRecipeFragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.ssafy.reper.ui.login.LoginActivity
+import kotlinx.coroutines.flow.count
 
 private const val TAG = "MainActivity_싸피"
 
@@ -54,6 +68,7 @@ class MainActivity : AppCompatActivity() {
         navController?.let {
             binding.activityMainBottomMenu.setupWithNavController(it)
         }
+        
         // FCM Token 비동기 처리
         CoroutineScope(Dispatchers.Main).launch {
             // 비동기적으로 백그라운드 스레드에서 토큰을 가져옴
@@ -128,6 +143,7 @@ class MainActivity : AppCompatActivity() {
             ""
         }
     }
+
 
     fun hideBottomNavigation() {
         binding.activityMainBottomMenu.visibility = View.GONE

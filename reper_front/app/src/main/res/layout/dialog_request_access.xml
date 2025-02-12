@@ -7,6 +7,7 @@
     android:background="@drawable/home_notice_dialog_back"
     android:padding="40dp">
 
+    <!-- 검색바 레이아웃 -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
@@ -34,6 +35,10 @@
             android:backgroundTint="@android:color/transparent"
             android:fontFamily="@font/pretendard_regular"
             android:hint="가게명을 검색해보세요."
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:maxLines="1"
+            android:singleLine="true"
             android:textColor="@color/black"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -41,34 +46,42 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ScrollView
-        android:id="@+id/request_access_d_sv"
+    <!-- 검색 결과 영역 -->
+    <FrameLayout
+        android:id="@+id/search_result_container"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="200dp"
         android:layout_marginTop="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/request_access_d_rv"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
-    </ScrollView>
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
+        <TextView
+            android:id="@+id/request_access_d_no_result"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="검색결과가 없습니다"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_regular"
+            android:textColor="@color/darkgray"
+            android:visibility="visible" />
+    </FrameLayout>
+
+    <!-- 나머지 레이아웃 -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/request_access_d_cl_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/request_access_d_sv">
+        app:layout_constraintTop_toBottomOf="@+id/search_result_container">
 
         <TextView
             android:id="@+id/request_access_d_tv_store_name"
@@ -104,6 +117,7 @@
             app:layout_constraintTop_toBottomOf="@+id/request_access_d_tv_store_name" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- 버튼들 -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/request_access_d_btn_positive"
         android:layout_width="130dp"
