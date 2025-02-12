@@ -107,7 +107,7 @@ def map_animation_url(instruction, threshold=0.85):
 def generate_recipe_image(recipe_name, type):
     response = client.images.generate(
         model="dall-e-2",
-        prompt=f"A high-quality realistic image of {recipe_name} coffee drink.",
+        prompt=f"A high-quality realistic image of {type} {recipe_name} coffee drink.",
         size="1024x1024",
         quality="standard",
         response_format="b64_json",
@@ -118,7 +118,7 @@ def generate_recipe_image(recipe_name, type):
         image_base64 = response.data[0].b64_json
         image_data = base64.b64decode(image_base64)
         bucket_name = "reper-images"
-        mykey = f"recipe_images/{recipe_name}.png"
+        mykey = f"recipe_images/{recipe_name}_{type}.png"
         s3.upload_fileobj(BytesIO(image_data), bucket_name, mykey)
         s3_url = f"https://{bucket_name}.s3.amazonaws.com/{mykey}"
         return s3_url
@@ -254,7 +254,7 @@ def upload_file():
         
         # 각 레시피 스텝에 대해 animationUrl 매핑 수행
         for recipe in data.get("recipes", []):
-            recipe["recipeImg"] = generate_recipe_image(recipe["recipeName"])
+            recipe["recipeImg"] = generate_recipe_image(recipe["recipeName"], recipe["type"])
             for step in recipe.get("recipeSteps", []):
                 instruction = step.get("instruction", "")
                 animation_url = map_animation_url(instruction)

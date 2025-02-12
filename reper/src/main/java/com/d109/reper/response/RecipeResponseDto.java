@@ -22,7 +22,7 @@ public class RecipeResponseDto {
         this.recipeName = recipe.getRecipeName();
         this.category = recipe.getCategory();
         this.type = recipe.getType();
-        this.recipeImg = getRecipeImg();
+        this.recipeImg = recipe.getRecipeImg();
         this.ingredients = recipe.getIngredients().stream()
                 .map(IngredientResponseDto::new) //new IngredientResponseDto(Ingredient)
                 .toList();
