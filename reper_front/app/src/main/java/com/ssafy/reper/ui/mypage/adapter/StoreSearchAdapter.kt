@@ -1,32 +1,31 @@
 package com.ssafy.reper.ui.mypage.adapter
 
 import android.graphics.Color
-import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.Store
 import androidx.core.content.res.ResourcesCompat
+import com.ssafy.reper.data.dto.SearchedStore
 
-class StoreSearchAdapter(private val storeList: List<Store>) :
+class StoreSearchAdapter(private val storeList: List<SearchedStore>) :
     RecyclerView.Adapter<StoreSearchAdapter.StoreViewHolder>() {
 
     private var selectedPosition = -1
-    private var onItemClickListener: ((Store) -> Unit)? = null
+    private var onItemClickListener: ((SearchedStore) -> Unit)? = null
 
-    fun setOnItemClickListener(listener: (Store) -> Unit) {
+    fun setOnItemClickListener(listener: (SearchedStore) -> Unit) {
         onItemClickListener = listener
     }
 
     inner class StoreViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val storeName: TextView = itemView.findViewById(R.id.store_item_tv_name)
 
-        fun bind(store: Store, position: Int) {
-            storeName.text = store.name
+        fun bind(store: SearchedStore, position: Int) {
+            storeName.text = store.storeName
             
             // 선택된 아이템의 텍스트 색상과 스타일 변경
             if (position == selectedPosition) {
@@ -64,7 +63,7 @@ class StoreSearchAdapter(private val storeList: List<Store>) :
     override fun getItemCount(): Int = storeList.size
 
     // 선택된 가게 정보 반환
-    fun getSelectedStore(): Store? {
+    fun getSelectedStore(): SearchedStore? {
         return if (selectedPosition != -1) storeList[selectedPosition] else null
     }
 }

@@ -77,24 +77,45 @@ class MyPageFragment : Fragment() {
             myPageBinding.mypageFmTvYellow.text = "${user.username} 사장"
             myPageBinding.mypageFmBtnBossMenu.text = "사장님 메뉴"
 
-            // 사장 정보 조회
+            // 사장 가게 정보 조회
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     ownerStoreList = RetrofitUtil.storeService.getStoreListByOwnerId(user.userId.toString())
+                    withContext(Dispatchers.Main) {
+                        myPageBinding.mypageFmTvStoreNum.text = "${ownerStoreList.size}"
+                        setupSpinner(ownerStoreList, user.role)  // 파라미터 전달
+                    }
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(requireContext(), "매장 정보 조회 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-            
+
+
+
         } else {
             myPageBinding.mypageFmTvYellow.text = "${user.username} 직원"
             myPageBinding.mypageFmBtnBossMenu.text = "권한 요청"
+            myPageBinding.textView7.text = "근무매장 수 : "
+
+            // 직원 가게 정보 조회
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    employeeStoreList = RetrofitUtil.storeService.getStoreListByEmployeeId(user.userId.toString())
+                    withContext(Dispatchers.Main) {
+                        myPageBinding.mypageFmTvStoreNum.text = "${employeeStoreList.size}"
+                        setupSpinner(employeeStoreList, user.role.toString())  // 파라미터 전달
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "매장 정보 조회 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
 
         startSequentialAnimation()
-        setupSpinner()
         initEvent()
     }
 
@@ -185,14 +206,19 @@ class MyPageFragment : Fragment() {
         }
     }
 
-    private fun setupSpinner() {
+    private fun setupSpinner(storeList: List<Any>, role: String) {
         val binding = _myPageBinding ?: return
         
         // 가게 이름 Spinner 설정
         val spinner = binding.mypageFmSp
-        val userTypes = arrayOf("메가커피 구미 인동점", "이스터에그:이걸 발견하다니!")
+        
+        val storeNames = if (role == "OWNER") {
+            (storeList as List<OwnerStore>).map { it.storeName }
+        } else {
+            (storeList as List<Store>).map { it.name }
+        }
 
-        val adapter = ArrayAdapter(requireContext(), R.layout.mypage_spinner_item, userTypes).apply {
+        val adapter = ArrayAdapter(requireContext(), R.layout.mypage_spinner_item, storeNames).apply {
             setDropDownViewResource(R.layout.mypage_spinner_item)
         }
 
@@ -205,7 +231,7 @@ class MyPageFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
-                val selectedItem = userTypes[position]
+                val selectedItem = storeNames[position]
                 // 선택된 항목 처리
             }
 
@@ -275,7 +301,7 @@ class MyPageFragment : Fragment() {
                                                 adapter.setOnItemClickListener { store ->
                                                     // 선택된 가게 이름을 TextView에 설정
                                                     dialog.findViewById<TextView>(R.id.request_access_d_tv_store_name).text =
-                                                        store.name
+                                                        store.storeName
                                                     selectedStoreId = store.storeId
 
                                                     // 확인 메시지를 보여주는 레이아웃 표시
@@ -335,11 +361,13 @@ class MyPageFragment : Fragment() {
                                     storeId.toString(),
                                     userId.toString()
                                 )
-                                Toast.makeText(
-                                    requireContext(),
-                                    "권한 요청 완료",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                withContext(Dispatchers.Main) {  // Main 스레드에서 토스트 메시지 표시
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "권한 요청 완료",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
 
                             } catch (e: Exception) {
                                 withContext(Dispatchers.Main) {

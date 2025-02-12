@@ -3,6 +3,7 @@ package com.ssafy.reper.data.remote
 import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.data.dto.OwnerStore
 import com.ssafy.reper.data.dto.RequestStore
+import com.ssafy.reper.data.dto.SearchedStore
 import com.ssafy.reper.data.dto.Store
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -25,10 +26,6 @@ interface StoreService {
     @DELETE("stores/{storeId}")
     suspend fun deleteStore(@Path("storeId") storeId: Int)
 
-    //가게명으로 매장검색
-    @GET("store/search")
-    suspend fun searchStore(@Query ("storeName")storeName : String) : List<Store>
-
     @GET("stores/{storeId}/employees")
     suspend fun allEmployee(@Path("storeId") storeId: Int): List<Employee>
 
@@ -44,7 +41,7 @@ interface StoreService {
 
     // 모든 매장 검색 - 엘라스틱 search
     @GET("stores/search")
-    suspend fun searchAllStores(@Query("storeName") storeName: String): List<Store>
+    suspend fun searchAllStores(@Query("storeName") storeName: String): List<SearchedStore>
 
     // 알바생 -> 사장 권한 요청
     @POST("stores/{storeId}/employees/{userId}/approve")
