@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Reper</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="announcement_text"><u>공지 더 보러가기</u></string>
+    <string name="recipe_text"><u>레시피 더 보러가기</u></string>
+    <string name="default_web_client_id">202494895529-5gjhql943hrtrui1k585bcta3qbnp9cb.apps.googleusercontent.com</string>
+</resources>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginVertical="8dp"
+    android:layout_marginHorizontal="1dp"
+    app:cardCornerRadius="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+
+        <ImageView
+            android:id="@+id/rv_order_recipe_img"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="24dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/noimage"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="24dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/rv_order_recipe_img"
+            app:layout_constraintStart_toEndOf="@+id/rv_order_recipe_img"
+            app:layout_constraintTop_toTopOf="@+id/rv_order_recipe_img">
+
+            <TextView
+                android:id="@+id/rv_order_recipe_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/pretendard_semibold"
+                android:text="아메리카노 Ice"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:text="수량 : "
+                    android:textColor="@color/darkgray"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/rv_order_recipe_quantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:text="2"
+                    android:textColor="@color/darkgray"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:text="요청사항 : "
+                    android:textColor="@color/darkgray"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/rv_order_recipe_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:text="샷 추가"
+                    android:textColor="@color/darkgray"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/rv_order_recipe_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/checkbox_tint_selector"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintBottom_toBottomOf="@+id/linearLayout5"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/linearLayout5" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.cardview.widget.CardView>

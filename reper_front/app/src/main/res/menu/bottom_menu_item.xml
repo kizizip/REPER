@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/homeFragment"
+        android:enabled="true"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/home_icon"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/allRecipeFragment"
+        android:enabled="true"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/recipe_icon"
+        android:title="Recipe" />
+
+    <item
+        android:id="@+id/orderFragment"
+        android:enabled="true"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/order_icon"
+        android:title="Order" />
+
+    <item
+        android:id="@+id/myPageFragment"
+        android:enabled="true"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/profile_icon"
+        android:title="MyPage" />
+
+</menu>

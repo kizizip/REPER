@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "202494895529",
+    "project_id": "reper-7e5b4",
+    "storage_bucket": "reper-7e5b4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:202494895529:android:4197122439d2bfd0ded0b8",
+        "android_client_info": {
+          "package_name": "com.ssafy.reper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "202494895529-5gjhql943hrtrui1k585bcta3qbnp9cb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ssafy.reper",
+            "certificate_hash": "f0ceaff91c53758748e7f4cb842160cab1939143"
+          }
+        },
+        {
+          "client_id": "202494895529-98r1p5mkc1rvhh2t9hhinjltli9p9b0h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ssafy.reper",
+            "certificate_hash": "bcda463a84186ab9ed57639c0f8e5bae1540c827"
+          }
+        },
+        {
+          "client_id": "202494895529-sm5k14m0g2isj0qetv34bult730lemk0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjPC4F_XfJ1oJFPYImaduAiKpO92kyLaI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "202494895529-sm5k14m0g2isj0qetv34bult730lemk0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
