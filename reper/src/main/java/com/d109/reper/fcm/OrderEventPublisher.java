@@ -12,7 +12,7 @@ public class OrderEventPublisher {
 //    public OrderEventPublisher(ApplicationEventPublisher publisher) {
 //        OrderEventPublisher.publisher = publisher;
 //    }
-
+//
 //    public static void publish(Order order) {
 //        publisher.publishEvent(new  OrderUpdatedEvent(order));
 //    }
