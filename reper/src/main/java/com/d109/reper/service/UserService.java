@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.d109.reper.domain.User;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -106,7 +107,45 @@ public class UserService {
     }
 
 
-    // 비밀번호 변경
+    // 카카오 가입 여부 변경 (X->O)
+    public boolean updateKakaoJoin(Long userId) {
+        try {
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new NoSuchElementException("UserNotFound"));
+
+            user.setKakao(true);
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // 구글 가입 여부 변경 (X->O)
+    public boolean updateGoogleJoin(Long userId) {
+        try {
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new NoSuchElementException("UserNotFound"));
+
+            user.setGoogle(true);
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
+    // 이메일 기준으로 사용자 정보 찾기
+    public User findByEmail(String email) {
+        try {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new NoSuchElementException("UserNotFound"));
+            return user;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Bad Request");
+        }
+    }
 
 
 

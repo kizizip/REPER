@@ -9,6 +9,7 @@ import com.d109.reper.repository.UserRepository;
 import com.d109.reper.service.KakaoApiService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
@@ -107,7 +108,7 @@ public class KakaoLoginController {
     // 토큰으로 사용자 정보(일부) 가져오기
     @GetMapping("/kakao")
     @Operation(summary = "accessToken을 날리면 사용자의 email, nickname을 불러옵니다."
-    , description = "POST 메서드와 유사하나, 카카오가 제공하는 정보를 불러옵니다.")
+            , description = "POST 메서드와 유사하나, 카카오가 제공하는 정보를 불러옵니다.")
     private KakaoUserInfo getKakaoUserInfo(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
         String url = "https://kapi.kakao.com/v2/user/me";

@@ -28,6 +28,10 @@ public class User {
 
     private LocalDateTime createdAt;
 
+    private boolean kakao;
+
+    private boolean google;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
