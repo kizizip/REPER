@@ -103,21 +103,20 @@ class OrderRecipeFragment : Fragment() {
         // 전체선택
         orderRecipebinding.orderrecipeFmCheckbox.setOnClickListener{
             if(orderRecipebinding.orderrecipeFmCheckbox.isChecked){
-                orderRecipeAdapter.checkedAll = true
-                orderRecipeAdapter.notifyDataSetChanged()
                 checkedRecipeIdList.clear()
                 for(detail in  orderRecipeAdapter.orderDetailList){
                     checkedRecipeIdList.add(detail.recipeId)
                 }
             }
             else{
-                orderRecipeAdapter.checkedAll = false
-                orderRecipeAdapter.notifyDataSetChanged()
                 checkedRecipeIdList.clear()
             }
+            orderRecipeAdapter.checkedRecipeIdList = checkedRecipeIdList
+            orderRecipeAdapter.notifyDataSetChanged()
         }
 
         orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.setOnClickListener {
+            viewModel.completeOrder(orderId)
             parentFragmentManager.popBackStack()
         }
 
@@ -133,15 +132,36 @@ class OrderRecipeFragment : Fragment() {
                     text.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
                 }
             }
+
+            orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.let {
+                if(order.completed){
+                    it.visibility = View.GONE
+                }
+                else{
+                    it.visibility = View.VISIBLE
+                }
+            }
+            orderRecipebinding.orderRecipeFragmentGoRecipeBtn.let {
+                if(order.completed){
+                    it.setBackgroundResource(R.drawable.btn)
+                }
+                else{
+                    it.setBackgroundResource(R.drawable.medium_green_button)
+                }
+            }
         }
 
         orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setOnClickListener {
             mainViewModel.setOrder(order)
             mainViewModel.getSelectedRecipes(checkedRecipeIdList)
             mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
+                Log.d(TAG, "selectedOrder: ${it}")
                 val bundle = Bundle().apply {
                     putInt("whereAmICame", 2)
                 }
+
+                mainViewModel.setNowISeeRecipe(0)
+                mainViewModel.setNowISeeStep(-1)
 
                 if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
                     findNavController().navigate(R.id.allRecipeFragment, bundle)
@@ -154,7 +174,7 @@ class OrderRecipeFragment : Fragment() {
     }
     // 어뎁터 설정
     fun initAdapter() {
-        orderRecipeAdapter = OrderRecipeAdatper(mutableListOf(), mutableListOf(), false) { recipeId, isChecked ->
+        orderRecipeAdapter = OrderRecipeAdatper(mutableListOf(), mutableListOf(), checkedRecipeIdList) { recipeId, isChecked ->
             // 클릭 이벤트 -> recipeId 저장, 삭제
             if(isChecked){
                 checkedRecipeIdList.add(recipeId)

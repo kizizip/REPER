@@ -306,6 +306,7 @@ class StepRecipeFragment : Fragment() {
         super.onConfigurationChanged(newConfig)
 
         val bundle = arguments
+        findNavController().popBackStack(R.id.stepRecipeFragment, true)
 
         initEvent()
         // 가로모드 UI 업데이트

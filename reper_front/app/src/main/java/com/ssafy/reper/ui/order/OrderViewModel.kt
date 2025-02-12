@@ -83,4 +83,10 @@ class OrderViewModel : ViewModel() {
             _recipeList.value = list
         }
     }
+
+    fun completeOrder(orderId: Int){
+        viewModelScope.launch {
+            orderService.orderComplete(orderId)
+        }
+    }
 }

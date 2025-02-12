@@ -26,7 +26,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.log
 
 private const val TAG = "OrderAdapter_정언"
-class OrderRecipeAdatper(var orderDetailList: MutableList<OrderDetail>, var recipeList: MutableList<Recipe>, var checkedAll : Boolean, val itemClickListener:ItemClickListener) : RecyclerView.Adapter<OrderRecipeAdatper.OrderDetailListHolder>() {
+class OrderRecipeAdatper(var orderDetailList: MutableList<OrderDetail>, var recipeList: MutableList<Recipe>, var checkedRecipeIdList:MutableList<Int>, val itemClickListener:ItemClickListener) : RecyclerView.Adapter<OrderRecipeAdatper.OrderDetailListHolder>() {
     inner class OrderDetailListHolder(private val binding: RvOrderRecipeItemBinding) : RecyclerView.ViewHolder(binding.root){
         fun bindInfo(position: Int){
             val item = orderDetailList[position]
@@ -36,7 +36,7 @@ class OrderRecipeAdatper(var orderDetailList: MutableList<OrderDetail>, var reci
             binding.rvOrderRecipeQuantity.text = item.quantity.toString()
             binding.rvOrderRecipeMessage.text = item.customerRequest
 
-            if(checkedAll){
+            if(checkedRecipeIdList.contains(item.recipeId)){
                 binding.rvOrderRecipeCheckbox.isChecked = true
             }
             else{

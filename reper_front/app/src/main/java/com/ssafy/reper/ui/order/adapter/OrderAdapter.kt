@@ -1,5 +1,6 @@
 package com.ssafy.reper.ui.order.adapter
 
+import android.content.res.ColorStateList
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
@@ -57,6 +58,13 @@ class OrderAdatper(var orderList:MutableList<Order>, var recipeNameList:MutableL
                     it.setTextColor(ContextCompat.getColor(binding.root.context, R.color.green))
                 }
             }
+
+            if(item.completed){
+                binding.root.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(binding.root.context, R.color.morelightgray))
+            }else{
+                binding.root.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(binding.root.context, R.color.white))
+            }
+
             binding.root.setOnClickListener{
                 itemClickListener.onClick(item.orderId)
             }
