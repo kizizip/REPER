@@ -22,16 +22,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.kakao.sdk.common.KakaoSdk.type
-import com.kakao.sdk.friend.m.u
 import com.ssafy.reper.R
+import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentRecipeManageBinding
 import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.RecipeAdapter
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -46,7 +43,10 @@ class RecipeManageFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private val bossViewModel: BossViewModel by activityViewModels()
     private val fcmViewModel: FcmViewModel by activityViewModels()
+    private lateinit var sharedPreferencesUtil: SharedPreferencesUtil
     var storeId = 1
+    var pdfName = ""
+
 
 
     override fun onAttach(context: Context) {
@@ -54,6 +54,11 @@ class RecipeManageFragment : Fragment() {
         if (context is MainActivity) {
             mainActivity = context
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mainActivity.hideBottomNavigation()
     }
 
     private val filePickerLauncher =
@@ -71,43 +76,59 @@ class RecipeManageFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentRecipeManageBinding.inflate(inflater, container, false)
+        sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
 
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Log.d(TAG, "onViewCreated:지금은 이상태입니다 ${sharedPreferencesUtil.getStateLoad()}")
+        bossViewModel.setRecipeLoad(sharedPreferencesUtil.getStateLoad())
+        Log.d(TAG, "onViewCreated: 뷰모델은 이거입니다! ${bossViewModel.recipeLoad.value}")
         bossViewModel.recipeLoad.observe(viewLifecycleOwner) { result ->
+            Log.d(TAG, "onViewCreated: 받아오는건..? ${result}")
             when (result) {
-                null -> {
+               "non" -> {
                     binding.uploadBar.visibility = View.GONE
+                   sharedPreferencesUtil.addStateLoad("non")
                 }
                 "success" -> {
                     binding.uploadBar.visibility = View.VISIBLE
                     binding.uploadState.text = "레시피 업로드 성공"
                     binding.successText.visibility = View.VISIBLE
+                    binding.fileName.text = sharedPreferencesUtil.getStateName()
                     binding.successText.text = "확인"
                     binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.mainorange))
                     binding.successText.setOnClickListener {
                         binding.uploadBar.visibility = View.GONE
                         bossViewModel.setRecipeLoad(null)
+                        sharedPreferencesUtil.addStateLoad("non")
+                        sharedPreferencesUtil.addStateName("non")
                     }
                 }
                 "failure" -> {
                     binding.uploadBar.visibility = View.VISIBLE
                     binding.uploadState.text = "레시피 업로드 실패"
                     binding.successText.visibility = View.VISIBLE
+                    binding.fileName.text = sharedPreferencesUtil.getStateName()
                     binding.successText.text = "확인"
                     binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
                     binding.successText.setOnClickListener {
                         binding.uploadBar.visibility = View.GONE
                         bossViewModel.setRecipeLoad(null)
+                        sharedPreferencesUtil.addStateLoad("non")
+                        sharedPreferencesUtil.addStateName("non")
+
                     }
                 }
                 "loading" -> {
+                    binding.uploadBar.visibility = View.VISIBLE
                     binding.successText.visibility = View.GONE
+                    binding.fileName.text = sharedPreferencesUtil.getStateName()
                     binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
+                    sharedPreferencesUtil.addStateLoad("loading")
+
                 }
             }
         }
@@ -233,9 +254,12 @@ class RecipeManageFragment : Fragment() {
             bossViewModel.uploadRecipe(storeId, it)
             binding.uploadBar.visibility = View.VISIBLE
             val contentDisposition = it.headers?.get("Content-Disposition")
-            val fileName = contentDisposition?.substringAfter("filename=")?.replace("\"", "") ?: "알 수 없는 파일"
-            binding.fileName.text = fileName
+            pdfName = contentDisposition?.substringAfter("filename=")?.replace("\"", "") ?: "알 수 없는 파일"
+            binding.fileName.text = pdfName
             bossViewModel.setRecipeLoad("loading")
+            sharedPreferencesUtil.addStateLoad("loading")
+            sharedPreferencesUtil.addStateName(pdfName)
+
         }
 
 

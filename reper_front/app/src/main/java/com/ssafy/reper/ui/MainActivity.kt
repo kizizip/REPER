@@ -8,19 +8,20 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
-import com.ssafy.reper.R
-import com.ssafy.reper.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.messaging.FirebaseMessaging
-import com.ssafy.reper.data.dto.Notice
+import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.UserToken
-import com.ssafy.reper.ui.boss.NoticeViewModel
+import com.ssafy.reper.data.local.SharedPreferencesUtil
+import com.ssafy.reper.databinding.ActivityMainBinding
 import com.ssafy.reper.ui.boss.BossViewModel
+import com.ssafy.reper.ui.boss.NoticeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+
 
 private const val TAG = "MainActivity_싸피"
 
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val bossViewModel: BossViewModel by viewModels()
     private val fcmViewModel:FcmViewModel by viewModels()
 
-//    val sharedPreferencesUtil = SharedPreferencesUtil(this)
+    lateinit var sharedPreferencesUtil: SharedPreferencesUtil
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         super.onCreate(savedInstanceState)
+        sharedPreferencesUtil = SharedPreferencesUtil(applicationContext)
 
         // View Binding 초기화
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -61,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                 getFCMToken()
             }
             // 토큰을 받은 후 메인 스레드에서 UI 작업
-            fcmViewModel.saveToken(UserToken(1, token, 1))
+            fcmViewModel.saveToken(UserToken(1, token, 6))
             Log.d("FCMTOKEN", token)
         }
 
@@ -147,10 +149,10 @@ class MainActivity : AppCompatActivity() {
         bossViewModel.recipeLoad.observe(this) { result ->
             when (result) {
                 "success" -> {
-                   fcmViewModel.sendToUserFCM(1,"레시피 업로드 성공","","RecipeManageFragment",0)
+                   fcmViewModel.sendToUserFCM(1,"레시피 업로드 성공",sharedPreferencesUtil.getStateName(),"RecipeManageFragment",0)
                 }
                 "failure" -> {
-                    fcmViewModel.sendToUserFCM(1,"레시피 업로드 실패","","RecipeManageFragment",0)
+                    fcmViewModel.sendToUserFCM(1,"레시피 업로드 실패",sharedPreferencesUtil.getStateName(),"RecipeManageFragment",0)
                 }
             }
         }

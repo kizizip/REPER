@@ -74,7 +74,7 @@ import com.ssafy.reper.data.dto.LoginResponse
 import com.ssafy.reper.data.dto.UserInfo
 
 class SharedPreferencesUtil(context: Context) {
-    private var preferences: SharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+    private var preferences: SharedPreferences = context.applicationContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
     fun getUserCookie(): String? {
         return preferences.getString(KEY_USER_COOKIE, null)
@@ -115,6 +115,33 @@ class SharedPreferencesUtil(context: Context) {
         val storeId = preferences.getInt("storeId", 0)
         Log.d("SharedPreferencesUtil", "Store ID retrieved: $storeId")
         return storeId
+    }
+
+
+    fun addStateLoad(state: String?) {
+        val editor = preferences.edit()
+        editor.putString("state", state)
+        editor.apply()
+        Log.d("SharedPreferencesUtil", "stateLoad saved: $state")
+    }
+
+    fun getStateLoad(): String {
+        val state = preferences.getString("state", "non")
+        Log.d("SharedPreferencesUtil", "state retrieved: $state")
+        return state!!
+    }
+
+    fun addStateName(state: String?) {
+        val editor = preferences.edit()
+        editor.putString("name", state)
+        editor.apply()
+        Log.d("SharedPreferencesUtil", "addStateName saved: $state")
+    }
+
+    fun getStateName(): String {
+        val state = preferences.getString("name", "non")
+        Log.d("SharedPreferencesUtil", "addStateName retrieved: $state")
+        return state!!
     }
 
 

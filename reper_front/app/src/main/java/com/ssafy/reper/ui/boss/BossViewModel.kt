@@ -1,24 +1,24 @@
 package com.ssafy.reper.ui.boss
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Employee
-import com.ssafy.reper.data.dto.Notice
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RequestStore
 import com.ssafy.reper.data.dto.Store
+import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.data.remote.RetrofitUtil
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
-import kotlin.math.log
 
 private const val TAG = "BossViewModel"
 
-class BossViewModel : ViewModel() {
+class BossViewModel(application: Application) : AndroidViewModel(application) {
+    private val sharedPreferencesUtil = SharedPreferencesUtil(application.applicationContext)
 
     //스토어 정보 리스트
     private val _myStoreList = MutableLiveData<List<Store>>()
@@ -39,7 +39,7 @@ class BossViewModel : ViewModel() {
 
     //레시피 업로드 상태 관찰
     private val _recipeLoad = MutableLiveData<String?>()
-    val recipeLoad: MutableLiveData<String?>get() = _recipeLoad
+    val recipeLoad: MutableLiveData<String?> get() = _recipeLoad
 
     fun setRecipeLoad(result: String?) {
         _recipeLoad.value = result
@@ -49,7 +49,7 @@ class BossViewModel : ViewModel() {
     //승인된 직원 리스트
     private val _accessList = MutableLiveData<List<Employee>>()
     val accessList: MutableLiveData<List<Employee>> get() = _accessList
-    fun getAccessEmployeeList(employees: List<Employee>){
+    fun getAccessEmployeeList(employees: List<Employee>) {
         _accessList.value = employees
     }
 
@@ -159,9 +159,11 @@ class BossViewModel : ViewModel() {
                 Log.d(TAG, "uploadRecipe: 서버 응답 = ${response}")
             }.onSuccess {
                 Log.d(TAG, "uploadRecipe: 성공")
+                sharedPreferencesUtil.addStateLoad("success")
                 setRecipeLoad("success")
                 getMenuList(storeId )
             }.onFailure {
+                sharedPreferencesUtil.addStateLoad("failure")
                 setRecipeLoad("failure")
                 Log.d(TAG, "uploadRecipe: 실패 - ${it.message}")
             }

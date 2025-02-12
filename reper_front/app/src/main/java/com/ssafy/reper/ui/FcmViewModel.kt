@@ -41,14 +41,11 @@ class FcmViewModel:ViewModel() {
             runCatching {
                 RetrofitUtil.fcmService.sendToStore(storeId, title, content, targetFragment, requestId)
             }.onSuccess {
-                Log.d(TAG, "sendToStoreFCM: ${title}")
+                Log.d(TAG, "sendToStoreFCM:성공공다리 ${title}")
             }.onFailure {
                 Log.d(TAG, "sendToStoreFCM: ${it.message}")
             }
         }
     }
-
-
-
 
 }
