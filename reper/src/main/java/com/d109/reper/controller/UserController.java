@@ -2,9 +2,12 @@ package com.d109.reper.controller;
 
 import com.d109.reper.domain.User;
 import com.d109.reper.domain.UserRole;
+import com.d109.reper.repository.UserRepository;
+import com.d109.reper.response.KakaoLoginResponseDto;
 import com.d109.reper.service.UserService;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.K;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -102,7 +106,8 @@ public class UserController {
         cookie.setHttpOnly(true);  // XSS 방지
         cookie.setSecure(false);  // HTTPS에서만 전송 (테스트 시 false, 실제 서비스에서는 true 권장)
         cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24 * 30); // 30일
+//        cookie.setMaxAge(60 * 60 * 24 * 30); // 30일
+        cookie.setMaxAge(60 * 15); //15분
         response.addCookie(cookie);
 
         logger.info("쿠키 - cookie: {} = {}", cookie.getName(), cookie.getValue());
@@ -164,6 +169,73 @@ public class UserController {
             throw new NoSuchElementException("회원 정보를 찾을 수 없음.");
         }
     }
+
+
+    // 카카오 가입 여부 변경 (X->O)
+    @PatchMapping("/{userId}/kakao")
+    @Operation(summary = "카카오 연동시 boolean=true로 변경합니다.")
+    public ResponseEntity<?> updateKakaoJoin(@PathVariable Long userId) {
+        try {
+            boolean result = userService.updateKakaoJoin(userId);
+
+            if (result) {
+                return ResponseEntity.ok(true);
+            } else {
+                throw new NoSuchElementException("해당하는 사용자가 없음.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("서버 오류 발생");
+        }
+    }
+
+    // 구글 가입 여부 변경 (X->O)
+    @PatchMapping("/{userId}/google")
+    @Operation(summary = "구글계정 연동시 boolean=true로 변경합니다.")
+    public ResponseEntity<?> updateGoogleJoin(@PathVariable Long userId) {
+        try {
+            boolean result = userService.updateGoogleJoin(userId);
+
+            if (result) {
+                return ResponseEntity.ok(true);
+            } else {
+                throw new NoSuchElementException("해당하는 사용자가 없음.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("서버 오류 발생");
+        }
+    }
+
+
+    @PostMapping("/cookie/{email}")
+    @Operation(summary = "구글 로그인 성공시 cookie를 내려보냅니다.")
+    public ResponseEntity<?> googleCookie(@PathVariable String email, HttpServletResponse response) {
+        try {
+            User user = userService.findByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+
+            // 쿠키 생성
+            Cookie cookie = new Cookie("loginId", URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8));
+            cookie.setHttpOnly(true);
+            cookie.setSecure(false); // HTTPS에서만 전송 (테스트 시 false, 실제 배포 환경에서는 true)
+            cookie.setPath("/"); // 모든 경로에서 쿠키 사용 가능
+            cookie.setMaxAge(60 * 15); // 15분 동안 유지
+
+            response.addCookie(cookie);
+
+            logger.info("쿠키 설정: {} = {}", cookie.getName(), cookie.getValue());
+
+            KakaoLoginResponseDto responseDto = new KakaoLoginResponseDto(user);
+
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            logger.error("쿠키 생성 실패: {}", e.getMessage());
+            throw new RuntimeException("서버 오류 발생");
+        }
+    }
+
 
 
 
