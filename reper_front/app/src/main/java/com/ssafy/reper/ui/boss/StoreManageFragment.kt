@@ -11,14 +11,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
-import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.databinding.FragmentStoreManageBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.StoreAdapter
@@ -119,7 +117,11 @@ class StoreManageFragment : Fragment() {
     private fun initAdapter() {
         storeAdapter = StoreAdapter(emptyList(), object : StoreAdapter.ItemClickListener {
             override fun onClick(position: Int) {
-                showDialog(storeAdapter.storeList[position].storeName, storeAdapter.storeList[position].storeId)
+                storeAdapter.storeList[position].name?.let { storeAdapter.storeList[position].storeId?.let { it1 ->
+                    showDialog(it,
+                        it1
+                    )
+                } }
 
             }
         })

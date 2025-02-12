@@ -12,18 +12,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.ssafy.reper.ApplicationClass
+
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.UserInfo
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.databinding.FragmentEditMyAccountBinding
-import com.ssafy.reper.databinding.FragmentMyPageBinding
+
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.login.LoginActivity
-import com.ssafy.reper.ui.recipe.FullRecipeListAdapter
-import com.ssafy.reper.ui.recipe.StepRecipeFragment
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

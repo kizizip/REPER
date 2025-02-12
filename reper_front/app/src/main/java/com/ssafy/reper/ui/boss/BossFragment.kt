@@ -135,7 +135,7 @@ class BossFragment : Fragment() {
 
         // 스토어 리스트 관찰 후 업데이트
         bossViewModel.myStoreList.observe(viewLifecycleOwner) { storeList ->
-            val storeNames = storeList.map { it.storeName }
+            val storeNames = storeList.map { it.name }
 
             val adapter = ArrayAdapter(
                 requireContext(),
@@ -146,7 +146,7 @@ class BossFragment : Fragment() {
             }
 
             spinner.adapter = adapter
-            val selectedStoreName = storeList.find { it.storeId == storeId }?.storeName
+            val selectedStoreName = storeList.find { it.storeId == storeId }?.name
             selectedStoreName?.let {
                 val position = storeNames.indexOf(it)
                 spinner.setSelection(position)
@@ -166,9 +166,9 @@ class BossFragment : Fragment() {
             ) {
                 val selectedItem = spinner.adapter.getItem(position) as String
                 val selectedStore =
-                    bossViewModel.myStoreList.value?.find { it.storeName == selectedItem }
-                storeId = selectedStore!!.storeId
-                storeName = selectedStore!!.storeName
+                    bossViewModel.myStoreList.value?.find { it.name == selectedItem }
+                storeId = selectedStore!!.storeId!!
+                storeName = selectedStore!!.name.toString()
                 //나중엔 sharedPreferencesUtil꺼 바꿔주기
                 Log.d(TAG, "onItemSelected: ${storeId}")
             }

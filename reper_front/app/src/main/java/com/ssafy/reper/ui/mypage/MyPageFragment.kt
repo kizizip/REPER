@@ -8,8 +8,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,24 +17,25 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.R
+import com.ssafy.reper.data.dto.OwnerStore
+import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.data.dto.UserInfo
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.data.remote.RetrofitUtil
-import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.databinding.FragmentMyPageBinding
 import com.ssafy.reper.ui.MainActivity
-import com.ssafy.reper.ui.boss.BossFragment
 import com.ssafy.reper.ui.login.LoginActivity
 import com.ssafy.reper.ui.mypage.adapter.StoreSearchAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import androidx.recyclerview.widget.DividerItemDecoration
 
 class MyPageFragment : Fragment() {
 
@@ -74,7 +73,7 @@ class MyPageFragment : Fragment() {
         var employeeStoreList: List<Store> = mutableListOf()    // 직원 가게 조회
         
         // 사장 or 직원 표시
-        if (user.role == "BOSS") {
+        if (user.role == "OWNER") {
             myPageBinding.mypageFmTvYellow.text = "${user.username} 사장"
             myPageBinding.mypageFmBtnBossMenu.text = "사장님 메뉴"
 
@@ -227,7 +226,7 @@ class MyPageFragment : Fragment() {
             val userInfo = sharedPreferencesUtil.getUser()
             var selectedStoreId: Int? = null
 
-            if (userInfo.role == "BOSS") {
+            if (userInfo.role == "OWNER") {
                 findNavController().navigate(R.id.bossFragment)
             } else {
                 val dialog = Dialog(mainActivity)

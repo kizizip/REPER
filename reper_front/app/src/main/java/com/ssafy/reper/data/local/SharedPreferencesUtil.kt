@@ -79,6 +79,7 @@ class SharedPreferencesUtil(context: Context) {
     companion object {
         private const val SHARED_PREFERENCES_NAME = "reper_preference"
         private const val KEY_USER_COOKIE = "user_cookie"
+        private const val STORE_ID = "1"
     }
 
 
@@ -157,13 +158,6 @@ class SharedPreferencesUtil(context: Context) {
         Log.d("SharedPreferencesUtil", "addStateName retrieved: $state")
         return state!!
     }
-
-
-    companion object {
-        private const val SHARED_PREFERENCES_NAME = "reper_preference"
-        private const val KEY_USER_COOKIE = "user_cookie"
-        private const val STORE_ID = "user_cookie"
-
 
     // 모든 사용자 데이터 삭제
     fun clearUserData() {

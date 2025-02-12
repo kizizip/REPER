@@ -20,6 +20,6 @@
 //            builder.addHeader("Cookie", cookie)
 //            Log.v(TAG,"Adding Header: $cookie")
 //        }
-        return chain.proceed(builder.build())
-    }
-}
+//        return chain.proceed(builder.build())
+//    }
+//}

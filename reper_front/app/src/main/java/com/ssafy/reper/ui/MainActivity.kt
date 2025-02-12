@@ -26,16 +26,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-import com.ssafy.reper.R
-import com.ssafy.reper.databinding.ActivityMainBinding
-import com.ssafy.reper.data.local.SharedPreferencesUtil
-import com.ssafy.reper.ui.home.HomeFragment
-import com.ssafy.reper.ui.mypage.MyPageFragment
-import com.ssafy.reper.ui.order.OrderFragment
-import com.ssafy.reper.ui.recipe.AllRecipeFragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.ssafy.reper.ui.login.LoginActivity
-import kotlinx.coroutines.flow.count
 
 private const val TAG = "MainActivity_싸피"
 

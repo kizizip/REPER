@@ -1,23 +1,15 @@
 package com.ssafy.reper.data.remote
 
-import android.hardware.camera2.CameraExtensionSession.StillCaptureLatency
-import com.google.android.gms.common.api.Response
+
 import com.ssafy.reper.data.dto.Recipe
 import okhttp3.MultipartBody
-import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import com.ssafy.reper.data.dto.FavoriteRecipe
-import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeResponse
-import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 

@@ -2,19 +2,13 @@ package com.ssafy.reper.base
 
 import MainActivityViewModel
 import android.app.Application
-import com.kakao.sdk.common.KakaoSdk
-import okhttp3.OkHttpClient
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.kakao.sdk.common.KakaoSdk
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.util.ViewModelSingleton
-import okhttp3.logging.HttpLoggingInterceptor
-// 필요한 라이브러리들을 import
-import android.app.Application
-import com.kakao.sdk.common.KakaoSdk
-import com.ssafy.reper.base.ReceivedCookiesInterceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -34,6 +28,9 @@ class ApplicationClass : Application() {
         
         // Retrofit 인스턴스를 lateinit으로 선언 (나중에 초기화)
         lateinit var retrofit: Retrofit
+
+        //shared preference 초기화
+        lateinit var sharedPreferencesUtil: SharedPreferencesUtil
     }
 
     // Application 클래스의 onCreate 메서드 오버라이드
@@ -41,8 +38,7 @@ class ApplicationClass : Application() {
         // 부모 클래스의 onCreate 호출
         super.onCreate()
 
-        //shared preference 초기화
-        sharedPreferencesUtil = SharedPreferencesUtil(applicationContext)
+        sharedPreferencesUtil= SharedPreferencesUtil(applicationContext)
 
         // OkHttpClient 설정 (타임아웃 관련 설정 추가)
         val client = OkHttpClient.Builder()

@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Order
-import com.ssafy.reper.data.dto.OrderDetail
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.remote.RetrofitUtil
 import kotlinx.coroutines.launch
