@@ -1,25 +1,21 @@
 package com.ssafy.reper.ui
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.messaging.FirebaseMessaging
+import com.ssafy.reper.data.dto.Notice
 import com.ssafy.reper.data.dto.UserToken
-import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.ui.boss.NoticeViewModel
 import com.ssafy.reper.ui.boss.BossViewModel
-import com.ssafy.reper.ui.home.HomeFragment
-import com.ssafy.reper.ui.order.OrderFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -69,6 +65,9 @@ class MainActivity : AppCompatActivity() {
 
         // 📌 FCM에서 targetFragment 전달받았는지 확인 후, 해당 프래그먼트로 이동
         val targetFragment = intent.getStringExtra("targetFragment")
+        val requestId = intent.getStringExtra("requestId")
+        Log.d(TAG, "onCreate:전달하긴해..?프래그먼트 ${targetFragment}")
+        Log.d(TAG, "onCreate:전달하긴해..?아이디..! ${requestId}")
         if (targetFragment != null) {
             when (targetFragment) {
                 "OrderFragment" -> {
@@ -78,17 +77,22 @@ class MainActivity : AppCompatActivity() {
                     }
                     navController?.navigate(R.id.orderFragment, bundle)
                 }
-                "NoticeFragment" -> {
+                "WriteNoticeFragment" -> {
                     val noticeId = intent.getStringExtra("requestId")!!.toInt()
-                    navController?.navigate(R.id.noticeManageFragment)
-                    noticeViewModel.getNotice( 1,noticeId,  1)
+                    noticeViewModel.getNotice(1, requestId!!.toInt(), 1).also {
+                        Log.d(TAG, "onCreate: ${targetFragment}")
+                        noticeViewModel.clickNotice.observe(this) { notice ->
+                            if (notice != null) {
+                                navController?.navigate(R.id.writeNotiFragment)
+                            }
+                        }
+                    }
                 }
                 "BossFragment" ->{
 //                    sharedPreferencesUtil.addStore(intent.getStringExtra("requestId")!!.toInt())
                     navController?.navigate(R.id.bossFragment)
                 }
                 "RecipeManageFragment"->{
-//                    sharedPreferencesUtil.addStore(intent.getStringExtra("requestId")!!.toInt())
                     navController?.navigate(R.id.recipeManageFragment)
                 }
                 "MyPageFragment"->{

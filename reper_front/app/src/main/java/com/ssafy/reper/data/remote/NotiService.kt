@@ -26,7 +26,7 @@ interface NotiService {
 
     //가게에 공지를 등록한다.
     @POST("stores/{storeId}/notices")
-    suspend fun createNotice(@Path("storeId") storeId: Int, @Body request: NoticeRequest)
+    suspend fun createNotice(@Path("storeId") storeId: Int, @Body request: NoticeRequest): Notice
 
     //공지를 수정한다.
     @PUT("stores/{storeId}/notices/{noticeId}")

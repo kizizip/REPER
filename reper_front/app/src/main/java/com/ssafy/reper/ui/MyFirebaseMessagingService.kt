@@ -11,6 +11,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.ssafy.reper.R
+
+private const val TAG = "MyFirebaseMessagingServ"
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -45,6 +48,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     private fun sendNotification(title: String, body: String, data: Map<String, String>) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        Log.d(TAG, "sendNotification: ${data}")
 
         // Android 8.0 이상 알림 채널 설정
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -66,6 +70,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // MainActivity를 열면서 targetFragment 정보 전달
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("targetFragment", targetFragment)
+            putExtra("requestId", requestId)
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
@@ -75,7 +80,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         // 알림 생성
         val notification = NotificationCompat.Builder(this, "default_channel")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.mypage_bell_btn)  // 작은 아이콘 지정
             .setContentTitle(title)
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH) // Heads-up 알림 활성화

@@ -1,21 +1,23 @@
 package com.ssafy.reper.ui.boss
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.Notice
 import com.ssafy.reper.databinding.FragmentWriteNotiBinding
 import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
+import kotlinx.coroutines.launch
 
-
+private const val TAG = "WriteNotiFragment"
 class WriteNotiFragment : Fragment() {
     private var _binding: FragmentWriteNotiBinding? = null
     private val binding get() = _binding!!
@@ -62,15 +64,18 @@ class WriteNotiFragment : Fragment() {
         }
 
         binding.notiWriteFgSaveBtn.setOnClickListener {
-            if (noticeViewModel.clickNotice.value != null) {
-                modifyNotice()
-                parentFragmentManager.popBackStack()
-            } else {
-                createNotice()
-                parentFragmentManager.popBackStack()
-                findNavController().navigate(R.id.noticeManageFragment)
+            viewLifecycleOwner.lifecycleScope.launch {
+                if (noticeViewModel.clickNotice.value != null) {
+                    modifyNotice()
+                    parentFragmentManager.popBackStack()
+                } else {
+                    createNotice()  // 공지 생성이 완료될 때까지 기다림
+                    parentFragmentManager.popBackStack()
+                    findNavController().navigate(R.id.noticeManageFragment)
+                }
             }
         }
+
 
         binding.notiWriteFgDeleteTv.setOnClickListener {
             noticeViewModel.deleteNotice(storeId, noticeViewModel.clickNotice.value!!.noticeId,
@@ -131,26 +136,28 @@ class WriteNotiFragment : Fragment() {
     }
 
 
-    fun createNotice() {
+    suspend fun createNotice() {
         val title = binding.notiWriteFgTitleET.text.toString()
         val content = binding.notiWriteFgContentET.text.toString()
-
-        val targetFragment = "NoticeWriteFragment"
-        val requestId = noticeViewModel.clickNotice.value?.noticeId
-
-        noticeViewModel.createNotice(storeId, userId, title, content)
-        fcmViewModel.sendToStoreFCM(storeId,"새로운 공지가 등록되었습니다.",title, targetFragment, 50)
-
-        Toast.makeText(requireContext(), "공지 작성 완료", Toast.LENGTH_SHORT).show()
-
+        val targetFragment = "WriteNoticeFragment"
+        val requestId = noticeViewModel.createNotice(storeId, userId, title, content)?.noticeId
+        requestId?.let { id ->  // requestId가 null이 아닐 때만 실행
+            fcmViewModel.sendToStoreFCM(storeId, "새로운 공지가 등록되었습니다.", title, targetFragment, id)
+            Toast.makeText(requireContext(), "공지 작성 완료", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "createNotice: ${id}")
+        } ?: run {
+            Toast.makeText(requireContext(), "공지 작성 실패", Toast.LENGTH_SHORT).show()
+        }
     }
+
 
     fun modifyNotice() {
         val title = binding.notiWriteFgTitleET.text.toString()
         val content = binding.notiWriteFgContentET.text.toString()
 
-        val targetFragment = "NoticeWriteFragment"  // 이동할 프래그먼트 이름
-        val requestId = noticeViewModel.clickNotice.value!!.noticeId  // 수정된 공지의 ID
+        val targetFragment = "WriteNoticeFragment"  // 이동할 프래그먼트 이름
+        val requestId = noticeViewModel.clickNotice.value!!.noticeId  // 수정된 공지의 ID,
+        Log.d(TAG, "modifyNotice: ${requestId}")
 
         noticeViewModel.modifyNotice(
             storeId, userId,
