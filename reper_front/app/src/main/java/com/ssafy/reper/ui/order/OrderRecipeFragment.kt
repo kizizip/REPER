@@ -1,141 +1,193 @@
 package com.ssafy.reper.ui.order
 
+import MainActivityViewModel
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
-import com.ssafy.reper.data.local.HomeAnnouncementModel
-import com.ssafy.reper.data.local.HomeBannerModel
-import com.ssafy.reper.data.local.OrderRecipeModel
-import com.ssafy.reper.databinding.FragmentOrderBinding
+import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.databinding.FragmentOrderRecipeBinding
 import com.ssafy.reper.ui.MainActivity
-import com.ssafy.reper.ui.home.adapter.RVHomeAnnouncement
-import com.ssafy.reper.ui.order.adapter.RVOrderRecipeAdapter
+import com.ssafy.reper.ui.order.adapter.OrderRecipeAdatper
+import com.ssafy.reper.util.ViewModelSingleton
+import java.util.ArrayList
 
-
+private const val TAG = "OrderRecipeFragment_정언"
 class OrderRecipeFragment : Fragment() {
 
-    private var _binding: FragmentOrderRecipeBinding? = null
-    private val binding get() = _binding!!
+    lateinit var order:Order
+    // check 표시된 레시피 ID 저장 리스트
+    var checkedRecipeIdList:MutableList<Int> = mutableListOf()
+    // OrderFragment에서 날라오는 orderId
+    var orderId = -1
 
-    private val orderdetailItems = mutableListOf<OrderRecipeModel>()
+    private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
+    private val viewModel: OrderViewModel by viewModels()
 
+    // 주문 레시피 리스트 recyclerView Adapter
+    private lateinit var orderRecipeAdapter : OrderRecipeAdatper
 
+    private lateinit var mainActivity: MainActivity
+    private var _orderRecipebinding: FragmentOrderRecipeBinding? = null
+    private val orderRecipebinding get() = _orderRecipebinding!!
+
+    // 안드로이드 라이프 사이클
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mainActivity = context as MainActivity
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
-        _binding = FragmentOrderRecipeBinding.inflate(inflater, container, false)
-        return binding.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        _orderRecipebinding = FragmentOrderRecipeBinding.inflate(inflater, container, false)
+        return orderRecipebinding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // OrderFragment에서 bundle로 던진 orderId를 받음
+        orderId = arguments?.getInt("orderId") ?: -1
 
+        // 어뎁터 처리
+        initAdapter()
+        // 이벤트 처리
+        initEvent()
+    }
+    override fun onResume() {
+        super.onResume()
+        mainActivity.hideBottomNavigation()
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        _orderRecipebinding = null
+    }
+
+    // 이벤트 처리
+    fun initEvent(){
         // 뒤로가기 버튼 클릭 리스너 설정
-        binding.notiFgBackIcon.setOnClickListener {
-            // 프래그먼트 매니저의 백스택에서 현재 프래그먼트 제거
+        orderRecipebinding.notiFgBackIcon.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
         // 탭 초기 상태 설정 (단계별 레시피 선택)
-        binding.orderRecipeFragmentStepbystepRecipeTab.isSelected = true
-        binding.orderRecipeFragmentAllRecipeTab.isSelected = false
+        orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected = true
+        orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected = false
 
-        // 탭 클릭 리스너 설정
-        binding.orderRecipeFragmentStepbystepRecipeTab.setOnClickListener {
-            binding.orderRecipeFragmentStepbystepRecipeTab.isSelected = true
-            binding.orderRecipeFragmentAllRecipeTab.isSelected = false
-            // 여기에 단계별 레시피 표시 로직 추가
+        // 단계별 레시피 탭
+        orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.setOnClickListener {
+            orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected = true
+            orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected = false
         }
 
-        binding.orderRecipeFragmentAllRecipeTab.setOnClickListener {
-            binding.orderRecipeFragmentStepbystepRecipeTab.isSelected = false
-            binding.orderRecipeFragmentAllRecipeTab.isSelected = true
-            // 여기에 전체 레시피 표시 로직 추가
+        // 전체 레시피 탭
+        orderRecipebinding.orderRecipeFragmentAllRecipeTab.setOnClickListener {
+            orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected = false
+            orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected = true
         }
 
-        // 주문 상세 리스트 코드!!!
-        orderdetailItems.add(
-            OrderRecipeModel(
-                R.drawable.americano_hot,
-                "아메리카노 hot",
-                2,
-                "없음"
-            )
-        )
+        // 전체선택
+        orderRecipebinding.orderrecipeFmCheckbox.setOnClickListener{
+            if(orderRecipebinding.orderrecipeFmCheckbox.isChecked){
+                checkedRecipeIdList.clear()
+                for(detail in  orderRecipeAdapter.orderDetailList){
+                    checkedRecipeIdList.add(detail.recipeId)
+                }
+            }
+            else{
+                checkedRecipeIdList.clear()
+            }
+            orderRecipeAdapter.checkedRecipeIdList = checkedRecipeIdList
+            orderRecipeAdapter.notifyDataSetChanged()
+        }
 
-        orderdetailItems.add(
-            OrderRecipeModel(
-                R.drawable.americano_hot,
-                "아메리카노 Ice",
-                3,
-                "샷 추가"
-            )
-        )
+        orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.setOnClickListener {
+            viewModel.completeOrder(orderId)
+            parentFragmentManager.popBackStack()
+        }
 
-        orderdetailItems.add(
-            OrderRecipeModel(
-                R.drawable.americano_hot,
-                "카페모카 Ice",
-                1,
-                "휘핑 빼고"
-            )
-        )
+        viewModel.order.observe(viewLifecycleOwner){
+            order = it
+            orderRecipebinding.fragmentOrderRecipeTvTakeout.let{text ->
+                if(it.takeout){
+                    text.setText("포장")
+                    text.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+                }
+                else{
+                    text.setText("매장")
+                    text.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
+                }
+            }
 
-        orderdetailItems.add(
-            OrderRecipeModel(
-                R.drawable.americano_hot,
-                "카페라떼 hot",
-                2,
-                "없음"
-            )
-        )
+            orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.let {
+                if(order.completed){
+                    it.visibility = View.GONE
+                }
+                else{
+                    it.visibility = View.VISIBLE
+                }
+            }
+            orderRecipebinding.orderRecipeFragmentGoRecipeBtn.let {
+                if(order.completed){
+                    it.setBackgroundResource(R.drawable.btn)
+                }
+                else{
+                    it.setBackgroundResource(R.drawable.medium_green_button)
+                }
+            }
+        }
 
-        orderdetailItems.add(
-            OrderRecipeModel(
-                R.drawable.americano_hot,
-                "아메리카노 hot",
-                2,
-                "없음"
-            )
-        )
+        orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setOnClickListener {
+            mainViewModel.setOrder(order)
+            mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
+                Log.d(TAG, "selectedOrder: ${it}")
+                val bundle = Bundle().apply {
+                    putInt("whereAmICame", 2)
+                    putIntegerArrayList("idList", ArrayList(checkedRecipeIdList))
+                }
 
-        orderdetailItems.add(
-            OrderRecipeModel(
-                R.drawable.americano_hot,
-                "아메리카노 hot",
-                2,
-                "없음"
-            )
-        )
-
-        val rvOrderRecipe = binding.fragmentOrderRecipeRv
-        val rvOrderRecipeAdapter = RVOrderRecipeAdapter(orderdetailItems)
-
-        rvOrderRecipe.adapter = rvOrderRecipeAdapter
-        rvOrderRecipe.layoutManager = LinearLayoutManager(context,  LinearLayoutManager.VERTICAL, false)
-
+                if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
+                    findNavController().navigate(R.id.allRecipeFragment, bundle)
+                }
+                else if(orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected == true){
+                    findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                }
+            }
+        }
     }
+    // 어뎁터 설정
+    fun initAdapter() {
+        orderRecipeAdapter = OrderRecipeAdatper(mutableListOf(), mutableListOf(), checkedRecipeIdList) { recipeId, isChecked ->
+            // 클릭 이벤트 -> recipeId 저장, 삭제
+            if(isChecked){
+                checkedRecipeIdList.add(recipeId)
+                if(checkedRecipeIdList.count() == orderRecipeAdapter.recipeList.count()){
+                    orderRecipebinding.orderrecipeFmCheckbox.isChecked = true
+                }
+            }
+            else{
+                checkedRecipeIdList.remove(recipeId)
+                if(checkedRecipeIdList.count() != orderRecipeAdapter.recipeList.count()){
+                    orderRecipebinding.orderrecipeFmCheckbox.isChecked = false
+                }
+            }
+        }
 
+        // 데이터 저장
+        orderRecipebinding.fragmentOrderRecipeRv.apply {
+            viewModel.getOrder(orderId)
 
-
-    override fun onDestroy() {
-        super.onDestroy()
-        // Fragment가 파괴될 때 BottomNavigationView 다시 보이게 하기
-        (activity as MainActivity).showBottomNavigation()
-
-        _binding = null
+            viewModel.recipeList.observe(viewLifecycleOwner){
+                orderRecipeAdapter.orderDetailList = viewModel.order.value!!.orderDetails
+                orderRecipeAdapter.recipeList = it
+                adapter = orderRecipeAdapter
+            }
+        }
     }
-
 }

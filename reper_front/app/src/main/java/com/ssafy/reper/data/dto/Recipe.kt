@@ -1,12 +1,11 @@
 package com.ssafy.reper.data.dto
 
 data class Recipe(
-
-    val recipeId: Int,
     val category: String,
-    val ingredients: List<Ingredient>,
+    val ingredients: MutableList<Ingredient>,
+    val recipeId: Int,
+    val recipeImg: Any?,
     val recipeName: String,
-    val recipeSteps: List<RecipeStep>,
+    val recipeSteps: MutableList<RecipeStep>,
     val type: String
-
 )

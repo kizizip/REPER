@@ -26,7 +26,6 @@ import kotlinx.coroutines.withContext
 private const val TAG = "MainActivity_싸피"
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장
     private val noticeViewModel: NoticeViewModel by viewModels()
@@ -55,7 +54,6 @@ class MainActivity : AppCompatActivity() {
         navController?.let {
             binding.activityMainBottomMenu.setupWithNavController(it)
         }
-
         // FCM Token 비동기 처리
         CoroutineScope(Dispatchers.Main).launch {
             // 비동기적으로 백그라운드 스레드에서 토큰을 가져옴
@@ -129,7 +127,6 @@ class MainActivity : AppCompatActivity() {
             Log.e("FCM Error", "Fetching FCM token failed", e)
             ""
         }
-
     }
 
     fun hideBottomNavigation() {
@@ -158,8 +155,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
-
     // backstack에 아무것도없는 상태에서 뒤로가기 버튼을 눌렀을때
     //이거 컨트롤러랑 같이 쓸수없음,,,,supportFragmentManager는 컨트롤러 안의 백스텍을 세는게아니라서,..
 

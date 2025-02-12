@@ -84,6 +84,14 @@ class SharedPreferencesUtil(context: Context) {
         preferences.edit().putString(KEY_USER_COOKIE, cookie).apply()
     }
 
+    fun getStoreId() :Int{
+        return preferences.getInt(STORE_ID, 1)
+    }
+
+    fun setStoreId(storeId: Int){
+        preferences.edit().putInt(STORE_ID, storeId).apply()
+    }
+
     //사용자 정보 저장
     fun addUser(userinfo: UserInfo){
         val editor = preferences.edit()
@@ -96,9 +104,9 @@ class SharedPreferencesUtil(context: Context) {
     // 사용자 정보 가져오기 (수정 필요)
     fun getUser(): LoginResponse {
         return LoginResponse(
-            userId = preferences.getLong("userId", 0),
-            username = preferences.getString("username", ""),
-            role = preferences.getString("role", ""),
+            userId = preferences.getLong("userId", 12),
+            username = preferences.getString("username", "test"),
+            role = preferences.getString("role", "Staff"),
         )
     }
 
@@ -148,5 +156,6 @@ class SharedPreferencesUtil(context: Context) {
     companion object {
         private const val SHARED_PREFERENCES_NAME = "reper_preference"
         private const val KEY_USER_COOKIE = "user_cookie"
+        private const val STORE_ID = "user_cookie"
     }
 }

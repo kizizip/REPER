@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:paddingHorizontal="24dp"
     android:paddingTop="60dp"
-    android:paddingBottom="24dp"
     android:background="@color/white"
     android:id="@+id/fragment_all_recipe"
     tools:context=".ui.recipe.AllRecipeFragment">
@@ -24,13 +23,15 @@
             android:text="레시피 검색"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
         <Spinner
             android:id="@+id/allrecipe_fm_sp"
-            android:layout_width="wrap_content"
+            android:layout_width="170dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="-8dp"
+            android:layout_marginEnd="4dp"
             android:overlapAnchor="false"
             android:spinnerMode="dialog"
+            android:background="@drawable/recipe_spinner_background"
             app:layout_constraintBottom_toBottomOf="@+id/textView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/textView" />
@@ -65,7 +66,7 @@
                 android:fontFamily="@font/pretendard_regular"
                 android:hint="원하는 레시피를 찾아보세요!"
                 android:inputType="text"
-                android:imeOptions="actionDone"
+                android:imeOptions="actionSearch"
                 android:singleLine="true"
                 android:textColor="@color/black"
                 android:textSize="16sp"
@@ -134,38 +135,30 @@
             android:background="@color/ligtgreen"
             app:layout_constraintTop_toBottomOf="@+id/allrecipe_fm_ll" />
 
+        <TextView
+            android:id="@+id/allrecipe_fm_tv_norecipe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:fontFamily="@font/pretendard_regular"
+            android:text="해당하는 레시피가 없습니다."
+            android:textColor="@color/lightgray"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/allrecipe_fm_rv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/allrecipe_fm_ll" />
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/allrecipe_fm_rv"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:visibility="visible"
             android:layout_marginTop="8dp"
             android:focusable="false"
-            app:layout_constraintBottom_toTopOf="@+id/allrecipe_fm_fl_btn_search_bottom"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/view" />
-
-        <FrameLayout
-            android:id="@+id/allrecipe_fm_fl_btn_search_bottom"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn"
-            android:clickable="true"
-            android:focusable="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/pretendard_semibold"
-                android:layout_gravity="center"
-                android:text="검색하기"
-                android:textColor="@color/white"
-                android:textSize="16sp"/>
-
-        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

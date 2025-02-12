@@ -3,6 +3,7 @@ package com.d109.reper.controller;
 import com.d109.reper.domain.User;
 import com.d109.reper.domain.UserRole;
 import com.d109.reper.service.UserService;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class UserController {
 
     //회원가입
     @PostMapping
-    @Operation(summary = "사용자 정보를 추가합니다. 성공하면 true를 리턴합니다. ", description = "모든 정보를 입력해야 회원가입이 가능합니다.")
+    @Operation(summary = "사용자 정보를 추가합니다. 성공하면 저장된 userId를 리턴합니다. ", description = "모든 정보를 입력해야 회원가입이 가능합니다.")
     public ResponseEntity<?> join(@RequestBody JoinRequest joinRequest) {
         log.info("insertMember::: {}", joinRequest);
 
@@ -53,11 +54,10 @@ public class UserController {
         user.setPhone(joinRequest.getPhone());
         user.setRole(joinRequest.getRoleEnum());  // Enum 변환
 
-        int res = userService.insertMember(user);
-        log.info("res ::: 0", res);
+        Long userId = userService.insertMember(user);
 
-        if (res == 1) {
-            return ResponseEntity.ok(true);
+        if (userId != null) {
+            return ResponseEntity.ok(userId);
         } else {
             throw new RuntimeException("회원가입 실패");
         }
@@ -144,16 +144,6 @@ public class UserController {
             throw new RuntimeException("서버 오류 발생");
         }
     }
-
-
-    // 비밀번호 변경
-//    @PatchMapping("/{userId}/{password}")
-//    public ResponseEntity<Boolean> updatePassword(@PathVariable Long userId, @PathVariable String password, @RequestBody PasswordUpdateRequest passwordUpdateRequest) {
-//        Map<String, Object> userInfo = userService.getUserInfo(userId);
-//        if () { // 기존 비밀번호와 일치한다면
-//
-//        }
-//    }
 
 
     // 회원 탈퇴
@@ -271,6 +261,7 @@ public class UserController {
         }
 
         // UserRole Enum으로 변환
+        @JsonIgnore
         public UserRole getRoleEnum() {
             try {
                 return UserRole.valueOf(role.toUpperCase());

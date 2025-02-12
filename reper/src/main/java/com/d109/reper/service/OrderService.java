@@ -62,6 +62,10 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setCompleted(false);
 
+        // takeout 여부를 랜덤으로 설정
+        boolean isTakeout = new Random().nextBoolean();
+        order.setTakeout(isTakeout);
+
         List<Recipe> recipes = recipeRepository.findAllRecipes();
         if (recipes.isEmpty()) {
             throw new IllegalStateException("No recipes available");
@@ -89,6 +93,23 @@ public class OrderService {
         orderDetailRepository.saveAll(orderDetails);
 
         return order;
+    }
+
+
+    public boolean updateOrder(Long orderId) {
+        try {
+            Order order = orderRepository.findByOrderId(orderId)
+                    .orElseThrow(() -> new IllegalArgumentException("OrderNotFound"));
+
+            if (order != null) {
+                order.setCompleted(true);
+            }
+
+            orderRepository.save(order);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }

@@ -1,6 +1,8 @@
 package com.d109.reper.repository;
 
+
 import com.d109.reper.domain.Recipe;
+import com.d109.reper.elasticsearch.RecipeSearchRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -13,9 +15,14 @@ public class RecipeRepository {
 
     private final EntityManager em;
 
+    private final RecipeSearchRepository recipeSearchRepository;
+
     //레시피 저장(단건)
-    public void save(Recipe recipe) {
+    public Recipe save(Recipe recipe) {
+
         em.persist(recipe);
+
+        return recipe; // elasticsearch 저장 위해 객체 반환으로 수정
     }
 
 
@@ -43,5 +50,6 @@ public class RecipeRepository {
             em.remove(recipe);
         }
     }
+
 
 }
