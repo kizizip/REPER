@@ -6,10 +6,23 @@ import fitz                                # pdf 파일에서 텍스트 추출
 import numpy as np                         # 벡터 연산 및 코사인 유사도 계산
 from dotenv import load_dotenv             # .env 파일에서 환경 변수 로드
 from flask import Flask, request, jsonify  # rest api 서버 구현현
+import boto3                               # aws s3 접근
+import base64                              # base64 인코딩/디코딩
+from io import BytesIO                     # 바이너리 데이터 처리
+
 
 # .env 파일 로드
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# AWS S3 클라이언트 생성성
+s3 = boto3.client(
+    "s3",
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    region_name="ap-northeast-2"
+)
+
 
 app = Flask(__name__)
 
@@ -90,16 +103,26 @@ def map_animation_url(instruction, threshold=0.85):
     return best_url if best_similarity >= threshold else None
 
 
-# # 레시피 이미지 생성
-# def generate_recipe_image(recipe_name):
-#     response = client.images.generate(
-#         model="dall-e-2",
-#         prompt=f"A high-quality realistic image of {recipe_name} coffee drink.",
-#         size="1024x1024",
-#         quality="standard",
-#         n=1,
-#     )
-#     return response.data[0].url if response.data else None
+# 레시피 이미지 생성
+def generate_recipe_image(recipe_name, type):
+    response = client.images.generate(
+        model="dall-e-2",
+        prompt=f"A high-quality realistic image of {recipe_name} coffee drink.",
+        size="1024x1024",
+        quality="standard",
+        response_format="b64_json",
+        n=1,
+    )
+
+    if response.data:
+        image_base64 = response.data[0].b64_json
+        image_data = base64.b64decode(image_base64)
+        bucket_name = "reper-images"
+        mykey = f"recipe_images/{recipe_name}.png"
+        s3.upload_fileobj(BytesIO(image_data), bucket_name, mykey)
+        s3_url = f"https://{bucket_name}.s3.amazonaws.com/{mykey}"
+        return s3_url
+    return None
 
 
 # PDF 파일에서 텍스트 추출
@@ -231,7 +254,7 @@ def upload_file():
         
         # 각 레시피 스텝에 대해 animationUrl 매핑 수행
         for recipe in data.get("recipes", []):
-            # recipe["recipeImg"] = generate_recipe_image(recipe["recipeName"])
+            recipe["recipeImg"] = generate_recipe_image(recipe["recipeName"])
             for step in recipe.get("recipeSteps", []):
                 instruction = step.get("instruction", "")
                 animation_url = map_animation_url(instruction)
