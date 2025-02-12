@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @Builder
@@ -18,6 +20,7 @@ public class FcmMessageResponseDto {
     public static class Message {
         private String token;
         private Notification notification;
+        private Map<String, String> data; // ← 추가된 부분
     }
 
     @Getter

@@ -83,9 +83,11 @@ public class FcmMessageService {
                                 .title(request.getTitle())
                                 .body(request.getBody())
                                 .build())
+                        .data(request.getData()) // ✅ 추가 데이터 포함
                         .build())
                 .build();
     }
+
 
     /**
      * 실제로 FCM 메시지를 전송하는 메서드
@@ -105,6 +107,7 @@ public class FcmMessageService {
 
         }catch (HttpClientErrorException e) {
             log.error("HTTP 오류 발생: 상태 코드 - {}, 응답 본문 - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.info("보내는 FCM 토큰: {}", messageDto);
         } catch (Exception e) {
             log.error("FCM 메시지 전송 중 오류 발생: ", e);
         }
