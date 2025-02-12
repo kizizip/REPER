@@ -14,6 +14,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
+import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentNoticeManageBinding
 import com.ssafy.reper.ui.boss.adpater.NotiAdapter
 
@@ -24,9 +25,13 @@ class NoticeManageFragment : Fragment() {
     private val binding get() = _binding!!
     private val noticeViewModel: NoticeViewModel by activityViewModels()
     var searchType = "제목"
-    var storeId = 1
-    var userId = 1
+    private var sharedUserId = 0
+    private var sharedStoreId = 0
     private lateinit var notiAdapter: NotiAdapter
+    val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
+        SharedPreferencesUtil(requireContext().applicationContext)
+    }
+
 
 
     override fun onCreateView(
@@ -42,12 +47,15 @@ class NoticeManageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("DEBUG", "onViewCreated 시작")
+        sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
+        sharedStoreId = sharedPreferencesUtil.getStoreId()
 
-        Log.d("DEBUG", "onViewCreated 끝")
+        if (sharedPreferencesUtil.getUser().role != "OWNER"){
+            binding.addBtn.visibility = View.GONE
+        }
 
         if(noticeViewModel.type.equals("")){
-            noticeViewModel.getAllNotice(storeId,userId)
+            noticeViewModel.getAllNotice(sharedStoreId,sharedUserId)
         }
 
         initNotiAdater()
@@ -119,7 +127,7 @@ class NoticeManageFragment : Fragment() {
     @SuppressLint("NotifyDataSetChanged")
     private fun initNotiAdater() {
         if (noticeViewModel.noticeList.value.isNullOrEmpty()) {
-            noticeViewModel.init(storeId, userId)
+            noticeViewModel.init(sharedStoreId, sharedUserId)
         }
 
         binding.notiList.layoutManager = LinearLayoutManager(requireContext())
@@ -145,9 +153,9 @@ class NoticeManageFragment : Fragment() {
     // 검색 기능
     private fun searchNotice(keyword: String) {
         if (searchType == "제목") {
-            noticeViewModel.searchNoticeTitle(storeId, keyword)
+            noticeViewModel.searchNoticeTitle(sharedStoreId, keyword)
         } else {
-            noticeViewModel.searchNoticeContent(storeId, keyword)
+            noticeViewModel.searchNoticeContent(sharedStoreId, keyword)
         }
     }
 

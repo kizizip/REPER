@@ -22,6 +22,7 @@ import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.StoreAdapter
 
 private const val TAG = "StoreManageFragment"
+
 class StoreManageFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private var _binding: FragmentStoreManageBinding? = null
@@ -117,11 +118,14 @@ class StoreManageFragment : Fragment() {
     private fun initAdapter() {
         storeAdapter = StoreAdapter(emptyList(), object : StoreAdapter.ItemClickListener {
             override fun onClick(position: Int) {
-                storeAdapter.storeList[position].name?.let { storeAdapter.storeList[position].storeId?.let { it1 ->
-                    showDialog(it,
-                        it1
-                    )
-                } }
+                storeAdapter.storeList[position].storeName?.let {
+                    storeAdapter.storeList[position].storeId?.let { it1 ->
+                        showDialog(
+                            it,
+                            it1
+                        )
+                    }
+                }
 
             }
         })
@@ -137,8 +141,7 @@ class StoreManageFragment : Fragment() {
     }
 
 
-
-    private fun showDialog(storeName: String, deleteStoreId:Int) {
+    private fun showDialog(storeName: String, deleteStoreId: Int) {
         val dialog = Dialog(mainActivity)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(R.layout.dialog_delete)

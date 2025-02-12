@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
+import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentRecipeManageBinding
 import com.ssafy.reper.ui.FcmViewModel
@@ -43,8 +44,11 @@ class RecipeManageFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private val bossViewModel: BossViewModel by activityViewModels()
     private val fcmViewModel: FcmViewModel by activityViewModels()
-    private lateinit var sharedPreferencesUtil: SharedPreferencesUtil
-    var storeId = 1
+    val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
+        SharedPreferencesUtil(requireContext().applicationContext)
+    }
+
+    var sharedStoreId = 0
     var pdfName = ""
 
 
@@ -76,13 +80,13 @@ class RecipeManageFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentRecipeManageBinding.inflate(inflater, container, false)
-        sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
 
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        sharedStoreId = sharedPreferencesUtil.getStoreId()
         Log.d(TAG, "onViewCreated:지금은 이상태입니다 ${sharedPreferencesUtil.getStateLoad()}")
         bossViewModel.setRecipeLoad(sharedPreferencesUtil.getStateLoad())
         Log.d(TAG, "onViewCreated: 뷰모델은 이거입니다! ${bossViewModel.recipeLoad.value}")
@@ -147,7 +151,7 @@ class RecipeManageFragment : Fragment() {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
                 val query = binding.recipeSearchBarET.text.toString().trim()
                 if (query.isNotEmpty()) {
-                    bossViewModel.searchRecipe(storeId, query)
+                    bossViewModel.searchRecipe(sharedStoreId, query)
                 }
                 true  // 이벤트 소비 (키보드 내림)
             } else {
@@ -160,10 +164,10 @@ class RecipeManageFragment : Fragment() {
 
     private fun initAdapter() {
         // MenuList를 불러오기 전에 어댑터 초기화
-        bossViewModel.getMenuList(storeId)
+        bossViewModel.getMenuList(sharedStoreId)
 
         binding.recipeFgAddRV.layoutManager = LinearLayoutManager(requireContext())
-        val recipeAdapter = RecipeAdapter(emptyList(), object : RecipeAdapter.ItemClickListener {
+        val recipeAdapter = RecipeAdapter(mutableListOf(), object : RecipeAdapter.ItemClickListener {
             override fun onItemClick(position: Int) {
                 val selectedRecipe = bossViewModel.recipeList.value?.get(position)
                 showDialog(selectedRecipe!!.recipeName, selectedRecipe!!.recipeId)
@@ -198,9 +202,9 @@ class RecipeManageFragment : Fragment() {
             dialog.dismiss()
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-            bossViewModel.deleteRecipe(recipeId, storeId)
+            bossViewModel.deleteRecipe(recipeId, sharedStoreId)
             Toast.makeText(requireContext(), "레시피 삭제 완료", Toast.LENGTH_SHORT).show()
-            bossViewModel.getMenuList(storeId)
+            bossViewModel.getMenuList(sharedStoreId)
             dialog.dismiss()
         }
         dialog.show()
@@ -251,7 +255,7 @@ class RecipeManageFragment : Fragment() {
         val filePart = getFilePart(requireContext(), uri)
         filePart?.let {
 
-            bossViewModel.uploadRecipe(storeId, it)
+            bossViewModel.uploadRecipe(sharedStoreId, it)
             binding.uploadBar.visibility = View.VISIBLE
             val contentDisposition = it.headers?.get("Content-Disposition")
             pdfName = contentDisposition?.substringAfter("filename=")?.replace("\"", "") ?: "알 수 없는 파일"

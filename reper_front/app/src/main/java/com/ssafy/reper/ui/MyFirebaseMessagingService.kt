@@ -1,5 +1,6 @@
 package com.ssafy.reper.ui
 
+import android.app.AlertDialog
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -11,6 +12,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.ssafy.reper.FcmDialog
 import com.ssafy.reper.R
 
 private const val TAG = "MyFirebaseMessagingServ"
@@ -42,6 +44,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
             // 데이터 메시지도 함께 전달
             sendNotification(title, body, data)
+            sendInAppMessage(title, body)
         }
     }
 
@@ -91,5 +94,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         notificationManager.notify(0, notification)
     }
+
+
+    private fun sendInAppMessage(title: String, body: String) {
+        val activity = MainActivity.instance  // MainActivity의 싱글톤 인스턴스를 가져옴
+        activity?.runOnUiThread {
+            val customDialog = FcmDialog(activity, title, body)
+            customDialog.show()
+        }
+    }
+
+
 
 }

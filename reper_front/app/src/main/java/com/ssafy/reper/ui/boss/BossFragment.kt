@@ -19,6 +19,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
+import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentBossBinding
 import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
@@ -36,13 +37,15 @@ class BossFragment : Fragment() {
     private val bossViewModel: BossViewModel by activityViewModels()
     private val noticeViewModel: NoticeViewModel by activityViewModels()
     private val fcmViewModel: FcmViewModel by activityViewModels()
-
-
+    val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
+        SharedPreferencesUtil(requireContext().applicationContext)
+    }
 
     //sharedPreferencesUtil정보로 바꾸기
-    var userId = 1
-    var storeId = 1
-    lateinit var storeName : String
+    private var sharedUserId = 0
+    private var sharedStoreId = 0
+
+    lateinit var storeName: String
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -63,10 +66,11 @@ class BossFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).hideBottomNavigation()
+        sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
+        sharedStoreId = sharedPreferencesUtil.getStoreId()
         initAdapter()
         moveFragment()
         initSpinner()
-
         noticeViewModel.type = ""
 
     }
@@ -78,16 +82,28 @@ class BossFragment : Fragment() {
     }
 
     private fun initAdapter() {
-        bossViewModel.getAllEmployee(storeId)
+        bossViewModel.getAllEmployee(sharedStoreId)
         // AccessAdapter 초기화
         accessAdapter = AccessAdapter(mutableListOf(), object : AccessAdapter.ItemClickListener {
             override fun onDeleteClick(position: Int) {
-                showDialog(accessAdapter.employeeList[position].userName,accessAdapter.employeeList[position].userId)
+                showDialog(
+                    accessAdapter.employeeList[position].userName,
+                    accessAdapter.employeeList[position].userId
+                )
             }
 
             override fun onAcceptClick(position: Int) {
-                bossViewModel.acceptEmployee(storeId, accessAdapter.employeeList[position].userId)
-                fcmViewModel.sendToUserFCM(accessAdapter.employeeList[position].userId,"권한 허가 알림", "${storeName}에서 권한을 허락했습니다.","MyPageFragment",storeId)
+                bossViewModel.acceptEmployee(
+                    sharedStoreId,
+                    accessAdapter.employeeList[position].userId
+                )
+                fcmViewModel.sendToUserFCM(
+                    accessAdapter.employeeList[position].userId,
+                    "권한 허가 알림",
+                    "${storeName}에서 권한을 허락했습니다.",
+                    "MyPageFragment",
+                    sharedStoreId
+                )
 
             }
         })
@@ -95,13 +111,25 @@ class BossFragment : Fragment() {
         // NonAccessAdapter 초기화
         nonAccessAdapter = AccessAdapter(mutableListOf(), object : AccessAdapter.ItemClickListener {
             override fun onDeleteClick(position: Int) {
-                showDialog(accessAdapter.employeeList[position].userName,nonAccessAdapter.employeeList[position].userId)
+                showDialog(
+                    accessAdapter.employeeList[position].userName,
+                    nonAccessAdapter.employeeList[position].userId
+                )
 
             }
 
             override fun onAcceptClick(position: Int) {
-                bossViewModel.acceptEmployee(storeId, nonAccessAdapter.employeeList[position].userId)
-                fcmViewModel.sendToUserFCM(accessAdapter.employeeList[position].userId,"권한 허가 알림", "${storeName}에서 권한을 허락했습니다.","MyPageFragment",storeId)
+                bossViewModel.acceptEmployee(
+                    sharedStoreId,
+                    nonAccessAdapter.employeeList[position].userId
+                )
+                fcmViewModel.sendToUserFCM(
+                    accessAdapter.employeeList[position].userId,
+                    "권한 허가 알림",
+                    "${storeName}에서 권한을 허락했습니다.",
+                    "MyPageFragment",
+                    sharedStoreId
+                )
 
             }
         })
@@ -135,7 +163,7 @@ class BossFragment : Fragment() {
 
         // 스토어 리스트 관찰 후 업데이트
         bossViewModel.myStoreList.observe(viewLifecycleOwner) { storeList ->
-            val storeNames = storeList.map { it.name }
+            val storeNames = storeList.map { it.storeName }
 
             val adapter = ArrayAdapter(
                 requireContext(),
@@ -146,7 +174,7 @@ class BossFragment : Fragment() {
             }
 
             spinner.adapter = adapter
-            val selectedStoreName = storeList.find { it.storeId == storeId }?.name
+            val selectedStoreName = storeList.find { it.storeId == sharedStoreId }?.storeName
             selectedStoreName?.let {
                 val position = storeNames.indexOf(it)
                 spinner.setSelection(position)
@@ -154,7 +182,7 @@ class BossFragment : Fragment() {
         }
 
         // 데이터 요청
-        bossViewModel.getStoreList(userId)
+        bossViewModel.getStoreList(sharedUserId)
 
         // 스피너 선택 이벤트 설정
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -166,11 +194,11 @@ class BossFragment : Fragment() {
             ) {
                 val selectedItem = spinner.adapter.getItem(position) as String
                 val selectedStore =
-                    bossViewModel.myStoreList.value?.find { it.name == selectedItem }
-                storeId = selectedStore!!.storeId!!
-                storeName = selectedStore!!.name.toString()
-                //나중엔 sharedPreferencesUtil꺼 바꿔주기
-                Log.d(TAG, "onItemSelected: ${storeId}")
+                    bossViewModel.myStoreList.value?.find { it.storeName == selectedItem }
+                storeName = selectedStore!!.storeName.toString()
+                sharedPreferencesUtil.setStoreId(selectedStore.storeId)
+                bossViewModel.getAllEmployee(selectedStore.storeId!!)
+                Log.d(TAG, "onItemSelected: ${selectedStore.storeId}")
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -203,7 +231,7 @@ class BossFragment : Fragment() {
     }
 
 
-    private fun showDialog(employeeName: String, userId:Int) {
+    private fun showDialog(employeeName: String, userId: Int) {
         val dialog = Dialog(mainActivity)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(R.layout.dialog_delete)
@@ -221,9 +249,20 @@ class BossFragment : Fragment() {
             dialog.dismiss()
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-            bossViewModel.deleteEmployee(storeId, userId )
-            fcmViewModel.sendToUserFCM(userId,"권한 삭제알림", "${storeName}에서 권한을 삭제했습니다.","MyPageFragment", storeId)
-            Toast.makeText(requireContext(), "권한 삭제 완료", Toast.LENGTH_SHORT).show()
+            bossViewModel.deleteEmployee(sharedStoreId, userId)
+            fcmViewModel.sendToUserFCM(
+                userId,
+                "권한 삭제알림",
+                "${storeName}에서 권한을 삭제했습니다.",
+                "MyPageFragment",
+                sharedStoreId
+            ).let {
+                if (it.equals("성공")){
+                    fcmViewModel.deleteUserToken(userId)
+                }
+                Toast.makeText(requireContext(), "권한 삭제 완료", Toast.LENGTH_SHORT).show()
+            }
+
             dialog.dismiss()
         }
         dialog.show()

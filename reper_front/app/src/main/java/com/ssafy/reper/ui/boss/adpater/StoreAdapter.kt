@@ -4,12 +4,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.ssafy.reper.data.dto.SearchedStore
 import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.databinding.ItemEditMyStoreRvBinding
 
 private const val TAG = "StoreAdapter_싸피"
 
-class StoreAdapter (var storeList: List<Store>, val itemClickListener: ItemClickListener) :
+class StoreAdapter (var storeList: List<SearchedStore>, val itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<StoreAdapter.StoreViewHolder>() {
 
     // ViewHolder
@@ -34,7 +35,7 @@ class StoreAdapter (var storeList: List<Store>, val itemClickListener: ItemClick
     }
 
     override fun onBindViewHolder(holder: StoreViewHolder, position: Int) {
-        holder.binding.itemStoreName.text = storeList[position].name
+        holder.binding.itemStoreName.text = storeList[position].storeName
     }
 
     override fun getItemCount(): Int {
@@ -46,7 +47,7 @@ class StoreAdapter (var storeList: List<Store>, val itemClickListener: ItemClick
         fun onClick(position: Int)
     }
 
-    fun updateData(newList: List<Store>) {
+    fun updateData(newList: List<SearchedStore>) {
         storeList = newList  // 그냥 새로운 리스트를 할당
         Log.d(TAG, "storeUpdateData: $storeList")
         notifyDataSetChanged() // 데이터 변경 시 UI 갱신

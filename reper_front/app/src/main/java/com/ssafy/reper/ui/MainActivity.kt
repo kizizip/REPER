@@ -30,13 +30,18 @@ import kotlinx.coroutines.withContext
 private const val TAG = "MainActivity_싸피"
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        var instance: MainActivity? = null
+    }
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장
     private val noticeViewModel: NoticeViewModel by viewModels()
     private val bossViewModel: BossViewModel by viewModels()
     private val fcmViewModel:FcmViewModel by viewModels()
-
     lateinit var sharedPreferencesUtil: SharedPreferencesUtil
+    var sharedUserId = 0
+    var sharedStoreId = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +49,10 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         super.onCreate(savedInstanceState)
+
         sharedPreferencesUtil = SharedPreferencesUtil(applicationContext)
+        sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
+        sharedStoreId = sharedPreferencesUtil.getStoreId()
 
         // View Binding 초기화
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -66,15 +74,13 @@ class MainActivity : AppCompatActivity() {
                 getFCMToken()
             }
             // 토큰을 받은 후 메인 스레드에서 UI 작업
-            fcmViewModel.saveToken(UserToken(1, token, 6))
+            fcmViewModel.saveToken(UserToken(sharedPreferencesUtil.getStoreId(), token, sharedPreferencesUtil.getUser().userId!!.toInt()))
             Log.d("FCMTOKEN", token)
         }
 
         // 📌 FCM에서 targetFragment 전달받았는지 확인 후, 해당 프래그먼트로 이동
         val targetFragment = intent.getStringExtra("targetFragment")
         val requestId = intent.getStringExtra("requestId")
-        Log.d(TAG, "onCreate:전달하긴해..?프래그먼트 ${targetFragment}")
-        Log.d(TAG, "onCreate:전달하긴해..?아이디..! ${requestId}")
         if (targetFragment != null) {
             when (targetFragment) {
                 "OrderFragment" -> {
@@ -85,8 +91,7 @@ class MainActivity : AppCompatActivity() {
                     navController?.navigate(R.id.orderFragment, bundle)
                 }
                 "WriteNoticeFragment" -> {
-                    val noticeId = intent.getStringExtra("requestId")!!.toInt()
-                    noticeViewModel.getNotice(1, requestId!!.toInt(), 1).also {
+                    noticeViewModel.getNotice(sharedPreferencesUtil.getStoreId(), requestId!!.toInt(), sharedPreferencesUtil.getStoreId()).also {
                         Log.d(TAG, "onCreate: ${targetFragment}")
                         noticeViewModel.clickNotice.observe(this) { notice ->
                             if (notice != null) {
@@ -96,14 +101,14 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 "BossFragment" ->{
-//                    sharedPreferencesUtil.addStore(intent.getStringExtra("requestId")!!.toInt())
+                    sharedPreferencesUtil.setStoreId(intent.getStringExtra("requestId")!!.toInt())
                     navController?.navigate(R.id.bossFragment)
                 }
                 "RecipeManageFragment"->{
                     navController?.navigate(R.id.recipeManageFragment)
                 }
                 "MyPageFragment"->{
-//                    sharedPreferencesUtil.addStore(intent.getStringExtra("requestId")!!.toInt())
+                    sharedPreferencesUtil.setStoreId(intent.getStringExtra("requestId")!!.toInt())
                     navController?.navigate(R.id.myPageFragment)
                 }
                 "" -> navController?.navigate(R.id.bossFragment)
@@ -116,7 +121,7 @@ class MainActivity : AppCompatActivity() {
             val token = withContext(Dispatchers.IO) {
                 getFCMToken()
             }
-            fcmViewModel.saveToken(UserToken(1, token, 1))
+            fcmViewModel.saveToken(UserToken(sharedPreferencesUtil.getStoreId(), token, sharedPreferencesUtil.getUser().userId!!.toInt()))
             Log.d("FCMTOKEN", token)
         }
 
@@ -148,18 +153,22 @@ class MainActivity : AppCompatActivity() {
         return binding.activityMainBottomMenu
     }
 
-    private fun sendFCMFileUpload(){
+    private fun sendFCMFileUpload() {
+        var lastResult: String? = null // 마지막 상태를 저장할 변수
+
         bossViewModel.recipeLoad.observe(this) { result ->
-            when (result) {
-                "success" -> {
-                   fcmViewModel.sendToUserFCM(1,"레시피 업로드 성공",sharedPreferencesUtil.getStateName(),"RecipeManageFragment",0)
+            if (lastResult != result) { // 값이 바뀌었을 때만 실행
+                when (result) {
+                    "success" -> {
+                        fcmViewModel.sendToUserFCM(1, "레시피 업로드 성공", sharedPreferencesUtil.getStateName(), "RecipeManageFragment", 0)
+                    }
+                    "failure" -> {
+                        fcmViewModel.sendToUserFCM(1, "레시피 업로드 실패", sharedPreferencesUtil.getStateName(), "RecipeManageFragment", 0)
+                    }
                 }
-                "failure" -> {
-                    fcmViewModel.sendToUserFCM(1,"레시피 업로드 실패",sharedPreferencesUtil.getStateName(),"RecipeManageFragment",0)
-                }
+                lastResult = result // 마지막 결과를 갱신
             }
         }
-
     }
     // backstack에 아무것도없는 상태에서 뒤로가기 버튼을 눌렀을때
     //이거 컨트롤러랑 같이 쓸수없음,,,,supportFragmentManager는 컨트롤러 안의 백스텍을 세는게아니라서,..

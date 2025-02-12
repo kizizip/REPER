@@ -3,7 +3,9 @@ package com.ssafy.reper.data.remote
 import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.data.dto.OwnerStore
 import com.ssafy.reper.data.dto.RequestStore
+import com.ssafy.reper.data.dto.SearchedStore
 import com.ssafy.reper.data.dto.Store
+import com.ssafy.reper.data.dto.StoreResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -15,7 +17,7 @@ interface StoreService {
 
     //사장님의 모든 가게 정보를 불러옴
     @GET("stores/owner/{userId}")
-    suspend fun findBossStore(@Path("userId") userId :Int): List<Store>
+    suspend fun findBossStore(@Path("userId") userId :Int): List<SearchedStore>
 
     //새로운 가게를 추가함
     @POST("stores")
@@ -25,12 +27,11 @@ interface StoreService {
     @DELETE("stores/{storeId}")
     suspend fun deleteStore(@Path("storeId") storeId: Int)
 
-    //가게명으로 매장검색
-    @GET("store/search")
-    suspend fun searchStore(@Query ("storeName")storeName : String) : List<Store>
-
     @GET("stores/{storeId}/employees")
     suspend fun allEmployee(@Path("storeId") storeId: Int): List<Employee>
+
+    @GET("stores/{storeId}")
+    suspend fun getStore(@Path("storeId") storeId: Int) : StoreResponse
 
     /////////////// 3.8선
 
