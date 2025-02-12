@@ -22,7 +22,7 @@ interface RecipeService {
 
     // 특정 매장의 레시피 이름 검색
     @GET("stores/{storeId}/recipes/search")
-    suspend fun searchRecipeName(@Path("storeId") storeId: Int, @Query("recipeName") recipeName:String) :MutableList<RecipeResponse>
+    suspend fun searchRecipeName(@Path("storeId") storeId: Int, @Query("recipeName") recipeName:String) : MutableList<RecipeResponse>
 
     // 특정 매장의 레시피 재료 포함 검색
     @GET("stores/{storeId}/recipes/search/include")

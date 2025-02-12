@@ -3,18 +3,13 @@ package com.ssafy.reper.ui.recipe
 import MainActivityViewModel
 import android.app.Dialog
 import android.content.Context
-import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.util.TypedValue
-import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -23,34 +18,19 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.GridLayout
 import android.widget.RadioButton
 import android.widget.Spinner
-import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.replace
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.airbnb.lottie.LottieComposition
-import com.airbnb.lottie.LottieCompositionFactory
 import com.ssafy.reper.R
 import com.ssafy.reper.base.ApplicationClass
-import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.ui.MainActivity
-import com.ssafy.reper.ui.login.LoginActivity
-import com.ssafy.reper.ui.order.OrderViewModel
 import com.ssafy.reper.util.ViewModelSingleton
-import com.ssafy.smartstore_jetpack.util.CommonUtils.makeComma
 import kotlinx.coroutines.launch
 
 private const val TAG = "AllRecipeFragment_정언"
@@ -220,63 +200,62 @@ class AllRecipeFragment : Fragment() {
             }
             // 아이템을 눌렀을 때
             else if(id == 2){
-                lifecycleScope.launch {
-                    val icehotList= viewModel.recipeList.value!!.filter { it.recipeName == recipeName }
-                    var ice = -1
-                    var hot = -1
-                    for(item in icehotList){
-                        if(item.type.equals("ICE")){
-                            ice = item.recipeId
+                val icehotList= viewModel.recipeList.value!!.filter { it.recipeName == recipeName }
+                var ice = -1
+                var hot = -1
+                for(item in icehotList){
+                    if(item.type.equals("ICE")){
+                        ice = item.recipeId
+                    }
+                    else if(item.type.equals("HOT")){
+                        hot = item.recipeId
+                    }
+                }
+
+                if(allRecipeBinding.allrecipeFmFullRecipeTab.isSelected == true){
+
+                    val bundle = Bundle().apply {
+                        putInt("whereAmICame", 1)
+                        putIntegerArrayList("idList", arrayListOf(ice ,hot))
+                    }
+                    findNavController().navigate(R.id.fullRecipeFragment, bundle)
+                }
+                else if(allRecipeBinding.allrecipeFmStepRecipeTab.isSelected == true){
+                    var bundle = Bundle().apply {
+                        putInt("whereAmICame", 1)
+                    }
+                    if(ice != -1 && hot != -1){
+                        val dialog = Dialog(mainActivity)
+                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        dialog.setContentView(R.layout.dialog_icehot)
+
+                        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.VISIBLE
+                        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.VISIBLE
+
+                        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
+                            ice = -1
+                            dialog.dismiss()
                         }
-                        else if(item.type.equals("HOT")){
-                            hot = item.recipeId
+                        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).setOnClickListener {
+                            hot = -1
+                            dialog.dismiss()
                         }
+                        dialog.show()
                     }
 
-                    if(allRecipeBinding.allrecipeFmFullRecipeTab.isSelected == true){
-                        mainViewModel.getSelectedRecipes(mutableListOf(ice, hot))
-                    }
-                    else if(allRecipeBinding.allrecipeFmStepRecipeTab.isSelected == true){
-                        if(ice != -1 && hot != -1){
-                            val dialog = Dialog(mainActivity)
-                            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                            dialog.setContentView(R.layout.dialog_icehot)
-
-                            dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.VISIBLE
-                            dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.VISIBLE
-
-                            dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
-                                ice = -1
-                                mainViewModel.getSelectedRecipes(mutableListOf(hot))
-                                dialog.dismiss()
-                            }
-                            dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).setOnClickListener {
-                                hot = -1
-                                mainViewModel.getSelectedRecipes(mutableListOf(ice))
-                                dialog.dismiss()
-                            }
-                            dialog.show()
-                        } else if (ice != -1){
-                            Log.d(TAG, "ice")
-                            mainViewModel.getSelectedRecipes(mutableListOf(ice))
-                        }
-                        else if (hot != -1){
-                            Log.d(TAG, "hot")
-                            mainViewModel.getSelectedRecipes(mutableListOf(hot))
-                        }
-                        mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
-                            if(ice == -1 || hot == -1){
-                                Log.d(TAG, "else? ${ice} / ${hot} ${it}")
-                                // 클릭 이벤트 -> 어디서 왔는지 전달
-                                val bundle = Bundle().apply {
-                                    putInt("whereAmICame", 1)
-                                }
-                                mainViewModel.setNowISeeRecipe(0)
-                                mainViewModel.setNowISeeStep(-1)
-                                findNavController().navigate(R.id.stepRecipeFragment, bundle)
-                            }
+                    if (ice != -1){
+                        bundle = Bundle().apply {
+                            putInt("whereAmICame", 1)
+                            putIntegerArrayList("idList", arrayListOf(ice))
                         }
                     }
+                    else if (hot != -1){
+                        bundle = Bundle().apply {
+                            putInt("whereAmICame", 1)
+                            putIntegerArrayList("idList", arrayListOf(hot))
+                        }
+                    }
+                    findNavController().navigate(R.id.stepRecipeFragment, bundle)
                 }
             }
         }

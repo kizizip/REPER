@@ -19,6 +19,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
+import java.io.IOException
 
 private const val TAG = "RecipeViewModel_정언"
 class RecipeViewModel : ViewModel() {
@@ -42,8 +43,7 @@ class RecipeViewModel : ViewModel() {
             _recipeList.value = list
         }
     }
-
-
+    
     fun searchRecipeName(storeId: Int, name: String) {
         viewModelScope.launch {
             var list:MutableList<RecipeResponse>
@@ -54,6 +54,7 @@ class RecipeViewModel : ViewModel() {
                     result.add(recipeService.getRecipe(item.recipeId))
                 }
             }
+
             catch (e:Exception){
                 Log.d(TAG, "error: ${e}")
                 result = mutableListOf()
@@ -61,6 +62,43 @@ class RecipeViewModel : ViewModel() {
             _recipeList.value = result
         }
     }
+
+//    fun searchRecipeName(storeId: Int, name: String) {
+//        viewModelScope.launch {
+//            try {
+//                Log.d(TAG, "🔍 API 요청 - storeId: $storeId, name: $name")
+//
+//                val response = recipeService.searchRecipeName(storeId, name)
+//
+//                if (response.isSuccessful) {
+//                    val list = response.body() ?: emptyList()
+//                    Log.d(TAG, "searchRecipeName: ${list}")
+//                    val result = list.map { recipeService.getRecipe(it.recipeId) }
+//                    _recipeList.value = result.toMutableList()
+//                    Log.d(TAG, "✅ 성공: ${_recipeList.value}")
+//                } else {
+//                    // ❌ 서버에서 응답이 왔지만 404 또는 다른 오류
+//                    val errorBody = response.errorBody()?.string()
+//                    Log.e(TAG, "❌ HTTP ${response.code()} - ${response.message()} \n 🔍 서버 응답: $errorBody")
+//                    _recipeList.value = mutableListOf()
+//                }
+//            } catch (e: HttpException) {
+//                // ❌ Retrofit의 HTTP 예외 (서버 응답 실패)
+//                Log.e(TAG, "⚠️ HttpException: HTTP ${e.code()} - ${e.message()} \n ${e.response()?.errorBody()?.string()}")
+//                _recipeList.value = mutableListOf()
+//            } catch (e: IOException) {
+//                // ❌ 네트워크 오류 (인터넷 끊김, 서버 다운 등)
+//                Log.e(TAG, "🚨 네트워크 오류: ${e.localizedMessage}", e)
+//                _recipeList.value = mutableListOf()
+//            } catch (e: Exception) {
+//                // ❌ 기타 예외 (JSON 파싱 오류 등)
+//                Log.e(TAG, "💥 알 수 없는 예외 발생: ${e.localizedMessage}", e)
+//                _recipeList.value = mutableListOf()
+//            }
+//        }
+//    }
+
+
 
     fun searchRecipeIngredientInclude(storeId:Int, ingredient:String){
         viewModelScope.launch {

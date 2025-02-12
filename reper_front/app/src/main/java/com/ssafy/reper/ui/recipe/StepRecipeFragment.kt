@@ -42,7 +42,7 @@ class StepRecipeFragment : Fragment() {
     private val viewModel: RecipeViewModel by viewModels()
 
     // Bundle 변수
-    lateinit var recipeIdList:ArrayList<Int>
+    lateinit var recipeIdList:MutableList<Int>
     var whereAmICame = -1
 
     private lateinit var mainActivity: MainActivity
@@ -66,25 +66,36 @@ class StepRecipeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // OrderFragment에서 bundle로 던진 orderId를 받음
         whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment
+        recipeIdList = arguments?.getIntegerArrayList("idList")?.toMutableList() ?: mutableListOf()
+        mainViewModel.setSelectedRecipes(recipeIdList)
 
         // 전역변수 관리
-        nowRecipeIdx = mainViewModel.nowISeeRecipe.value!!
-        mainViewModel.nowISeeRecipe.observe(viewLifecycleOwner){
-            nowRecipeIdx = it
-        }
-        nowStepIdx = mainViewModel.nowISeeStep.value!!
-        mainViewModel.nowISeeStep.observe(viewLifecycleOwner){
-            nowStepIdx = it
-        }
-        totalSteps = mainViewModel.recipeSteps.value?.count()!!
-        mainViewModel.recipeSteps.observe(viewLifecycleOwner){
-            totalSteps = it.count()
-        }
-        selectedRecipeList = mainViewModel.selectedRecipeList.value!!
-        totalRecipes = mainViewModel.selectedRecipeList.value?.count()!!
         mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
+            Log.d(TAG, "selectedRecipeList: $it")
             selectedRecipeList = it
             totalRecipes = it.count()
+
+            // 공통 이벤트 처리
+            initEvent()
+
+            val orientation = resources.configuration.orientation
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) { // 가로모드 처리
+                eventLand()
+            } else { // 세로 모드 처리
+                eventPortrait()
+            }
+        }
+        mainViewModel.nowISeeRecipe.observe(viewLifecycleOwner){
+            Log.d(TAG, "nowISeeRecipe: ")
+            nowRecipeIdx = it
+        }
+        mainViewModel.nowISeeStep.observe(viewLifecycleOwner){
+            Log.d(TAG, "nowISeeStep: ")
+            nowStepIdx = it
+        }
+        mainViewModel.recipeSteps.observe(viewLifecycleOwner){
+            Log.d(TAG, "recipeSteps: ")
+            totalSteps = it.count()
         }
 
         if(whereAmICame == 1){ // ALlRecipeFragment에서 옴
@@ -96,15 +107,7 @@ class StepRecipeFragment : Fragment() {
             orderDetails = order.orderDetails
         }
 
-        // 공통 이벤트 처리
-        initEvent()
 
-        val orientation = resources.configuration.orientation
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) { // 가로모드 처리
-            eventLand()
-        } else { // 세로 모드 처리
-            eventPortrait()
-        }
     }
     //캡쳐방지 코드입니다! 메시지 내용은 수정불가능,, 핸드폰내에 저장된 메시지가 뜨는 거라고 하네요
     override fun onResume() {
@@ -221,7 +224,7 @@ class StepRecipeFragment : Fragment() {
             }
 
             nowStepIdx >= totalSteps - 1 && nowRecipeIdx < totalRecipes - 1-> {
-                Log.d(TAG, "다음 레시피 보여주기!")
+                Log.d(TAG, "다음 레시피 보여주기! ${nowRecipeIdx}/${totalRecipes}, ${nowStepIdx}/${totalSteps}")
                 mainViewModel.setNowISeeRecipe(nowRecipeIdx + 1)
                 mainViewModel.setRecipeSteps(nowRecipeIdx)
                 mainViewModel.setNowISeeStep(-1)
@@ -230,7 +233,7 @@ class StepRecipeFragment : Fragment() {
 
             // 마지막 레시피의 마지막 스텝인 경우 → 버튼 비활성화
             else -> {
-                Log.d(TAG, "마지막 레시피의 마지막 스텝 도달")
+                Log.d(TAG, "마지막 레시피의 마지막 스텝 도달 ${nowRecipeIdx}/${totalRecipes}, ${nowStepIdx}/${totalSteps}")
                 showOneStepRecipe(nowStepIdx)
                 stepRecipeBinding.steprecipeFmBtnRight.visibility = View.GONE
             }
@@ -253,10 +256,10 @@ class StepRecipeFragment : Fragment() {
             }
 
             nowStepIdx < 0 && nowRecipeIdx > 0-> {
+                showIngredient(nowRecipeIdx)
                 mainViewModel.setNowISeeRecipe(nowRecipeIdx - 1)
                 mainViewModel.setRecipeSteps(nowRecipeIdx)
                 mainViewModel.setNowISeeStep(totalSteps - 1)
-                showIngredient(nowRecipeIdx)
             }
 
             nowStepIdx < 0  && nowRecipeIdx == 0->{
@@ -274,7 +277,12 @@ class StepRecipeFragment : Fragment() {
     fun showIngredient(recipeIdx:Int){
         stepRecipeBinding.lottieAnimationView.visibility = View.GONE
         stepRecipeBinding.steprecipeFmTvStep?.visibility = View.GONE
-        stepRecipeBinding.steprecipeFmLandTvRecipe?.text = "${selectedRecipeList.get(recipeIdx).recipeName} ${selectedRecipeList.get(recipeIdx).type}"
+        stepRecipeBinding.steprecipeFmTvMenuName?.setText("${selectedRecipeList.get(recipeIdx).recipeName} ${selectedRecipeList.get(recipeIdx).type}")
+        stepRecipeBinding.steprecipeFmLandTvRecipe?.setText("${selectedRecipeList.get(recipeIdx).recipeName} ${selectedRecipeList.get(recipeIdx).type}")
+
+        if(whereAmICame == 2){
+            stepRecipeBinding.steprecipeFmTvCustom.setText("${orderDetails.get(recipeIdx).customerRequest}")
+        }
 
         stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.VISIBLE
         initIngredientsAdapter(recipeIdx)
@@ -284,6 +292,9 @@ class StepRecipeFragment : Fragment() {
         val recipeSteps = mainViewModel.recipeSteps.value!!
 
         stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.GONE
+        if(whereAmICame == 2){
+            stepRecipeBinding.steprecipeFmTvCustom.setText("${orderDetails.get(nowRecipeIdx).customerRequest}")
+        }
 
         // 로티
         stepRecipeBinding.lottieAnimationView.visibility = View.VISIBLE

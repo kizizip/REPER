@@ -104,8 +104,8 @@ class SharedPreferencesUtil(context: Context) {
     fun getUser(): LoginResponse {
         return LoginResponse(
             userId = preferences.getLong("userId", 12),
-            username = preferences.getString("username", ""),
-            role = preferences.getString("role", ""),
+            username = preferences.getString("username", "test"),
+            role = preferences.getString("role", "Staff"),
         )
     }
 

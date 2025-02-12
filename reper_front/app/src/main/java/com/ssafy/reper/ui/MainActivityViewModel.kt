@@ -1,45 +1,39 @@
 import android.app.Application
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.airbnb.lottie.LottieComposition
-import com.airbnb.lottie.LottieCompositionFactory
-import com.google.android.datatransport.runtime.firebase.transport.LogEventDropped
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.data.remote.RetrofitUtil
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivityViewModel_정언"
 class MainActivityViewModel(application: Application) :  AndroidViewModel(application) {
     private val recipeService = RetrofitUtil.recipeService
 
-    private val _selectedRecipeList =
-        MutableLiveData<MutableList<Recipe>>()
+    private val _selectedRecipeList = MutableLiveData<MutableList<Recipe>>()
     val selectedRecipeList: LiveData<MutableList<Recipe>>
         get() = _selectedRecipeList
 
-    fun getSelectedRecipes(recipeIdList:MutableList<Int>){
+    fun setSelectedRecipes(recipeIdList:MutableList<Int>){
         viewModelScope.launch {
-            var list: MutableList<Recipe> = mutableListOf()
+            var list = mutableListOf<Recipe>()
             try {
                 for(id in recipeIdList){
                     list.add(recipeService.getRecipe(id))
-                    Log.d(TAG, "getSelectedRecipes: $id ${list.first()}")
                 }
+
+                setNowISeeRecipe(0)
+                setNowISeeStep(-1)
             }
             catch (e:Exception){
-                Log.d(TAG, "error: ${e}")
-                list = mutableListOf()
+                Log.e(TAG, "Error fetching recipes: ${e.message}", e)
             }
-            _selectedRecipeList.postValue(list)
-            setNowISeeRecipe(0)
-            setNowISeeStep(-1)
+            _selectedRecipeList.value = list
+            _selectedRecipeList.postValue(_selectedRecipeList.value)
         }
     }
 

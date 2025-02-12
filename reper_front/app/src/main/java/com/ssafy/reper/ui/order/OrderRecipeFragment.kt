@@ -1,31 +1,23 @@
 package com.ssafy.reper.ui.order
 
 import MainActivityViewModel
-import android.app.Dialog
 import android.content.Context
-import android.content.pm.ActivityInfo
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
-import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Order
-import com.ssafy.reper.data.local.OrderRecipeModel
 import com.ssafy.reper.databinding.FragmentOrderRecipeBinding
 import com.ssafy.reper.ui.MainActivity
-import com.ssafy.reper.ui.order.adapter.OrderAdatper
 import com.ssafy.reper.ui.order.adapter.OrderRecipeAdatper
 import com.ssafy.reper.util.ViewModelSingleton
-import kotlin.math.log
+import java.util.ArrayList
 
 private const val TAG = "OrderRecipeFragment_정언"
 class OrderRecipeFragment : Fragment() {
@@ -153,15 +145,12 @@ class OrderRecipeFragment : Fragment() {
 
         orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setOnClickListener {
             mainViewModel.setOrder(order)
-            mainViewModel.getSelectedRecipes(checkedRecipeIdList)
             mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
                 Log.d(TAG, "selectedOrder: ${it}")
                 val bundle = Bundle().apply {
                     putInt("whereAmICame", 2)
+                    putIntegerArrayList("idList", ArrayList(checkedRecipeIdList))
                 }
-
-                mainViewModel.setNowISeeRecipe(0)
-                mainViewModel.setNowISeeStep(-1)
 
                 if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
                     findNavController().navigate(R.id.allRecipeFragment, bundle)
