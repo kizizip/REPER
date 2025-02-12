@@ -26,7 +26,7 @@ class StoreSearchAdapter(private val storeList: List<Store>) :
         private val storeName: TextView = itemView.findViewById(R.id.store_item_tv_name)
 
         fun bind(store: Store, position: Int) {
-            storeName.text = store.storeName
+            storeName.text = store.name
             
             // 선택된 아이템의 텍스트 색상과 스타일 변경
             if (position == selectedPosition) {

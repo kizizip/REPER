@@ -37,7 +37,7 @@ class LoginActivity : AppCompatActivity() {
         val sharedPreferencesUtil = SharedPreferencesUtil(this)
         
         // 세션이 유효하고 사용자 정보가 있는 경우
-        if (sharedPreferencesUtil.isSessionValid() && sharedPreferencesUtil.getUser().userId != -1L) {
+        if (sharedPreferencesUtil.getUser().userId != -1L) {
             // MainActivity로 이동
             startActivity(Intent(this, MainActivity::class.java))
             finish()

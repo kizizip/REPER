@@ -68,15 +68,134 @@ class MyPageFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         mainActivity.showBottomNavigation()
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
+        val user = sharedPreferencesUtil.getUser()
+        var ownerStoreList: List<OwnerStore> = mutableListOf()  // 사장 가게 조회
+        var employeeStoreList: List<Store> = mutableListOf()    // 직원 가게 조회
+        
+        // 사장 or 직원 표시
+        if (user.role == "BOSS") {
+            myPageBinding.mypageFmTvYellow.text = "${user.username} 사장"
+            myPageBinding.mypageFmBtnBossMenu.text = "사장님 메뉴"
+
+            // 사장 정보 조회
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    ownerStoreList = RetrofitUtil.storeService.getStoreListByOwnerId(user.userId.toString())
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "매장 정보 조회 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            
+        } else {
+            myPageBinding.mypageFmTvYellow.text = "${user.username} 직원"
+            myPageBinding.mypageFmBtnBossMenu.text = "권한 요청"
+        }
+
+        startSequentialAnimation()
+        setupSpinner()
+        initEvent()
+    }
+
+    private fun startSequentialAnimation() {
+        // 뷰가 유효한지 확인
+        val binding = _myPageBinding ?: return
+
+        // 헤더 이미지 애니메이션
+        binding.imageView4.apply {
+            translationY = -200f
+            animate()
+                .translationY(0f)
+                .setDuration(1000)
+                .withEndAction {
+                    if (_myPageBinding == null) return@withEndAction
+                    // 바운스 효과
+                    animate()
+                        .translationY(-30f)
+                        .setDuration(150)
+                        .withEndAction {
+                            if (_myPageBinding == null) return@withEndAction
+                            animate()
+                                .translationY(0f)
+                                .setDuration(150)
+                        }
+                }
+        }
+
+        // 첫 번째 그룹 (상단 프로필 영역) - 투명도로 페이드인
+        val firstGroup = listOf(
+            binding.mypageFmBtnBell,
+            binding.mypageFmTvYellow,
+            binding.mypageFmTvName,
+            binding.textView6,
+            binding.mypageFmBtnLogout
+        )
+
+        firstGroup.forEach { view ->
+            view.alpha = 0f
+            view.animate()
+                .alpha(1f)
+                .setDuration(800)
+                .setStartDelay(500)
+                .withEndAction {
+                    if (_myPageBinding == null) return@withEndAction
+                }
+        }
+
+        // 두 번째 그룹 (매장 정보 영역) - 왼쪽에서 슬라이드
+        val secondGroup = listOf(
+            binding.textView7,
+            binding.mypageFmTvStoreNum,
+            binding.mypageFmBtnBossMenu,
+            binding.mypageFmSp
+        )
+
+        secondGroup.forEach { view ->
+            view.translationX = -200f
+            view.alpha = 0f
+            view.animate()
+                .translationX(0f)
+                .alpha(1f)
+                .setDuration(800)
+                .setStartDelay(1000)
+                .withEndAction {
+                    if (_myPageBinding == null) return@withEndAction
+                }
+        }
+
+        // 세 번째 그룹 (하단 버튼들) - 아래에서 위로 슬라이드
+        val thirdGroup = listOf(
+            binding.mypageFmBtnNotice,
+            binding.mypageFmBtnRecipe,
+            binding.mypageFmBtnEdit
+        )
+
+        thirdGroup.forEach { view ->
+            view.translationY = 200f
+            view.alpha = 0f
+            view.animate()
+                .translationY(0f)
+                .alpha(1f)
+                .setDuration(800)
+                .setStartDelay(1500)
+                .withEndAction {
+                    if (_myPageBinding == null) return@withEndAction
+                }
+        }
+    }
+
+    private fun setupSpinner() {
+        val binding = _myPageBinding ?: return
+        
         // 가게 이름 Spinner 설정
-        val spinner = myPageBinding.mypageFmSp
+        val spinner = binding.mypageFmSp
         val userTypes = arrayOf("메가커피 구미 인동점", "이스터에그:이걸 발견하다니!")
 
-        val adapter =
-            ArrayAdapter(requireContext(), R.layout.mypage_spinner_item, userTypes).apply {
-                setDropDownViewResource(R.layout.mypage_spinner_item)
-            }
+        val adapter = ArrayAdapter(requireContext(), R.layout.mypage_spinner_item, userTypes).apply {
+            setDropDownViewResource(R.layout.mypage_spinner_item)
+        }
 
         spinner.adapter = adapter
 
@@ -95,9 +214,6 @@ class MyPageFragment : Fragment() {
                 // 아무것도 선택되지 않았을 때의 처리
             }
         }
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        initEvent()
     }
 
     override fun onDestroyView() {
@@ -160,7 +276,7 @@ class MyPageFragment : Fragment() {
                                                 adapter.setOnItemClickListener { store ->
                                                     // 선택된 가게 이름을 TextView에 설정
                                                     dialog.findViewById<TextView>(R.id.request_access_d_tv_store_name).text =
-                                                        store.storeName
+                                                        store.name
                                                     selectedStoreId = store.storeId
 
                                                     // 확인 메시지를 보여주는 레이아웃 표시

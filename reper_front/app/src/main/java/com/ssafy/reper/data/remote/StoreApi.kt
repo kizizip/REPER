@@ -1,5 +1,6 @@
 package com.ssafy.reper.data.remote
 
+import com.ssafy.reper.data.dto.OwnerStore
 import com.ssafy.reper.data.dto.Store
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -23,4 +24,8 @@ interface StoreApi {
     // 알바생 -> 사장 권한 요청
     @POST("stores/{storeId}/employees/{userId}/approve")
     suspend fun approveEmployee(@Path("storeId") storeId: String, @Path("userId") userId: String)
+
+    // OWNER인 {userId}에 해당하는 모든 store를 조회
+    @GET("stores/owner/{userId}")
+    suspend fun getStoreListByOwnerId(@Path("userId") userId: String): List<OwnerStore>
 }

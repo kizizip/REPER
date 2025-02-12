@@ -80,20 +80,8 @@ class SharedPreferencesUtil(context: Context) {
     companion object {
         private const val SHARED_PREFERENCES_NAME = "reper_preference"
         private const val KEY_USER_COOKIE = "user_cookie"
-        private const val KEY_LOGIN_TIME = "login_time"
-        private const val SESSION_TIMEOUT = 10 * 60 * 1000 // 10분 (밀리초)
     }
 
-    // 로그인 시간 저장
-    fun saveLoginTime() {
-        preferences.edit().putLong(KEY_LOGIN_TIME, System.currentTimeMillis()).apply()
-    }
-
-    // 세션이 유효한지 확인
-    fun isSessionValid(): Boolean {
-        val loginTime = preferences.getLong(KEY_LOGIN_TIME, 0)
-        return System.currentTimeMillis() - loginTime < SESSION_TIMEOUT
-    }
 
     fun getUserCookie(): String? {
         return preferences.getString(KEY_USER_COOKIE, null)
@@ -110,7 +98,6 @@ class SharedPreferencesUtil(context: Context) {
         editor.putString("username", userinfo.username)
         editor.putString("role", userinfo.role)
         editor.apply()
-        saveLoginTime() // 사용자 정보 저장시 로그인 시간도 저장
     }
 
     // 사용자 정보 가져오기 (수정 필요)
@@ -129,7 +116,6 @@ class SharedPreferencesUtil(context: Context) {
             remove("userId")
             remove("username")
             remove("role")
-            remove(KEY_LOGIN_TIME)
             apply()
         }
     }

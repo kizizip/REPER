@@ -227,7 +227,7 @@ class EditMyAccountFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        // 계정 삭제 텍스트 클릭 시 삭제 확인 다이얼로그 표시
+        // 회원 탈퇴 텍스트 클릭 시 삭제 확인 다이얼로그 표시
         editMyAccountBinding.editmyaccountFmTvDeleteaccount.setOnClickListener {
             val dialog = Dialog(mainActivity)
             // 다이얼로그 배경을 투명하게 설정
@@ -252,14 +252,13 @@ class EditMyAccountFragment : Fragment() {
 
                         // 로그아웃 처리
                         // 사용자 쿠키 및 정보 삭제
-                        sharedPreferencesUtil.saveUserCookie("")
-                        sharedPreferencesUtil.addUser(UserInfo("", 0, ""))
+                        sharedPreferencesUtil.clearUserData()
 
                         Toast.makeText(context, "회원 탈퇴 완료", Toast.LENGTH_SHORT).show()
 
+                        dialog.dismiss()
                         startActivity(Intent(mainActivity, LoginActivity::class.java))
                         mainActivity.finish()
-                        dialog.dismiss()
                     } catch (e: Exception) {
                         // 에러 처리
                         Toast.makeText(context, "회원 탈퇴 처리 중 오류가 발생", Toast.LENGTH_SHORT).show()
@@ -276,7 +275,7 @@ class EditMyAccountFragment : Fragment() {
         myAccessStoreListAdapter = MyAccessStoreListAdapter(
             mutableListOf(),
             object : MyAccessStoreListAdapter.ItemClickListener {
-                override fun onStoreClick(store: Store, position: Int) {
+                override fun onDeleteClick(store: Store, position: Int) {
                     // 삭제 확인 다이얼로그 표시
                     val dialog = Dialog(mainActivity)
                     dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -297,7 +296,7 @@ class EditMyAccountFragment : Fragment() {
                                 myAccessStoreListAdapter.accessStoreList.removeAt(position)
                                 myAccessStoreListAdapter.notifyItemRemoved(position)
 
-                                Toast.makeText(requireContext(), "${store.storeName}에서 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireContext(), "${store.name}매장 권한이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
                                 dialog.dismiss()
                             } catch (e: Exception) {
                                 Toast.makeText(requireContext(), "삭제 처리 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
@@ -307,95 +306,112 @@ class EditMyAccountFragment : Fragment() {
                     }
                     dialog.show()
                 }
-
-                override fun onDeleteClick(store: Store, position: Int) {
-                    // 매장명 클릭과 동일한 동작
-                    onStoreClick(store, position)
-                }
             }
         )
 
         // RecyclerView 설정 및 데이터 로드
         val userId = sharedPreferencesUtil.getUser().userId
 
+        // RecyclerView 설정을 먼저 수행
+        editMyAccountBinding.editmyaccountFmRv.apply {
+            layoutManager = LinearLayoutManager(mainActivity, LinearLayoutManager.VERTICAL, false)
+            addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
+            adapter = myAccessStoreListAdapter
+        }
+
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 val storeList = RetrofitUtil.storeService.getStoreListByEmployeeId(userId.toString())
 
+                // RecyclerView와 빈 상태 메시지 설정
                 editMyAccountBinding.editmyaccountFmRv.apply {
                     layoutManager = LinearLayoutManager(mainActivity, LinearLayoutManager.VERTICAL, false)
                     addItemDecoration(DividerItemDecoration(mainActivity, DividerItemDecoration.VERTICAL))
                     adapter = myAccessStoreListAdapter
                 }
 
-                // 어댑터에 데이터 설정
-                myAccessStoreListAdapter.accessStoreList = storeList.toMutableList()
-                myAccessStoreListAdapter.notifyDataSetChanged()
+                // 데이터 유무에 따라 뷰 표시/숨김 처리
+                if (storeList.isEmpty()) {
+                    editMyAccountBinding.editmyaccountFmRv.visibility = View.GONE
+                    editMyAccountBinding.editmyaccountFmTvNoStores.visibility = View.VISIBLE
+                } else {
+                    editMyAccountBinding.editmyaccountFmRv.visibility = View.VISIBLE
+                    editMyAccountBinding.editmyaccountFmTvNoStores.visibility = View.GONE
+                    
+                    // 어댑터에 데이터 설정
+                    myAccessStoreListAdapter.accessStoreList = storeList.toMutableList()
+                    myAccessStoreListAdapter.notifyDataSetChanged()
+                }
 
             } catch (e: Exception) {
                 Log.e("EditMyAccountFragment", "매장 목록 조회 실패: ${e.message}")
                 Toast.makeText(requireContext(), "매장 목록을 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                
+                // 에러 발생 시에도 빈 상태 메시지 표시
+                editMyAccountBinding.editmyaccountFmRv.visibility = View.GONE
+                editMyAccountBinding.editmyaccountFmTvNoStores.visibility = View.VISIBLE
             }
         }
     }
 
     private fun startSequentialAnimation() {
-        // 각 요소별로 새로운 애니메이션 인스턴스 생성
-        val fadeSlideUp1 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
-        val fadeSlideUp2 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
-        val fadeSlideUp3 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
-        val fadeSlideUp4 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
-        val fadeSlideUp5 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
-        val fadeSlideUp6 = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+        // 각 애니메이션 실행 전에 바인딩 객체가 유효한지 확인
+        val binding = _editMyAccountBinding ?: return
 
         // 첫 번째 그룹 (뒤로가기 버튼, 타이틀)
-        editMyAccountBinding.editmyaccountFmBtnBack.postDelayed({
-            editMyAccountBinding.editmyaccountFmBtnBack.alpha = 1f
-            editMyAccountBinding.editmyaccountFmBtnBack.startAnimation(fadeSlideUp1)
-            editMyAccountBinding.textView9.alpha = 1f
-            editMyAccountBinding.textView9.startAnimation(fadeSlideUp1)
+        binding.editmyaccountFmBtnBack.postDelayed({
+            if (_editMyAccountBinding == null) return@postDelayed
+            binding.editmyaccountFmBtnBack.alpha = 1f
+            binding.editmyaccountFmBtnBack.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
+            binding.textView9.alpha = 1f
+            binding.textView9.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
         }, 200)
 
         // 두 번째 그룹 (아이디 관련)
-        editMyAccountBinding.textView12.postDelayed({
-            editMyAccountBinding.textView12.alpha = 1f
-            editMyAccountBinding.textView12.startAnimation(fadeSlideUp2)
-            editMyAccountBinding.FragmentJoinPhoneError.alpha = 1f
-            editMyAccountBinding.FragmentJoinPhoneError.startAnimation(fadeSlideUp2)
-            editMyAccountBinding.editmyaccountFmEtId.alpha = 1f
-            editMyAccountBinding.editmyaccountFmEtId.startAnimation(fadeSlideUp2)
+        binding.textView12.postDelayed({
+            if (_editMyAccountBinding == null) return@postDelayed
+            binding.textView12.alpha = 1f
+            binding.textView12.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
+            binding.FragmentJoinPhoneError.alpha = 1f
+            binding.FragmentJoinPhoneError.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
+            binding.editmyaccountFmEtId.alpha = 1f
+            binding.editmyaccountFmEtId.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
         }, 500)
 
         // 세 번째 그룹 (이름 관련)
-        editMyAccountBinding.textView13.postDelayed({
-            editMyAccountBinding.textView13.alpha = 1f
-            editMyAccountBinding.textView13.startAnimation(fadeSlideUp3)
-            editMyAccountBinding.editmyaccountFmEtName.alpha = 1f
-            editMyAccountBinding.editmyaccountFmEtName.startAnimation(fadeSlideUp3)
+        binding.textView13.postDelayed({
+            if (_editMyAccountBinding == null) return@postDelayed
+            binding.textView13.alpha = 1f
+            binding.textView13.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
+            binding.editmyaccountFmEtName.alpha = 1f
+            binding.editmyaccountFmEtName.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
         }, 800)
 
         // 네 번째 그룹 (전화번호 관련)
-        editMyAccountBinding.textView14.postDelayed({
-            editMyAccountBinding.textView14.alpha = 1f
-            editMyAccountBinding.textView14.startAnimation(fadeSlideUp4)
-            editMyAccountBinding.editmyaccountFmEtTel.alpha = 1f
-            editMyAccountBinding.editmyaccountFmEtTel.startAnimation(fadeSlideUp4)
+        binding.textView14.postDelayed({
+            if (_editMyAccountBinding == null) return@postDelayed
+            binding.textView14.alpha = 1f
+            binding.textView14.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
+            binding.editmyaccountFmEtTel.alpha = 1f
+            binding.editmyaccountFmEtTel.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
         }, 1100)
 
         // 다섯 번째 그룹 (내 권한 관련)
-        editMyAccountBinding.editmyaccountFmTvMyaccess.postDelayed({
-            editMyAccountBinding.editmyaccountFmTvMyaccess.alpha = 1f
-            editMyAccountBinding.editmyaccountFmTvMyaccess.startAnimation(fadeSlideUp5)
-            editMyAccountBinding.editmyaccountFmSv.alpha = 1f
-            editMyAccountBinding.editmyaccountFmSv.startAnimation(fadeSlideUp5)
+        binding.editmyaccountFmTvMyaccess.postDelayed({
+            if (_editMyAccountBinding == null) return@postDelayed
+            binding.editmyaccountFmTvMyaccess.alpha = 1f
+            binding.editmyaccountFmTvMyaccess.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
+            binding.editmyaccountFmSv.alpha = 1f
+            binding.editmyaccountFmSv.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
         }, 1400)
 
         // 여섯 번째 그룹 (수정 버튼, 회원탈퇴)
-        editMyAccountBinding.editmyaccountFmFlTenEdit.postDelayed({
-            editMyAccountBinding.editmyaccountFmFlTenEdit.alpha = 1f
-            editMyAccountBinding.editmyaccountFmFlTenEdit.startAnimation(fadeSlideUp6)
-            editMyAccountBinding.editmyaccountFmTvDeleteaccount.alpha = 1f
-            editMyAccountBinding.editmyaccountFmTvDeleteaccount.startAnimation(fadeSlideUp6)
+        binding.editmyaccountFmFlTenEdit.postDelayed({
+            if (_editMyAccountBinding == null) return@postDelayed
+            binding.editmyaccountFmFlTenEdit.alpha = 1f
+            binding.editmyaccountFmFlTenEdit.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
+            binding.editmyaccountFmTvDeleteaccount.alpha = 1f
+            binding.editmyaccountFmTvDeleteaccount.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up))
         }, 1700)
     }
 }

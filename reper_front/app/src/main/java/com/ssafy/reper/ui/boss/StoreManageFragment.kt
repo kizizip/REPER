@@ -117,7 +117,7 @@ class StoreManageFragment : Fragment() {
         storeAdapter = StoreAdapter(storeList
             , object : StoreAdapter.ItemClickListener {
             override fun onClick(position: Int) {
-                storeList[position].storeName?.let { showDialog(it) }
+                storeList[position].name?.let { showDialog(it) }
             }
         })
 

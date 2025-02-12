@@ -19,7 +19,7 @@ class SplashActivity : AppCompatActivity() {
 
         Handler().postDelayed({
             val sharedPreferencesUtil = SharedPreferencesUtil(this)
-            if (sharedPreferencesUtil.isSessionValid() && sharedPreferencesUtil.getUser().userId != -1L) {
+            if (sharedPreferencesUtil.getUser().userId != -1L) {
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             } else {

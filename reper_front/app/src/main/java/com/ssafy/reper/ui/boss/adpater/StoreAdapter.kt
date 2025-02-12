@@ -31,7 +31,7 @@ class StoreAdapter (var storeList: List<Store>, val itemClickListener: ItemClick
     }
 
     override fun onBindViewHolder(holder: StoreViewHolder, position: Int) {
-        holder.binding.itemStoreName.text = storeList[position].storeName
+        holder.binding.itemStoreName.text = storeList[position].name
     }
 
     override fun getItemCount(): Int {

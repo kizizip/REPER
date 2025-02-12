@@ -32,8 +32,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장
-    private lateinit var handler: Handler
-    private lateinit var sessionCheckRunnable: Runnable
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -51,34 +49,8 @@ class MainActivity : AppCompatActivity() {
         navController?.let {
             binding.activityMainBottomMenu.setupWithNavController(it)
         }
-
-        // 세션 체크 설정
-        setupSessionCheck()
     }
 
-    private fun setupSessionCheck() {
-        handler = Handler(Looper.getMainLooper())
-        sessionCheckRunnable = Runnable {
-            checkSession()
-            handler.postDelayed(sessionCheckRunnable, 60000) // 1분마다 체크
-        }
-        handler.post(sessionCheckRunnable)
-    }
-
-    private fun checkSession() {
-        val sharedPreferencesUtil = SharedPreferencesUtil(this)
-        if (!sharedPreferencesUtil.isSessionValid()) {
-            // 세션 만료시 처리
-            sharedPreferencesUtil.clearUserData()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacks(sessionCheckRunnable)
-    }
 
     fun hideBottomNavigation() {
         binding.activityMainBottomMenu.visibility = View.GONE

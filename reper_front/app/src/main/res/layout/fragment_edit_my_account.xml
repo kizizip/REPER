@@ -158,11 +158,29 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editmyaccount_fm_tv_myaccess">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/editmyaccount_fm_rv"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
+                android:layout_height="wrap_content">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/editmyaccount_fm_rv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/editmyaccount_fm_tv_no_stores"
+                    android:layout_width="wrap_content"
+                    android:layout_height="200dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="매장 권한 없음"
+                    android:textColor="@color/darkgray"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:visibility="gone"/>
+
+            </FrameLayout>
         </ScrollView>
 
         <FrameLayout

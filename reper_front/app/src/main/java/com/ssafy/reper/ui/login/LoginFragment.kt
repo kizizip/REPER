@@ -81,14 +81,14 @@ class LoginFragment : Fragment() {
         // Firebase Auth 객체 초기화
         auth = Firebase.auth
 
-//        // Google 로그인 옵션 설정
-//        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//            .requestIdToken(getString(R.string.default_web_client_id)) // Google OAuth 2.0 클라이언트 ID 요청
-//            .requestEmail() // 사용자 이메일 요청
-//            .build()
+        // Google 로그인 옵션 설정
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id)) // Google OAuth 2.0 클라이언트 ID 요청
+            .requestEmail() // 사용자 이메일 요청
+            .build()
 
-//        // Google 로그인 클라이언트 초기화
-//        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+        // Google 로그인 클라이언트 초기화
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
         // 초기에 모든 레이아웃을 숨김
         binding.fragmentLoginLinearLayout1.alpha = 0f
