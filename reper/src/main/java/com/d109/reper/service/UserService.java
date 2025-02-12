@@ -106,7 +106,33 @@ public class UserService {
     }
 
 
-    // 비밀번호 변경
+    // 카카오 가입 여부 변경 (X->O)
+    public boolean updateKakaoJoin(Long userId) {
+        try {
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+
+            user.setKakao(true);
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // 구글 가입 여부 변경 (X->O)
+    public boolean updateGoogleJoin(Long userId) {
+        try {
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+
+            user.setGoogle(true);
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
 
 

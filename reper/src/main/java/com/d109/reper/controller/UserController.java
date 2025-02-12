@@ -102,7 +102,8 @@ public class UserController {
         cookie.setHttpOnly(true);  // XSS 방지
         cookie.setSecure(false);  // HTTPS에서만 전송 (테스트 시 false, 실제 서비스에서는 true 권장)
         cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24 * 30); // 30일
+//        cookie.setMaxAge(60 * 60 * 24 * 30); // 30일
+        cookie.setMaxAge(60 * 15); //15분
         response.addCookie(cookie);
 
         logger.info("쿠키 - cookie: {} = {}", cookie.getName(), cookie.getValue());
@@ -162,6 +163,41 @@ public class UserController {
             return ResponseEntity.ok(responseBody);
         } else {
             throw new NoSuchElementException("회원 정보를 찾을 수 없음.");
+        }
+    }
+
+
+    // 카카오 가입 여부 변경 (X->O)
+    @PatchMapping("/{userId}/kakao")
+    @Operation(summary = "카카오 연동시 boolean=true로 변경합니다.")
+    public ResponseEntity<?> updateKakaoJoin(@PathVariable Long userId) {
+        try {
+            boolean result = userService.updateKakaoJoin(userId);
+
+            if (result) {
+                return ResponseEntity.ok(true);
+            } else {
+                throw new NoSuchElementException("해당하는 사용자가 없음.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("서버 오류 발생");
+        }
+    }
+
+    // 구글 가입 여부 변경 (X->O)
+    @PatchMapping("/{userId}/google")
+    @Operation(summary = "구글계정 연동시 boolean=true로 변경합니다.")
+    public ResponseEntity<?> updateGoogleJoin(@PathVariable Long userId) {
+        try {
+            boolean result = userService.updateGoogleJoin(userId);
+
+            if (result) {
+                return ResponseEntity.ok(true);
+            } else {
+                throw new NoSuchElementException("해당하는 사용자가 없음.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("서버 오류 발생");
         }
     }
 
