@@ -1,5 +1,3 @@
-package com.ssafy.reper.ui.boss.adpater
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,7 +6,7 @@ import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.databinding.ItemEmployeeBinding
 
 class AccessAdapter(
-    private val employeeList: MutableList<Employee>,
+    val employeeList: MutableList<Employee>,
     val itemClickListener: ItemClickListener
 ) : RecyclerView.Adapter<AccessAdapter.AccessViewHolder>() {
 
@@ -18,32 +16,37 @@ class AccessAdapter(
         fun bindInfo(position: Int) {
             val item = employeeList[position]
 
-            if (item.access) {
+            if (item.employed) {
                 binding.btnAccept.visibility = View.GONE
                 binding.btnReject.visibility = View.GONE
             } else {
                 binding.iconDelete.visibility = View.GONE
             }
 
-            binding.employeeItemName.text = item.name
+            binding.employeeItemName.text = item.userName
 
             binding.btnAccept.setOnClickListener {
                 //수락 버튼 클릭
+                 itemClickListener.onAcceptClick(absoluteAdapterPosition)
+
             }
 
             binding.btnReject.setOnClickListener {
                 //거절 버튼 클릭
+                itemClickListener.onDeleteClick(absoluteAdapterPosition)
+
             }
 
             binding.iconDelete.setOnClickListener {
                 //삭제 버튼 클릭
-                itemClickListener.onClick(absoluteAdapterPosition)
+                itemClickListener.onDeleteClick(absoluteAdapterPosition)
             }
         }
     }
 
-    fun interface ItemClickListener {
-        fun onClick(position: Int)
+     interface ItemClickListener {
+        fun onDeleteClick(position: Int)
+        fun onAcceptClick(position: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccessViewHolder {
@@ -58,5 +61,12 @@ class AccessAdapter(
 
     override fun getItemCount(): Int {
         return employeeList.size
+    }
+
+    // 리스트 갱신 함수
+    fun updateList(newList: List<Employee>) {
+        employeeList.clear()  // 기존 리스트 비우기
+        employeeList.addAll(newList)  // 새로운 리스트 추가
+        notifyDataSetChanged()  // 리사이클러뷰 갱신
     }
 }

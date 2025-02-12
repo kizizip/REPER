@@ -69,9 +69,19 @@ package com.ssafy.reper.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
+import com.ssafy.reper.data.dto.LoginResponse
+import com.ssafy.reper.data.dto.UserInfo
 
 class SharedPreferencesUtil(context: Context) {
-    private var preferences: SharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+    private var preferences: SharedPreferences = context.applicationContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+
+    companion object {
+        private const val SHARED_PREFERENCES_NAME = "reper_preference"
+        private const val KEY_USER_COOKIE = "user_cookie"
+        private const val STORE_ID = "1"
+    }
+
 
     fun getUserCookie(): String? {
         return preferences.getString(KEY_USER_COOKIE, null)
@@ -81,8 +91,82 @@ class SharedPreferencesUtil(context: Context) {
         preferences.edit().putString(KEY_USER_COOKIE, cookie).apply()
     }
 
-    companion object {
-        private const val SHARED_PREFERENCES_NAME = "reper_preference"
-        private const val KEY_USER_COOKIE = "user_cookie"
+    fun getStoreId() :Int{
+        return preferences.getInt(STORE_ID, 1)
+    }
+
+    fun setStoreId(storeId: Int){
+        preferences.edit().putInt(STORE_ID, storeId).apply()
+    }
+
+    //사용자 정보 저장
+    fun addUser(userinfo: UserInfo){
+        val editor = preferences.edit()
+        editor.putLong("userId", userinfo.userId)
+        editor.putString("username", userinfo.username)
+        editor.putString("role", userinfo.role)
+        editor.apply()
+    }
+
+    // 사용자 정보 가져오기 (수정 필요)
+    fun getUser(): LoginResponse {
+        return LoginResponse(
+            userId = preferences.getLong("userId", -1L),
+            username = preferences.getString("username", ""),
+            role = preferences.getString("role", ""),
+        )
+    }
+
+
+    //스토어 정보 받아 오기
+    fun addStore(storeId: Int) {
+        val editor = preferences.edit()
+        editor.putInt("storeId", storeId)
+        editor.apply()
+        Log.d("SharedPreferencesUtil", "Store ID saved: $storeId")
+    }
+
+    fun getStore(): Int {
+        val storeId = preferences.getInt("storeId", 0)
+        Log.d("SharedPreferencesUtil", "Store ID retrieved: $storeId")
+        return storeId
+    }
+
+
+    fun addStateLoad(state: String?) {
+        val editor = preferences.edit()
+        editor.putString("state", state)
+        editor.apply()
+        Log.d("SharedPreferencesUtil", "stateLoad saved: $state")
+    }
+
+    fun getStateLoad(): String {
+        val state = preferences.getString("state", "non")
+        Log.d("SharedPreferencesUtil", "state retrieved: $state")
+        return state!!
+    }
+
+    fun addStateName(state: String?) {
+        val editor = preferences.edit()
+        editor.putString("name", state)
+        editor.apply()
+        Log.d("SharedPreferencesUtil", "addStateName saved: $state")
+    }
+
+    fun getStateName(): String {
+        val state = preferences.getString("name", "non")
+        Log.d("SharedPreferencesUtil", "addStateName retrieved: $state")
+        return state!!
+    }
+
+    // 모든 사용자 데이터 삭제
+    fun clearUserData() {
+        preferences.edit().apply {
+            remove(KEY_USER_COOKIE)
+            remove("userId")
+            remove("username")
+            remove("role")
+            apply()
+        }
     }
 }
