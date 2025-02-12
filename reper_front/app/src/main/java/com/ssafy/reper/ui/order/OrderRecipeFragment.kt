@@ -3,7 +3,6 @@ package com.ssafy.reper.ui.order
 import MainActivityViewModel
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,18 +12,18 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.Order
+import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentOrderRecipeBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.order.adapter.OrderRecipeAdatper
 import com.ssafy.reper.util.ViewModelSingleton
-import java.util.ArrayList
 
 private const val TAG = "OrderRecipeFragment_정언"
 class OrderRecipeFragment : Fragment() {
 
     lateinit var order:Order
     // check 표시된 레시피 ID 저장 리스트
-    var checkedRecipeIdList:MutableList<Int> = mutableListOf()
+    var checkedRecipeList:MutableList<Recipe> = mutableListOf()
     // OrderFragment에서 날라오는 orderId
     var orderId = -1
 
@@ -95,15 +94,13 @@ class OrderRecipeFragment : Fragment() {
         // 전체선택
         orderRecipebinding.orderrecipeFmCheckbox.setOnClickListener{
             if(orderRecipebinding.orderrecipeFmCheckbox.isChecked){
-                checkedRecipeIdList.clear()
-                for(detail in  orderRecipeAdapter.orderDetailList){
-                    checkedRecipeIdList.add(detail.recipeId)
-                }
+                checkedRecipeList.clear()
+                checkedRecipeList = viewModel.recipeList.value!!
             }
             else{
-                checkedRecipeIdList.clear()
+                checkedRecipeList.clear()
             }
-            orderRecipeAdapter.checkedRecipeIdList = checkedRecipeIdList
+            orderRecipeAdapter.checkedRecipeIdList = checkedRecipeList
             orderRecipeAdapter.notifyDataSetChanged()
         }
 
@@ -125,6 +122,7 @@ class OrderRecipeFragment : Fragment() {
                 }
             }
 
+            // order를 이미 완료 처리한 상태라면, 완료 버튼 안보이게!
             orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.let {
                 if(order.completed){
                     it.visibility = View.GONE
@@ -143,39 +141,30 @@ class OrderRecipeFragment : Fragment() {
             }
         }
 
+        // 레시피 보기 버튼 클릭
         orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setOnClickListener {
+            mainViewModel.clearData()
             mainViewModel.setOrder(order)
-            mainViewModel.selectedRecipeList.observe(viewLifecycleOwner){
-                Log.d(TAG, "selectedOrder: ${it}")
-                val bundle = Bundle().apply {
-                    putInt("whereAmICame", 2)
-                    putIntegerArrayList("idList", ArrayList(checkedRecipeIdList))
-                }
 
-                if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
-                    findNavController().navigate(R.id.allRecipeFragment, bundle)
-                }
-                else if(orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected == true){
-                    findNavController().navigate(R.id.stepRecipeFragment, bundle)
-                }
+            if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
+                navigateToRecipeFragment()
+            }
+            else if(orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected == true){
+                navigateToRecipeFragment()
             }
         }
     }
     // 어뎁터 설정
     fun initAdapter() {
-        orderRecipeAdapter = OrderRecipeAdatper(mutableListOf(), mutableListOf(), checkedRecipeIdList) { recipeId, isChecked ->
+        orderRecipeAdapter = OrderRecipeAdatper(mutableListOf(), mutableListOf(), checkedRecipeList) { recipe, isChecked ->
             // 클릭 이벤트 -> recipeId 저장, 삭제
-            if(isChecked){
-                checkedRecipeIdList.add(recipeId)
-                if(checkedRecipeIdList.count() == orderRecipeAdapter.recipeList.count()){
-                    orderRecipebinding.orderrecipeFmCheckbox.isChecked = true
-                }
+            if(!isChecked){
+                checkedRecipeList.add(recipe)
+                orderRecipebinding.orderrecipeFmCheckbox.isChecked = true
             }
             else{
-                checkedRecipeIdList.remove(recipeId)
-                if(checkedRecipeIdList.count() != orderRecipeAdapter.recipeList.count()){
-                    orderRecipebinding.orderrecipeFmCheckbox.isChecked = false
-                }
+                checkedRecipeList.remove(recipe)
+                orderRecipebinding.orderrecipeFmCheckbox.isChecked = false
             }
         }
 
@@ -189,5 +178,12 @@ class OrderRecipeFragment : Fragment() {
                 adapter = orderRecipeAdapter
             }
         }
+    }
+    fun navigateToRecipeFragment() {
+        val bundle =Bundle().apply {
+            putInt("whereAmICame", 2)
+        }
+        mainViewModel.setSelectedRecipes(checkedRecipeList)
+        findNavController().navigate(R.id.stepRecipeFragment, bundle)
     }
 }

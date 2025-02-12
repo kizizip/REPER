@@ -26,7 +26,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.log
 
 private const val TAG = "OrderAdapter_정언"
-class OrderRecipeAdatper(var orderDetailList: MutableList<OrderDetail>, var recipeList: MutableList<Recipe>, var checkedRecipeIdList:MutableList<Int>, val itemClickListener:ItemClickListener) : RecyclerView.Adapter<OrderRecipeAdatper.OrderDetailListHolder>() {
+class OrderRecipeAdatper(var orderDetailList: MutableList<OrderDetail>, var recipeList: MutableList<Recipe>, var checkedRecipeIdList:MutableList<Recipe>, val itemClickListener:ItemClickListener) : RecyclerView.Adapter<OrderRecipeAdatper.OrderDetailListHolder>() {
     inner class OrderDetailListHolder(private val binding: RvOrderRecipeItemBinding) : RecyclerView.ViewHolder(binding.root){
         fun bindInfo(position: Int){
             val item = orderDetailList[position]
@@ -36,22 +36,17 @@ class OrderRecipeAdatper(var orderDetailList: MutableList<OrderDetail>, var reci
             binding.rvOrderRecipeQuantity.text = item.quantity.toString()
             binding.rvOrderRecipeMessage.text = item.customerRequest
 
-            if(checkedRecipeIdList.contains(item.recipeId)){
-                binding.rvOrderRecipeCheckbox.isChecked = true
-            }
-            else{
-                binding.rvOrderRecipeCheckbox.isChecked = false
-            }
+            binding.rvOrderRecipeCheckbox.isChecked = checkedRecipeIdList.any{ it.recipeId == item.recipeId }
 
             binding.rvOrderRecipeCheckbox.setOnClickListener {
-                itemClickListener.onClick(item.recipeId, binding.rvOrderRecipeCheckbox.isChecked)
+                itemClickListener.onClick(recipe, binding.rvOrderRecipeCheckbox.isChecked)
             }
         }
     }
 
     //클릭 인터페이스 정의 사용하는 곳에서 만들어준다.
     fun  interface ItemClickListener {
-        fun onClick(recipeId: Int, isChecked:Boolean)
+        fun onClick(recipe: Recipe, isChecked:Boolean)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderDetailListHolder {
