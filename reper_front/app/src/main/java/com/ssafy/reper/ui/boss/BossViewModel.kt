@@ -37,6 +37,15 @@ class BossViewModel : ViewModel() {
         Log.d(TAG, "setRecipeList: $list")
     }
 
+    //레시피 업로드 상태 관찰
+    private val _recipeLoad = MutableLiveData<String?>()
+    val recipeLoad: MutableLiveData<String?>get() = _recipeLoad
+
+    fun setRecipeLoad(result: String?) {
+        _recipeLoad.value = result
+        Log.d(TAG, "setRecipeLoad: ${result}")
+    }
+
     //승인된 직원 리스트
     private val _accessList = MutableLiveData<List<Employee>>()
     val accessList: MutableLiveData<List<Employee>> get() = _accessList
@@ -150,8 +159,10 @@ class BossViewModel : ViewModel() {
                 Log.d(TAG, "uploadRecipe: 서버 응답 = ${response}")
             }.onSuccess {
                 Log.d(TAG, "uploadRecipe: 성공")
+                setRecipeLoad("success")
                 getMenuList(storeId )
             }.onFailure {
+                setRecipeLoad("failure")
                 Log.d(TAG, "uploadRecipe: 실패 - ${it.message}")
             }
         }

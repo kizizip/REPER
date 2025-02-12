@@ -19,8 +19,10 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kakao.sdk.common.KakaoSdk.type
 import com.kakao.sdk.friend.m.u
@@ -75,6 +77,40 @@ class RecipeManageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        bossViewModel.recipeLoad.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                null -> {
+                    binding.uploadBar.visibility = View.GONE
+                }
+                "success" -> {
+                    binding.uploadBar.visibility = View.VISIBLE
+                    binding.uploadState.text = "레시피 업로드 성공"
+                    binding.successText.visibility = View.VISIBLE
+                    binding.successText.text = "확인"
+                    binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.mainorange))
+                    binding.successText.setOnClickListener {
+                        binding.uploadBar.visibility = View.GONE
+                        bossViewModel.setRecipeLoad(null)
+                    }
+                }
+                "failure" -> {
+                    binding.uploadBar.visibility = View.VISIBLE
+                    binding.uploadState.text = "레시피 업로드 실패"
+                    binding.successText.visibility = View.VISIBLE
+                    binding.successText.text = "확인"
+                    binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
+                    binding.successText.setOnClickListener {
+                        binding.uploadBar.visibility = View.GONE
+                        bossViewModel.setRecipeLoad(null)
+                    }
+                }
+                "loading" -> {
+                    binding.successText.visibility = View.GONE
+                    binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
+                }
+            }
+        }
 
         binding.recipeFgAddTv.setOnClickListener {
             selectPdfFile()
@@ -193,16 +229,13 @@ class RecipeManageFragment : Fragment() {
 
         val filePart = getFilePart(requireContext(), uri)
         filePart?.let {
-            bossViewModel.uploadRecipe(storeId, it).also {
-                // 업로드가 성공적으로 이루어졌다면 알림 전송
-                fcmViewModel.sendToStoreFCM(
-                    storeId,
-                    "레시피가 성공적으로 업로드되었습니다.",
-                    "새로운 레시피가 추가되었습니다!",
-                    "RecipeManageFragment",
-                    0
-                )
-            }
+
+            bossViewModel.uploadRecipe(storeId, it)
+            binding.uploadBar.visibility = View.VISIBLE
+            val contentDisposition = it.headers?.get("Content-Disposition")
+            val fileName = contentDisposition?.substringAfter("filename=")?.replace("\"", "") ?: "알 수 없는 파일"
+            binding.fileName.text = fileName
+            bossViewModel.setRecipeLoad("loading")
         }
 
 

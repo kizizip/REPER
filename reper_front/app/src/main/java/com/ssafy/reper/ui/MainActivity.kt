@@ -45,6 +45,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        sendFCMFileUpload()
+
         val navController =
             supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer)
                 ?.findNavController()
@@ -139,6 +141,20 @@ class MainActivity : AppCompatActivity() {
     // binding의 bottomMenu에 접근하기 위한 public 메서드
     fun getBottomNavigationView(): BottomNavigationView {
         return binding.activityMainBottomMenu
+    }
+
+    private fun sendFCMFileUpload(){
+        bossViewModel.recipeLoad.observe(this) { result ->
+            when (result) {
+                "success" -> {
+                   fcmViewModel.sendToUserFCM(1,"레시피 업로드 성공","","RecipeManageFragment",0)
+                }
+                "failure" -> {
+                    fcmViewModel.sendToUserFCM(1,"레시피 업로드 실패","","RecipeManageFragment",0)
+                }
+            }
+        }
+
     }
 
 
