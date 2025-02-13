@@ -4,6 +4,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeStep
@@ -12,7 +13,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivityViewModel_정언"
 class MainActivityViewModel(application: Application) :  AndroidViewModel(application) {
-    private val recipeService = RetrofitUtil.recipeService
+    private val storeService = RetrofitUtil.storeService
 
     private val _isDataReady = MutableLiveData<Boolean>()
     val isDataReady: LiveData<Boolean> = _isDataReady
@@ -31,6 +32,9 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
 
     private val _recipeSteps = MutableLiveData<MutableList<RecipeStep>?>(null)
     val recipeSteps: LiveData<MutableList<RecipeStep>?> = _recipeSteps
+
+    private val _isEmployee = MutableLiveData<Boolean?>(null)
+    val isEmployee: LiveData<Boolean?> = _isEmployee
 
     fun setSelectedRecipes(recipeList:MutableList<Recipe>){
         viewModelScope.launch {
@@ -75,6 +79,22 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
         Log.d(TAG, "setRecipeSteps: ${recipeSteps.value}")
     }
 
+    fun getIsEmployee(userId: Int){
+        viewModelScope.launch {
+            try {
+                val list = storeService.getStoreListByEmployeeId(userId)
+                for(store in list){
+                    if(store.storeId == ApplicationClass.sharedPreferencesUtil.getStoreId()){
+                        _isEmployee.postValue(true)
+                        return@launch
+                    }
+                }
+            }catch (e:Exception){
+                Log.e(TAG, "getIsEmployee: ", )
+            }
+        }
+    }
+
     fun clearData(){
         _selectedRecipeList.value = null
         _nowISeeRecipe.value = null
@@ -82,5 +102,6 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
         _recipeSteps.value = null
         _isDataReady.value = false
         _order.value = null
+        _isEmployee.value = false
     }
 }

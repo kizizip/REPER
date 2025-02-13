@@ -319,7 +319,7 @@ class EditMyAccountFragment : Fragment() {
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                val storeList = RetrofitUtil.storeService.getStoreListByEmployeeId(userId.toString())
+                val storeList = RetrofitUtil.storeService.getStoreListByEmployeeId(userId!!.toInt())
 
                 // RecyclerView와 빈 상태 메시지 설정
                 editMyAccountBinding.editmyaccountFmRv.apply {

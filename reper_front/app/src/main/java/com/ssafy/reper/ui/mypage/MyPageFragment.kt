@@ -102,7 +102,7 @@ class MyPageFragment : Fragment() {
             // 직원 가게 정보 조회
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    employeeStoreList = RetrofitUtil.storeService.getStoreListByEmployeeId(user.userId.toString())
+                    employeeStoreList = RetrofitUtil.storeService.getStoreListByEmployeeId(user.userId!!.toInt())
                     withContext(Dispatchers.Main) {
                         myPageBinding.mypageFmTvStoreNum.text = "${employeeStoreList.size}"
                         setupSpinner(employeeStoreList, user.role.toString())  // 파라미터 전달

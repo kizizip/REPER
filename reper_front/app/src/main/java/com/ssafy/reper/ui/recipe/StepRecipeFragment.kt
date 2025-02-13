@@ -42,7 +42,6 @@ class StepRecipeFragment : Fragment() {
     private val viewModel: RecipeViewModel by viewModels()
 
     // Bundle 변수
-    lateinit var recipeIdList:MutableList<Int>
     var whereAmICame = -1
 
     private lateinit var mainActivity: MainActivity

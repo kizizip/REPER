@@ -50,35 +50,50 @@ class AllRecipeFragment : Fragment() {
     private val allRecipeBinding get() =_allRecipeBinding!!
 
     override fun onAttach(context: Context) {
-        Log.d(TAG, "onAttach: ")
         super.onAttach(context)
         mainActivity = context as MainActivity
     }
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(TAG, "onCreate: ")
         super.onCreate(savedInstanceState)
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.d(TAG, "onCreateView: ")
         _allRecipeBinding = FragmentAllRecipeBinding.inflate(inflater, container, false)
         return allRecipeBinding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(TAG, "onViewCreated: ")
         super.onViewCreated(view, savedInstanceState)
 
+        mainViewModel.clearData()
+        mainViewModel.isEmployee.observe(viewLifecycleOwner){
+            if(it == true){
+                allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
+
+                allRecipeBinding.allrecipeFmRv.visibility = View.VISIBLE
+                allRecipeBinding.allrecipeFmSp.visibility = View.VISIBLE
+                allRecipeBinding.allrecipeFmEtSearch.isEnabled = true
+                allRecipeBinding.allrecipeFmBtnFilter.isEnabled = true
+
+                // RecyclerView adapter 처리
+                initAdapter()
+            }
+            else{
+                allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
+
+                allRecipeBinding.allrecipeFmRv.visibility = View.GONE
+                allRecipeBinding.allrecipeFmSp.visibility = View.GONE
+                allRecipeBinding.allrecipeFmEtSearch.isEnabled = false
+                allRecipeBinding.allrecipeFmBtnFilter.isEnabled = false
+            }
+        }
+        mainViewModel.getIsEmployee(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt())
         // 이벤트 관리
         initEvent()
-        // RecyclerView adapter 처리
-        initAdapter()
     }
     override fun onResume() {
-        Log.d(TAG, "onResume: ")
         super.onResume()
         mainActivity.showBottomNavigation()
     }
     override fun onDestroyView() {
-        Log.d(TAG, "onDestroyView: ")
         super.onDestroyView()
         _allRecipeBinding = null
     }
@@ -172,7 +187,8 @@ class AllRecipeFragment : Fragment() {
 
         allRecipeBinding.allrecipeFmEtSearch.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm = requireContext().
+                getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 view?.windowToken?.let {
                     imm.hideSoftInputFromWindow(it, 0)
                 }
@@ -260,6 +276,8 @@ class AllRecipeFragment : Fragment() {
         allRecipeBinding.allrecipeFmRv.apply {
             addItemDecoration(GridSpacingItemDecoration(2, 10)) // 2열, 20dp 간격
             layoutManager = GridLayoutManager(mainActivity, 2)
+
+            allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
 
             viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
             viewModel.getLikeRecipes(

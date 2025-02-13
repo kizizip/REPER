@@ -3,6 +3,7 @@ package com.ssafy.reper.ui.order
 import MainActivityViewModel
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +23,7 @@ private const val TAG = "OrderRecipeFragment_정언"
 class OrderRecipeFragment : Fragment() {
 
     lateinit var order:Order
-    // check 표시된 레시피 ID 저장 리스트
+    // check 표시된 레시피 저장 리스트
     var checkedRecipeList:MutableList<Recipe> = mutableListOf()
     // OrderFragment에서 날라오는 orderId
     var orderId = -1
@@ -95,12 +96,13 @@ class OrderRecipeFragment : Fragment() {
         orderRecipebinding.orderrecipeFmCheckbox.setOnClickListener{
             if(orderRecipebinding.orderrecipeFmCheckbox.isChecked){
                 checkedRecipeList.clear()
-                checkedRecipeList = viewModel.recipeList.value!!
+                checkedRecipeList.addAll(viewModel.recipeList.value ?: mutableListOf())
             }
             else{
                 checkedRecipeList.clear()
             }
-            orderRecipeAdapter.checkedRecipeIdList = checkedRecipeList
+            Log.d(TAG, "initEvent: ${checkedRecipeList}")
+            orderRecipeAdapter.checkedRecipeList = checkedRecipeList.toMutableList()
             orderRecipeAdapter.notifyDataSetChanged()
         }
 
@@ -158,12 +160,17 @@ class OrderRecipeFragment : Fragment() {
     fun initAdapter() {
         orderRecipeAdapter = OrderRecipeAdatper(mutableListOf(), mutableListOf(), checkedRecipeList) { recipe, isChecked ->
             // 클릭 이벤트 -> recipeId 저장, 삭제
-            if(!isChecked){
+            if(isChecked){
                 checkedRecipeList.add(recipe)
-                orderRecipebinding.orderrecipeFmCheckbox.isChecked = true
             }
             else{
                 checkedRecipeList.remove(recipe)
+            }
+
+            if(checkedRecipeList.count() == viewModel.recipeList.value!!.count()){
+                orderRecipebinding.orderrecipeFmCheckbox.isChecked = isChecked
+            }
+            else {
                 orderRecipebinding.orderrecipeFmCheckbox.isChecked = false
             }
         }
