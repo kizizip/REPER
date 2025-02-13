@@ -37,6 +37,11 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import android.Manifest
 import android.content.pm.PackageManager
+import com.ssafy.reper.data.remote.RetrofitUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val TAG = "StepRecipeFragment_정언"
 class StepRecipeFragment : Fragment() {
@@ -69,6 +74,8 @@ class StepRecipeFragment : Fragment() {
 
     private var _stepRecipeBinding : FragmentStepRecipeBinding? = null
     private val stepRecipeBinding get() =_stepRecipeBinding!!
+
+    private val userService = RetrofitUtil.userService
 
     override fun onAttach(context: Context) {
         Log.d(TAG, "onAttach: ")
@@ -218,8 +225,28 @@ class StepRecipeFragment : Fragment() {
     // 세로 화면일 때 이벤트 처리
     fun eventPortrait(){
         Log.d(TAG, "eventPortrait: ")
-        stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()}")
-        stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
+//        val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()
+//        val email =
+////        stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()}")
+//        stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
+        
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
+                val userInfo = withContext(Dispatchers.IO) {
+                    userService.getUserInfo(userId)
+                }
+                stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${userInfo.email}")
+            } catch (e: Exception) {
+                Log.e(TAG, "사용자 정보 조회 실패", e)
+                // 에러 시 기존 방식으로 표시
+                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()
+                stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : $userId")
+            }
+        }
+
+        stepRecipeBinding.steprecipeFmTvMenuName?.text =
+            "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
 
         if(nowStepIdx == -1){ // 재료를 보여줘야해!
             showIngredient(nowRecipeIdx)
@@ -230,7 +257,20 @@ class StepRecipeFragment : Fragment() {
     }
     // 가로 화면일 때 이벤트 처리
     fun eventLand(){
-        stepRecipeBinding.steprecipeFmLandTvUser?.setText("이용자 : ${ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()}")
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
+                val userInfo = withContext(Dispatchers.IO) {
+                    userService.getUserInfo(userId)
+                }
+                stepRecipeBinding.steprecipeFmLandTvUser?.setText("이용자 : ${userInfo.email}")
+            } catch (e: Exception) {
+                Log.e(TAG, "사용자 정보 조회 실패", e)
+                // 에러 시 기존 방식으로 표시
+                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()
+                stepRecipeBinding.steprecipeFmLandTvUser?.setText("이용자 : $userId")
+            }
+        }
 
         if(whereAmICame == 1){
             stepRecipeBinding.constraintLayout4?.visibility = View.GONE // 인덱스 안보이게
