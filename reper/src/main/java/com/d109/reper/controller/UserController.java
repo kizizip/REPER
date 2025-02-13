@@ -205,7 +205,6 @@ public class UserController {
         }
     }
 
-
     @PostMapping("/cookie/{email}")
     @Operation(summary = "구글 로그인 성공시 cookie를 내려보냅니다.")
     public ResponseEntity<?> googleCookie(@PathVariable String email, HttpServletResponse response) {

@@ -111,7 +111,7 @@ public class UserService {
     public boolean updateKakaoJoin(Long userId) {
         try {
             User user = userRepository.findByUserId(userId)
-                    .orElseThrow(() -> new NoSuchElementException("UserNotFound"));
+                    .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
 
             user.setKakao(true);
             userRepository.save(user);
@@ -125,7 +125,7 @@ public class UserService {
     public boolean updateGoogleJoin(Long userId) {
         try {
             User user = userRepository.findByUserId(userId)
-                    .orElseThrow(() -> new NoSuchElementException("UserNotFound"));
+                    .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
 
             user.setGoogle(true);
             userRepository.save(user);
