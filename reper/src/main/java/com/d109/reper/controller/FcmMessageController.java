@@ -3,17 +3,11 @@ package com.d109.reper.controller;
 import com.d109.reper.request.FcmMessageRequest;
 import com.d109.reper.service.FcmMessageService;
 import com.d109.reper.service.UserTokenService;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.TopicManagementResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,48 +73,8 @@ public class FcmMessageController {
         }
     }
 
-    //JY 여러 사용자 토픽 구독 추가
-    @PostMapping("/subscribe")
-    public ResponseEntity<String> subscribeToTopic(@RequestBody FcmSubscribeRequest request) {
-        try {
-            List<String> tokens = request.getTokens();
-            String topic = request.getTopic();
-
-            // 디버깅용
-            System.out.println("[디버깅] 받은 토큰 리스트: " + tokens);
-            System.out.println("[디버깅] 받은 토픽명: " + topic);
-
-            if (tokens == null || tokens.isEmpty() || tokens.contains(null) || tokens.contains("")) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("오류: tokens 리스트가 비어 있거나 null 값이 포함되어 있습니다.");
-            }
-
-            TopicManagementResponse response = FirebaseMessaging.getInstance().subscribeToTopic(tokens, topic);
-            return ResponseEntity.ok("구독 성공: " + response.getSuccessCount());
-        } catch (FirebaseMessagingException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("구독 실패: " + e.getMessage());
-        }
-    }
 
 }
 
 
-
-class FcmSubscribeRequest {
-    private List<String> tokens;
-    private String topic;
-
-    // Getter, Setter
-    public List<String> getTokens() {
-        return tokens; }
-    public void setTokens(List<String> tokens) {
-        this.tokens = tokens; }
-    public String getTopic() {
-        return topic; }
-    public void setTopic(String topic) {
-        this.topic = topic; }
-
-}
 

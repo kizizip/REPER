@@ -22,12 +22,11 @@ public interface StoreEmployeeRepository extends JpaRepository<StoreEmployee, Lo
     // 특정 알바생의 isEmployed = ture 인 storeEmployee의 storeEmployee들 조회
     List<StoreEmployee> findByUserAndIsEmployedTrue(User user);
 
-    // 매장 ID와 근무 상태를 기반으로 근무 중인 직원 조회
-    @Query("SELECT se FROM StoreEmployee se WHERE se.store = :store AND se.isEmployed = :isEmployed")
-    List<StoreEmployee> findActiveEmployees(@Param("store") Store store, @Param("isEmployed") boolean isEmployed);
 
-    // 특정 매장에서 근무 중인 직원만 조회
-    List<User> findByUserAnd(Long storeId);
+    // 특정 매장에서 isEmployed=true 직원(User)만 조회
+    @Query("SELECT se.user FROM StoreEmployee se WHERE se.store.storeId = :storeId AND se.isEmployed = true")
+    List<User> findUsersByStoreIdAndIsEmployedTrue(@Param("storeId") Long storeId);
+
 
 }
 

@@ -10,6 +10,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class OrderEventListener {
@@ -51,7 +52,7 @@ public class OrderEventListener {
                     .sum();
 
             String title = "새로운 주문 알림";
-            String body = order.getStore().getStoreName()+ "에 총" + totalQuantity + "잔 새로운 주문이 들어왔습니다.";
+            String body = order.getStore().getStoreName()+ "에 총 " + totalQuantity + "잔 새로운 주문이 들어왔습니다.";
             String targetFragment = "OrderRecipeFragment";
             Integer requestId = Math.toIntExact(order.getOrderId());  // Long → Integer 변환
 
@@ -64,18 +65,33 @@ public class OrderEventListener {
             UserToken ownerToken = userTokenRepository.findByUserId(owner.getUserId())
                     .orElseThrow(() -> new  IllegalArgumentException("ownerToken not found"));
 
-            if (owner != null && ownerToken != null) {
-                FcmMessageRequest ownerMessage = new FcmMessageRequest(
-                        ownerToken.getToken(), title, body, targetFragment, requestId
-                );
-                fcmMessageService.sendFcmMessage(ownerMessage);
-                System.out.println("사장님에게 FCM 메시지 전송 완료");
-            }
+            FcmMessageRequest ownerMessage = new FcmMessageRequest(
+                    ownerToken.getToken(), title, body, targetFragment, requestId
+            );
+            fcmMessageService.sendFcmMessage(ownerMessage);
+            System.out.println("사장님에게 FCM 메시지 전송 완료");
 
             // 알바생들에게 보내기(isEmployed=true인 사람만)
-            List<User> staffs = storeEmployeeRepository.findByUserAndIsEmployedTrue(order.getStore().getStoreId());
+            List<User> staffs = storeEmployeeRepository.findUsersByStoreIdAndIsEmployedTrue(order.getStore().getStoreId());
+            System.out.println("직원 목록: " + staffs);
 
-            //메세지 보내기
+            if (!staffs.isEmpty()) {
+                List<Long> staffIds = staffs.stream()
+                        .map(User::getUserId)
+                        .collect(Collectors.toList());
+
+                List<UserToken> staffTokens = userTokenRepository.findByUserIdIn(staffIds);
+                List<FcmMessageRequest> staffMessages = staffTokens.stream()
+                        .map(token -> new FcmMessageRequest(
+                                token.getToken(), title, body, targetFragment, requestId
+                        ))
+                        .collect(Collectors.toList());
+
+                if (!staffMessages.isEmpty()) {
+                    fcmMessageService.sendToMultipleUsers(staffMessages);
+                    System.out.println("직원들에게 FCM 메시지 전송 완료");
+                }
+            }
 
             order.setNotified(true);
             orderRepository.save(order);

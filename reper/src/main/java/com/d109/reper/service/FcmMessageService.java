@@ -1,7 +1,6 @@
 package com.d109.reper.service;
 
 import com.d109.reper.request.FcmMessageRequest;
-import com.d109.reper.request.FcmTopicMessageRequestDto;
 import com.d109.reper.response.FcmMessageResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.AccessToken;
@@ -15,7 +14,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.FileInputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -65,6 +66,15 @@ public class FcmMessageService {
     public void sendFcmMessage(FcmMessageRequest request) {
         initialize();
         FcmMessageResponseDto messageDto = createFcmMessage(request);
+
+        // response 데이터 확인용
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonMessage = objectMapper.writeValueAsString(messageDto);
+            System.out.println("FCM 메시지 전송: " + jsonMessage);
+        } catch (Exception e) {
+            System.err.println("FCM 메시지 변환 오류: " + e.getMessage());
+        }
         sendFcmNotification(messageDto);
     }
 
@@ -72,6 +82,15 @@ public class FcmMessageService {
      * FcmMessageRequest 객체를 이용하여 FCM 메시지 DTO 생성
      */
     private FcmMessageResponseDto createFcmMessage(FcmMessageRequest request) {
+
+        Map<String, String> data = new HashMap<>();
+        if (request.getTargetFragment() != null) {
+            data.put("targetFragment", request.getTargetFragment());
+        }
+        if (request.getRequestId() != null) {
+            data.put("requestId", String.valueOf(request.getRequestId()));
+        }
+
         return FcmMessageResponseDto.builder()
                 .message(FcmMessageResponseDto.Message.builder()
                         .token(request.getToken())  // 한 개의 토큰만 전달
@@ -79,6 +98,7 @@ public class FcmMessageService {
                                 .title(request.getTitle())
                                 .body(request.getBody())
                                 .build())
+                        .data(data)
                         .build())
                 .build();
     }
@@ -107,31 +127,4 @@ public class FcmMessageService {
     }
 
 
-
-    // order FCM
-    public void sendOrderToAll(String topic, String title, String body, List<String> data) {
-
-    }
-
-    // orderFCM 토픽 기반으로 FCM 메시지 보내기
-//    public void sendToTopic(String topic, String title, String body) {
-//        initialize();
-//
-//        FcmTopicMessageRequestDto messageDto = FcmTopicMessageRequestDto.builder()
-//                .message(FcmTopicMessageRequestDto.Message.builder()
-//                        .topic(topic)  // 토픽 기반 전송
-//                        .notification(FcmTopicMessageRequestDto.Notification.builder()
-//                                .title(title)
-//                                .body(body)
-//                                .build())
-//                        .build())
-//                .build();
-//        try {
-//            sendFcmNotificationForTopic(messageDto);
-//            System.out.println("FCM 메세지 전송 성공: " + topic + " - " + title);
-//        } catch (Exception e) {
-//            System.out.println("FCM 메세지 전송 실패: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//    }
 }
