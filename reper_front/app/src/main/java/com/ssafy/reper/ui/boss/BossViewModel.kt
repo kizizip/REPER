@@ -110,13 +110,14 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getStoreList(userId: Int) {
         viewModelScope.launch {
-            runCatching {
-                RetrofitUtil.storeService.findBossStore(userId)
-            }.onSuccess {
-                _myStoreList.value = it
-                Log.d(TAG, "getStoreList: ${it}")
-            }.onFailure {
-                Log.d(TAG, "getStoreList: ${it.message}")
+            try {
+                Log.d(TAG, "getStoreList: Starting request for userId=$userId")
+                val response = RetrofitUtil.storeService.findBossStore(userId)
+                Log.d(TAG, "getStoreList: Response received, size=${response.size}")
+                _myStoreList.postValue(response)
+            } catch (e: Exception) {
+                Log.e(TAG, "getStoreList error: ${e.message}")
+                _myStoreList.postValue(emptyList())
             }
         }
     }

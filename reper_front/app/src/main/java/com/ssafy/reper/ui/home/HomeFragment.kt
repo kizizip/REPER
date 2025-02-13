@@ -1,5 +1,7 @@
 package com.ssafy.reper.ui.home
 
+
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,40 +11,53 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
-import com.ssafy.reper.data.local.HomeAnnouncementModel
 import com.ssafy.reper.data.local.HomeBannerModel
 import com.ssafy.reper.data.local.HomeLikeRecipeModel
 import com.ssafy.reper.data.local.HomeOrderModel
 import com.ssafy.reper.databinding.FragmentHomeBinding
-import com.ssafy.reper.ui.home.adapter.RVHomeAnnouncement
 import com.ssafy.reper.ui.home.adapter.RVHomeBannerAdapter
 import com.ssafy.reper.ui.home.adapter.RVHomeLikeRecipeAdapter
-import com.ssafy.reper.ui.home.adapter.RVHomeOrderAdapter
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
+import com.ssafy.reper.data.dto.SearchedStore
+import com.ssafy.reper.data.dto.StoreResponseUser
+import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.ui.MainActivity
-import com.ssafy.reper.ui.boss.NoticeManageFragment
-import com.ssafy.reper.ui.recipe.AllRecipeFragment
+import com.ssafy.reper.ui.boss.BossViewModel
+import com.ssafy.reper.ui.boss.NoticeViewModel
+import com.ssafy.reper.ui.boss.adpater.NotiAdapter
+import com.ssafy.reper.ui.order.OrderViewModel
+import com.ssafy.reper.ui.order.adapter.HomeOrderAdatper
+import com.ssafy.reper.ui.order.adapter.OrderAdatper
+
+
+private const val TAG = "HomeFragment_싸피"
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var notiAdapter: NotiAdapter
+    private lateinit var orderAdapter: HomeOrderAdatper
+
     private val bannerItems = mutableListOf<HomeBannerModel>()
-    private val announcementItems = mutableListOf<HomeAnnouncementModel>()
     private val likeRecipeItems = mutableListOf<HomeLikeRecipeModel>()
-    private val orderItems = mutableListOf<HomeOrderModel>()
     private lateinit var bannerHandler: Handler
     private lateinit var bannerRunnable: Runnable
+    private val bossViewModel: BossViewModel by activityViewModels()
+    private val noticeViewModel: NoticeViewModel by activityViewModels()
+    private val storeViewModel: StoreViewModel by activityViewModels()
+    private val viewModel: OrderViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
+    val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
+        SharedPreferencesUtil(requireContext().applicationContext)
     }
-
 
 
     override fun onCreateView(
@@ -59,67 +74,34 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).showBottomNavigation()
 
+        Log.d(TAG, "onViewCreated: User role = ${sharedPreferencesUtil.getUser()?.role}")
+        Log.d(TAG, "onViewCreated: User ID = ${sharedPreferencesUtil.getUser()?.userId}")
 
-        // 가게 이름 Spinner 설정
-        val spinner = binding.fragmentHomeStorenameSpinner
-        val userTypes = arrayOf("메가커피 구미 인동점", "이스터에그:이걸 발견하다니!")
-
-        val adapter = ArrayAdapter(
-            requireContext(),
-            R.layout.home_spinner_item,
-            userTypes
-        ).apply {
-            setDropDownViewResource(R.layout.home_spinner_item)
+        if (sharedPreferencesUtil.getUser()?.role == "OWNER") {
+            Log.d(TAG, "onViewCreated: Starting OWNER flow")
+            bossViewModel.myStoreList.observe(viewLifecycleOwner) { storeList ->
+                Log.d(TAG, "onViewCreated: OWNER stores observer triggered, size=${storeList?.size}")
+                initSpinner()
+            }
+            Log.d(TAG, "onViewCreated: Calling getStoreList...")
+            bossViewModel.getStoreList(sharedPreferencesUtil.getUser()?.userId?.toInt() ?: 0)
+        } else {
+            Log.d(TAG, "onViewCreated: Starting USER flow")
+            storeViewModel.myStoreList.observe(viewLifecycleOwner) { storeList ->
+                Log.d(TAG, "onViewCreated: USER stores observer triggered, size=${storeList?.size}")
+                initSpinner()
+            }
+            Log.d(TAG, "onViewCreated: Calling getUserStore...")
+            storeViewModel.getUserStore(sharedPreferencesUtil.getUser()?.userId?.toInt() ?: 0)
         }
 
-        spinner.adapter = adapter
-
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedItem = userTypes[position]
-                // 선택된 항목 처리
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // 아무것도 선택되지 않았을 때의 처리
-            }
-        }
-
-
+        // 나머지 초기화
+        initNotiAdater()
+        initOrderAdapter("")
 
         // Home Banner 코드!!
         setupBannerItems()
         setupBannerViewPager()
-
-
-        // HomeAnnouncement(공지사항) 코드!!!
-        announcementItems.add(
-            HomeAnnouncementModel(
-                "🔥내용🔥 멋쟁이 우리팀들 화이팅!!1",
-                "1분전"
-            )
-        )
-
-        announcementItems.add(
-            HomeAnnouncementModel(
-                "🔥내용🔥 멋쟁이 우리팀들 화이팅!!2",
-                "2분전"
-            )
-        )
-
-        announcementItems.add(
-            HomeAnnouncementModel(
-                "🔥내용🔥 멋쟁이 우리팀들 화이팅!!3",
-                "3분전"
-            )
-        )
-
-        val rvHomeAnnouncement = binding.fragmentHomeRvAnnouncement
-        val rvHomeAnnouncementAdapter = RVHomeAnnouncement(announcementItems)
-
-        rvHomeAnnouncement.adapter = rvHomeAnnouncementAdapter
-        rvHomeAnnouncement.layoutManager = LinearLayoutManager(context,  LinearLayoutManager.VERTICAL, false)
-
 
         // 공지 더 보러가기 클릭시
         binding.fragmentHomeAnnouncementText.setOnClickListener {
@@ -129,51 +111,15 @@ class HomeFragment : Fragment() {
 
             findNavController().navigate(R.id.noticeManageFragment)
 
-
         }
 
-
-        // HomeLikeRecipe(즐겨찾는 레시피) 코드!!!
-        likeRecipeItems.add(
-            HomeLikeRecipeModel(
-                "아메리카노(HOT)1",
-                R.drawable.americano_hot
-            )
-        )
-
-        likeRecipeItems.add(
-            HomeLikeRecipeModel(
-                "아메리카노(HOT)2",
-                R.drawable.americano_hot
-            )
-        )
-
-        likeRecipeItems.add(
-            HomeLikeRecipeModel(
-                "아메리카노(HOT)3",
-                R.drawable.americano_hot
-            )
-        )
-
-        likeRecipeItems.add(
-            HomeLikeRecipeModel(
-                "아메리카노(HOT)4",
-                R.drawable.americano_hot
-            )
-        )
-
-        likeRecipeItems.add(
-            HomeLikeRecipeModel(
-                "아메리카노(HOT)5",
-                R.drawable.americano_hot
-            )
-        )
 
         val rvHomeLikeRecipe = binding.fragmentHomeRvLikeRecipe
         val rvHomeLikeRecipeAdapter = RVHomeLikeRecipeAdapter(likeRecipeItems)
 
         rvHomeLikeRecipe.adapter = rvHomeLikeRecipeAdapter
-        rvHomeLikeRecipe.layoutManager = LinearLayoutManager(context,  LinearLayoutManager.HORIZONTAL, false)
+        rvHomeLikeRecipe.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
 
         // 레시피 더 보러가기 클릭시
@@ -182,35 +128,177 @@ class HomeFragment : Fragment() {
 
         }
 
-        // 현재 진행중인 주문 코드!!!
-        orderItems.add(
-            HomeOrderModel(
-                "아메리카노 외.. 1잔",
-                "1분전"
-            )
-        )
-
-        orderItems.add(
-            HomeOrderModel(
-                "아메리카노 외.. 2잔",
-                "2분전"
-            )
-        )
-
-        orderItems.add(
-            HomeOrderModel(
-                "아메리카노 외.. 3잔",
-                "3분전"
-            )
-        )
-
-        val rvHomeOrder = binding.fragmentHomeRvOrder
-        val rvHomeOrderAdapter = RVHomeOrderAdapter(orderItems)
-
-        rvHomeOrder.adapter = rvHomeOrderAdapter
-        rvHomeOrder.layoutManager = LinearLayoutManager(context,  LinearLayoutManager.VERTICAL, false)
 
     }
+
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun initNotiAdater() {
+        if (noticeViewModel.noticeList.value.isNullOrEmpty()) {
+            noticeViewModel.init(
+                sharedPreferencesUtil.getStoreId(),
+                sharedPreferencesUtil.getUser().userId!!.toInt()
+            )
+        }
+        binding.fragmentHomeRvAnnouncement.layoutManager = LinearLayoutManager(requireContext())
+        notiAdapter = NotiAdapter(emptyList(), object : NotiAdapter.ItemClickListener {
+            override fun onClick(position: Int) {
+                val noticeList = noticeViewModel.noticeList.value // 현재 공지 리스트 가져오기
+                if (!noticeList.isNullOrEmpty() && position in noticeList.indices) {
+                    noticeViewModel.setClickNotice(noticeList[position])
+                    findNavController().navigate(R.id.writeNotiFragment)
+                }
+            }
+        })
+
+        binding.fragmentHomeRvAnnouncement.adapter = notiAdapter
+
+        noticeViewModel.noticeList.observe(viewLifecycleOwner, { newList ->
+            // 기존 데이터를 덮어쓰지 않고 새로운 리스트를 어댑터에 설정
+            notiAdapter.noticeList = newList
+            notiAdapter.notifyDataSetChanged() // 리스트 업데이트
+        })
+    }
+
+
+    fun initSpinner() {
+        Log.d(TAG, "initSpinner: Starting spinner initialization")
+        val spinner = binding.fragmentHomeStorenameSpinner
+
+        val observeStoreList: (List<Any>) -> Unit = { storeList ->
+            Log.d(TAG, "observeStoreList: Received store list, size=${storeList.size}")
+            
+            // 기본값으로 "등록된 가게가 없습니다" 설정
+            val storeNames = mutableListOf("등록된 가게가 없습니다")
+            val storeIds = mutableListOf(0)
+            
+            // 가게 목록이 있을 경우에만 기본값을 덮어씀
+            if (storeList.isNotEmpty()) {
+                when (val firstItem = storeList[0]) {
+                    is SearchedStore -> {
+                        val filteredList = storeList.mapNotNull { 
+                            (it as? SearchedStore)?.takeIf { store -> 
+                                !store.storeName.isNullOrEmpty() && store.storeId != null 
+                            }
+                        }
+                        if (filteredList.isNotEmpty()) {
+                            storeNames.clear()
+                            storeIds.clear()
+                            storeNames.addAll(filteredList.map { it.storeName!! })
+                            storeIds.addAll(filteredList.map { it.storeId!! })
+                        }
+                    }
+                    is StoreResponseUser -> {
+                        val filteredList = storeList.mapNotNull { 
+                            (it as? StoreResponseUser)?.takeIf { store -> 
+                                store.name.isNotEmpty() 
+                            }
+                        }
+                        if (filteredList.isNotEmpty()) {
+                            storeNames.clear()
+                            storeIds.clear()
+                            storeNames.addAll(filteredList.map { it.name })
+                            storeIds.addAll(filteredList.map { it.storeId })
+                        }
+                    }
+                }
+            }
+
+            Log.d(TAG, "initSpinner: storeNames=$storeNames, storeIds=$storeIds")
+            
+            // Adapter 설정
+            val adapter = ArrayAdapter(
+                requireContext(),
+                R.layout.home_spinner_item,
+                storeNames
+            ).apply {
+                setDropDownViewResource(R.layout.home_spinner_item)
+            }
+
+            spinner.adapter = adapter
+            
+            // 저장된 storeId 가져오기
+            val savedStoreId = sharedPreferencesUtil.getStoreId()
+            val defaultIndex = storeIds.indexOfFirst { it == savedStoreId }.takeIf { it != -1 } ?: 0
+            
+            // 기본 선택 인덱스 설정
+            spinner.setSelection(defaultIndex)
+
+            spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    val selectedStoreId = storeIds.getOrNull(position) ?: 0
+                    sharedPreferencesUtil.setStoreId(selectedStoreId)
+                    if (selectedStoreId != 0) {
+                        noticeViewModel.getAllNotice(selectedStoreId, sharedPreferencesUtil.getUser().userId!!.toInt())
+                        viewModel.getOrders()
+                    }
+                    Log.d(TAG, "onItemSelected: position=$position, storeId=$selectedStoreId")
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        }
+
+        // OWNER인지 아닌지에 따라 다른 뷰모델을 사용
+        if (sharedPreferencesUtil.getUser()?.role == "OWNER") {
+            Log.d(TAG, "initSpinner: Observing OWNER stores")
+            bossViewModel.myStoreList.value?.let { 
+                Log.d(TAG, "initSpinner: Current OWNER stores size=${it.size}")
+                observeStoreList(it)
+            }
+        } else {
+            Log.d(TAG, "initSpinner: Observing USER stores")
+            storeViewModel.myStoreList.value?.let {
+                Log.d(TAG, "initSpinner: Current USER stores size=${it.size}")
+                observeStoreList(it)
+            }
+        }
+    }
+
+
+    fun initOrderAdapter(selectedDate: String) {
+        binding.fragmentHomeRvOrder.layoutManager = LinearLayoutManager(requireContext())
+        
+        orderAdapter = HomeOrderAdatper(mutableListOf(), mutableListOf()) { orderId ->
+            val bundle = Bundle().apply {
+                putInt("orderId", orderId)
+            }
+            // 주문 상세 화면으로 이동할 때 결과 리스너 설정
+            findNavController().navigate(R.id.orderRecipeFragment, bundle)
+        }
+        
+        binding.fragmentHomeRvOrder.adapter = orderAdapter
+
+        viewModel.getOrders()
+        
+        // orderList와 recipeNameList를 동시에 관찰
+        viewModel.orderList.observe(viewLifecycleOwner) { orderList ->
+            viewModel.recipeNameList.value?.let { recipeList ->
+                val currentStoreId = sharedPreferencesUtil.getStoreId()
+                // 현재 선택된 가게의 완료되지 않은 주문만 필터링
+                val activeOrders = orderList.filter { order -> 
+                    !order.completed
+                }
+                orderAdapter.orderList = activeOrders.toMutableList()
+                
+                // 필터링된 주문에 해당하는 레시피만 선택
+                val activeRecipes = recipeList.filterIndexed { index, _ -> 
+                    index < orderList.size && 
+                    !orderList[index].completed
+                }
+                orderAdapter.recipeNameList = activeRecipes.map { it.recipeName }.toMutableList()
+                orderAdapter.notifyDataSetChanged()
+                
+                Log.d(TAG, "Orders updated: active=${activeOrders.size}, total=${orderList.size}, storeId=$currentStoreId")
+            }
+        }
+    }
+
 
     private fun setupBannerItems() {
         bannerItems.add(
@@ -271,7 +359,7 @@ class HomeFragment : Fragment() {
                     // 화면을 터치했을 때 자동 스크롤 중지
                     android.view.MotionEvent.ACTION_DOWN -> stopBannerAutoScroll()
                     // 터치가 끝났거나 취소됐을 때 자동 스크롤 재시작
-                    android.view.MotionEvent.ACTION_UP, 
+                    android.view.MotionEvent.ACTION_UP,
                     android.view.MotionEvent.ACTION_CANCEL -> startBannerAutoScroll()
                 }
                 // false를 반환하여 터치 이벤트가 상위 뷰로 전파되도록 함
@@ -285,7 +373,7 @@ class HomeFragment : Fragment() {
             // 현재 위치에서 다음 아이템으로 이동
             binding.fragmentHomeVpBanner.currentItem = binding.fragmentHomeVpBanner.currentItem + 1
         }
-        
+
         // 초기 자동 스크롤 시작
         startBannerAutoScroll()
     }

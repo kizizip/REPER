@@ -25,14 +25,20 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.R
+import com.ssafy.reper.base.ApplicationClass.Companion.sharedPreferencesUtil
 import com.ssafy.reper.data.dto.OwnerStore
+import com.ssafy.reper.data.dto.SearchedStore
 import com.ssafy.reper.data.dto.Store
+import com.ssafy.reper.data.dto.StoreResponseUser
 import com.ssafy.reper.data.dto.UserInfo
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.databinding.FragmentMyPageBinding
 import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
+import com.ssafy.reper.ui.boss.BossViewModel
+import com.ssafy.reper.ui.boss.NoticeViewModel
+import com.ssafy.reper.ui.home.StoreViewModel
 import com.ssafy.reper.ui.login.LoginActivity
 import com.ssafy.reper.ui.mypage.adapter.StoreSearchAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -49,6 +55,8 @@ class MyPageFragment : Fragment() {
     private var _myPageBinding: FragmentMyPageBinding? = null
     private val myPageBinding get() = _myPageBinding!!
     private val fcmViewModel: FcmViewModel by activityViewModels()
+    private val bossViewModel: BossViewModel by activityViewModels()
+    private val storeViewModel: StoreViewModel by activityViewModels()
 
 
     override fun onAttach(context: Context) {
@@ -76,29 +84,10 @@ class MyPageFragment : Fragment() {
 
         val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
         val user = sharedPreferencesUtil.getUser()
-        var ownerStoreList: List<OwnerStore> = mutableListOf()  // 사장 가게 조회
-        var employeeStoreList: List<Store> = mutableListOf()    // 직원 가게 조회
 
-        // 사장 or 직원 표시
         if (user.role == "OWNER") {
             myPageBinding.mypageFmTvYellow.text = "${user.username} 사장"
             myPageBinding.mypageFmBtnBossMenu.text = "사장님 메뉴"
-
-            // 사장 정보 조회
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    ownerStoreList =
-                        RetrofitUtil.storeService.getStoreListByOwnerId(user.userId.toString())
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            requireContext(),
-                            "매장 정보 조회 중 오류가 발생했습니다.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
 
         } else {
             myPageBinding.mypageFmTvYellow.text = "${user.username} 직원"
@@ -109,7 +98,11 @@ class MyPageFragment : Fragment() {
         startSequentialAnimation()
         setupSpinner()
         initEvent()
+
+
     }
+
+
 
     private fun startSequentialAnimation() {
         // 뷰가 유효한지 확인
@@ -202,30 +195,81 @@ class MyPageFragment : Fragment() {
         val binding = _myPageBinding ?: return
 
         // 가게 이름 Spinner 설정
-        val spinner = binding.mypageFmSp
-        val userTypes = arrayOf("메가커피 구미 인동점", "이스터에그:이걸 발견하다니!")
+        val spinner = myPageBinding.mypageFmSp
 
-        val adapter =
-            ArrayAdapter(requireContext(), R.layout.mypage_spinner_item, userTypes).apply {
-                setDropDownViewResource(R.layout.mypage_spinner_item)
+        val observeStoreList: (List<Any>) -> Unit = { storeList ->
+            val storeNames: MutableList<String>
+            val storeIds: MutableList<Int>
+
+            // OWNER와 USER의 Store DTO가 다르므로, 그에 맞게 처리
+            if (storeList.isNotEmpty()) {
+                when (val firstItem = storeList[0]) {
+                    is SearchedStore -> {
+                        // SearchedStore DTO 처리
+                        storeNames = storeList.map { (it as SearchedStore).storeName ?: "등록된 가게가 없습니다." }.toMutableList()
+                        storeIds = storeList.map { (it as SearchedStore).storeId ?: 0}.toMutableList()
+                    }
+                    is StoreResponseUser -> {
+                        // StoreResponseUser DTO 처리
+                        storeNames = storeList.map { (it as StoreResponseUser).name}.toMutableList()
+                        storeIds = storeList.map { (it as StoreResponseUser).storeId }.toMutableList()
+                    }
+                    else -> {
+                        // 타입이 예상과 다르면 기본값 처리
+                        storeNames = mutableListOf("등록된 가게가 없습니다.")
+                        storeIds = mutableListOf(0)
+                        sharedPreferencesUtil.setStoreId(0)
+                    }
+                }
+            } else {
+                // 리스트가 비어 있으면 기본값 처리
+                storeNames = mutableListOf("등록된 가게가 없습니다.")
+                storeIds = mutableListOf(0)
+                sharedPreferencesUtil.setStoreId(0)
             }
 
-        spinner.adapter = adapter
-
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val selectedItem = userTypes[position]
-                // 선택된 항목 처리
+            // Adapter 설정
+            val adapter = ArrayAdapter(
+                requireContext(),
+                R.layout.home_spinner_item,
+                storeNames
+            ).apply {
+                setDropDownViewResource(R.layout.home_spinner_item)
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // 아무것도 선택되지 않았을 때의 처리
+            spinner.adapter = adapter
+
+            // 저장된 storeId 가져오기
+            val savedStoreId = sharedPreferencesUtil.getStoreId()
+            val defaultIndex = storeIds.indexOfFirst { it == savedStoreId }
+
+            // 기본 선택 인덱스 설정
+            if (defaultIndex != -1) {
+                spinner.setSelection(defaultIndex)
             }
+
+            spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    // 선택된 storeId 저장
+                    val selectedStoreId = storeIds.getOrNull(position)
+                    selectedStoreId?.let { sharedPreferencesUtil.setStoreId(it) }
+
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        }
+
+        // OWNER인지 아닌지에 따라 다른 뷰모델을 사용
+        if (sharedPreferencesUtil.getUser().role == "OWNER") {
+            bossViewModel.myStoreList.observe(viewLifecycleOwner, observeStoreList)
+        } else {
+            storeViewModel.myStoreList.observe(viewLifecycleOwner, observeStoreList)
         }
     }
 
@@ -437,6 +481,10 @@ class MyPageFragment : Fragment() {
 
         myPageBinding.mypageFmBtnNotice.setOnClickListener {
             findNavController().navigate(R.id.noticeManageFragment)
+
+        }
+        myPageBinding.mypageFmBtnRecipe.setOnClickListener {
+            findNavController().navigate(R.id.allRecipeFragment)
 
         }
     }

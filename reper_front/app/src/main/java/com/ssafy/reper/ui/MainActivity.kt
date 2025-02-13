@@ -24,6 +24,7 @@ import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.ActivityMainBinding
 import com.ssafy.reper.ui.boss.BossViewModel
 import com.ssafy.reper.ui.boss.NoticeViewModel
+import com.ssafy.reper.ui.home.StoreViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private val noticeViewModel: NoticeViewModel by viewModels()
     private val bossViewModel: BossViewModel by viewModels()
     private val fcmViewModel:FcmViewModel by viewModels()
+    private val storeViewModel: StoreViewModel by viewModels()
     lateinit var sharedPreferencesUtil: SharedPreferencesUtil
     var sharedUserId = 0
     var sharedStoreId = 0
