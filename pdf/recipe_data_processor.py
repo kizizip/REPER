@@ -7,6 +7,7 @@ import numpy as np                         # 벡터 연산 및 코사인 유사�
 from dotenv import load_dotenv             # .env 파일에서 환경 변수 로드
 from flask import Flask, request, jsonify  # rest api 서버 구현현
 import boto3                               # aws s3 접근
+import botocore                            # boto3 예외 처리리
 import base64                              # base64 인코딩/디코딩
 from io import BytesIO                     # 바이너리 데이터 처리
 
@@ -57,6 +58,7 @@ ANIMATIONS = [
     {"keyword": "딸기 베이스를 컵에 담습니다.", "url": "https://cdn.lottielab.com/l/2Y6Ggm7jWcNaJ6.json"},
     {"keyword": "레몬청을 스푼으로 덜어 냅니다.", "url": "https://cdn.lottielab.com/l/A95CqnJxqAfT79.json"},
     {"keyword": "자몽청을 스푼으로 덜어 냅니다.", "url": "https://cdn.lottielab.com/l/CLut8Kky51eJ7B.json"},
+    {"keyword": "크림베이스를 스푼으로 올립니다.", "url": "https://cdn.lottielab.com/l/3Zb2Fu2gKEqwdu.json"},
     {"keyword": "우유 거품을 스푼으로 떠서 올립니다.", "url": "https://cdn.lottielab.com/l/3Zb2Fu2gKEqwdu.json"},
     {"keyword": "대추청을 스푼으로 덜어 냅니다.", "url": "https://cdn.lottielab.com/l/6Tm6WxmBktLg6d.json"},
     {"keyword": "초코 소스를 스푼으로 떠서 추가합니다.", "url": "https://cdn.lottielab.com/l/81ckDCvhP5kb4H.json"},
@@ -64,7 +66,6 @@ ANIMATIONS = [
     {"keyword": "에스프레소를 머신에서 추출합니다.", "url": "https://cdn.lottielab.com/l/7s4iHVxukkaC57.json"},
     {"keyword": "추출한 에스프레소 샷을 컵에 붓습니다.", "url": "https://cdn.lottielab.com/l/DnWc3zyzDZBhAx.json"}
 ]
-
 
 
 def get_embedding(text, model="text-embedding-ada-002"):
@@ -103,24 +104,46 @@ def map_animation_url(instruction, threshold=0.85):
     return best_url if best_similarity >= threshold else None
 
 
+# s3 버킷 내에 지정한 키의 객체가 존재하는지 확인
+def check_image_exists(bucket_name, my_key):
+    try:
+        s3.head_object(Bucket=bucket_name, Key=my_key)
+        return True # 이미지 존재함
+    except botocore.exceptions.ClientError as e:
+        if e.response["Error"]["Code"] == "404":
+            return False # 이미지 존재하지 않음
+        else:
+            raise # 다른 예외 발생
+
+
 # 레시피 이미지 생성
-def generate_recipe_image(recipe_name, type):
+def generate_recipe_image(recipe_name, recipe_type):
+    formatted_recipe_name = recipe_name.replace(" ", "")
+
+    bucket_name = "reper-images"
+    my_key = f"recipe_images/{formatted_recipe_name}_{recipe_type}.png"
+
+    # s3에 이미지가 존재하는지 확인
+    if check_image_exists(bucket_name, my_key):
+        s3_url = f"https://{bucket_name}.s3.amazonaws.com/{my_key}"
+        return s3_url
+
+    # 이미지가 존재하지 않으면 생성
     response = client.images.generate(
         model="dall-e-2",
-        prompt=f"A high-quality realistic image of {type} {recipe_name} coffee drink.",
+        prompt=f"A high-quality realistic image of {recipe_type} {recipe_name} coffee drink.",
         size="1024x1024",
         quality="standard",
         response_format="b64_json",
         n=1,
     )
 
+    # s3에 저장하고 s3 url 반환
     if response.data:
         image_base64 = response.data[0].b64_json
         image_data = base64.b64decode(image_base64)
-        bucket_name = "reper-images"
-        mykey = f"recipe_images/{recipe_name}_{type}.png"
-        s3.upload_fileobj(BytesIO(image_data), bucket_name, mykey)
-        s3_url = f"https://{bucket_name}.s3.amazonaws.com/{mykey}"
+        s3.upload_fileobj(BytesIO(image_data), bucket_name, my_key)
+        s3_url = f"https://{bucket_name}.s3.amazonaws.com/{my_key}"
         return s3_url
     return None
 
@@ -234,7 +257,7 @@ def send_json_to_spring(data, store_id):
 
 
 
-# PDF 파일을 업로드 하면 JSON 변환 후 반환
+#★ PDF 파일을 업로드 하면 JSON 변환 후 반환 ★
 @app.route("/upload", methods=["POST"])
 def upload_file():
     file = request.files.get("file")
