@@ -55,11 +55,11 @@ interface AuthApi {
     suspend fun updateGoogleBoolean(@Path("userId") userId: Int)
 
     // 해당 계정으로 kakao 소셜 가입이 되어있는지를 반환
-    @GET("{email}/kakao")
+    @GET("users/{email}/kakao")
     suspend fun checkKakao(@Path("email") email: String): Boolean
 
     // 해당 계정으로 google 소셜 가입이 되어있는지를 반환
-    @GET("{email}/google")
+    @GET("users/{email}/google")
     suspend fun checkGoogle(@Path("email") email: String): Boolean
 
 }
