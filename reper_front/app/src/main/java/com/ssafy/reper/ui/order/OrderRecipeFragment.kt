@@ -55,10 +55,10 @@ class OrderRecipeFragment : Fragment() {
         // OrderFragment에서 bundle로 던진 orderId를 받음
         orderId = arguments?.getInt("orderId") ?: -1
 
-        // 어뎁터 처리
-        initAdapter()
         // 이벤트 처리
         initEvent()
+        // 어뎁터 처리
+        initAdapter()
     }
     override fun onResume() {
         super.onResume()
@@ -149,10 +149,10 @@ class OrderRecipeFragment : Fragment() {
             mainViewModel.setOrder(order)
 
             if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
-                navigateToRecipeFragment()
+                navigateToRecipeFragment(R.id.fullRecipeFragment)
             }
             else if(orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected == true){
-                navigateToRecipeFragment()
+                navigateToRecipeFragment(R.id.stepRecipeFragment)
             }
         }
     }
@@ -186,11 +186,11 @@ class OrderRecipeFragment : Fragment() {
             }
         }
     }
-    fun navigateToRecipeFragment() {
+    fun navigateToRecipeFragment(fragmentId :Int) {
         val bundle =Bundle().apply {
             putInt("whereAmICame", 2)
         }
         mainViewModel.setSelectedRecipes(checkedRecipeList)
-        findNavController().navigate(R.id.stepRecipeFragment, bundle)
+        findNavController().navigate(fragmentId, bundle)
     }
 }
