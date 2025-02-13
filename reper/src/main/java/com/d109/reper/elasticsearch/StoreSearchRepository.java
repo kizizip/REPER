@@ -17,7 +17,7 @@ public interface StoreSearchRepository extends ElasticsearchRepository<StoreDocu
         "should": [
           { 
             "match": { 
-              "name": { 
+              "storeName": { 
                 "query": "?0",
                 "fuzziness": "AUTO"
               }
@@ -25,7 +25,7 @@ public interface StoreSearchRepository extends ElasticsearchRepository<StoreDocu
           },        
           { 
             "match": { 
-              "name.ngram": { 
+              "storeName.ngram": { 
                 "query": "?0"
               }
             }

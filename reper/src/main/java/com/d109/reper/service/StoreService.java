@@ -58,7 +58,7 @@ public class StoreService {
         // 엘라스틱서치 DB에 등록
         StoreDocument elasticStore = new StoreDocument();
         elasticStore.setStoreId(savedStore.getStoreId());
-        elasticStore.setName(savedStore.getStoreName());
+        elasticStore.setStoreName(savedStore.getStoreName());
         storeSearchRepository.save(elasticStore);
 
         return new StoreResponseDto(savedStore);
@@ -144,7 +144,7 @@ public class StoreService {
                 .map(store -> {
                     StoreDocument doc = new StoreDocument();
                     doc.setStoreId(store.getStoreId());
-                    doc.setName(store.getStoreName());
+                    doc.setStoreName(store.getStoreName());
                     return doc;
                 })
                 .toList();

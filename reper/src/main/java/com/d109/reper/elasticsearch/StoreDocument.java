@@ -20,5 +20,5 @@ public class StoreDocument {
                     @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "nori_edge_ngram_analyzer", searchAnalyzer = "nori_edge_ngram_analyzer")  // 초성 검색용
             }
     )
-    private String name;
+    private String storeName;
 }
