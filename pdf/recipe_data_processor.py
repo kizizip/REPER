@@ -129,8 +129,11 @@ def generate_recipe_image(recipe_name, recipe_type):
 
     # 이미지가 존재하지 않으면 생성
     response = client.images.generate(
-        model="dall-e-2",
-        prompt=f"A high-quality realistic image of {recipe_type} {recipe_name} coffee drink.",
+        model="dall-e-3",
+        prompt=f"""A high-resolution, realistic photograph of a {recipe_type.lower()} {recipe_name}. 
+                The beverage is presented on a clean, white background with soft, even lighting, 
+                clearly showing its rich colors, textures, and fresh ingredients. 
+                The background is completely white, ensuring the focus remains on the vibrant and well-defined drink in the foreground.""",
         size="1024x1024",
         quality="standard",
         response_format="b64_json",
