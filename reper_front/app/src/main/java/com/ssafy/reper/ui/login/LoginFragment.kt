@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -39,6 +40,7 @@ import kotlin.coroutines.resumeWithException
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -50,6 +52,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.auth.ktx.auth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
 
 private const val TAG = "LoginFragment_레퍼"
 
@@ -282,6 +285,7 @@ class LoginFragment : Fragment() {
                         } else if (isGoogle) { // 구글로 회원가입을 진행했더라면
                             // 다른 소셜 로그인 으로 회원가입을 한 적이있다고 표시 하고 로그인창으로 돌려보냄
                             val dialog = Dialog(requireContext())
+                            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                             dialog.setContentView(R.layout.dialog_social_login)
 
                             val socialLoginTitle = dialog.findViewById<TextView>(R.id.social_login_tv_title)
@@ -290,17 +294,18 @@ class LoginFragment : Fragment() {
 
                             dialog.show()
 
-                            val socialLoginLl = dialog.findViewById<LinearLayout>(R.id.logout_d_btn_positive)
-                            socialLoginLl.setOnClickListener {
+                            val socialLoginBtn = dialog.findViewById<ConstraintLayout>(R.id.logout_d_btn_positive)
+                            socialLoginBtn.setOnClickListener {
                                 dialog.dismiss()
                             }
                         } else {
                             val dialog = Dialog(requireContext())
-                            dialog.setContentView(R.layout.dialog_social_login)
+                            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                            dialog.setContentView(R.layout.dialog_inapp_login)
                             dialog.show()
     
-                            val socialLoginLl = dialog.findViewById<LinearLayout>(R.id.logout_d_btn_positive)
-                            socialLoginLl.setOnClickListener {
+                            val socialLoginBtn = dialog.findViewById<ConstraintLayout>(R.id.logout_d_btn_positive)
+                            socialLoginBtn.setOnClickListener {
                                 dialog.dismiss()
                             }
                         }
@@ -354,8 +359,12 @@ class LoginFragment : Fragment() {
 
 
     private fun loginWithGoogle() {
-        val signInIntent = googleSignInClient.signInIntent
-        startActivityForResult(signInIntent, RC_SIGN_IN) // Google 로그인 화면 실행
+        // 기존 로그인 정보 삭제
+        googleSignInClient.signOut().addOnCompleteListener {
+            // 로그아웃 완료 후 새로운 로그인 시도
+            val signInIntent = googleSignInClient.signInIntent
+            startActivityForResult(signInIntent, RC_SIGN_IN)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -441,14 +450,13 @@ class LoginFragment : Fragment() {
 
                         sharedPreferencesUtil.addUser(userinfo)
 
-                        Toast.makeText(requireContext(), "${user.email}님 구글 로그인 처리", Toast.LENGTH_SHORT).show()
-
                         // 메인 화면으로 이동
                         navigateToMainActivity()
 
                     } else if (isKakao == true) {
                         // 다른 소셜 로그인 으로 회원가입을 한 적이있다고 표시 하고 로그인창으로 돌려보냄
                         val dialog = Dialog(requireContext())
+                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                         dialog.setContentView(R.layout.dialog_social_login)
                         
                         val socialLoginTitle = dialog.findViewById<TextView>(R.id.social_login_tv_title)
@@ -457,17 +465,18 @@ class LoginFragment : Fragment() {
                         
                         dialog.show()
 
-                        val socialLoginLl = dialog.findViewById<LinearLayout>(R.id.logout_d_btn_positive)
-                        socialLoginLl.setOnClickListener {
+                        val socialLoginBtn = dialog.findViewById<ConstraintLayout>(R.id.logout_d_btn_positive)
+                        socialLoginBtn.setOnClickListener {
                             dialog.dismiss()
-                        }   
+                        }
                     } else {
                         val dialog = Dialog(requireContext())
-                        dialog.setContentView(R.layout.dialog_social_login)
+                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        dialog.setContentView(R.layout.dialog_inapp_login)
                         dialog.show()
 
-                        val socialLoginLl = dialog.findViewById<LinearLayout>(R.id.logout_d_btn_positive)
-                        socialLoginLl.setOnClickListener {
+                        val socialLoginBtn = dialog.findViewById<ConstraintLayout>(R.id.logout_d_btn_positive)
+                        socialLoginBtn.setOnClickListener {
                             dialog.dismiss()
                         }
                         
@@ -492,7 +501,7 @@ class LoginFragment : Fragment() {
                     Log.e(TAG, "updateUI: 일반 오류 발생")
                     Log.e(TAG, "updateUI: 오류 종류 = ${e.javaClass.simpleName}")
                     Log.e(TAG, "updateUI: 오류 메시지 = ${e.message}")
-                    Log.e(TAG, "updateUI: 스택 트레이스", e)
+                    Log.e(TAG, "updateUI: 발생 위치", e)  // 스택 트레이스를 통해 정확한 오류 발생 위치 확인
                     
                     withContext(Dispatchers.Main) {
                         Toast.makeText(requireContext(), "예기치 않은 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
