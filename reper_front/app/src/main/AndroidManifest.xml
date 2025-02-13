@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.ssafy.reper">
     <!-- 서버와의 통신을 위한 Internet 허용 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -68,6 +69,14 @@
             </intent-filter>
         </service>
 
+        <receiver
+            android:name="com.ssafy.reper.base.FragmentReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.ssafy.reper.UPDATE_BOSS_FRAGMENT"/>
+                <action android:name="com.ssafy.reper.DELETE_ACCESS"/>
+            </intent-filter>
+        </receiver>
 
     </application>
 

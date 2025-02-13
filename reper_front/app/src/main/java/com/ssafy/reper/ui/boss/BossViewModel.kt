@@ -69,9 +69,9 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
                 RetrofitUtil.storeService.allEmployee(storeId)
             }.onSuccess { employees ->
                 val access = employees.filter { it.employed }  // employed가 true인 직원들
-                val waiting = employees.filter { !it.employed } // employed가 false인 직원들
-                getAccessEmployeeList(access)
-                getWaitingEmployee(waiting)
+                val waiting = employees.filter { !it.employed } // employed가 false인 직원들_
+                _accessList.value = access
+                _waitingList.value = waiting
                 Log.d(TAG, "getAllEmployee: ${storeId}")
                 Log.d(TAG, "Access: $access")
                 Log.d(TAG, "Waiting: $waiting")

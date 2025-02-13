@@ -1,23 +1,36 @@
 package com.ssafy.reper.ui
 
+import FcmDialog
+import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.Application
+import android.app.Dialog
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.util.Log
+import android.view.View
+import android.widget.TextView
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.findNavController
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.ssafy.reper.FcmDialog
 import com.ssafy.reper.R
+import com.ssafy.reper.ui.boss.BossViewModel
 
 private const val TAG = "MyFirebaseMessagingServ"
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
+
 
     // 새 토큰이 발급될 때 호출되는 메서드
     override fun onNewToken(token: String) {
@@ -26,26 +39,63 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     // FCM 메시지를 수신할 때 호출되는 메서드
+    @SuppressLint("UnsafeImplicitIntentLaunch")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
+        Log.d(TAG, "onMessageReceived: ${remoteMessage}메세지를 받음")
 
-        val data = remoteMessage.data // 데이터 메시지
-        val notification = remoteMessage.notification // 알림 메시지
+        val data = remoteMessage.data
+        val notification = remoteMessage.notification
+        
+        Log.d(TAG, "FCM Data: $data")
+        Log.d(TAG, "targetFragment: ${data["targetFragment"]}, requestId: ${data["requestId"]}")
 
-        // 로그 출력
-        if (data.isNotEmpty()) {
-            Log.d("MyFirebaseMessagingService", "Data Message: $data")
+        // BossFragment 갱신이 필요한 경우 브로드캐스트 발송
+        if (data["targetFragment"] == "BossFragment") {
+            try {
+                val updateIntent = Intent("com.ssafy.reper.UPDATE_BOSS_FRAGMENT").apply {
+                    putExtra("requestId", data["requestId"])
+                    addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                }
+                applicationContext.sendBroadcast(updateIntent)
+                Log.d(TAG, "BossFragment 브로드캐스트 발송 성공")
+            } catch (e: Exception) {
+                Log.e(TAG, "BossFragment 브로드캐스트 발송 실패: ${e.message}")
+            }
         }
 
-        notification?.let {
-            val title = it.title ?: "No title"
-            val body = it.body ?: "No body"
-            Log.d("MyFirebaseMessagingService", "Notification Message: Title=$title, Body=$body")
+        // 권한 삭제 알림인 경우
+        if (data["targetFragment"] == "MyPageFragment" && data["title"] == "권한 삭제알림") {
+            try {
+                Log.d(TAG, "권한 삭제 브로드캐스트 발송 시도")
+                val updateIntent = Intent("com.ssafy.reper.DELETE_ACCESS").apply {
+                    putExtra("title", data["title"])
+                    putExtra("body", data["body"])  // FCM 메시지의 내용
+                    `package` = packageName
+                    addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                applicationContext.sendBroadcast(updateIntent)
+                Log.d(TAG, "권한 삭제 브로드캐스트 발송 성공")
+            } catch (e: Exception) {
+                Log.e(TAG, "권한 삭제 브로드캐스트 발송 실패: ${e.message}")
+                e.printStackTrace()
+            }
 
-            // 데이터 메시지도 함께 전달
-            sendNotification(title, body, data)
-            sendInAppMessage(title, body)
+
+            notification?.let {
+                val title = it.title ?: "No title"
+                val body = it.body ?: "No body"
+                Log.d(TAG, "알림 메시지: Title=$title, Body=$body")
+
+                // 데이터 메시지도 함께 전달
+                sendNotification(title, body, data)
+                sendInAppMessage(title, body)
+            }
+
         }
+
+
     }
 
 
@@ -97,10 +147,46 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
 
     private fun sendInAppMessage(title: String, body: String) {
-        val activity = MainActivity.instance  // MainActivity의 싱글톤 인스턴스를 가져옴
+        val activity = MainActivity.instance
         activity?.runOnUiThread {
-            val customDialog = FcmDialog(activity, title, body)
-            customDialog.show()
+            try {
+                // 커스텀 다이얼로그 생성
+                val dialog = Dialog(activity)
+                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                dialog.setContentView(R.layout.dialog_delete)
+
+                // 텍스트뷰 설정
+                val nameTextView = dialog.findViewById<TextView>(R.id.dialog_delete_bold_tv)
+                val middleTV = dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv)
+                val text = dialog.findViewById<TextView>(R.id.dialog_delete_tv)
+                Log.d(TAG, "sendInAppMessage: 여기는 인앱메세지에서 생성됨")
+
+                // 상단 텍스트 숨기기
+                nameTextView.visibility = View.GONE
+                middleTV.visibility = View.GONE
+                text.text = body
+
+                // 취소 버튼 숨기기
+                dialog.findViewById<View>(R.id.dialog_delete_cancle_btn).visibility = View.GONE
+
+                // 삭제 버튼을 확인 버튼으로 변경
+                dialog.findViewById<TextView>(R.id.dialog_delete_delete_btn).apply {
+                    setText("확인")
+                    setOnClickListener {
+                        dialog.dismiss()
+                        // 홈 프래그먼트로 이동
+                        activity.findNavController(R.id.activityMainFragmentContainer)
+                            .navigate(R.id.homeFragment)
+                    }
+                }
+
+                dialog.setCancelable(false)
+                dialog.show()
+                Log.d(TAG, "In-app dialog shown successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error showing in-app dialog: ${e.message}")
+                e.printStackTrace()
+            }
         }
     }
 

@@ -1,7 +1,11 @@
 package com.ssafy.reper.ui
 
+import FragmentReceiver
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -42,8 +46,10 @@ class MainActivity : AppCompatActivity() {
     lateinit var sharedPreferencesUtil: SharedPreferencesUtil
     var sharedUserId = 0
     var sharedStoreId = 0
+    private lateinit var receiver: FragmentReceiver
 
 
+    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         enableEdgeToEdge()
@@ -80,7 +86,7 @@ class MainActivity : AppCompatActivity() {
 
         // 📌 FCM에서 targetFragment 전달받았는지 확인 후, 해당 프래그먼트로 이동
         val targetFragment = intent.getStringExtra("targetFragment")
-        val requestId = intent.getStringExtra("requestId")
+        val requestId = intent.getStringExtra("requestId")?.toInt()
         if (targetFragment != null) {
             when (targetFragment) {
                 "OrderFragment" -> {
@@ -101,14 +107,17 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 "BossFragment" ->{
-                    sharedPreferencesUtil.setStoreId(intent.getStringExtra("requestId")!!.toInt())
+                    sharedPreferencesUtil.setStoreId(requestId)
                     navController?.navigate(R.id.bossFragment)
+                    Log.d(TAG, "onCreate: ${requestId}승인요청 가게 아이디")
+                    bossViewModel.getAllEmployee(requestId!!)
+                    Log.d(TAG, "onCreate: ${bossViewModel.waitingList}")
                 }
                 "RecipeManageFragment"->{
                     navController?.navigate(R.id.recipeManageFragment)
                 }
                 "MyPageFragment"->{
-                    sharedPreferencesUtil.setStoreId(intent.getStringExtra("requestId")!!.toInt())
+                    sharedPreferencesUtil.setStoreId(requestId)
                     navController?.navigate(R.id.myPageFragment)
                 }
                 "" -> navController?.navigate(R.id.bossFragment)
@@ -125,11 +134,33 @@ class MainActivity : AppCompatActivity() {
             Log.d("FCMTOKEN", token)
         }
 
+        // BossFragmentReceiver 등록
+        receiver = FragmentReceiver()
+        val filter = IntentFilter().apply {
+            addAction("com.ssafy.reper.UPDATE_BOSS_FRAGMENT")
+            addAction("com.ssafy.reper.DELETE_ACCESS")
+        }
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(receiver, filter, RECEIVER_EXPORTED)
+        }
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // 리시버 해제
+        try {
+            unregisterReceiver(receiver)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unregistering receiver: ${e.message}")
+        }
+    }
+
     // FCM 토큰을 비동기적으로 가져오는 함수
-    private suspend fun getFCMToken(): String {
+     suspend fun getFCMToken(): String {
         return try {
             // FCM Token을 비동기적으로 가져옴
             FirebaseMessaging.getInstance().token.await()
@@ -160,10 +191,10 @@ class MainActivity : AppCompatActivity() {
             if (lastResult != result) { // 값이 바뀌었을 때만 실행
                 when (result) {
                     "success" -> {
-                        fcmViewModel.sendToUserFCM(1, "레시피 업로드 성공", sharedPreferencesUtil.getStateName(), "RecipeManageFragment", 0)
+                        fcmViewModel.sendToUserFCM(sharedUserId, "레시피 업로드 성공", sharedPreferencesUtil.getStateName(), "RecipeManageFragment", 0)
                     }
                     "failure" -> {
-                        fcmViewModel.sendToUserFCM(1, "레시피 업로드 실패", sharedPreferencesUtil.getStateName(), "RecipeManageFragment", 0)
+                        fcmViewModel.sendToUserFCM(sharedUserId, "레시피 업로드 실패", sharedPreferencesUtil.getStateName(), "RecipeManageFragment", 0)
                     }
                 }
                 lastResult = result // 마지막 결과를 갱신
