@@ -15,7 +15,6 @@ import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
@@ -37,6 +36,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import android.Manifest
 import android.content.pm.PackageManager
+import com.ssafy.reper.ui.recipe.adapter.RecipeIngredientsAdapter
 
 private const val TAG = "StepRecipeFragment_정언"
 class StepRecipeFragment : Fragment() {

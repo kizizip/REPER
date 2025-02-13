@@ -22,7 +22,6 @@ import android.widget.RadioButton
 import android.widget.Spinner
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,8 +30,8 @@ import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.ui.MainActivity
+import com.ssafy.reper.ui.recipe.adapter.AllRecipeListAdapter
 import com.ssafy.reper.util.ViewModelSingleton
-import kotlinx.coroutines.launch
 
 private const val TAG = "AllRecipeFragment_정언"
 class AllRecipeFragment : Fragment() {
@@ -243,11 +242,6 @@ class AllRecipeFragment : Fragment() {
                 val selectedRecipes = mutableListOf<Recipe>()
                 iceRecipe?.let { selectedRecipes.add(it) }
                 hotRecipe?.let { selectedRecipes.add(it) }
-
-                // 내가 어디 Fragment 출신인지 판단하는 bundle
-                val bundle = Bundle().apply {
-                    putInt("whereAmICame", 1)
-                }
 
                 // 전체 레시피 탭에서 단건 레시피를 클릭했을 떄
                 if(allRecipeBinding.allrecipeFmFullRecipeTab.isSelected == true){

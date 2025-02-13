@@ -1,15 +1,11 @@
-package com.ssafy.reper.ui.recipe
+package com.ssafy.reper.ui.recipe.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.ssafy.reper.databinding.ItemAllRecipeRvBinding
 import com.ssafy.reper.databinding.ItemFullRecipeStepRvBinding
-import com.ssafy.reper.databinding.ItemRecipeBinding
 
-class FullRecipeListAdapter (var recipeStepList:MutableList<String>, val itemClickListener:ItemClickListener) : RecyclerView.Adapter<FullRecipeListAdapter.FullRecipeListHolder>() {
+class FullRecipeListAdapter (var recipeStepList:MutableList<String>, val itemClickListener: ItemClickListener) : RecyclerView.Adapter<FullRecipeListAdapter.FullRecipeListHolder>() {
     inner class FullRecipeListHolder(private val binding: ItemFullRecipeStepRvBinding) : RecyclerView.ViewHolder(binding.root){
         fun bindInfo(position: Int){
             val item = recipeStepList[position]

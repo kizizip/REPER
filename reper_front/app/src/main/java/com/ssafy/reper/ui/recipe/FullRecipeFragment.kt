@@ -2,8 +2,6 @@ package com.ssafy.reper.ui.recipe
 
 import MainActivityViewModel
 import android.content.Context
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -11,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -23,10 +20,11 @@ import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.OrderDetail
 import com.ssafy.reper.data.dto.Recipe
-import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.databinding.FragmentFullRecipeBinding
 import com.ssafy.reper.databinding.FragmentFullRecipeItemBinding
 import com.ssafy.reper.ui.MainActivity
+import com.ssafy.reper.ui.recipe.adapter.FullRecipeListAdapter
+import com.ssafy.reper.ui.recipe.adapter.FullRecipeViewPagerAdapter
 import com.ssafy.reper.util.ViewModelSingleton
 
 private const val TAG = "FullRecipeFragment_정언"
@@ -51,6 +49,7 @@ class FullRecipeFragment : Fragment() {
 
     // 레시피 리스트 recyclerView Adapter
     private lateinit var fullRecipeListAdapter: FullRecipeListAdapter
+    private lateinit var viewPagerAdapter: FullRecipeViewPagerAdapter
 
     private lateinit var mainActivity: MainActivity
 
@@ -110,6 +109,7 @@ class FullRecipeFragment : Fragment() {
                 initEvent()
                 // RecyclerView adapter 처리
                 initAdapter()
+                initViewPager()
             }
         }
     }
@@ -133,6 +133,26 @@ class FullRecipeFragment : Fragment() {
         _fullRecipeItemBinding = null
     }
 
+    fun initViewPager() {
+        viewPagerAdapter = FullRecipeViewPagerAdapter(
+            recipeList = selectedRecipeList,
+            whereAmICame = whereAmICame,
+            orderDetails = orderDetails,
+            favoriteRecipeList = favoriteReicpeList,
+            onHeartClick = { recipe, isFavorite ->
+                if (isFavorite) {
+                    viewModel.likeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipe.recipeId)
+                } else {
+                    viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipe.recipeId)
+                }
+            }
+        )
+
+        fullRecipeBinding.fullrecipeFmVp.apply {
+            adapter = viewPagerAdapter
+            setCurrentItem(mainViewModel.nowISeeRecipe.value ?: 0, false)
+        }
+    }
     fun initEvent(){
         // 즐겨찾기 버튼이 눌리면
         fullRecipeItemBinding.fullrecipeFmBtnHeart.setOnClickListener {
@@ -152,10 +172,14 @@ class FullRecipeFragment : Fragment() {
         fullRecipeItemBinding.fullrecipeFmBtnIce.setOnClickListener {
             fullRecipeItemBinding.fullrecipeFmBtngroup.check(fullRecipeItemBinding.fullrecipeFmBtnIce.id)
             btnHotIceColorChange()
+            val iceRecipe = selectedRecipeList.filter { it.type.equals("ICE") }.first()
+            showRecipe(iceRecipe)
         }
         fullRecipeItemBinding.fullrecipeFmBtnHot.setOnClickListener {
             fullRecipeItemBinding.fullrecipeFmBtngroup.check(fullRecipeItemBinding.fullrecipeFmBtnHot .id)
             btnHotIceColorChange()
+            val hotRecipe = selectedRecipeList.filter { it.type.equals("HOT") }.first()
+            showRecipe(hotRecipe)
         }
 
         // slidepannel이 다 펴질 때만 scroll 가능하게!
@@ -189,11 +213,13 @@ class FullRecipeFragment : Fragment() {
             adapter = fullRecipeListAdapter
         }
     }
-    fun nextEvnet(){
-
+    fun nextEvent(){
+        mainViewModel.setNowISeeRecipe(nowRecipeIdx + 1)
+        showRecipe(selectedRecipeList.get(nowRecipeIdx))
     }
     fun prevEvent(){
-        
+        mainViewModel.setNowISeeRecipe(nowRecipeIdx - 1)
+        showRecipe(selectedRecipeList.get(nowRecipeIdx))
     }
     fun btnHotIceColorChange(){
         if(fullRecipeItemBinding.fullrecipeFmBtngroup.checkedButtonId == fullRecipeItemBinding.fullrecipeFmBtnIce.id){
