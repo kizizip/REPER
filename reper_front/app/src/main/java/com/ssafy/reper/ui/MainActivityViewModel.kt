@@ -5,17 +5,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.data.remote.RetrofitUtil
+import com.ssafy.reper.data.remote.RetrofitUtil.Companion.storeService
+import com.ssafy.reper.data.remote.RetrofitUtil.Companion.recipeService
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 private const val TAG = "MainActivityViewModel_정언"
 class MainActivityViewModel(application: Application) :  AndroidViewModel(application) {
-    private val storeService = RetrofitUtil.storeService
-
-    private val _isDataReady = MutableLiveData<Boolean>()
+        private val _isDataReady = MutableLiveData<Boolean>()
     val isDataReady: LiveData<Boolean> = _isDataReady
 
     private val _order = MutableLiveData<Order?>(null)
@@ -35,6 +37,25 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
 
     private val _isEmployee = MutableLiveData<Boolean?>(null)
     val isEmployee: LiveData<Boolean?> = _isEmployee
+
+    private val _favoriteRecipeList =
+        MutableLiveData<MutableList<FavoriteRecipe>>()
+    val favoriteRecipeList: LiveData<MutableList<FavoriteRecipe>>
+        get() = _favoriteRecipeList
+
+    fun getLikeRecipes(storeId:Int, userId:Int){
+        viewModelScope.launch {
+            var list:MutableList<FavoriteRecipe>
+            try {
+                list = recipeService.getLikeRecipes(storeId, userId)
+            }
+            catch (e: HttpException){
+                Log.d(TAG, "getLikeRecipes :error: ${e.response()?.errorBody().toString()}")
+                list = mutableListOf()
+            }
+            _favoriteRecipeList.value = list
+        }
+    }
 
     fun setSelectedRecipes(recipeList:MutableList<Recipe>){
         viewModelScope.launch {

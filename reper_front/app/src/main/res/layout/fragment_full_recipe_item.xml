@@ -13,90 +13,6 @@
         android:gravity="bottom"
         app:umanoDragView="@id/fullrecipe_fm_slide_layout"
         app:umanoPanelHeight="450dp">
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/fullrecipe_fm_back_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <ImageView
-                android:id="@+id/fullrecipe_fm_iv"
-                android:layout_width="match_parent"
-                android:layout_height="280dp"
-                android:background="@color/green"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:background="@color/white"
-                android:padding="24dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_iv"
-                app:layout_constraintVertical_bias="0.0">
-
-                <TextView
-                    android:id="@+id/fullrecipe_fm_tv_category"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="카테고리"
-                    android:textColor="@color/lightgray"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/pretendard_regular"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/fullrecipe_fm_tv_menu_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:fontFamily="@font/pretendard_semibold"
-                    android:text="메뉴명"
-                    android:textColor="@color/black"
-                    android:textSize="24sp"
-                    app:layout_constraintStart_toStartOf="@+id/fullrecipe_fm_tv_category"
-                    app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_tv_category" />
-
-                <FrameLayout
-                    android:id="@+id/fullrecipe_fm_fl_btn_heart"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="@+id/fullrecipe_fm_tv_menu_name"
-                    app:layout_constraintEnd_toEndOf="parent">
-
-                    <ImageButton
-                        android:id="@+id/fullrecipe_fm_btn_heart"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/fullrecipe_heart_btn" />
-
-                    <ImageView
-                        android:id="@+id/fullrecipe_fm_iv_lineheart"
-                        android:layout_width="25dp"
-                        android:layout_height="21.43dp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="2dp"
-                        android:background="@drawable/fullrecipe_lineheart"
-                        android:visibility="visible" />
-
-                    <ImageView
-                        android:id="@+id/fullrecipe_fm_iv_fullheart"
-                        android:layout_width="25dp"
-                        android:layout_height="21.88dp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="2dp"
-                        android:background="@drawable/fullrecipe_heart"
-                        android:visibility="gone" />
-                </FrameLayout>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fullrecipe_fm_slide_layout"
@@ -224,6 +140,92 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.ssafy.reper.ui.recipe.LockableNestedScrollView>
         </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fullrecipe_fm_back_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/fullrecipe_fm_iv"
+                android:layout_width="match_parent"
+                android:layout_height="280dp"
+                android:background="@color/green"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@color/white"
+                android:padding="24dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_iv"
+                app:layout_constraintVertical_bias="0.0">
+
+                <TextView
+                    android:id="@+id/fullrecipe_fm_tv_category"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="카테고리"
+                    android:textColor="@color/lightgray"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/pretendard_regular"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/fullrecipe_fm_tv_menu_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/pretendard_semibold"
+                    android:text="메뉴명"
+                    android:textColor="@color/black"
+                    android:textSize="24sp"
+                    app:layout_constraintStart_toStartOf="@+id/fullrecipe_fm_tv_category"
+                    app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_tv_category" />
+
+                <FrameLayout
+                    android:id="@+id/fullrecipe_fm_fl_btn_heart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="@+id/fullrecipe_fm_tv_menu_name"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <ImageButton
+                        android:id="@+id/fullrecipe_fm_btn_heart"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/fullrecipe_heart_btn" />
+
+                    <ImageView
+                        android:id="@+id/fullrecipe_fm_iv_lineheart"
+                        android:layout_width="25dp"
+                        android:layout_height="21.43dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="2dp"
+                        android:background="@drawable/fullrecipe_lineheart"
+                        android:visibility="visible" />
+
+                    <ImageView
+                        android:id="@+id/fullrecipe_fm_iv_fullheart"
+                        android:layout_width="25dp"
+                        android:layout_height="21.88dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="2dp"
+                        android:background="@drawable/fullrecipe_heart"
+                        android:visibility="gone" />
+                </FrameLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
 </FrameLayout>

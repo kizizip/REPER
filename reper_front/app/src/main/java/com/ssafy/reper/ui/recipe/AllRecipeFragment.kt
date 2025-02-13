@@ -280,7 +280,7 @@ class AllRecipeFragment : Fragment() {
             allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
 
             viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
-            viewModel.getLikeRecipes(
+            mainViewModel.getLikeRecipes(
                 ApplicationClass.sharedPreferencesUtil.getStoreId(),
                 ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
             )
@@ -309,7 +309,7 @@ class AllRecipeFragment : Fragment() {
                 }
             }
 
-            viewModel.favoriteRecipeList.observe(viewLifecycleOwner) {
+            mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner) {
                 allRecipeListAdapter.favoriteRecipeList = it
                 adapter = allRecipeListAdapter
             }

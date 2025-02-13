@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.ssafy.reper.R
 import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.OrderDetail
 import com.ssafy.reper.data.dto.Recipe
@@ -37,6 +38,7 @@ class FullRecipeFragment : Fragment() {
     lateinit var order : Order
     lateinit var orderDetails: MutableList<OrderDetail>
     lateinit var selectedRecipeList : MutableList<Recipe>
+    lateinit var favoriteReicpeList : MutableList<FavoriteRecipe>
 
     // Bundle 변수
     var whereAmICame = -1
@@ -52,6 +54,8 @@ class FullRecipeFragment : Fragment() {
 
     private lateinit var mainActivity: MainActivity
 
+    private var _fullRecipeBinding : FragmentFullRecipeBinding? = null
+    private val fullRecipeBinding get() =_fullRecipeBinding!!
     private var _fullRecipeItemBinding : FragmentFullRecipeItemBinding? = null
     private val fullRecipeItemBinding get() =_fullRecipeItemBinding!!
 
@@ -91,6 +95,11 @@ class FullRecipeFragment : Fragment() {
                 }
             }
             Log.d(TAG, "onViewCreated: recipeSteps: $it")
+        }
+        mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
+            if(it != null){
+                favoriteReicpeList = it
+            }
         }
         mainViewModel.isDataReady.observe(viewLifecycleOwner){
             if(it){
@@ -161,6 +170,11 @@ class FullRecipeFragment : Fragment() {
                 // 상태 변화에 따른 추가 처리가 필요하면 여기에 작성
             }
         })
+
+        // 돌아가기 버튼을 누르면 이전 Fragment로 돌아감.
+        fullRecipeBinding.fullrecipeFmBtnBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
     }
     fun initAdapter() {
         // allrecipe item 클릭 이벤트 리스너
@@ -174,6 +188,12 @@ class FullRecipeFragment : Fragment() {
             fullRecipeListAdapter.recipeStepList = recipeSteps
             adapter = fullRecipeListAdapter
         }
+    }
+    fun nextEvnet(){
+
+    }
+    fun prevEvent(){
+        
     }
     fun btnHotIceColorChange(){
         if(fullRecipeItemBinding.fullrecipeFmBtngroup.checkedButtonId == fullRecipeItemBinding.fullrecipeFmBtnIce.id){
@@ -189,5 +209,40 @@ class FullRecipeFragment : Fragment() {
             fullRecipeItemBinding.fullrecipeFmBtnHot.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.green))
             fullRecipeItemBinding.fullrecipeFmBtnHot.setTextColor(ContextCompat.getColor(mainActivity, R.color.white))
         }
+    }
+    fun showRecipe(recipe:Recipe) {
+        fullRecipeItemBinding.fullrecipeFmTvCategory.setText(recipe.category)
+        fullRecipeItemBinding.fullrecipeFmTvMenuName.setText(recipe.recipeName)
+
+        var ingredient = ""
+        for(item in recipe.ingredients){
+            ingredient += ", ${item.ingredientName}"
+        }
+        ingredient = ingredient.substring(2)
+        fullRecipeItemBinding.fullrecipeFmTvIngredients.setText(ingredient)
+
+        if(whereAmICame == 1) { // AllRecipeFragment
+            fullRecipeItemBinding.fullrecipeFmFlBtnHeart.visibility = View.VISIBLE
+            fullRecipeItemBinding.fullrecipeFmBtngroup.visibility = View.VISIBLE
+            fullRecipeItemBinding.fullrecipeFmTvNote.visibility = View.GONE
+            fullRecipeItemBinding.textView11.visibility = View.GONE
+
+            if(recipe.type.equals("ICE")){
+                fullRecipeItemBinding.fullrecipeFmBtngroup.check(fullRecipeItemBinding.fullrecipeFmBtnIce.id)
+            }
+            else if (recipe.type.equals("HOT")){
+                fullRecipeItemBinding.fullrecipeFmBtngroup.check(fullRecipeItemBinding.fullrecipeFmBtnHot.id)
+            }
+            btnHotIceColorChange()
+        } else if (whereAmICame == 2){ // OrdeFragment
+            fullRecipeItemBinding.fullrecipeFmFlBtnHeart.visibility = View.GONE
+            fullRecipeItemBinding.fullrecipeFmBtngroup.visibility = View.GONE
+            fullRecipeItemBinding.fullrecipeFmTvNote.visibility = View.VISIBLE
+            fullRecipeItemBinding.textView11.visibility = View.VISIBLE
+
+            fullRecipeItemBinding.fullrecipeFmTvNote.setText(orderDetails.filter { it.recipeId == recipe.recipeId }.get(0).customerRequest)
+        }
+
+        initAdapter()
     }
 }
