@@ -8,7 +8,11 @@ import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeResponse
 import com.ssafy.reper.data.remote.RetrofitUtil.Companion.recipeService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val TAG = "RecipeViewModel_정언"
 class RecipeViewModel : ViewModel() {
@@ -52,38 +56,50 @@ class RecipeViewModel : ViewModel() {
     }
 
     fun searchRecipeIngredientInclude(storeId:Int, ingredient:String){
-        viewModelScope.launch {
-            var list:MutableList<RecipeResponse>
-            var result:MutableList<Recipe> = mutableListOf()
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                list = recipeService.searchRecipeInclude(storeId, ingredient)
-                for(item in list){
-                    result.add(recipeService.getRecipe(item.recipeId))
+                // 검색 결과 받아오기
+                val recipeResponses = recipeService.searchRecipeInclude(storeId, ingredient)
+                
+                // 병렬로 Recipe 정보 가져오기
+                val recipes = recipeResponses.map { response ->
+                    async { recipeService.getRecipe(response.recipeId) }
+                }.awaitAll()
+
+                // UI 업데이트
+                withContext(Dispatchers.Main) {
+                    _recipeList.value = recipes.toMutableList()
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "error: ${e}")
+                withContext(Dispatchers.Main) {
+                    _recipeList.value = mutableListOf()
                 }
             }
-            catch (e:Exception){
-                Log.d(TAG, "error: ${e}")
-                result = mutableListOf()
-            }
-            _recipeList.value = result
         }
     }
 
-    fun searchRecipeIngredientExclude(storeId:Int, ingredient:String){
-        viewModelScope.launch {
-            var list:MutableList<RecipeResponse>
-            var result:MutableList<Recipe> = mutableListOf()
+    fun searchRecipeIngredientExclude(storeId: Int, ingredient: String) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                list = recipeService.searchRecipeExclude(storeId, ingredient)
-                for(item in list){
-                    result.add(recipeService.getRecipe(item.recipeId))
+                // 검색 결과 받아오기
+                val recipeResponses = recipeService.searchRecipeExclude(storeId, ingredient)
+                
+                // 병렬로 Recipe 정보 가져오기
+                val recipes = recipeResponses.map { response ->
+                    async { recipeService.getRecipe(response.recipeId) }
+                }.awaitAll()
+
+                // UI 업데이트
+                withContext(Dispatchers.Main) {
+                    _recipeList.value = recipes.toMutableList()
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "error: ${e}")
+                withContext(Dispatchers.Main) {
+                    _recipeList.value = mutableListOf()
                 }
             }
-            catch (e:Exception){
-                Log.d(TAG, "error: ${e}")
-                result = mutableListOf()
-            }
-            _recipeList.value = result
         }
     }
 

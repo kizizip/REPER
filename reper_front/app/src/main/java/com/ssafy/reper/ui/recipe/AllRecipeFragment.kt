@@ -22,6 +22,7 @@ import android.widget.RadioButton
 import android.widget.Spinner
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,6 +33,11 @@ import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.recipe.adapter.AllRecipeListAdapter
 import com.ssafy.reper.util.ViewModelSingleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val TAG = "AllRecipeFragment_정언"
 class AllRecipeFragment : Fragment() {
@@ -47,6 +53,8 @@ class AllRecipeFragment : Fragment() {
 
     private var _allRecipeBinding : FragmentAllRecipeBinding? = null
     private val allRecipeBinding get() =_allRecipeBinding!!
+
+    private var howSearch = 2  // 기본값은 2 (이름 검색)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -76,6 +84,7 @@ class AllRecipeFragment : Fragment() {
                 initAdapter()
             }
             else{
+                Log.d(TAG, "onViewCreated: ${it}")
                 allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
 
                 allRecipeBinding.allrecipeFmRv.visibility = View.GONE
@@ -116,13 +125,46 @@ class AllRecipeFragment : Fragment() {
             allRecipeBinding.allrecipeFmFullRecipeTab.isSelected = true
         }
 
-        allRecipeBinding.allrecipeFmBtnFilter.setOnClickListener {
-            var howSearch = 0
+        var searchJob: Job? = null
+        allRecipeBinding.allrecipeFmEtSearch.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                searchJob?.cancel()
+                searchJob = lifecycleScope.launch {
+                    delay(300)
+                    val searchText = s.toString()
+                    
+                    if (searchText.isEmpty()) {
+                        viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
+                        return@launch
+                    }
 
+                    when (howSearch) {
+                        0 -> viewModel.searchRecipeIngredientInclude(
+                            ApplicationClass.sharedPreferencesUtil.getStoreId(),
+                            searchText
+                        )
+                        1 -> viewModel.searchRecipeIngredientExclude(
+                            ApplicationClass.sharedPreferencesUtil.getStoreId(),
+                            searchText
+                        )
+                        else -> viewModel.searchRecipeName(
+                            ApplicationClass.sharedPreferencesUtil.getStoreId(),
+                            searchText
+                        )
+                    }
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        allRecipeBinding.allrecipeFmBtnFilter.setOnClickListener {
             val dialog = Dialog(mainActivity)
             dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             dialog.setContentView(R.layout.dialog_ingredient_filter)
             dialog.findViewById<View>(R.id.dialog_filter_cancel_btn).setOnClickListener {
+                howSearch = 2  // 다이얼로그 취소시 howSearch 초기화
                 dialog.dismiss()
             }
 
@@ -166,21 +208,10 @@ class AllRecipeFragment : Fragment() {
                                 otherRadio.isChecked = false
                             }
                         }
-                        if(howSearch == 0){
-                            viewModel.searchRecipeIngredientInclude(
-                                ApplicationClass.sharedPreferencesUtil.getStoreId(),
-                                allRecipeBinding.allrecipeFmEtSearch.text.toString())
-                        }
-                        else if(howSearch == 1){
-                            viewModel.searchRecipeIngredientExclude(
-                                ApplicationClass.sharedPreferencesUtil.getStoreId(),
-                                allRecipeBinding.allrecipeFmEtSearch.text.toString())
-                        }
                         dialog.dismiss()
                     }
                 }
             }
-
             dialog.show()
         }
 
@@ -196,22 +227,6 @@ class AllRecipeFragment : Fragment() {
                 false // 기본 동작 유지
             }
         }
-        allRecipeBinding.allrecipeFmEtSearch.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // text 공백 및 줄바꿈 제거
-                val inputText = s?.trim().toString()
-                if(inputText.isBlank()){
-                    viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
-                }
-                else{
-                    viewModel.searchRecipeName(ApplicationClass.sharedPreferencesUtil.getStoreId(), inputText)
-                }
-            }
-        })
     }
     fun initAdapter() {
         // allrecipe item 클릭 이벤트 리스너
@@ -268,7 +283,9 @@ class AllRecipeFragment : Fragment() {
         }
 
         allRecipeBinding.allrecipeFmRv.apply {
-            addItemDecoration(GridSpacingItemDecoration(2, 10)) // 2열, 20dp 간격
+            if(itemDecorationCount == 0){
+                addItemDecoration(GridSpacingItemDecoration(2, 10)) // 2열, 20dp 간격
+            }
             layoutManager = GridLayoutManager(mainActivity, 2)
 
             allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
@@ -304,7 +321,6 @@ class AllRecipeFragment : Fragment() {
             }
 
             mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner) {
-                Log.d(TAG, "favoriteRecipeList: ")
                 allRecipeListAdapter.favoriteRecipeList = it
                 adapter = allRecipeListAdapter
             }
@@ -347,8 +363,11 @@ class AllRecipeFragment : Fragment() {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(R.layout.dialog_icehot)
 
-        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.VISIBLE
-        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.VISIBLE
+        // 다이얼로그 취소 리스너 설정
+        dialog.setOnCancelListener {
+            // isEmployee 상태 유지
+            mainViewModel.getIsEmployee(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt())
+        }
 
         // hot 선택 시
         dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
