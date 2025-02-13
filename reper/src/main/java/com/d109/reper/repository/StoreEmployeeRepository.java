@@ -26,5 +26,8 @@ public interface StoreEmployeeRepository extends JpaRepository<StoreEmployee, Lo
     @Query("SELECT se FROM StoreEmployee se WHERE se.store = :store AND se.isEmployed = :isEmployed")
     List<StoreEmployee> findActiveEmployees(@Param("store") Store store, @Param("isEmployed") boolean isEmployed);
 
+    // 특정 매장에서 근무 중인 직원만 조회
+    List<User> findByUserAnd(Long storeId);
+
 }
 

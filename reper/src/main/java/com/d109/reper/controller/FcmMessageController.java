@@ -104,34 +104,6 @@ public class FcmMessageController {
         }
     }
 
-    // 토픽 구독 테스트용 API1
-        // 테스트용 토큰을 직접 지정하고 store_1 토픽에 구독하는 API
-    @PostMapping("/test-subscribe")
-    public ResponseEntity<String> testSubscribe() {
-        String dummyToken = "test-dummy-token-123"; // 실제 기기가 없어도 설정 가능
-        String topic = "store_50";
-
-        try {
-            // 명시적으로 FirebaseApp 지정
-            FirebaseMessaging messaging = FirebaseMessaging.getInstance(FirebaseApp.getInstance());
-            TopicManagementResponse response = messaging.subscribeToTopic(
-                    Arrays.asList(dummyToken), topic
-            );
-            return ResponseEntity.ok("테스트 구독 성공: " + response.getSuccessCount());
-        } catch (FirebaseMessagingException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("구독 실패: " + e.getMessage());
-        }
-    }
-
-    // 테스트용 FCM 알림 전송 API
-    @PostMapping("/test-fcm")
-    public ResponseEntity<String> testFcm() {
-        fcmMessageService.sendToTopic("store_50", "테스트 알림", "테스트 메시지입니다.");
-        return ResponseEntity.ok("테스트 FCM 전송 완료!");
-    }
-
-
 }
 
 

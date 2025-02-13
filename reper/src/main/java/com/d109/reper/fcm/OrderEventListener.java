@@ -3,6 +3,8 @@ package com.d109.reper.fcm;
 import com.d109.reper.domain.*;
 import com.d109.reper.repository.OrderRepository;
 import com.d109.reper.repository.StoreEmployeeRepository;
+import com.d109.reper.repository.UserTokenRepository;
+import com.d109.reper.request.FcmMessageRequest;
 import com.d109.reper.service.FcmMessageService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -17,10 +19,13 @@ public class OrderEventListener {
 
     private final OrderRepository orderRepository;
 
-    public OrderEventListener(FcmMessageService fcmMessageService, StoreEmployeeRepository storeEmployeeRepository, OrderRepository orderRepository) {
+    private final UserTokenRepository userTokenRepository;
+
+    public OrderEventListener(FcmMessageService fcmMessageService, StoreEmployeeRepository storeEmployeeRepository, OrderRepository orderRepository, UserTokenRepository userTokenRepository) {
         this.fcmMessageService = fcmMessageService;
         this.storeEmployeeRepository = storeEmployeeRepository;
         this.orderRepository = orderRepository;
+        this.userTokenRepository = userTokenRepository;
     }
 
     @EventListener
@@ -37,34 +42,43 @@ public class OrderEventListener {
             }
             System.out.println("processOrderNotification 실행 중");
 
-            fcmMessageService.initialize();
 
-            // 매장 ID 기반 토픽 설정
-            String topic = "store_" + order.getStore().getStoreId();
-            System.out.println("전송되는 Topic:" + topic);
+            fcmMessageService.initialize();
 
             int totalQuantity = order.getOrderDetails()
                     .stream()
                     .mapToInt(OrderDetail::getQuantity)
                     .sum();
 
-            User owner = order.getStore().getOwner();
+            String title = "새로운 주문 알림";
+            String body = order.getStore().getStoreName()+ "에 총" + totalQuantity + "잔 새로운 주문이 들어왔습니다.";
+            String targetFragment = "OrderRecipeFragment";
+            Integer requestId = Math.toIntExact(order.getOrderId());  // Long → Integer 변환
 
-            // 근무 중인 직원이 있는 경우에만 토픽 알림 전송
-            if (hasActiveEmployees(order.getStore())) {
-                fcmMessageService.sendToTopic(
-                        topic,
-                        "새로운 주문 알림",
-                        "총 " + totalQuantity + "잔 새로운 주문이 들어왔습니다."
-                );
-                System.out.println("sendToTopic에 알림 전송 요청");
-                order.setNotified(true);
-                orderRepository.save(order);
-            } else {
-                System.out.println("근무 중인 직원이 없습니다.");
-                order.setNotified(true);
-                orderRepository.save(order);
+            // 사장님에게 보내기
+            User owner = order.getStore().getOwner();
+            if (owner == null) {
+                throw new IllegalArgumentException("storeOwner not found");
             }
+
+            UserToken ownerToken = userTokenRepository.findByUserId(owner.getUserId())
+                    .orElseThrow(() -> new  IllegalArgumentException("ownerToken not found"));
+
+            if (owner != null && ownerToken != null) {
+                FcmMessageRequest ownerMessage = new FcmMessageRequest(
+                        ownerToken.getToken(), title, body, targetFragment, requestId
+                );
+                fcmMessageService.sendFcmMessage(ownerMessage);
+                System.out.println("사장님에게 FCM 메시지 전송 완료");
+            }
+
+            // 알바생들에게 보내기(isEmployed=true인 사람만)
+            List<User> staffs = storeEmployeeRepository.findByUserAndIsEmployedTrue(order.getStore().getStoreId());
+
+            //메세지 보내기
+
+            order.setNotified(true);
+            orderRepository.save(order);
 
         } catch(Exception e) {
             System.out.println("주문 알림 처리 중 오류 발생: " + e.getMessage());
@@ -73,12 +87,5 @@ public class OrderEventListener {
             orderRepository.save(order);
         }
     }
-
-    // 매장에 근무 중인 직원이 있는지 확인
-    private boolean hasActiveEmployees(Store store) {
-        List<StoreEmployee> activeEmployees = storeEmployeeRepository.findActiveEmployees(store, true);
-        return !activeEmployees.isEmpty();
-    }
-
 
 }

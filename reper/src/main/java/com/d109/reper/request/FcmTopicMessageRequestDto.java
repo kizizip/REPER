@@ -15,7 +15,7 @@ public class FcmTopicMessageRequestDto {
     @Setter
     @Builder
     public static class Message {
-        private String topic;  // 🔥 기존 `token`과 분리된 토픽 필드
+        private String topic;  // 기존 `token`과 분리된 토픽 필드
         private Notification notification;
     }
 
