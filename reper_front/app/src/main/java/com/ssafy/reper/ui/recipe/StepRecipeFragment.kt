@@ -71,43 +71,36 @@ class StepRecipeFragment : Fragment() {
     private val stepRecipeBinding get() =_stepRecipeBinding!!
 
     override fun onAttach(context: Context) {
-        Log.d(TAG, "onAttach: ")
         super.onAttach(context)
         mainActivity = context as MainActivity
     }
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(TAG, "onCreate: ")
         super.onCreate(savedInstanceState)
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.d(TAG, "onCreateView: ")
         _stepRecipeBinding = FragmentStepRecipeBinding.inflate(inflater, container, false)
         return stepRecipeBinding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(TAG, "onViewCreated: ")
         super.onViewCreated(view, savedInstanceState)
         // 내가 어느 Fragment에서 왔는 지 Flag 처리
-        whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment
+        whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment // 3 : FullRecipeFragment
 
         // 전역변수 관리
         mainViewModel.nowISeeRecipe.observe(viewLifecycleOwner){
             if (it != null) {
                 nowRecipeIdx = it
             }
-            Log.d(TAG, "onViewCreated: nowISeeRecipe: $it")
         }
         mainViewModel.nowISeeStep.observe(viewLifecycleOwner){
             if (it != null) {
                 nowStepIdx = it
             }
-            Log.d(TAG, "onViewCreated: nowISeeStep: $it")
         }
         mainViewModel.recipeSteps.observe(viewLifecycleOwner){
             if (it != null) {
                 totalSteps = it.count()
             }
-            Log.d(TAG, "onViewCreated: recipeSteps: $it")
         }
         mainViewModel.isDataReady.observe(viewLifecycleOwner){
             if(it){
@@ -155,7 +148,6 @@ class StepRecipeFragment : Fragment() {
 
     //캡쳐방지 코드입니다! 메시지 내용은 수정불가능,, 핸드폰내에 저장된 메시지가 뜨는 거라고 하네요
     override fun onResume() {
-        Log.d(TAG, "onResume: ")
         super.onResume()
         activity?.window?.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
@@ -164,13 +156,11 @@ class StepRecipeFragment : Fragment() {
         mainActivity.hideBottomNavigation()
     }
     override fun onPause() {
-        Log.d(TAG, "onPause: ")
         super.onPause()
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
     }
     ////////////////////////////////////////////////////////////////////////////////////////
     override fun onDestroyView() {
-        Log.d(TAG, "onDestroyView: ")
         super.onDestroyView()
         cameraExecutor.shutdown()
         gestureRecognizer.close()
@@ -217,7 +207,6 @@ class StepRecipeFragment : Fragment() {
     }
     // 세로 화면일 때 이벤트 처리
     fun eventPortrait(){
-        Log.d(TAG, "eventPortrait: ")
         stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()}")
         stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
 
@@ -269,11 +258,11 @@ class StepRecipeFragment : Fragment() {
         stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.VISIBLE
 
         mainViewModel.setNowISeeStep(nowStepIdx + 1)
-        Log.d(TAG, "다음을 눌렀습니다. ${nowRecipeIdx}/${totalRecipes}, ${nowStepIdx}/${totalSteps}")
+//        Log.d(TAG, "다음을 눌렀습니다. ${nowRecipeIdx}/${totalRecipes}, ${nowStepIdx}/${totalSteps}")
 
         // 마지막 레시피의 마지막 스텝인 경우 → 버튼 비활성화
         if(nowRecipeIdx >= totalRecipes - 1 && nowStepIdx >= totalSteps - 1){
-            Log.d(TAG, "마지막 레시피의 마지막 스텝 도달 ${nowRecipeIdx}/${totalRecipes}, ${nowStepIdx}/${totalSteps}")
+//            Log.d(TAG, "마지막 레시피의 마지막 스텝 도달 ${nowRecipeIdx}/${totalRecipes}, ${nowStepIdx}/${totalSteps}")
             stepRecipeBinding.steprecipeFmBtnRight.visibility = View.GONE
             showOneStepRecipe(nowStepIdx)
             return
@@ -286,10 +275,7 @@ class StepRecipeFragment : Fragment() {
             }
 
             nowStepIdx >= totalSteps && nowRecipeIdx < totalRecipes - 1-> {
-                Log.d(
-                    TAG,
-                    "다음 레시피 보여주기! ${nowRecipeIdx}/${totalRecipes}, ${nowStepIdx}/${totalSteps}"
-                )
+//                Log.d(TAG,"다음 레시피 보여주기! ${nowRecipeIdx}/${totalRecipes}, ${nowStepIdx}/${totalSteps}")
                 mainViewModel.setNowISeeRecipe(nowRecipeIdx + 1)
                 mainViewModel.setRecipeSteps(nowRecipeIdx)
                 mainViewModel.setNowISeeStep(-1)
@@ -336,7 +322,7 @@ class StepRecipeFragment : Fragment() {
     }
     // 재료 보이게
     fun showIngredient(recipeIdx:Int){
-        Log.d(TAG, "showIngredient: ")
+//        Log.d(TAG, "showIngredient: ")
         stepRecipeBinding.lottieAnimationView.visibility = View.GONE
         stepRecipeBinding.steprecipeFmTvStep?.visibility = View.GONE
         stepRecipeBinding.steprecipeFmTvMenuName?.setText("${selectedRecipeList.get(recipeIdx).recipeName} ${selectedRecipeList.get(recipeIdx).type}")
@@ -351,7 +337,7 @@ class StepRecipeFragment : Fragment() {
     }
     // 레시피 보이게
     fun showOneStepRecipe(stepIdx:Int){
-        Log.d(TAG, "showOneStepRecipe: ")
+//        Log.d(TAG, "showOneStepRecipe: ")
         val recipeSteps = mainViewModel.recipeSteps.value!!
 
         stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.GONE

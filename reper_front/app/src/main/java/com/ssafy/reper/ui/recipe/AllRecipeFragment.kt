@@ -245,20 +245,20 @@ class AllRecipeFragment : Fragment() {
 
                 // 전체 레시피 탭에서 단건 레시피를 클릭했을 떄
                 if(allRecipeBinding.allrecipeFmFullRecipeTab.isSelected == true){
-                    navigateToRecipeFragment(selectedRecipes)
+                    navigateToRecipeFragment(selectedRecipes, R.id.fullRecipeFragment)
                 }
                 // 단계별 레시피 탭에서 단건 레시피를 클릭했을 때
                 else if(allRecipeBinding.allrecipeFmStepRecipeTab.isSelected == true){
                     // ICE와 HOT 둘 다 있을 때만 다이얼로그를 띄움
                     if(iceRecipe != null && hotRecipe != null) {
                         showIceHotDialog(selectedRecipes, iceRecipe, hotRecipe) { selectedRecipe ->
-                            navigateToRecipeFragment(selectedRecipes)
+                            navigateToRecipeFragment(selectedRecipes, R.id.stepRecipeFragment)
                         }
                     } else {
                         // ICE나 HOT 중 하나만 있는 경우 바로 해당 레시피 선택
                         val recipe = iceRecipe ?: hotRecipe
                         if (recipe != null) {
-                            navigateToRecipeFragment(selectedRecipes)
+                            navigateToRecipeFragment(selectedRecipes, R.id.stepRecipeFragment)
                         } else {
                             Log.e(TAG, "No recipes found for $recipeName")
                         }
@@ -334,12 +334,12 @@ class AllRecipeFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
-    fun navigateToRecipeFragment(list: MutableList<Recipe>) {
+    fun navigateToRecipeFragment(list: MutableList<Recipe>, id :Int) {
         val bundle =Bundle().apply {
             putInt("whereAmICame", 1)
         }
         mainViewModel.setSelectedRecipes(list)
-        findNavController().navigate(R.id.stepRecipeFragment, bundle)
+        findNavController().navigate(id, bundle)
     }
     fun showIceHotDialog(selectedRecipes: MutableList<Recipe>, iceRecipe: Recipe, hotRecipe: Recipe, onRecipeSelected: (MutableList<Recipe>) -> Unit) {
         val dialog = Dialog(mainActivity)

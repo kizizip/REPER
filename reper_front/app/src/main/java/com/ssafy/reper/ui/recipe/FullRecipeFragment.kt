@@ -20,6 +20,7 @@ import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.OrderDetail
 import com.ssafy.reper.data.dto.Recipe
+import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.databinding.FragmentFullRecipeBinding
 import com.ssafy.reper.databinding.FragmentFullRecipeItemBinding
 import com.ssafy.reper.ui.MainActivity
@@ -32,7 +33,7 @@ class FullRecipeFragment : Fragment() {
 
     var nowRecipeIdx = 0
     var totalRecipes =  0
-    lateinit var recipeSteps:MutableList<String>
+    var recipeSteps:MutableList<String> = mutableListOf()
     lateinit var order : Order
     lateinit var orderDetails: MutableList<OrderDetail>
     lateinit var selectedRecipeList : MutableList<Recipe>
@@ -66,11 +67,13 @@ class FullRecipeFragment : Fragment() {
         super.onCreate(savedInstanceState)
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        _fullRecipeBinding = FragmentFullRecipeBinding.inflate(inflater, container, false)
         _fullRecipeItemBinding = FragmentFullRecipeItemBinding.inflate(inflater, container, false)
-        return fullRecipeItemBinding.root
+        return fullRecipeBinding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "onViewCreated: ")
         // 내가 어느 Fragment에서 왔는 지 Flag 처리
         whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment
 
@@ -83,17 +86,17 @@ class FullRecipeFragment : Fragment() {
         mainViewModel.nowISeeRecipe.observe(viewLifecycleOwner){
             if (it != null) {
                 nowRecipeIdx = it
+                Log.d(TAG, "onViewCreated: nowISeeRecipe: $it")
             }
-            Log.d(TAG, "onViewCreated: nowISeeRecipe: $it")
         }
         mainViewModel.recipeSteps.observe(viewLifecycleOwner){
             if (it != null) {
                 recipeSteps.clear()
-                for(recipeStep in it){
-                    recipeSteps.add(recipeStep.instruction)
+                for(item in it){
+                    recipeSteps.add(item.instruction)
                 }
+                Log.d(TAG, "onViewCreated: recipeSteps: $it")
             }
-            Log.d(TAG, "onViewCreated: recipeSteps: $it")
         }
         mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
             if(it != null){
@@ -107,8 +110,7 @@ class FullRecipeFragment : Fragment() {
 
                 // 공통 이벤트 처리
                 initEvent()
-                // RecyclerView adapter 처리
-                initAdapter()
+                // viewpager 처리
                 initViewPager()
             }
         }
@@ -130,23 +132,49 @@ class FullRecipeFragment : Fragment() {
     ////////////////////////////////////////////////////////////////////////////////////////
     override fun onDestroyView() {
         super.onDestroyView()
+        _fullRecipeBinding = null
         _fullRecipeItemBinding = null
     }
 
     fun initViewPager() {
+        Log.d(TAG, "initViewPager: ")
+
+        var customList:MutableList<String> = mutableListOf()
+        if(whereAmICame == 2){
+            customList.clear()
+            for(item in orderDetails){
+                customList.add(item.customerRequest)
+            }
+        }
         viewPagerAdapter = FullRecipeViewPagerAdapter(
             recipeList = selectedRecipeList,
             whereAmICame = whereAmICame,
-            orderDetails = orderDetails,
+            customList = customList,
             favoriteRecipeList = favoriteReicpeList,
-            onHeartClick = { recipe, isFavorite ->
-                if (isFavorite) {
-                    viewModel.likeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipe.recipeId)
-                } else {
-                    viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipe.recipeId)
+            itemClickListener = object : FullRecipeViewPagerAdapter.ItemClickListener {
+                override fun onHeartClick(recipeId: Int, isFavorite: Boolean) {
+                    if (isFavorite) {
+                        viewModel.likeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipeId)
+                    } else {
+                        viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipeId)
+                    }
                 }
-            }
+
+                override fun onHotIceClick(recipeName: String, type: String) {
+                    viewPagerAdapter.recipeList = selectedRecipeList.filter { it.type.equals(type) }
+                    viewPagerAdapter.notifyDataSetChanged()
+                }
+
+                override fun onRecipeStepClick(recipe: Recipe, nowISeeStep: Int) {
+                    val bundle = Bundle().apply {
+                        putInt("whereAmICame", 3)
+                    }
+                    mainViewModel.setSelectedRecipeGoToStepRecipe(mutableListOf(recipe), nowISeeStep)
+                    findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                }
+            },
         )
+
 
         fullRecipeBinding.fullrecipeFmVp.apply {
             adapter = viewPagerAdapter
@@ -154,34 +182,6 @@ class FullRecipeFragment : Fragment() {
         }
     }
     fun initEvent(){
-        // 즐겨찾기 버튼이 눌리면
-        fullRecipeItemBinding.fullrecipeFmBtnHeart.setOnClickListener {
-            if(fullRecipeItemBinding.fullrecipeFmIvLineheart.visibility == View.VISIBLE){
-                fullRecipeItemBinding.fullrecipeFmIvLineheart.visibility = View.GONE
-                fullRecipeItemBinding.fullrecipeFmIvFullheart.visibility = View.VISIBLE
-                viewModel.likeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!, selectedRecipeList.get(nowRecipeIdx).recipeId)
-            }
-            else{
-                fullRecipeItemBinding.fullrecipeFmIvLineheart.visibility = View.VISIBLE
-                fullRecipeItemBinding.fullrecipeFmIvFullheart.visibility = View.GONE
-                viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!, selectedRecipeList.get(nowRecipeIdx).recipeId)
-            }
-        }
-
-        // Ice Hot 버튼 클릭
-        fullRecipeItemBinding.fullrecipeFmBtnIce.setOnClickListener {
-            fullRecipeItemBinding.fullrecipeFmBtngroup.check(fullRecipeItemBinding.fullrecipeFmBtnIce.id)
-            btnHotIceColorChange()
-            val iceRecipe = selectedRecipeList.filter { it.type.equals("ICE") }.first()
-            showRecipe(iceRecipe)
-        }
-        fullRecipeItemBinding.fullrecipeFmBtnHot.setOnClickListener {
-            fullRecipeItemBinding.fullrecipeFmBtngroup.check(fullRecipeItemBinding.fullrecipeFmBtnHot .id)
-            btnHotIceColorChange()
-            val hotRecipe = selectedRecipeList.filter { it.type.equals("HOT") }.first()
-            showRecipe(hotRecipe)
-        }
-
         // slidepannel이 다 펴질 때만 scroll 가능하게!
         slidingUpPanelLayout = fullRecipeItemBinding.fullrecipeFmSlideuppanel // XML의 SlidingUpPanelLayout id
         scrollView = fullRecipeItemBinding.scrollView // XML의 NestedScrollView id
@@ -199,76 +199,5 @@ class FullRecipeFragment : Fragment() {
         fullRecipeBinding.fullrecipeFmBtnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-    }
-    fun initAdapter() {
-        // allrecipe item 클릭 이벤트 리스너
-        fullRecipeListAdapter = FullRecipeListAdapter(mutableListOf()) { position ->
-            // StepRecipeFragment로 이동하는 거 필요해!!!!!!!!!!!!!!!!!!!!!!!
-            findNavController().navigate(R.id.stepRecipeFragment)
-        }
-
-        fullRecipeItemBinding.fullrecipeFmRvRecipe.apply {
-            layoutManager = LinearLayoutManager(mainActivity, LinearLayoutManager.VERTICAL, false)
-            fullRecipeListAdapter.recipeStepList = recipeSteps
-            adapter = fullRecipeListAdapter
-        }
-    }
-    fun nextEvent(){
-        mainViewModel.setNowISeeRecipe(nowRecipeIdx + 1)
-        showRecipe(selectedRecipeList.get(nowRecipeIdx))
-    }
-    fun prevEvent(){
-        mainViewModel.setNowISeeRecipe(nowRecipeIdx - 1)
-        showRecipe(selectedRecipeList.get(nowRecipeIdx))
-    }
-    fun btnHotIceColorChange(){
-        if(fullRecipeItemBinding.fullrecipeFmBtngroup.checkedButtonId == fullRecipeItemBinding.fullrecipeFmBtnIce.id){
-            fullRecipeItemBinding.fullrecipeFmBtnIce.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.green))
-            fullRecipeItemBinding.fullrecipeFmBtnIce.setTextColor(ContextCompat.getColor(mainActivity, R.color.white))
-            fullRecipeItemBinding.fullrecipeFmBtnHot.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.white))
-            fullRecipeItemBinding.fullrecipeFmBtnHot.setTextColor(ContextCompat.getColor(mainActivity, R.color.green))
-        }
-
-        if(fullRecipeItemBinding.fullrecipeFmBtngroup.checkedButtonId == fullRecipeItemBinding.fullrecipeFmBtnHot.id){
-            fullRecipeItemBinding.fullrecipeFmBtnIce.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.white))
-            fullRecipeItemBinding.fullrecipeFmBtnIce.setTextColor(ContextCompat.getColor(mainActivity, R.color.green))
-            fullRecipeItemBinding.fullrecipeFmBtnHot.setBackgroundColor(ContextCompat.getColor(mainActivity, R.color.green))
-            fullRecipeItemBinding.fullrecipeFmBtnHot.setTextColor(ContextCompat.getColor(mainActivity, R.color.white))
-        }
-    }
-    fun showRecipe(recipe:Recipe) {
-        fullRecipeItemBinding.fullrecipeFmTvCategory.setText(recipe.category)
-        fullRecipeItemBinding.fullrecipeFmTvMenuName.setText(recipe.recipeName)
-
-        var ingredient = ""
-        for(item in recipe.ingredients){
-            ingredient += ", ${item.ingredientName}"
-        }
-        ingredient = ingredient.substring(2)
-        fullRecipeItemBinding.fullrecipeFmTvIngredients.setText(ingredient)
-
-        if(whereAmICame == 1) { // AllRecipeFragment
-            fullRecipeItemBinding.fullrecipeFmFlBtnHeart.visibility = View.VISIBLE
-            fullRecipeItemBinding.fullrecipeFmBtngroup.visibility = View.VISIBLE
-            fullRecipeItemBinding.fullrecipeFmTvNote.visibility = View.GONE
-            fullRecipeItemBinding.textView11.visibility = View.GONE
-
-            if(recipe.type.equals("ICE")){
-                fullRecipeItemBinding.fullrecipeFmBtngroup.check(fullRecipeItemBinding.fullrecipeFmBtnIce.id)
-            }
-            else if (recipe.type.equals("HOT")){
-                fullRecipeItemBinding.fullrecipeFmBtngroup.check(fullRecipeItemBinding.fullrecipeFmBtnHot.id)
-            }
-            btnHotIceColorChange()
-        } else if (whereAmICame == 2){ // OrdeFragment
-            fullRecipeItemBinding.fullrecipeFmFlBtnHeart.visibility = View.GONE
-            fullRecipeItemBinding.fullrecipeFmBtngroup.visibility = View.GONE
-            fullRecipeItemBinding.fullrecipeFmTvNote.visibility = View.VISIBLE
-            fullRecipeItemBinding.textView11.visibility = View.VISIBLE
-
-            fullRecipeItemBinding.fullrecipeFmTvNote.setText(orderDetails.filter { it.recipeId == recipe.recipeId }.get(0).customerRequest)
-        }
-
-        initAdapter()
     }
 }

@@ -10,8 +10,8 @@ class FullRecipeListAdapter (var recipeStepList:MutableList<String>, val itemCli
         fun bindInfo(position: Int){
             val item = recipeStepList[position]
 
-            // 메뉴명 설정
-            binding.steprecipeItemTvStep.text = item
+            // 레시피 스탭 설정
+            binding.steprecipeItemTvStep.text = "${position + 1}. ${item}"
 
             binding.root.setOnClickListener {
                 itemClickListener.onClick(layoutPosition)
