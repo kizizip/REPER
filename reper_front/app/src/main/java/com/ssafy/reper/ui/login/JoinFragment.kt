@@ -18,7 +18,6 @@ import android.graphics.drawable.GradientDrawable
 import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import com.ssafy.reper.data.dto.JoinRequest
 import com.ssafy.reper.data.dto.RequestStore
 import android.view.animation.AnimationUtils
@@ -68,6 +67,7 @@ class JoinFragment : Fragment() {
         // 소셜로그인으로 회원가입시
         val socialEmail = arguments?.getString("email")
         val socialNickname = arguments?.getString("nickname")
+        val social = arguments?.getString("social")
 
         if (socialEmail != null && socialNickname != null) {
             // 이메일과 닉네임 설정
@@ -392,6 +392,12 @@ class JoinFragment : Fragment() {
                                 storeName = binding.FragmentJoinStoreInfoInput.text.toString()
                             )
                             val storeResponse = RetrofitUtil.storeService.addStore(storeRequest)
+                        }
+
+                        if (social == "kakao") {
+                            RetrofitUtil.authService.updateKakaoBoolean(response)
+                        } else if (social == "google") {
+                            RetrofitUtil.authService.updateGoogleBoolean(response)
                         }
 
                         Toast.makeText(requireContext(), "회원가입 성공", Toast.LENGTH_SHORT).show()

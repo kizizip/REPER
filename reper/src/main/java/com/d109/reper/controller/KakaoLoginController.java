@@ -120,9 +120,9 @@ public class KakaoLoginController {
 
         try {
             // 카카오 API 호출
-            ResponseEntity<KakaoUserInfoResponse> response = restTemplate.exchange(
-                    url,
-                    org.springframework.http.HttpMethod.GET,
+                    ResponseEntity<KakaoUserInfoResponse> response = restTemplate.exchange(
+                            url,
+                            org.springframework.http.HttpMethod.GET,
                     entity,
                     KakaoUserInfoResponse.class // 응답을 KakaoUserInfoResponse로 받음
             );

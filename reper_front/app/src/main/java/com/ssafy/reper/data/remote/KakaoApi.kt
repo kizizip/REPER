@@ -25,4 +25,6 @@ interface KakaoApi {
     @POST("auth/kakao")
     suspend fun kakaoLogin(@Body kakaoLoginRequest: KakaoLoginRequest): KakaoLoginResponse
 
+
+
 }

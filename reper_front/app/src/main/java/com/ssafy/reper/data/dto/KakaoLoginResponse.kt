@@ -1,7 +1,7 @@
 package com.ssafy.reper.data.dto
 
 data class KakaoLoginResponse(
-    val userId: Long?, // Long?을 사용하여 null 가능하도록 처리
+    val userId: Int?, // Long?을 사용하여 null 가능하도록 처리
     val email: String,
     val password: String?,
     val userName: String,

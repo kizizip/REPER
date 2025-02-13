@@ -225,6 +225,7 @@ class LoginFragment : Fragment() {
                     val bundle = Bundle().apply {
                         putString("email", email)
                         putString("nickname", nickname)
+                        putString("social", "kakao")
                     }
                     val joinFragment = JoinFragment().apply {
                         arguments = bundle
@@ -240,31 +241,47 @@ class LoginFragment : Fragment() {
                 } else {
                     try {
                         // 중복일 경우 로그인 처리
-                        val request = KakaoLoginRequest(accessToken)
-                        Log.d(TAG, "카카오 로그인 요청: $request")
-                        val response = RetrofitUtil.kakaoService.kakaoLogin(request)
-                        Log.d(TAG, "로그인 성공: ${response}")
+//                        val isKakao = RetrofitUtil.authService.checkKakao(email)
+//                        val isGoogle = RetrofitUtil.authService.checkGoogle(email)
+                        val isKakao = true // 나중에 삭제 아직 api가 서버에 안올라왔음
+                        val isGoogle = false // 나중에 삭제 아직 api가 서버에 안올라왔음
 
-                        // SharedPreferences에 사용자 정보 저장
-                        val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
+                        // 카카오로 회원가입을 진행했더라면 카카오 로그인 진행
+                        if (isKakao) {
+                            val request = KakaoLoginRequest(accessToken)
+                            Log.d(TAG, "카카오 로그인 요청: $request")
+                            val response = RetrofitUtil.kakaoService.kakaoLogin(request)
+                            Log.d(TAG, "로그인 성공: ${response}")
 
-                        // null 체크 후 사용자 정보 저장
-                        val userInfo = UserInfo(
-                            userId = response.userId ?: -1L,  // null일 경우 -1L을 기본값으로 사용
-                            username = response.userName ?: "",  // null일 경우 빈 문자열 사용
-                            role = response.role ?: ""  // null일 경우 빈 문자열 사용
-                        )
-                        sharedPreferencesUtil.addUser(userInfo)
+                            // SharedPreferences에 사용자 정보 저장
+                            val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
 
-                        // 저장된 정보 확인을 위한 로그
-                        val savedUser = sharedPreferencesUtil.getUser()
-                        Log.d(
-                            TAG,
-                            "저장된 사용자 정보 - userId: ${savedUser.userId}, username: ${savedUser.username}, role: ${savedUser.role}"
-                        )
+                            // null 체크 후 사용자 정보 저장
+                            val userInfo = UserInfo(
+                                userId = response.userId ?: -1,  // null일 경우 -1L을 기본값으로 사용
+                                username = response.userName ?: "",  // null일 경우 빈 문자열 사용
+                                role = response.role ?: ""  // null일 경우 빈 문자열 사용
+                            )
+                            sharedPreferencesUtil.addUser(userInfo)
 
-                        // 메인 화면으로 이동
-                        navigateToMainActivity()
+                            // 저장된 정보 확인을 위한 로그
+                            val savedUser = sharedPreferencesUtil.getUser()
+                            Log.d(
+                                TAG,
+                                "저장된 사용자 정보 - userId: ${savedUser.userId}, username: ${savedUser.username}, role: ${savedUser.role}"
+                            )
+
+                            // 메인 화면으로 이동
+                            navigateToMainActivity()
+
+                        } else if (isGoogle) { // 구글로 회원가입을 진행했더라면
+                            // 다른 소셜 로그인 으로 회원가입을 한 적이있다고 표시 하고 로그인창으로 돌려보냄
+                            Toast.makeText(requireContext(), "다른 소셜 로그인 으로 회원가입을 한 적이있다고 표시", Toast.LENGTH_SHORT).show()
+                            // parentFragmentManager.beginTransaction()
+                            //     .replace(R.id.activityLoginFragmentContainer, LoginFragment())
+                            //     .addToBackStack(null)
+                            //     .commit()
+                        }
 
 
                     } catch (e: HttpException) {
@@ -316,7 +333,7 @@ class LoginFragment : Fragment() {
 
     private fun loginWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
-        startActivityForResult(signInIntent, RC_SIGN_IN) // Google 로그인 화면 실행행
+        startActivityForResult(signInIntent, RC_SIGN_IN) // Google 로그인 화면 실행
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -363,6 +380,7 @@ class LoginFragment : Fragment() {
             val bundle = Bundle().apply {
                 putString("email", user.email)
                 putString("nickname", user.displayName)
+                putString("social", "google")
             }
             val joinFragment = JoinFragment().apply {
                 arguments = bundle
@@ -442,7 +460,7 @@ class LoginFragment : Fragment() {
 
         // 사용자 정보 저장
         val userInfo = UserInfo(
-            userId = response.userId ?: -1L,  // null일 경우 -1L을 기본값으로 사용
+            userId = response.userId ?: -1,  // null일 경우 -1L을 기본값으로 사용
             username = response.username ?: "",  // null일 경우 빈 문자열 사용
             role = response.role ?: ""  // null일 경우 빈 문자열 사용
         )

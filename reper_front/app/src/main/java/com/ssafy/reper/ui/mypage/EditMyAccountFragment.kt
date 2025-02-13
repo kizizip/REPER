@@ -319,7 +319,7 @@ class EditMyAccountFragment : Fragment() {
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                val storeList = RetrofitUtil.storeService.getStoreListByEmployeeId(userId.toString())
+                val storeList = userId?.let { RetrofitUtil.storeService.getStoreListByEmployeeId(it) }
 
                 // RecyclerView와 빈 상태 메시지 설정
                 editMyAccountBinding.editmyaccountFmRv.apply {
@@ -329,16 +329,18 @@ class EditMyAccountFragment : Fragment() {
                 }
 
                 // 데이터 유무에 따라 뷰 표시/숨김 처리
-                if (storeList.isEmpty()) {
-                    editMyAccountBinding.editmyaccountFmRv.visibility = View.GONE
-                    editMyAccountBinding.editmyaccountFmTvNoStores.visibility = View.VISIBLE
-                } else {
-                    editMyAccountBinding.editmyaccountFmRv.visibility = View.VISIBLE
-                    editMyAccountBinding.editmyaccountFmTvNoStores.visibility = View.GONE
-                    
-                    // 어댑터에 데이터 설정
-                    myAccessStoreListAdapter.accessStoreList = storeList.toMutableList()
-                    myAccessStoreListAdapter.notifyDataSetChanged()
+                if (storeList != null) {
+                    if (storeList.isEmpty()) {
+                        editMyAccountBinding.editmyaccountFmRv.visibility = View.GONE
+                        editMyAccountBinding.editmyaccountFmTvNoStores.visibility = View.VISIBLE
+                    } else {
+                        editMyAccountBinding.editmyaccountFmRv.visibility = View.VISIBLE
+                        editMyAccountBinding.editmyaccountFmTvNoStores.visibility = View.GONE
+
+                        // 어댑터에 데이터 설정
+                        myAccessStoreListAdapter.accessStoreList = storeList?.toMutableList() ?: mutableListOf()
+                        myAccessStoreListAdapter.notifyDataSetChanged()
+                    }
                 }
 
             } catch (e: Exception) {

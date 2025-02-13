@@ -33,7 +33,7 @@ interface StoreService {
 
     // 특정 알바생의 근무 매장 목록 조회
     @GET("stores/employees/{userId}")
-    suspend fun getStoreListByEmployeeId(@Path("userId") userId: String): List<Store>
+    suspend fun getStoreListByEmployeeId(@Path("userId") userId: Int?): List<Store>
 
     // 권한 요청 거절 or 알바생 자르기
     @DELETE("stores/{storeId}/employees/{userId}")
