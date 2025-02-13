@@ -7,10 +7,15 @@ import numpy as np                         # 벡터 연산 및 코사인 유사�
 from dotenv import load_dotenv             # .env 파일에서 환경 변수 로드
 from flask import Flask, request, jsonify  # rest api 서버 구현현
 import boto3                               # aws s3 접근
+<<<<<<< HEAD
 import botocore                            # boto3 예외 처리리
 import base64                              # base64 인코딩/디코딩
 from io import BytesIO                     # 바이너리 데이터 처리
 
+=======
+import base64                              # base64 인코딩/디코딩
+from io import BytesIO                     # 바이너리 데이터 처리리
+>>>>>>> c99dd8568b65824a9f34a7488b427772c86c4586
 
 # .env 파일 로드
 load_dotenv()
@@ -24,7 +29,10 @@ s3 = boto3.client(
     region_name="ap-northeast-2"
 )
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> c99dd8568b65824a9f34a7488b427772c86c4586
 app = Flask(__name__)
 
 # 애니메이션 목록 및 임베딩 관련 함수들
@@ -104,6 +112,7 @@ def map_animation_url(instruction, threshold=0.85):
     return best_url if best_similarity >= threshold else None
 
 
+<<<<<<< HEAD
 # s3 버킷 내에 지정한 키의 객체가 존재하는지 확인
 def check_image_exists(bucket_name, my_key):
     try:
@@ -132,11 +141,19 @@ def generate_recipe_image(recipe_name, recipe_type):
     response = client.images.generate(
         model="dall-e-2",
         prompt=f"A high-quality realistic image of {recipe_type} {recipe_name} coffee drink.",
+=======
+# 레시피 이미지 생성
+def generate_recipe_image(recipe_name):
+    response = client.images.generate(
+        model="dall-e-2",
+        prompt=f"A high-quality realistic image of {recipe_name} coffee drink.",
+>>>>>>> c99dd8568b65824a9f34a7488b427772c86c4586
         size="1024x1024",
         quality="standard",
         response_format="b64_json",
         n=1,
     )
+<<<<<<< HEAD
 
     # s3에 저장하고 s3 url 반환
     if response.data:
@@ -146,7 +163,18 @@ def generate_recipe_image(recipe_name, recipe_type):
         s3_url = f"https://{bucket_name}.s3.amazonaws.com/{my_key}"
         return s3_url
     return None
+=======
+>>>>>>> c99dd8568b65824a9f34a7488b427772c86c4586
 
+    if response.data:
+        image_base64 = response.data[0].b64_json
+        image_data = base64.b64decode(image_base64)
+        bucket_name = "reper-images"
+        mykey = f"recipe_images/{recipe_name}.png"
+        s3.upload_fileobj(BytesIO(image_data), bucket_name, mykey)
+        s3_url = f"https://{bucket_name}.s3.amazonaws.com/{mykey}"
+        return s3_url
+    return None
 
 # PDF 파일에서 텍스트 추출
 def extract_text_from_pdf(pdf_path):
@@ -277,7 +305,11 @@ def upload_file():
         
         # 각 레시피 스텝에 대해 animationUrl 매핑 수행
         for recipe in data.get("recipes", []):
+<<<<<<< HEAD
             recipe["recipeImg"] = generate_recipe_image(recipe["recipeName"], recipe["type"])
+=======
+            recipe["recipeImg"] = generate_recipe_image(recipe["recipeName"])
+>>>>>>> c99dd8568b65824a9f34a7488b427772c86c4586
             for step in recipe.get("recipeSteps", []):
                 instruction = step.get("instruction", "")
                 animation_url = map_animation_url(instruction)
