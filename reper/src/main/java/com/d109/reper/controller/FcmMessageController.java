@@ -79,17 +79,28 @@ public class FcmMessageController {
         }
     }
 
-    //JY 토픽 구독 추가
+    //JY 여러 사용자 토픽 구독 추가
     @PostMapping("/subscribe")
-    public String subscribeToTopic(@RequestBody FcmSubscribeRequest request) {
+    public ResponseEntity<String> subscribeToTopic(@RequestBody FcmSubscribeRequest request) {
         try {
-            TopicManagementResponse response = FirebaseMessaging.getInstance().subscribeToTopic(
-                    Arrays.asList(request.getToken()), request.getTopic()
-            );
-            return "구독 성공: " + response.getSuccessCount();
+            List<String> tokens = request.getTokens();
+            String topic = request.getTopic();
+
+            // 디버깅용
+            System.out.println("[디버깅] 받은 토큰 리스트: " + tokens);
+            System.out.println("[디버깅] 받은 토픽명: " + topic);
+
+            if (tokens == null || tokens.isEmpty() || tokens.contains(null) || tokens.contains("")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("오류: tokens 리스트가 비어 있거나 null 값이 포함되어 있습니다.");
+            }
+
+            TopicManagementResponse response = FirebaseMessaging.getInstance().subscribeToTopic(tokens, topic);
+            return ResponseEntity.ok("구독 성공: " + response.getSuccessCount());
         } catch (FirebaseMessagingException e) {
             e.printStackTrace();
-            return "구독 실패: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("구독 실패: " + e.getMessage());
         }
     }
 
@@ -126,13 +137,18 @@ public class FcmMessageController {
 
 
 class FcmSubscribeRequest {
-    private String token;
+    private List<String> tokens;
     private String topic;
 
     // Getter, Setter
-    public String getToken() { return token; }
-    public void setToken(String token) { this.token = token; }
-    public String getTopic() { return topic; }
-    public void setTopic(String topic) { this.topic = topic; }
+    public List<String> getTokens() {
+        return tokens; }
+    public void setTokens(List<String> tokens) {
+        this.tokens = tokens; }
+    public String getTopic() {
+        return topic; }
+    public void setTopic(String topic) {
+        this.topic = topic; }
+
 }
 

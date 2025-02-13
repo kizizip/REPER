@@ -11,7 +11,7 @@ import com.d109.reper.repository.RecipeRepository;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.response.OrderResponseDto;
 import jakarta.transaction.Transactional;
-import org.aspectj.weaver.ast.Or;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -123,8 +123,8 @@ public class OrderService {
     }
 
     // 주문이 1분에 하나씩 생기게 스케쥴링
-//    @Scheduled(fixedDelay = 10000) // 테스트용 10초
-    @Scheduled(fixedDelay = 120000)
+    @Scheduled(fixedDelay = 15000) // 테스트용 10초
+//    @Scheduled(fixedDelay = 120000) //
     public void createOrder1Min() {
         createRandomOrder();
         System.out.println("새로운 주문 생성" + LocalDateTime.now());

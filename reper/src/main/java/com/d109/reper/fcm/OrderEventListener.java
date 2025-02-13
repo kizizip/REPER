@@ -1,9 +1,6 @@
 package com.d109.reper.fcm;
 
-import com.d109.reper.domain.Order;
-import com.d109.reper.domain.OrderDetail;
-import com.d109.reper.domain.Store;
-import com.d109.reper.domain.StoreEmployee;
+import com.d109.reper.domain.*;
 import com.d109.reper.repository.OrderRepository;
 import com.d109.reper.repository.StoreEmployeeRepository;
 import com.d109.reper.service.FcmMessageService;
@@ -51,6 +48,8 @@ public class OrderEventListener {
                     .mapToInt(OrderDetail::getQuantity)
                     .sum();
 
+            User owner = order.getStore().getOwner();
+
             // 근무 중인 직원이 있는 경우에만 토픽 알림 전송
             if (hasActiveEmployees(order.getStore())) {
                 fcmMessageService.sendToTopic(
@@ -66,6 +65,7 @@ public class OrderEventListener {
                 order.setNotified(true);
                 orderRepository.save(order);
             }
+
         } catch(Exception e) {
             System.out.println("주문 알림 처리 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
