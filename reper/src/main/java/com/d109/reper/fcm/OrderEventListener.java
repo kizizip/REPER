@@ -4,10 +4,11 @@ import com.d109.reper.domain.Order;
 import com.d109.reper.domain.OrderDetail;
 import com.d109.reper.domain.Store;
 import com.d109.reper.domain.StoreEmployee;
+import com.d109.reper.repository.OrderRepository;
 import com.d109.reper.repository.StoreEmployeeRepository;
 import com.d109.reper.service.FcmMessageService;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 
@@ -17,17 +18,27 @@ public class OrderEventListener {
 
     private final StoreEmployeeRepository storeEmployeeRepository;
 
-    public OrderEventListener(FcmMessageService fcmMessageService, StoreEmployeeRepository storeEmployeeRepository) {
+    private final OrderRepository orderRepository;
+
+    public OrderEventListener(FcmMessageService fcmMessageService, StoreEmployeeRepository storeEmployeeRepository, OrderRepository orderRepository) {
         this.fcmMessageService = fcmMessageService;
         this.storeEmployeeRepository = storeEmployeeRepository;
+        this.orderRepository = orderRepository;
     }
 
-    @TransactionalEventListener
-    public void onOrderChange(Order order) {
+    @EventListener
+    public void onOrderChange(OrderCreatedEvent event) {
+        Order order = event.getOrder();
+        processOrderNotification(order);
+        System.out.println("onOrderChange 실행 됨");
+    }
+
+    public void processOrderNotification(Order order) {
         try {
             if (order.isNotified()) {
                 return;
             }
+            System.out.println("processOrderNotification 실행 중");
 
             fcmMessageService.initialize();
 
@@ -47,13 +58,19 @@ public class OrderEventListener {
                         "새로운 주문 알림",
                         "총 " + totalQuantity + "잔 새로운 주문이 들어왔습니다."
                 );
+                System.out.println("sendToTopic에 알림 전송 요청");
+                order.setNotified(true);
+                orderRepository.save(order);
             } else {
                 System.out.println("근무 중인 직원이 없습니다.");
-                markOrderAsNotified(order);
+                order.setNotified(true);
+                orderRepository.save(order);
             }
         } catch(Exception e) {
             System.out.println("주문 알림 처리 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
+            order.setNotified(false);
+            orderRepository.save(order);
         }
     }
 
@@ -63,8 +80,5 @@ public class OrderEventListener {
         return !activeEmployees.isEmpty();
     }
 
-    private void markOrderAsNotified(Order order) {
-        order.setNotified(true);
-        // 서비스 계층에서 저장 처리하는 것이 더 안전합니다.
-    }
+
 }

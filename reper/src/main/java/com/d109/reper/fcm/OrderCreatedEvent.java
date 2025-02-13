@@ -10,6 +10,7 @@ public class OrderCreatedEvent extends ApplicationEvent {
     public OrderCreatedEvent(Object source, Order order) {
         super(source);
         this.order = order;
+        System.out.println("OrderCreatedEvent 실행 됨");
     }
 
     public  Order getOrder() {

@@ -1,6 +1,5 @@
 package com.d109.reper.domain;
 
-import com.d109.reper.fcm.OrderEntityListener;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@EntityListeners(OrderEntityListener.class)
 @Getter @Setter
 @Table(name = "orders")
 public class Order {
