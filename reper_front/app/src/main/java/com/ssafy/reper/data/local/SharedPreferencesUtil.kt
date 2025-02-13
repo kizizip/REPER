@@ -102,7 +102,7 @@ class SharedPreferencesUtil(context: Context) {
     //사용자 정보 저장
     fun addUser(userinfo: UserInfo){
         val editor = preferences.edit()
-        editor.putLong("userId", userinfo.userId)
+        editor.putInt("userId", userinfo.userId)
         editor.putString("username", userinfo.username)
         editor.putString("role", userinfo.role)
         editor.apply()
@@ -111,7 +111,7 @@ class SharedPreferencesUtil(context: Context) {
     // 사용자 정보 가져오기 (수정 필요)
     fun getUser(): LoginResponse {
         return LoginResponse(
-            userId = preferences.getLong("userId", -1L),
+            userId = preferences.getInt("userId", -1),
             username = preferences.getString("username", ""),
             role = preferences.getString("role", ""),
         )

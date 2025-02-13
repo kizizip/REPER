@@ -5,7 +5,6 @@ import com.ssafy.reper.data.dto.JoinRequest
 import com.ssafy.reper.data.dto.LoginRequest
 import com.ssafy.reper.data.dto.ResponseUserInfo
 import com.ssafy.reper.data.dto.UpdateUserRequest
-import com.ssafy.reper.data.dto.UserInfo
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -31,21 +30,36 @@ interface AuthApi {
 
     // 회원 탈퇴
     @DELETE("users/{userId}")
-    suspend fun deleteUser(@Path("userId") userId: Long)
+    suspend fun deleteUser(@Path("userId") userId: Int?)
 
 
     // 회원정보 수정
     @PATCH("users/{userId}")
-    suspend fun updateUser(@Path("userId") userId: Long, @Body updateUserRequest: UpdateUserRequest)
+    suspend fun updateUser(@Path("userId") userId: Int, @Body updateUserRequest: UpdateUserRequest)
 
     // 회원정보 반환
     @GET("users/{userId}/info")
-    suspend fun getUserInfo(@Path("userId") userId: Long): ResponseUserInfo
+    suspend fun getUserInfo(@Path("userId") userId: Int): ResponseUserInfo
 
 
     // 이메일 중복 체크
     @GET("users/email/check-duplication")
     suspend fun checkEmail(@Query("email") email: String): Boolean
 
+    // 카카오 연동시 boolean=true로 변경
+    @PATCH("users/{userId}/kakao")
+    suspend fun updateKakaoBoolean(@Path("userId") userId: Int)
+
+    // 구글계정 연동시 boolean=true로 변경
+    @PATCH("users/{userId}/google")
+    suspend fun updateGoogleBoolean(@Path("userId") userId: Int)
+
+    // 해당 계정으로 kakao 소셜 가입이 되어있는지를 반환
+    @GET("{email}/kakao")
+    suspend fun checkKakao(@Path("email") email: String): Boolean
+
+    // 해당 계정으로 google 소셜 가입이 되어있는지를 반환
+    @GET("{email}/google")
+    suspend fun checkGoogle(@Path("email") email: String): Boolean
 
 }

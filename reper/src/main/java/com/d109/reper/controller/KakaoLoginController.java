@@ -8,6 +8,7 @@ import com.d109.reper.domain.UserRole;
 import com.d109.reper.repository.UserRepository;
 import com.d109.reper.service.KakaoApiService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,10 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -81,8 +85,32 @@ public class KakaoLoginController {
         return responseBody != null ? responseBody.get("access_token") : null;
     }
 
+//    @PostMapping("/kakao")
+//    @Operation(summary = "accessToken을 날리면 User 테이블상의 모든 정보를 불러옵니다."
+//            , description = "GET메서드와 유사하나, User 엔티티를 기본형으로 합니다.")
+//    public ResponseEntity<?> kakaoLogin(@RequestBody KakaoLoginRequest kakaoLoginRequest) {
+//        //1. 카카오 access token으로 카카오 사용자 정보 조회
+//        KakaoUserInfo kakaoUserInfo = getKakaoUserInfo(kakaoLoginRequest.getAccessToken());
+//
+//        //2. db에서 해당 사용자 검색
+//        User user = userRepository.findByEmail(kakaoUserInfo.getEmail())
+//                .orElseGet(() -> {
+//                    // 3. 사용자 정보가 없으면, 새로 추가
+//                    User newUser = new User();
+//                    newUser.setEmail(kakaoUserInfo.getEmail());
+//                    newUser.setUserName(kakaoUserInfo.getNickname());
+//                    newUser.setPassword(""); //비밀번호는 kakao에서 관리하므로, 빈 값으로 설정
+//                    newUser.setRole(UserRole.STAFF); //기본 권한 설정
+//                    return userRepository.save(newUser);
+//                });
+//
+//        //4. 사용자 정보 반환
+//        return ResponseEntity.ok(new KakaoLoginResponseDto(user));
+//
+//    }
+
     @PostMapping("/kakao")
-    @Operation(summary = "accessToken을 날리면 User 테이블상의 모든 정보를 불러옵니다."
+    @Operation(summary = "accessToken을 날리면 User 테이블상의 모든 정보를 불러오고 쿠키를 내려보냅니다.."
             , description = "GET메서드와 유사하나, User 엔티티를 기본형으로 합니다.")
     public ResponseEntity<?> kakaoLogin(@RequestBody KakaoLoginRequest kakaoLoginRequest) {
         //1. 카카오 access token으로 카카오 사용자 정보 조회
@@ -90,21 +118,26 @@ public class KakaoLoginController {
 
         //2. db에서 해당 사용자 검색
         User user = userRepository.findByEmail(kakaoUserInfo.getEmail())
-                .orElseGet(() -> {
-                    // 3. 사용자 정보가 없으면, 새로 추가
-                    User newUser = new User();
-                    newUser.setEmail(kakaoUserInfo.getEmail());
-                    newUser.setUserName(kakaoUserInfo.getNickname());
-                    newUser.setPassword(""); //비밀번호는 kakao에서 관리하므로, 빈 값으로 설정
-                    newUser.setRole(UserRole.STAFF); //기본 권한 설정
-                    return userRepository.save(newUser);
-                });
+                .orElseThrow(() -> new NoSuchElementException("UserNotFound"));
 
-        //4. 사용자 정보 반환
-        return ResponseEntity.ok(new KakaoLoginResponseDto(user));
+        //3. 쿠키 생성
+        // 쿠키 생성
+        jakarta.servlet.http.Cookie cookie = new Cookie("loginId", URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8));
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // HTTPS에서만 전송 (테스트 시 false, 실제 배포 환경에서는 true)
+        cookie.setPath("/"); // 모든 경로에서 쿠키 사용 가능
+        cookie.setMaxAge(60 * 15); // 15분 동안 유지
 
+        // 4. 쿠키를 포함하여 로그인 응답 반환
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        // 사용자 정보를 포함하여 응답
+        KakaoLoginResponseDto responseDto = new KakaoLoginResponseDto(user);
+        return new ResponseEntity<>(responseDto, headers, HttpStatus.OK);
     }
 
+    
     // 토큰으로 사용자 정보(일부) 가져오기
     @GetMapping("/kakao")
     @Operation(summary = "accessToken을 날리면 사용자의 email, nickname을 불러옵니다."
@@ -120,9 +153,9 @@ public class KakaoLoginController {
 
         try {
             // 카카오 API 호출
-            ResponseEntity<KakaoUserInfoResponse> response = restTemplate.exchange(
-                    url,
-                    org.springframework.http.HttpMethod.GET,
+                    ResponseEntity<KakaoUserInfoResponse> response = restTemplate.exchange(
+                            url,
+                            org.springframework.http.HttpMethod.GET,
                     entity,
                     KakaoUserInfoResponse.class // 응답을 KakaoUserInfoResponse로 받음
             );
