@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
+import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.databinding.FragmentOrderBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.order.adapter.OrderAdatper
@@ -26,6 +27,7 @@ class OrderFragment : Fragment() {
     // 주문 날짜 모음 yyyy-MM-dd 형식
     var orderDateList: MutableList<String> = mutableListOf()
 
+    private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val viewModel: OrderViewModel by viewModels()
 
     // 주문 리스트 recyclerView Adapter
@@ -49,10 +51,29 @@ class OrderFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //  초기화
-        resetData()
-        //어뎁터설정
-        initAdapter("")
+
+        mainViewModel.clearData()
+        mainViewModel.isEmployee.observe(viewLifecycleOwner){
+            if(it == true){
+                orderBinding.fragmentOrderTvNoorder.visibility = View.GONE
+
+                orderBinding.fragmentOrderRvOrder.visibility = View.VISIBLE
+                orderBinding.fragmentOrderDateSpinner.visibility = View.VISIBLE
+
+                //  초기화
+                resetData()
+                //어뎁터설정
+                initAdapter("")
+            }
+            else{
+                orderBinding.fragmentOrderTvNoorder.visibility = View.VISIBLE
+
+                orderBinding.fragmentOrderRvOrder.visibility = View.GONE
+                orderBinding.fragmentOrderDateSpinner.visibility = View.GONE
+
+            }
+        }
+        mainViewModel.getIsEmployee(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt())
     }
     override fun onResume() {
         super.onResume()
@@ -106,20 +127,29 @@ class OrderFragment : Fragment() {
             viewModel.orderList.observe(viewLifecycleOwner) { orderList ->
                 orderAdapter.orderList.clear()
                 orderAdapter.recipeNameList.clear()
-
-                for (item in orderList) {
-                    if (!orderDateList.contains(item.orderDate.substring(0, 10))) {
-                        orderDateList.add(item.orderDate.substring(0, 10))
-                        orderDateList.sortedDescending()
-                        configureDateSpinner()
-                    }
-                    if (selectedDate.isNotBlank() && item.orderDate.substring(0, 10) == selectedDate) {
-                        if(!orderAdapter.orderList.contains(item)){
-                            orderAdapter.orderList.add(item)
-                            orderAdapter.recipeNameList.add(viewModel.recipeNameList.value?.get(orderList.indexOf(item))?.recipeName!!)
+                if(orderList.isEmpty()){
+                    orderBinding.fragmentOrderTvNoorder.visibility = View.VISIBLE
+                    orderBinding.fragmentOrderRvOrder.visibility = View.GONE
+                    orderBinding.fragmentOrderDateSpinner.visibility = View.GONE
+                }else{
+                    orderBinding.fragmentOrderTvNoorder.visibility = View.GONE
+                    orderBinding.fragmentOrderRvOrder.visibility = View.VISIBLE
+                    orderBinding.fragmentOrderDateSpinner.visibility = View.VISIBLE
+                    for (item in orderList) {
+                        if (!orderDateList.contains(item.orderDate.substring(0, 10))) {
+                            orderDateList.add(item.orderDate.substring(0, 10))
+                            orderDateList.sortedDescending()
+                            configureDateSpinner()
+                        }
+                        if (selectedDate.isNotBlank() && item.orderDate.substring(0, 10) == selectedDate) {
+                            if(!orderAdapter.orderList.contains(item)){
+                                orderAdapter.orderList.add(item)
+                                orderAdapter.recipeNameList.add(viewModel.recipeNameList.value?.get(orderList.indexOf(item))?.recipeName!!)
+                            }
                         }
                     }
                 }
+
                 adapter = orderAdapter
             }
         }

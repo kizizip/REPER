@@ -4,6 +4,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeStep
@@ -12,61 +13,95 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivityViewModel_정언"
 class MainActivityViewModel(application: Application) :  AndroidViewModel(application) {
-    private val recipeService = RetrofitUtil.recipeService
+    private val storeService = RetrofitUtil.storeService
 
-    private val _selectedRecipeList = MutableLiveData<MutableList<Recipe>>()
-    val selectedRecipeList: LiveData<MutableList<Recipe>>
-        get() = _selectedRecipeList
+    private val _isDataReady = MutableLiveData<Boolean>()
+    val isDataReady: LiveData<Boolean> = _isDataReady
 
-    fun setSelectedRecipes(recipeIdList:MutableList<Int>){
+    private val _order = MutableLiveData<Order?>(null)
+    val order : LiveData<Order?> = _order
+
+    private val _selectedRecipeList = MutableLiveData<MutableList<Recipe>?>(null)
+    val selectedRecipeList: LiveData<MutableList<Recipe>?> = _selectedRecipeList
+
+    private val _nowISeeStep = MutableLiveData<Int?>(null)
+    val nowISeeStep: LiveData<Int?> = _nowISeeStep
+
+    private val _nowISeeRecipe = MutableLiveData<Int?>(null)
+    val nowISeeRecipe: LiveData<Int?> = _nowISeeRecipe
+
+    private val _recipeSteps = MutableLiveData<MutableList<RecipeStep>?>(null)
+    val recipeSteps: LiveData<MutableList<RecipeStep>?> = _recipeSteps
+
+    private val _isEmployee = MutableLiveData<Boolean?>(null)
+    val isEmployee: LiveData<Boolean?> = _isEmployee
+
+    fun setSelectedRecipes(recipeList:MutableList<Recipe>){
         viewModelScope.launch {
-            var list = mutableListOf<Recipe>()
             try {
-                for(id in recipeIdList){
-                    list.add(recipeService.getRecipe(id))
-                }
+                _selectedRecipeList.value = recipeList
+                Log.d(TAG, "setSelectedRecipes: ${selectedRecipeList.value}")
 
-                setNowISeeRecipe(0)
-                setNowISeeStep(-1)
+                _nowISeeRecipe.value = 0
+                Log.d(TAG, "_nowIseeRecipe: ${nowISeeRecipe.value}")
+                _nowISeeStep.value = -1
+                Log.d(TAG, "_nowISeeStep: ${nowISeeStep.value}")
+                _recipeSteps.value = recipeList.get(0).recipeSteps
+                Log.d(TAG, "_recipeSteps: ${recipeSteps.value}")
+                _isDataReady.postValue(true)
+                Log.d(TAG, "_isDataReady: ${isDataReady.value}")
             }
             catch (e:Exception){
                 Log.e(TAG, "Error fetching recipes: ${e.message}", e)
+                _isDataReady.value = false
             }
-            _selectedRecipeList.value = list
-            _selectedRecipeList.postValue(_selectedRecipeList.value)
         }
     }
 
-    private val _order = MutableLiveData<Order>()
-    val order : LiveData<Order>
-        get() = _order
-
     fun setOrder(order: Order){
         _order.value = order
+        Log.d(TAG, "setOrder: ${_order.value}")
     }
-
-    private val _nowISeeStep = MutableLiveData<Int>()
-    val nowISeeStep : LiveData<Int>
-        get() = _nowISeeStep
 
     fun setNowISeeStep(stepIdx: Int){
         _nowISeeStep.value = stepIdx
+        Log.d(TAG, "setNowISeeStep: ${nowISeeStep.value}")
     }
-
-    private val _nowISeeRecipe = MutableLiveData<Int>()
-    val nowISeeRecipe : LiveData<Int>
-        get() = _nowISeeRecipe
 
     fun setNowISeeRecipe(recipeIdx: Int){
         _nowISeeRecipe.value = recipeIdx
+        Log.d(TAG, "setNowISeeRecipe: ${nowISeeRecipe.value}")
         setRecipeSteps(recipeIdx)
     }
 
-    private val _recipeSteps = MutableLiveData<MutableList<RecipeStep>>()
-    val recipeSteps : LiveData<MutableList<RecipeStep>>
-        get() = _recipeSteps
-
     fun setRecipeSteps(recipeIdx: Int){
          _recipeSteps.value = _selectedRecipeList.value?.get(recipeIdx)?.recipeSteps
+        Log.d(TAG, "setRecipeSteps: ${recipeSteps.value}")
+    }
+
+    fun getIsEmployee(userId: Int){
+        viewModelScope.launch {
+            try {
+                val list = storeService.getStoreListByEmployeeId(userId)
+                for(store in list){
+                    if(store.storeId == ApplicationClass.sharedPreferencesUtil.getStoreId()){
+                        _isEmployee.postValue(true)
+                        return@launch
+                    }
+                }
+            }catch (e:Exception){
+                Log.e(TAG, "getIsEmployee: ", )
+            }
+        }
+    }
+
+    fun clearData(){
+        _selectedRecipeList.value = null
+        _nowISeeRecipe.value = null
+        _nowISeeStep.value = null
+        _recipeSteps.value = null
+        _isDataReady.value = false
+        _order.value = null
+        _isEmployee.value = false
     }
 }

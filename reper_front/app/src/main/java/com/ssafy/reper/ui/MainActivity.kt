@@ -15,6 +15,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.reper.R
+import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.UserToken
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.ActivityMainBinding
@@ -66,7 +67,7 @@ class MainActivity : AppCompatActivity() {
                 getFCMToken()
             }
             // 토큰을 받은 후 메인 스레드에서 UI 작업
-            fcmViewModel.saveToken(UserToken(1, token, 6))
+            fcmViewModel.saveToken(UserToken(1, token, ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()))
             Log.d("FCMTOKEN", token)
         }
 
@@ -116,7 +117,7 @@ class MainActivity : AppCompatActivity() {
             val token = withContext(Dispatchers.IO) {
                 getFCMToken()
             }
-            fcmViewModel.saveToken(UserToken(1, token, 1))
+            fcmViewModel.saveToken(UserToken(1, token, ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()))
             Log.d("FCMTOKEN", token)
         }
 

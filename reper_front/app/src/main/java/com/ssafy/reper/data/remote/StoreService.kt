@@ -35,6 +35,7 @@ interface StoreService {
     @GET("stores/employees/{userId}")
     suspend fun getStoreListByEmployeeId(@Path("userId") userId: Int?): List<Store>
 
+
     // 권한 요청 거절 or 알바생 자르기
     @DELETE("stores/{storeId}/employees/{userId}")
     suspend fun deleteEmployee(@Path("storeId") storeId: String, @Path("userId") userId: String)

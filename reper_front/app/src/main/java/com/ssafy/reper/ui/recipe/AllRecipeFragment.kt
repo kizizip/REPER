@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.R
 import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.util.ViewModelSingleton
@@ -61,10 +62,32 @@ class AllRecipeFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        mainViewModel.clearData()
+        mainViewModel.isEmployee.observe(viewLifecycleOwner){
+            if(it == true){
+                allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
+
+                allRecipeBinding.allrecipeFmRv.visibility = View.VISIBLE
+                allRecipeBinding.allrecipeFmSp.visibility = View.VISIBLE
+                allRecipeBinding.allrecipeFmEtSearch.isEnabled = true
+                allRecipeBinding.allrecipeFmBtnFilter.isEnabled = true
+
+                // RecyclerView adapter 처리
+                initAdapter()
+            }
+            else{
+                allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
+
+                allRecipeBinding.allrecipeFmRv.visibility = View.GONE
+                allRecipeBinding.allrecipeFmSp.visibility = View.GONE
+                allRecipeBinding.allrecipeFmEtSearch.isEnabled = false
+                allRecipeBinding.allrecipeFmBtnFilter.isEnabled = false
+            }
+        }
+        mainViewModel.getIsEmployee(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt())
         // 이벤트 관리
         initEvent()
-        // RecyclerView adapter 처리
-        initAdapter()
     }
     override fun onResume() {
         super.onResume()
@@ -76,6 +99,9 @@ class AllRecipeFragment : Fragment() {
     }
 
     fun initEvent(){
+        // 검색 초기 상태 설정
+        allRecipeBinding.allrecipeFmEtSearch.setText("")
+
         // 탭 초기 상태 설정 (단계별 레시피 선택)
         allRecipeBinding.allrecipeFmStepRecipeTab.isSelected = true
         allRecipeBinding.allrecipeFmFullRecipeTab.isSelected = false
@@ -161,7 +187,8 @@ class AllRecipeFragment : Fragment() {
 
         allRecipeBinding.allrecipeFmEtSearch.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm = requireContext().
+                getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 view?.windowToken?.let {
                     imm.hideSoftInputFromWindow(it, 0)
                 }
@@ -200,62 +227,48 @@ class AllRecipeFragment : Fragment() {
             }
             // 아이템을 눌렀을 때
             else if(id == 2){
-                val icehotList= viewModel.recipeList.value!!.filter { it.recipeName == recipeName }
-                var ice = -1
-                var hot = -1
-                for(item in icehotList){
-                    if(item.type.equals("ICE")){
-                        ice = item.recipeId
-                    }
-                    else if(item.type.equals("HOT")){
-                        hot = item.recipeId
-                    }
+                // mainViewModel에 기존에 있던 레시피 데이터 초기화
+                mainViewModel.clearData()
+
+                // 레시피 이름이 동일한 경우는 ICE HOT 일 거라 가정. -> 하지만..! 동일한 이름의 레시피 짱 많음..! => 가장 마지막으로 추가된 걸로...
+                // 클릭한 레시피와 동일한 이름의 레시피를 모두 가져와서 ice와 hot을 구별
+                val iceRecipe =
+                    viewModel.recipeList.value!!
+                        .filter { it.recipeName == recipeName && it.type.equals("ICE") }
+                        .maxByOrNull { it.recipeId }
+                val hotRecipe =
+                    viewModel.recipeList.value!!
+                        .filter { it.recipeName == recipeName && it.type.equals("HOT") }
+                        .maxByOrNull { it.recipeId }
+                val selectedRecipes = mutableListOf<Recipe>()
+                iceRecipe?.let { selectedRecipes.add(it) }
+                hotRecipe?.let { selectedRecipes.add(it) }
+
+                // 내가 어디 Fragment 출신인지 판단하는 bundle
+                val bundle = Bundle().apply {
+                    putInt("whereAmICame", 1)
                 }
 
+                // 전체 레시피 탭에서 단건 레시피를 클릭했을 떄
                 if(allRecipeBinding.allrecipeFmFullRecipeTab.isSelected == true){
-
-                    val bundle = Bundle().apply {
-                        putInt("whereAmICame", 1)
-                        putIntegerArrayList("idList", arrayListOf(ice ,hot))
-                    }
-                    findNavController().navigate(R.id.fullRecipeFragment, bundle)
+                    navigateToRecipeFragment(selectedRecipes)
                 }
+                // 단계별 레시피 탭에서 단건 레시피를 클릭했을 때
                 else if(allRecipeBinding.allrecipeFmStepRecipeTab.isSelected == true){
-                    var bundle = Bundle().apply {
-                        putInt("whereAmICame", 1)
-                    }
-                    if(ice != -1 && hot != -1){
-                        val dialog = Dialog(mainActivity)
-                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                        dialog.setContentView(R.layout.dialog_icehot)
-
-                        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.VISIBLE
-                        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.VISIBLE
-
-                        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
-                            ice = -1
-                            dialog.dismiss()
+                    // ICE와 HOT 둘 다 있을 때만 다이얼로그를 띄움
+                    if(iceRecipe != null && hotRecipe != null) {
+                        showIceHotDialog(selectedRecipes, iceRecipe, hotRecipe) { selectedRecipe ->
+                            navigateToRecipeFragment(selectedRecipes)
                         }
-                        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).setOnClickListener {
-                            hot = -1
-                            dialog.dismiss()
-                        }
-                        dialog.show()
-                    }
-
-                    if (ice != -1){
-                        bundle = Bundle().apply {
-                            putInt("whereAmICame", 1)
-                            putIntegerArrayList("idList", arrayListOf(ice))
+                    } else {
+                        // ICE나 HOT 중 하나만 있는 경우 바로 해당 레시피 선택
+                        val recipe = iceRecipe ?: hotRecipe
+                        if (recipe != null) {
+                            navigateToRecipeFragment(selectedRecipes)
+                        } else {
+                            Log.e(TAG, "No recipes found for $recipeName")
                         }
                     }
-                    else if (hot != -1){
-                        bundle = Bundle().apply {
-                            putInt("whereAmICame", 1)
-                            putIntegerArrayList("idList", arrayListOf(hot))
-                        }
-                    }
-                    findNavController().navigate(R.id.stepRecipeFragment, bundle)
                 }
             }
         }
@@ -263,6 +276,8 @@ class AllRecipeFragment : Fragment() {
         allRecipeBinding.allrecipeFmRv.apply {
             addItemDecoration(GridSpacingItemDecoration(2, 10)) // 2열, 20dp 간격
             layoutManager = GridLayoutManager(mainActivity, 2)
+
+            allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
 
             viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
             viewModel.getLikeRecipes(
@@ -324,6 +339,35 @@ class AllRecipeFragment : Fragment() {
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
+    }
+    fun navigateToRecipeFragment(list: MutableList<Recipe>) {
+        val bundle =Bundle().apply {
+            putInt("whereAmICame", 1)
+        }
+        mainViewModel.setSelectedRecipes(list)
+        findNavController().navigate(R.id.stepRecipeFragment, bundle)
+    }
+    fun showIceHotDialog(selectedRecipes: MutableList<Recipe>, iceRecipe: Recipe, hotRecipe: Recipe, onRecipeSelected: (MutableList<Recipe>) -> Unit) {
+        val dialog = Dialog(mainActivity)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setContentView(R.layout.dialog_icehot)
+
+        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).visibility = View.VISIBLE
+        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).visibility = View.VISIBLE
+
+        // hot 선택 시
+        dialog.findViewById<CardView>(R.id.icehot_d_btn_hot).setOnClickListener {
+            selectedRecipes.remove(iceRecipe)
+            dialog.dismiss()
+            onRecipeSelected(selectedRecipes)
+        }
+        // ice 선택 시
+        dialog.findViewById<CardView>(R.id.icehot_d_btn_ice).setOnClickListener {
+            selectedRecipes.remove(hotRecipe)
+            dialog.dismiss()
+            onRecipeSelected(selectedRecipes)
+        }
+        dialog.show()
     }
 
     // recyclerview Grid 형태 여백 주는 Class (Deco 용임)
