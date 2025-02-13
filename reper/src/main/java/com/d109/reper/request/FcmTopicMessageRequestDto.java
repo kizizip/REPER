@@ -1,16 +1,12 @@
-package com.d109.reper.response;
+package com.d109.reper.request;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.Map;
-
-@Getter
-@Setter
+@Getter @Setter
 @Builder
-public class FcmMessageResponseDto {
+public class FcmTopicMessageRequestDto {
 
     private boolean validateOnly;
     private Message message;
@@ -19,14 +15,8 @@ public class FcmMessageResponseDto {
     @Setter
     @Builder
     public static class Message {
-        private String token;
+        private String topic;  // 기존 `token`과 분리된 토픽 필드
         private Notification notification;
-
-        // order FCM respose data 위해서 필드 추가
-            // data 필요없는 알림들 위해 null 방지 default 설정
-        @Builder.Default
-        private Map<String, String> data = new HashMap<>();
-
     }
 
     @Getter

@@ -39,7 +39,6 @@ public interface RecipeSearchRepository extends ElasticsearchRepository<RecipeDo
     """)
     List<RecipeDocument> searchByStoreIdAndRecipeName(Long storeId, String recipeName, Pageable pageable);
 
-    List<RecipeDocument> findByStoreIdAndRecipeNameContaining(Long storeId, String keyword, Pageable pageable);
 
     // 가게별 레시피에서 재료 포함 검색
     List<RecipeDocument> findByStoreIdAndIngredientsContaining(Long storeId, String ingredient, Pageable pageable);

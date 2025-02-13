@@ -22,7 +22,6 @@ public class RecipeDocument {
     @Field(type = FieldType.Long)
     private Long storeId;
 
-//    @Field(type = FieldType.Text, analyzer = "nori_edge_ngram_analyzer", searchAnalyzer = "nori_edge_ngram_analyzer")
     @MultiField(
             mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_analyzer"),  // 기본 형태소 분석기
             otherFields = {

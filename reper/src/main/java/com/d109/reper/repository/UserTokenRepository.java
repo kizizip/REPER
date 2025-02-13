@@ -14,4 +14,7 @@ public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<UserToken> findByUserId(Long userId);  // 특정 유저의 토큰 조회
     List<UserToken> findByStoreId(Long storeId);  // 특정 가게의 모든 직원 토큰 조회
+
+    // 다수의 사용자 토큰 조회
+    List<UserToken> findByUserIdIn(List<Long> userIds);
 }
