@@ -161,4 +161,21 @@ public class UserService {
             return false;
         }
     }
+
+
+    // 카카오 가입 여부 판단
+    public boolean findKakaoJoin(String email) {
+        boolean result = userRepository.findKakaoByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+
+        return result;
+    }
+
+    // 구글 가입 여부 판단
+    public boolean findGoogleJoin(String email) {
+        boolean result = userRepository.findGoogleByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+
+        return result;
+    }
 }

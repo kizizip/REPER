@@ -1,11 +1,11 @@
 package com.d109.reper.controller;
 
 import com.d109.reper.domain.KakaoUserInfo;
-import com.d109.reper.response.KakaoLoginResponseDto;
-import com.d109.reper.response.KakaoUserInfoResponse;
 import com.d109.reper.domain.User;
 import com.d109.reper.domain.UserRole;
 import com.d109.reper.repository.UserRepository;
+import com.d109.reper.response.KakaoLoginResponseDto;
+import com.d109.reper.response.KakaoUserInfoResponse;
 import com.d109.reper.service.KakaoApiService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
@@ -16,6 +16,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import jakarta.servlet.http.Cookie;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -121,7 +122,7 @@ public class KakaoLoginController {
 
         //3. 쿠키 생성
         // 쿠키 생성
-        jakarta.servlet.http.Cookie cookie = new Cookie("loginId", URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8));
+        Cookie cookie = new Cookie("loginId", URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8));
         cookie.setHttpOnly(true);
         cookie.setSecure(false); // HTTPS에서만 전송 (테스트 시 false, 실제 배포 환경에서는 true)
         cookie.setPath("/"); // 모든 경로에서 쿠키 사용 가능
