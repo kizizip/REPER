@@ -30,6 +30,9 @@ public class Order {
     @Column(name = "takeout")
     private boolean takeout;
 
+    @Column(name = "is_notified")
+    private boolean isNotified = false;
+
     // 양방향 관계 설정
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
