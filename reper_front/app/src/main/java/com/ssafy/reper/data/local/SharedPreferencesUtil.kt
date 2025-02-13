@@ -80,6 +80,7 @@ class SharedPreferencesUtil(context: Context) {
         private const val SHARED_PREFERENCES_NAME = "reper_preference"
         private const val KEY_USER_COOKIE = "user_cookie"
         private const val STORE_ID = "1"
+        private const val KEY_COOKIE_EXPIRY = "cookie_expiry"
     }
 
 
@@ -166,7 +167,24 @@ class SharedPreferencesUtil(context: Context) {
             remove("userId")
             remove("username")
             remove("role")
+            remove(KEY_COOKIE_EXPIRY)
             apply()
         }
+    }
+
+    // 쿠키 만료 시간 저장
+    fun saveCookieExpiry(expiryTime: Long) {
+        preferences.edit().putLong(KEY_COOKIE_EXPIRY, expiryTime).apply()
+    }
+
+    // 쿠키 만료 시간 확인
+    fun getCookieExpiry(): Long {
+        return preferences.getLong(KEY_COOKIE_EXPIRY, 0)
+    }
+
+    // 쿠키가 유효한지 확인
+    fun isCookieValid(): Boolean {
+        val expiryTime = getCookieExpiry()
+        return expiryTime > System.currentTimeMillis()
     }
 }
