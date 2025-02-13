@@ -241,10 +241,10 @@ class LoginFragment : Fragment() {
                 } else {
                     try {
                         // 중복일 경우 로그인 처리
-//                        val isKakao = RetrofitUtil.authService.checkKakao(email)
-//                        val isGoogle = RetrofitUtil.authService.checkGoogle(email)
-                        val isKakao = true // 나중에 삭제 아직 api가 서버에 안올라왔음
-                        val isGoogle = false // 나중에 삭제 아직 api가 서버에 안올라왔음
+                        val isKakao = RetrofitUtil.authService.checkKakao(email)
+                        val isGoogle = RetrofitUtil.authService.checkGoogle(email)
+//                        val isKakao = true // 나중에 삭제 아직 api가 서버에 안올라왔음
+//                        val isGoogle = false // 나중에 삭제 아직 api가 서버에 안올라왔음
 
                         // 카카오로 회원가입을 진행했더라면 카카오 로그인 진행
                         if (isKakao) {
@@ -364,7 +364,11 @@ class LoginFragment : Fragment() {
                 if (task.isSuccessful) {
                     // 인증 성공 시 Firebase 사용자 객체 가져오기
                     val user = auth.currentUser
-                    updateUI(user) // UI 업데이트
+                    
+                    // updateUI 호출을 lifecycleScope로 감싸기
+                    lifecycleScope.launch {
+                        updateUI(user)
+                    }
                 } else {
                     // 인증 실패 시 오류 메시지 표시
                     Toast.makeText(requireContext(), "Firebase 인증 실패", Toast.LENGTH_SHORT).show()
@@ -373,22 +377,35 @@ class LoginFragment : Fragment() {
     }
 
     // 로그인 성공 시 UI 업데이트 및 JoinFragment로 이동
-    private fun updateUI(user: FirebaseUser?) {
+    private suspend fun updateUI(user: FirebaseUser?) {
         if (user != null) {
 
-            // 회원가입창으로 이동
-            val bundle = Bundle().apply {
-                putString("email", user.email)
-                putString("nickname", user.displayName)
-                putString("social", "google")
-            }
-            val joinFragment = JoinFragment().apply {
-                arguments = bundle
-            }
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.activityLoginFragmentContainer, joinFragment)
-                .addToBackStack(null)
-                .commit()
+            // 이메일 중복 확인
+            val isEmailDuplicate = user.email?.let { RetrofitUtil.authService.checkEmail(it) }
+
+            if (!isEmailDuplicate!!) {
+                // 중복이 아닐 경우 회원가입 진행
+                // 회원가입창으로 이동
+                val bundle = Bundle().apply {
+                    putString("email", user.email)
+                    putString("nickname", user.displayName)
+                    putString("social", "google")
+                }
+                val joinFragment = JoinFragment().apply {
+                    arguments = bundle
+                }
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.activityLoginFragmentContainer, joinFragment)
+                    .addToBackStack(null)
+                    .commit()
+            } else {
+                // 중복일 경우 로그인 처리
+                // 로그인 처리
+//                handleLoginAttempt(user.email!!, "")
+                Toast.makeText(requireContext(), "구글 로그인 처리", Toast.LENGTH_SHORT).show()
+            }   
+
+
         } else {
             Toast.makeText(requireContext(), "Firebase 인증 실패", Toast.LENGTH_SHORT).show()
         }
