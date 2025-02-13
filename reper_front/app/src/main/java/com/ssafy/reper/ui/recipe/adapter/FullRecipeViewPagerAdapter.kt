@@ -16,7 +16,8 @@ import com.ssafy.reper.data.dto.OrderDetail
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentFullRecipeItemBinding
 
-class FullRecipeViewPagerAdapter(var recipeList: List<Recipe>,var whereAmICame: Int, var customList: MutableList<String>, var favoriteRecipeList: List<FavoriteRecipe>?, var itemClickListener: ItemClickListener) : RecyclerView.Adapter<FullRecipeViewPagerAdapter.FullRecipeViewHolder>() {
+private const val TAG = "FullRecipeViewPagerAdap_정언"
+class FullRecipeViewPagerAdapter(var recipeList: MutableList<Recipe>,var whereAmICame: Int, var customList: MutableList<String>, var favoriteRecipeList: List<FavoriteRecipe>?, var itemClickListener: ItemClickListener) : RecyclerView.Adapter<FullRecipeViewPagerAdapter.FullRecipeViewHolder>() {
     private lateinit var fullRecipeListAdapter: FullRecipeListAdapter
     inner class FullRecipeViewHolder(private val binding: FragmentFullRecipeItemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bindInfo(position: Int) {
@@ -55,7 +56,6 @@ class FullRecipeViewPagerAdapter(var recipeList: List<Recipe>,var whereAmICame: 
                     fullrecipeFmTvNote.visibility = View.GONE
                     textView11.visibility = View.GONE
 
-
                     // 즐겨찾기 상태 설정
                     val isFavorite = favoriteRecipeList?.any { it.recipeId == item.recipeId } ?: false
                     fullrecipeFmIvLineheart.visibility = if (isFavorite) View.GONE else View.VISIBLE
@@ -63,15 +63,10 @@ class FullRecipeViewPagerAdapter(var recipeList: List<Recipe>,var whereAmICame: 
 
                     // 즐겨찾기 버튼 클릭 이벤트
                     fullrecipeFmBtnHeart.setOnClickListener {
+                        val isFavorite = favoriteRecipeList?.any { it.recipeId == item.recipeId } ?: false
+                        fullrecipeFmIvLineheart.visibility = if (isFavorite) View.GONE else View.VISIBLE
+                        fullrecipeFmIvFullheart.visibility = if (isFavorite) View.VISIBLE else View.GONE
                         itemClickListener.onHeartClick(item.recipeId, isFavorite)
-                        if(isFavorite){
-                            fullrecipeFmIvFullheart.visibility = View.GONE
-                            fullrecipeFmIvLineheart.visibility = View.VISIBLE
-                        }
-                        else{
-                            fullrecipeFmIvFullheart.visibility = View.VISIBLE
-                            fullrecipeFmIvLineheart.visibility = View.GONE
-                        }
                     }
 
                     // ICE/HOT 버튼 설정

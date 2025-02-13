@@ -304,6 +304,7 @@ class AllRecipeFragment : Fragment() {
             }
 
             mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner) {
+                Log.d(TAG, "favoriteRecipeList: ")
                 allRecipeListAdapter.favoriteRecipeList = it
                 adapter = allRecipeListAdapter
             }

@@ -91,6 +91,7 @@ class RecipeViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 recipeService.likeRecipe(userId, recipeId)
+                Log.d(TAG, "likeRecipe: ${recipeId}")
             }
             catch (e:Exception){
                 Log.d(TAG, "likeRecipe :error: ${e}")
@@ -102,6 +103,7 @@ class RecipeViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 recipeService.unLikeRecipe(userId, recipeId)
+                Log.d(TAG, "unLikeRecipe: ${recipeId}")
             }
             catch (e:Exception){
                 Log.d(TAG, "unLikeRecipe : error: ${e.message.toString()}")

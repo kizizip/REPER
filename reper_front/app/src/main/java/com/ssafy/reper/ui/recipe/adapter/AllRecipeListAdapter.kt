@@ -24,7 +24,7 @@ class AllRecipeListAdapter (var recipeList:MutableList<Recipe>, var favoriteReci
             binding.alllrecipeRvItemIvFullheart.visibility= View.GONE
 
             for(favorite in favoriteRecipeList){
-                if(item.recipeId == favorite.recipeId){
+                if(item.recipeName == favorite.recipeName){
                     binding.allrecipeRvItemIvLineheart.visibility = View.GONE
                     binding.alllrecipeRvItemIvFullheart.visibility= View.VISIBLE
                 }
