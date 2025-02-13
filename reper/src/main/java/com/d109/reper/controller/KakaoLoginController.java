@@ -10,7 +10,6 @@ import com.d109.reper.service.KakaoApiService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
