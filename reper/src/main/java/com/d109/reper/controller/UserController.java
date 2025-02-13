@@ -205,7 +205,6 @@ public class UserController {
         }
     }
 
-
     @PostMapping("/cookie/{email}")
     @Operation(summary = "구글 로그인 성공시 cookie를 내려보냅니다.")
     public ResponseEntity<?> googleCookie(@PathVariable String email, HttpServletResponse response) {
@@ -237,6 +236,19 @@ public class UserController {
     }
 
 
+    @GetMapping("/{email}/kakao")
+    @Operation(summary = "해당 계정으로 kakao 소셜 가입이 되어있는지를 boolean타입으로 반환합니다.")
+    public boolean kakaoJoinOrNot(@PathVariable String email) {
+        boolean result = userService.findKakaoJoin(email);
+        return result;
+    }
+
+    @GetMapping("/{email}/google")
+    @Operation(summary = "해당 계정으로 google 소셜 가입이 되어있는지를 boolean타입으로 반환합니다.")
+    public boolean googleJoinOrNot(@PathVariable String email) {
+        boolean result = userService.findGoogleJoin(email);
+        return result;
+    }
 
 
     // 로그인 api에서 예시 request를 보여주기 위한 형식적 DTO

@@ -111,7 +111,7 @@ public class UserService {
     public boolean updateKakaoJoin(Long userId) {
         try {
             User user = userRepository.findByUserId(userId)
-                    .orElseThrow(() -> new NoSuchElementException("UserNotFound"));
+                    .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
 
             user.setKakao(true);
             userRepository.save(user);
@@ -125,7 +125,7 @@ public class UserService {
     public boolean updateGoogleJoin(Long userId) {
         try {
             User user = userRepository.findByUserId(userId)
-                    .orElseThrow(() -> new NoSuchElementException("UserNotFound"));
+                    .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
 
             user.setGoogle(true);
             userRepository.save(user);
@@ -160,5 +160,22 @@ public class UserService {
         } else {
             return false;
         }
+    }
+
+
+    // 카카오 가입 여부 판단
+    public boolean findKakaoJoin(String email) {
+        boolean result = userRepository.findKakaoByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+
+        return result;
+    }
+
+    // 구글 가입 여부 판단
+    public boolean findGoogleJoin(String email) {
+        boolean result = userRepository.findGoogleByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+
+        return result;
     }
 }
