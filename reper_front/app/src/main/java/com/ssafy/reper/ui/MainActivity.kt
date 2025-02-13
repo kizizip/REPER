@@ -2,14 +2,18 @@ package com.ssafy.reper.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.PackageManagerCompat
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -36,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     private val noticeViewModel: NoticeViewModel by viewModels()
     private val bossViewModel: BossViewModel by viewModels()
     private val fcmViewModel:FcmViewModel by viewModels()
+    private val CAMERA_PERMISSION_REQUEST_CODE = 1001
 
     lateinit var sharedPreferencesUtil: SharedPreferencesUtil
 
@@ -121,7 +126,32 @@ class MainActivity : AppCompatActivity() {
             Log.d("FCMTOKEN", token)
         }
 
+        checkCameraPermission()
 
+
+    }
+
+    private fun checkCameraPermission() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(android.Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
+        } else {
+            // 카메라 권한이 있다면
+            Log.d(TAG, "checkCameraPermission: 카메라 권한 있음")
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 권한이 승인되면 Fragment1로 이동
+//                openFragment1()
+                Log.d(TAG, "onRequestPermissionsResult: 권한 승인됨.")
+            } else {
+                // 권한 거부 시 처리 (예: 알림 표시)
+                Toast.makeText(this, "원활한 기능을 위해 카메라 권한을 허용해 주세요.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // FCM 토큰을 비동기적으로 가져오는 함수

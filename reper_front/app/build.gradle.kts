@@ -127,4 +127,15 @@ dependencies {
     // Google Play Services
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
+    // CameraX
+    implementation("androidx.camera:camera-core:1.3.0")
+    implementation("androidx.camera:camera-camera2:1.3.0")
+    implementation("androidx.camera:camera-lifecycle:1.3.0")
+    implementation("androidx.camera:camera-view:1.3.0")
+
+    // MediaPipe
+    implementation("com.google.mediapipe:tasks-vision:0.10.20")
+
+    // WindowManager
+    implementation("androidx.window:window:1.1.0")
 }

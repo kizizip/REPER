@@ -11,8 +11,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.Toast
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.mediapipe.framework.image.BitmapImageBuilder
+import com.google.mediapipe.tasks.core.BaseOptions
+import com.google.mediapipe.tasks.vision.gesturerecognizer.GestureRecognizer
+import com.google.mediapipe.tasks.vision.gesturerecognizer.GestureRecognizerResult
 import com.ssafy.reper.R
 import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Order
@@ -21,6 +33,10 @@ import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentStepRecipeBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.util.ViewModelSingleton
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import android.Manifest
+import android.content.pm.PackageManager
 
 private const val TAG = "StepRecipeFragment_정언"
 class StepRecipeFragment : Fragment() {
@@ -43,6 +59,11 @@ class StepRecipeFragment : Fragment() {
 
     // Bundle 변수
     var whereAmICame = -1
+
+    // 모션인식을 위한 카메라 제공자, 실행자 초기화
+    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+    private lateinit var cameraExecutor: ExecutorService
+    private lateinit var gestureRecognizer: GestureRecognizer
 
     private lateinit var mainActivity: MainActivity
 
@@ -113,7 +134,25 @@ class StepRecipeFragment : Fragment() {
             order = mainViewModel.order.value!!
             orderDetails = order.orderDetails
         }
+
+        // 카메라 권한 체크 추가
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED) {
+            // 권한이 있으면 카메라 설정
+            cameraExecutor = Executors.newSingleThreadExecutor()
+            setupGestureRecognizer()
+            setupCamera()
+        } else {
+            // 권한이 없으면 요청
+            requestPermissions(
+                arrayOf(Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST_CODE
+            )
+        }
     }
+
     //캡쳐방지 코드입니다! 메시지 내용은 수정불가능,, 핸드폰내에 저장된 메시지가 뜨는 거라고 하네요
     override fun onResume() {
         Log.d(TAG, "onResume: ")
@@ -133,6 +172,8 @@ class StepRecipeFragment : Fragment() {
     override fun onDestroyView() {
         Log.d(TAG, "onDestroyView: ")
         super.onDestroyView()
+        cameraExecutor.shutdown()
+        gestureRecognizer.close()
         _stepRecipeBinding = null
     }
 
@@ -352,4 +393,178 @@ class StepRecipeFragment : Fragment() {
         }
     }
 
+    // 모션인식을 위한 코드
+
+    // 제스처 인식기 설정
+    private fun setupGestureRecognizer() {
+        Log.d(TAG, "setupGestureRecognizer: ")
+
+        // 제스처 인식 모델 로딩
+        val options = GestureRecognizer.GestureRecognizerOptions.builder()
+            .setBaseOptions(
+                BaseOptions.builder()
+                    .setModelAssetPath("gesture_recognizer.task") // 모델 경로 설정
+                    .build()
+            )
+            .build()
+
+        gestureRecognizer = GestureRecognizer.createFromOptions(requireContext(), options)
+    }
+
+    // 카메라 설정
+    private fun setupCamera() {
+        Log.d(TAG, "setupCamera: ")
+
+        cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
+
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+
+            // 이미지 분석기 설정
+            val imageAnalyzer = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+                .also {
+                    it.setAnalyzer(cameraExecutor, ImageAnalyzer(gestureRecognizer))
+                }
+
+            try {
+                // 모든 카메라 리소스를 해제하고 새로 바인딩
+                cameraProvider.unbindAll()
+                // preview 제거하고 imageAnalyzer만 사용
+                cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalyzer)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error binding camera", e)
+            }
+        }, ContextCompat.getMainExecutor(requireContext()))
+    }
+
+    // 이미지 분석 클래스
+    private inner class ImageAnalyzer(
+        private val recognizer: GestureRecognizer
+    ) : ImageAnalysis.Analyzer {
+        private var gestureStartTime: Long = 0
+        private var currentGesture: String? = null
+        private val GESTURE_DURATION_THRESHOLD = 500 // 0.5초
+
+        override fun analyze(imageProxy: ImageProxy) {
+            // 이미지 회전 처리를 위한 Matrix 생성
+            val matrix = android.graphics.Matrix().apply {
+                // 카메라에서 받은 이미지를 회전
+                postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
+
+                // 전면 카메라이므로 이미지 좌우 반전
+                postScale(
+                    -1f, 1f, imageProxy.width.toFloat(), imageProxy.height.toFloat()
+                )
+            }
+
+            // ImageProxy를 Bitmap으로 변환
+            val bitmap = imageProxy.toBitmap()
+
+            // 회전된 비트맵 생성
+            val rotatedBitmap = android.graphics.Bitmap.createBitmap(
+                bitmap,
+                0,
+                0,
+                bitmap.width,
+                bitmap.height,
+                matrix,
+                true
+            )
+
+            // 회전된 비트맵으로 MPImage 생성
+            val mpImage = BitmapImageBuilder(rotatedBitmap).build()
+
+            // 제스처 인식
+            val result: GestureRecognizerResult = recognizer.recognize(mpImage)
+
+            if (result.gestures().isNotEmpty()) {
+                val gesture = result.gestures().first().firstOrNull()
+
+                if (gesture != null) {
+                    val gestureName = gesture.categoryName()
+                    Log.d(TAG, "analyze: $gestureName")
+
+                    // 새로운 제스처 감지시
+                    if (currentGesture != gestureName) {
+                        currentGesture = gestureName
+                        gestureStartTime = System.currentTimeMillis()
+                    } else {
+                        // 같은 제스처 지속시 -> 지속시간 체크
+                        val gestureDuration = System.currentTimeMillis() - gestureStartTime
+                        if (gestureDuration >= GESTURE_DURATION_THRESHOLD) {
+                            // 최소시간 이상 지속된 경우에만 이동
+                            when (gestureName) {
+                                "Thumb_Up" -> {
+                                    requireActivity().runOnUiThread {
+                                        if (isAdded) {
+                                            if (!(nowRecipeIdx >= totalRecipes - 1 && nowStepIdx >= totalSteps - 1)) {
+                                                nextEvent()
+                                                // 제스처 초기화
+                                                currentGesture = null
+                                                gestureStartTime = 0
+                                            }
+                                        }
+                                    }
+                                }
+                                "Closed_Fist" -> {
+                                    if (isAdded) {
+                                        requireActivity().runOnUiThread {
+                                            if (!(nowRecipeIdx == 0 && nowStepIdx == -1)) {
+                                                prevEvent()
+                                                // 제스처 초기화
+                                                currentGesture = null
+                                                gestureStartTime = 0
+                                            }
+                                        }
+                                    }
+                                }
+                                else -> {
+                                    Log.d(TAG, "알 수 없는 제스처")
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // 제스처가 감지되지 않으면 초기화
+                currentGesture = null
+                gestureStartTime = 0
+            }
+
+            imageProxy.close()
+            bitmap.recycle()
+            rotatedBitmap.recycle()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            CAMERA_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && 
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // 권한이 승인되면 카메라 설정
+                    setupGestureRecognizer()
+                    setupCamera()
+                } else {
+                    // 권한이 거부되면 사용자에게 알림
+                    Toast.makeText(
+                        requireContext(),
+                        "카메라 권한이 필요합니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    companion object {
+        private const val CAMERA_PERMISSION_REQUEST_CODE = 1001
+    }
 }
