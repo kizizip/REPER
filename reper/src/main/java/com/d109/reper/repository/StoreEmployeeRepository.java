@@ -4,6 +4,8 @@ import com.d109.reper.domain.Store;
 import com.d109.reper.domain.StoreEmployee;
 import com.d109.reper.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,6 +21,10 @@ public interface StoreEmployeeRepository extends JpaRepository<StoreEmployee, Lo
 
     // 특정 알바생의 isEmployed = ture 인 storeEmployee의 storeEmployee들 조회
     List<StoreEmployee> findByUserAndIsEmployedTrue(User user);
+
+    // 매장 ID와 근무 상태를 기반으로 근무 중인 직원 조회
+    @Query("SELECT se FROM StoreEmployee se WHERE se.store = :store AND se.isEmployed = :isEmployed")
+    List<StoreEmployee> findActiveEmployees(@Param("store") Store store, @Param("isEmployed") boolean isEmployed);
 
 }
 

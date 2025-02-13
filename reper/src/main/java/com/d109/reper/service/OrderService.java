@@ -114,8 +114,8 @@ public class OrderService {
     }
 
     // 주문이 1분에 하나씩 생기게 스케쥴링
-    @Scheduled(fixedDelay = 60000)
 //    @Scheduled(fixedDelay = 10000) // 테스트용 10초
+    @Scheduled(fixedDelay = 60000)
     public void createOrder1Min() {
         createRandomOrder();
         System.out.println("새로운 주문 생성" + LocalDateTime.now());

@@ -105,26 +105,20 @@ public class FcmMessageService {
         }
     }
 
+    // orderFCM 토픽 기반으로 FCM 메시지 보내기
+    public void sendToTopic(String topic, String title, String body) {
+        initialize();  // 액세스 토큰 초기화
 
-    //
-//    public void sendNotificationToStore(Long storeId, String message) {
-//        String topic = "store_" + storeId;
-//
-//        Notification notification = Notification.builder()
-//                .setTitle("주문 상태 변경 알림")
-//                .setBody(message)
-//                .build();
-//
-//        Message firebaseMessage = Message.builder()
-//                .setTopic(topic)
-//                .setNotification(notification)
-//                .build();
-//
-//        try {
-//            String response = FirebaseMessaging.getInstance().send(firebaseMessage);
-//            System.out.println("FCM 메시지 전송 완료: " + response);
-//        } catch (FirebaseMessagingException e) {
-//            e.printStackTrace();
-//        }
-//    }
+        FcmMessageResponseDto messageDto = FcmMessageResponseDto.builder()
+                .message(FcmMessageResponseDto.Message.builder()
+                        .token("/topics/" + topic)  // 토픽 기반 전송
+                        .notification(FcmMessageResponseDto.Notification.builder()
+                                .title(title)
+                                .body(body)
+                                .build())
+                        .build())
+                .build();
+
+        sendFcmNotification(messageDto);
+    }
 }
