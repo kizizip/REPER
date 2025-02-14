@@ -155,11 +155,14 @@ class HomeFragment : Fragment() {
 
         binding.fragmentHomeRvAnnouncement.adapter = notiAdapter
 
-        noticeViewModel.noticeList.observe(viewLifecycleOwner, { newList ->
+        noticeViewModel.noticeList.observe(viewLifecycleOwner) { fullList ->
+            // 상위 3개만 선택
+            val latestNotices = fullList.take(3)
+            
             // 기존 데이터를 덮어쓰지 않고 새로운 리스트를 어댑터에 설정
-            notiAdapter.noticeList = newList
-            notiAdapter.notifyDataSetChanged() // 리스트 업데이트
-        })
+            notiAdapter.noticeList = latestNotices
+            notiAdapter.notifyDataSetChanged()
+        }
     }
 
 
@@ -167,9 +170,20 @@ class HomeFragment : Fragment() {
         Log.d(TAG, "initSpinner: Starting spinner initialization")
         val spinner = binding.fragmentHomeStorenameSpinner
 
-        val observeStoreList: (List<Any>) -> Unit = { storeList ->
-            Log.d(TAG, "observeStoreList: Received store list, size=${storeList.size}")
-
+        val observeStoreList: (List<Any>) -> Unit = { originalStoreList ->
+            Log.d(TAG, "observeStoreList: Received store list, size=${originalStoreList.size}")
+            
+            // storeId로 정렬된 리스트 생성
+            val storeList = when {
+                originalStoreList.isNotEmpty() && originalStoreList[0] is SearchedStore -> {
+                    originalStoreList.sortedBy { (it as SearchedStore).storeId }
+                }
+                originalStoreList.isNotEmpty() && originalStoreList[0] is StoreResponseUser -> {
+                    originalStoreList.sortedBy { (it as StoreResponseUser).storeId }
+                }
+                else -> originalStoreList
+            }
+               
             // 기본값으로 "등록된 가게가 없습니다" 설정
             val storeNames = mutableListOf("등록된 가게가 없습니다")
             val storeIds = mutableListOf(0)

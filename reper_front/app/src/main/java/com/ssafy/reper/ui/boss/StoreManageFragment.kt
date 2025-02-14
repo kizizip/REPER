@@ -15,9 +15,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.databinding.FragmentStoreManageBinding
+import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.StoreAdapter
 
@@ -29,6 +31,7 @@ class StoreManageFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var storeAdapter: StoreAdapter
     private val bossViewModel: BossViewModel by activityViewModels()
+    private val fcmViewModel: FcmViewModel by activityViewModels()
     var userId = 1
     var storeId = 1
     private var storeAddDialog: AlertDialog? = null
@@ -163,6 +166,7 @@ class StoreManageFragment : Fragment() {
             Log.d(TAG, "showDialog: $deleteStoreId")
             dialog.dismiss()
             Toast.makeText(requireContext(), "가게 삭제 완료", Toast.LENGTH_SHORT).show()
+            fcmViewModel.deleteStoreToken(deleteStoreId)
         }
         dialog.show()
     }
