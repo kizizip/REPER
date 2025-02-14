@@ -24,11 +24,11 @@ interface FcmService {
                             @Query("targetFragment") targetFragment: String,@Query("requestId") requestId: Int)
 
    //가게직원 모두의 토큰 삭제
-    @DELETE("fcm/sendToStore/{storeId}")
-    suspend fun deleteStoreToken()
+    @DELETE("token/deleteTokensForStore/{storeId}")
+    suspend fun deleteStoreToken(@Path("storeId") storeId: Int)
 
     //한 직원의 토큰 삭제-->로그 아웃, 권한 삭제..., 알림 끄기
-    @DELETE("fcm/sendToStore/{userId}")
-    suspend fun deleteSUserToken()
+    @DELETE("token/deleteTokensForUser/{userId}")
+    suspend fun deleteSUserToken(@Path("userId") userId: Int)
 
 }

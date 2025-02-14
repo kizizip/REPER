@@ -9,9 +9,12 @@ import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeStep
+import com.ssafy.reper.data.dto.User
+import com.ssafy.reper.data.dto.UserInfo
 import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.data.remote.RetrofitUtil.Companion.storeService
 import com.ssafy.reper.data.remote.RetrofitUtil.Companion.recipeService
+import com.ssafy.reper.data.remote.RetrofitUtil.Companion.userService
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -25,6 +28,9 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
 
     private val _selectedRecipeList = MutableLiveData<MutableList<Recipe>?>(null)
     val selectedRecipeList: LiveData<MutableList<Recipe>?> = _selectedRecipeList
+
+    private val _orderRecipeList = MutableLiveData<MutableList<Recipe>?>(null)
+    val orderRecipeList: LiveData<MutableList<Recipe>?> = _orderRecipeList
 
     private val _nowISeeStep = MutableLiveData<Int?>(null)
     val nowISeeStep: LiveData<Int?> = _nowISeeStep
@@ -42,6 +48,26 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
         MutableLiveData<MutableList<FavoriteRecipe>>()
     val favoriteRecipeList: LiveData<MutableList<FavoriteRecipe>>
         get() = _favoriteRecipeList
+
+    private val _userInfo = MutableLiveData<User?>(null)
+    val userInfo: LiveData<User?> = _userInfo
+
+    fun setOrderRecipeList(recipeList: MutableList<Recipe>){
+        _orderRecipeList.value = recipeList
+    }
+
+    fun setUserInfo(userId: Int){
+        viewModelScope.launch {
+            var data: User
+            try {
+                data = userService.getUserInfo(userId)
+                _userInfo.value = data
+            }
+            catch (e:Exception){
+                Log.d(TAG, "getUserInfo: ${e}")
+            }
+        }
+    }
 
     fun getLikeRecipes(storeId:Int, userId:Int){
         viewModelScope.launch {

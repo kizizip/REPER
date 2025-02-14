@@ -51,12 +51,12 @@ class FcmViewModel:ViewModel() {
         }
     }
 
-    fun  deleteUserToken(uerId : Int){
+    fun  deleteUserToken(userId : Int){
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.fcmService.deleteSUserToken()
+                RetrofitUtil.fcmService.deleteSUserToken(userId)
             }.onSuccess {
-
+                Log.d(TAG, "deleteUserToken: ${userId}")
             }.onFailure {
                 Log.d(TAG, "deleteUserToken: ${it.message}")
             }
@@ -67,9 +67,9 @@ class FcmViewModel:ViewModel() {
     fun  deleteStoreToken(storeId: Int){
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.fcmService.deleteStoreToken()
+                RetrofitUtil.fcmService.deleteStoreToken(storeId)
             }.onSuccess {
-
+                Log.d(TAG, "deleteStoreToken: ${storeId}")
             }.onFailure {
                 Log.d(TAG, "deleteUserToken: ${it.message}")
             }

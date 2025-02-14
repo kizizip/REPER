@@ -2,6 +2,7 @@ package com.d109.reper.repository;
 
 
 import com.d109.reper.domain.Recipe;
+import com.d109.reper.domain.RecipeType;
 import com.d109.reper.elasticsearch.RecipeSearchRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,21 @@ public class RecipeRepository {
         Recipe recipe = em.find(Recipe.class, recipeId);
         if (recipe != null) {
             em.remove(recipe);
+        }
+    }
+
+    // 특정 가게의 특정 레시피 삭제
+    public void deleteByStoreAndRecipeName(Long storeId, String recipeName, RecipeType recipeType) {
+        // 해당 레시피 조회
+        List<Recipe> recipe = em.createQuery(
+                "select r from Recipe  r where r.store.storeId = :storeId and r.recipeName = :recipeName and r.type = :recipeType", Recipe.class)
+                .setParameter("storeId", storeId)
+                .setParameter("recipeName", recipeName)
+                .setParameter("recipeType", recipeType)
+                .getResultList();
+
+        if (!recipe.isEmpty()) {
+            em.remove(recipe.get(0));
         }
     }
 

@@ -80,7 +80,7 @@ class SharedPreferencesUtil(context: Context) {
     companion object {
         private const val SHARED_PREFERENCES_NAME = "reper_preference"
         private const val KEY_USER_COOKIE = "user_cookie"
-        private const val STORE_ID = "1"
+        private const val STORE_ID = "0"
         private const val KEY_COOKIE_EXPIRY = "cookie_expiry"
     }
 

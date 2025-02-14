@@ -1,6 +1,7 @@
 package com.ssafy.reper.ui
 
 
+import MainActivityViewModel
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -33,6 +34,7 @@ import com.ssafy.reper.ui.boss.BossViewModel
 import com.ssafy.reper.ui.boss.NoticeViewModel
 import com.ssafy.reper.ui.home.StoreViewModel
 import com.ssafy.reper.ui.order.OrderViewModel
+import com.ssafy.reper.util.ViewModelSingleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,7 +55,9 @@ class MainActivity : AppCompatActivity() {
     private val bossViewModel: BossViewModel by viewModels()
     private val fcmViewModel:FcmViewModel by viewModels()
     private val CAMERA_PERMISSION_REQUEST_CODE = 1001
+    private val MICROPHONE_PERMISSION_REQUEST_CODE = 1002  // 마이크 권한 요청 코드 추가
 
+    private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val storeViewModel: StoreViewModel by viewModels()
     lateinit var sharedPreferencesUtil: SharedPreferencesUtil
     var sharedUserId = 0
@@ -76,14 +80,14 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
-
         enableEdgeToEdge()
-
         super.onCreate(savedInstanceState)
 
         sharedPreferencesUtil = SharedPreferencesUtil(applicationContext)
         sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
         sharedStoreId = sharedPreferencesUtil.getStoreId()
+
+        mainViewModel.setUserInfo(sharedUserId)
 
         // View Binding 초기화
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -161,6 +165,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("FCMTOKEN", token)
         }
 
+        // 권한 체크 시작 - 카메라 권한부터 확인
         checkCameraPermission()
 
 
@@ -192,25 +197,80 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // 카메라 권한 확인 함수
     private fun checkCameraPermission() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(android.Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // 카메라 권한이 없는 경우 권한 요청
+            requestPermissions(
+                arrayOf(android.Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST_CODE
+            )
         } else {
-            // 카메라 권한이 있다면
+            // 이미 카메라 권한이 있는 경우 마이크 권한 확인으로 진행
             Log.d(TAG, "checkCameraPermission: 카메라 권한 있음")
+            checkMicrophonePermission()
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    // 마이크 권한 확인 함수
+    private fun checkMicrophonePermission() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // 마이크 권한이 없는 경우 권한 요청
+            requestPermissions(
+                arrayOf(android.Manifest.permission.RECORD_AUDIO),
+                MICROPHONE_PERMISSION_REQUEST_CODE
+            )
+        } else {
+            // 이미 마이크 권한이 있는 경우
+            Log.d(TAG, "checkMicrophonePermission: 마이크 권한 있음")
+        }
+    }
+
+    // 권한 요청 결과 처리
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // 권한이 승인되면 Fragment1로 이동
-//                openFragment1()
-                Log.d(TAG, "onRequestPermissionsResult: 권한 승인됨.")
-            } else {
-                // 권한 거부 시 처리 (예: 알림 표시)
-                Toast.makeText(this, "원활한 기능을 위해 카메라 권한을 허용해 주세요.", Toast.LENGTH_SHORT).show()
+        when (requestCode) {
+            CAMERA_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // 카메라 권한이 승인된 경우
+                    Log.d(TAG, "onRequestPermissionsResult: 카메라 권한 승인됨")
+                    // 카메라 권한 승인 후 마이크 권한 확인
+                    checkMicrophonePermission()
+                } else {
+                    // 카메라 권한이 거부된 경우
+                    Toast.makeText(
+                        this,
+                        "원활한 기능을 위해 카메라 권한을 허용해 주세요.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    // 카메라 권한이 거부되어도 마이크 권한 확인
+                    checkMicrophonePermission()
+                }
+            }
+            MICROPHONE_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // 마이크 권한이 승인된 경우
+                    Log.d(TAG, "onRequestPermissionsResult: 마이크 권한 승인됨")
+                } else {
+                    // 마이크 권한이 거부된 경우
+                    Toast.makeText(
+                        this,
+                        "원활한 기능을 위해 마이크 권한을 허용해 주세요.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }

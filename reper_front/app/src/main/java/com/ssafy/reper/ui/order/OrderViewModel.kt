@@ -42,8 +42,8 @@ class OrderViewModel : ViewModel() {
                         }
                     }
                     
-                    _orderList.postValue(orderList)
-                    _recipeNameList.postValue(recipeList)
+                    _orderList.value = orderList
+                    _recipeNameList.value = recipeList
                     
                     Log.d(TAG, "getOrders success: orders=${orderList.size}, recipes=${recipeList.size}")
                 } else {

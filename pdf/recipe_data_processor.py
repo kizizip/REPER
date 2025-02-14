@@ -281,7 +281,9 @@ def upload_file():
         
         # GPT API로 JSON 구조 생성
         structured_json = process_recipe_text(text)
-        data = json.loads(structured_json)
+        data = json.loads(structured_json) # JSON 문자열을 -> python 딕셔너리로 변환
+        
+        recipe_cnt = len(data.get("recipes",  []))
         
         # 각 레시피 스텝에 대해 animationUrl 매핑 수행
         for recipe in data.get("recipes", []):
@@ -294,7 +296,8 @@ def upload_file():
         
         # 최종 JSON 데이터를 Spring Boot로 전송
         send_json_to_spring(data, store_id)
-        return jsonify(data)
+        return jsonify({"recipeCount" : recipe_cnt}), 200
+        # return jsonify(data)
     else:
         return jsonify({"error": "파일이 없습니다."}), 400
 

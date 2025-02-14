@@ -131,7 +131,6 @@ class MyPageFragment : Fragment() {
 
         // 첫 번째 그룹 (상단 프로필 영역) - 투명도로 페이드인
         val firstGroup = listOf(
-            binding.mypageFmBtnBell,
             binding.mypageFmTvYellow,
             binding.mypageFmTvName,
             binding.textView6,
@@ -192,40 +191,46 @@ class MyPageFragment : Fragment() {
     }
 
     private fun setupSpinner() {
-        val binding = _myPageBinding ?: return
-
-        // 가게 이름 Spinner 설정
         val spinner = myPageBinding.mypageFmSp
 
-        val observeStoreList: (List<Any>) -> Unit = { storeList ->
+        val observeStoreList: (List<Any>) -> Unit = { originalStoreList ->
+            // 먼저 리스트를 storeId 기준으로 정렬
+            val storeList = when {
+                originalStoreList.isNotEmpty() && originalStoreList[0] is SearchedStore -> {
+                    originalStoreList.sortedBy { (it as SearchedStore).storeId }
+                }
+                originalStoreList.isNotEmpty() && originalStoreList[0] is StoreResponseUser -> {
+                    originalStoreList.sortedBy { (it as StoreResponseUser).storeId }
+                }
+                else -> originalStoreList
+            }
+
             val storeNames: MutableList<String>
             val storeIds: MutableList<Int>
 
-            // OWNER와 USER의 Store DTO가 다르므로, 그에 맞게 처리
             if (storeList.isNotEmpty()) {
+                myPageBinding.mypageFmTvStoreNum.text = storeList.size.toString()
+                
                 when (val firstItem = storeList[0]) {
                     is SearchedStore -> {
-                        // SearchedStore DTO 처리
                         storeNames = storeList.map { (it as SearchedStore).storeName ?: "등록된 가게가 없습니다." }.toMutableList()
                         storeIds = storeList.map { (it as SearchedStore).storeId ?: 0}.toMutableList()
                     }
                     is StoreResponseUser -> {
-                        // StoreResponseUser DTO 처리
                         storeNames = storeList.map { (it as StoreResponseUser).name}.toMutableList()
                         storeIds = storeList.map { (it as StoreResponseUser).storeId }.toMutableList()
                     }
                     else -> {
-                        // 타입이 예상과 다르면 기본값 처리
                         storeNames = mutableListOf("등록된 가게가 없습니다.")
                         storeIds = mutableListOf(0)
                         sharedPreferencesUtil.setStoreId(0)
                     }
                 }
             } else {
-                // 리스트가 비어 있으면 기본값 처리
                 storeNames = mutableListOf("등록된 가게가 없습니다.")
                 storeIds = mutableListOf(0)
                 sharedPreferencesUtil.setStoreId(0)
+                myPageBinding.mypageFmTvStoreNum.text = "0"
             }
 
             // Adapter 설정
@@ -466,7 +471,7 @@ class MyPageFragment : Fragment() {
                 sharedPreferencesUtil.clearUserData()
 
                 Toast.makeText(requireContext(), "로그아웃 완료.", Toast.LENGTH_SHORT).show()
-
+                fcmViewModel.deleteUserToken(sharedPreferencesUtil.getUser().userId!!.toInt())
                 startActivity(Intent(mainActivity, LoginActivity::class.java))
                 mainActivity.finish()
                 dialog.dismiss()
