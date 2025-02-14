@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y mariadb-client && rm -rf /var/lib/apt/l
 
 # Jaso Analyzer 플러그인 추가 (필요한 경우)
 # Jaso Analyzer 플러그인 추가 (정확한 경로로 수정)
-COPY /home/ubuntu/docker/jaso-analyzer /usr/share/elasticsearch/plugins/jaso-analyzer
+COPY docker/jaso-analyzer /usr/share/elasticsearch/plugins/jaso-analyzer
 RUN ls -la /usr/share/elasticsearch/plugins/jaso-analyzer
 
 # gradle 빌드를 하면 build/libs 하위에 *.jar 생성됨. 해당 '*.jar'를 'app.jar'로 copy
