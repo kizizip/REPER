@@ -1,6 +1,7 @@
 package com.ssafy.reper.ui.home
 
 
+import MainActivityViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -15,7 +16,6 @@ import com.ssafy.reper.data.local.HomeBannerModel
 import com.ssafy.reper.data.local.HomeLikeRecipeModel
 import com.ssafy.reper.databinding.FragmentHomeBinding
 import com.ssafy.reper.ui.home.adapter.RVHomeBannerAdapter
-import com.ssafy.reper.ui.home.adapter.RVHomeLikeRecipeAdapter
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -23,6 +23,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
+import com.ssafy.reper.data.dto.Recipe
+import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.data.dto.SearchedStore
 import com.ssafy.reper.data.dto.StoreResponseUser
 import com.ssafy.reper.data.local.SharedPreferencesUtil
@@ -30,9 +32,11 @@ import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.BossViewModel
 import com.ssafy.reper.ui.boss.NoticeViewModel
 import com.ssafy.reper.ui.boss.adpater.NotiAdapter
+import com.ssafy.reper.ui.home.adapter.RVHomeLikeRecipeAdapter
 import com.ssafy.reper.ui.order.OrderViewModel
 import com.ssafy.reper.ui.order.adapter.HomeOrderAdatper
-import com.ssafy.reper.ui.order.adapter.OrderAdatper
+import com.ssafy.reper.ui.recipe.AllRecipeFragment
+import com.ssafy.reper.ui.recipe.RecipeViewModel
 
 
 private const val TAG = "HomeFragment_싸피"
@@ -52,7 +56,9 @@ class HomeFragment : Fragment() {
     private val bossViewModel: BossViewModel by activityViewModels()
     private val noticeViewModel: NoticeViewModel by activityViewModels()
     private val storeViewModel: StoreViewModel by activityViewModels()
-    private val viewModel: OrderViewModel by viewModels()
+    private val orderViewModel: OrderViewModel by viewModels()
+    private val recipeViewModel: RecipeViewModel by viewModels()
+    private val mainViewModel: MainActivityViewModel by viewModels()
 
     val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
         SharedPreferencesUtil(requireContext().applicationContext)
@@ -100,6 +106,7 @@ class HomeFragment : Fragment() {
         // 나머지 초기화
         initNotiAdater()
         initOrderAdapter("")
+        initFavoriteAdapter()
 
         // Home Banner 코드!!
         setupBannerItems()
@@ -116,14 +123,6 @@ class HomeFragment : Fragment() {
         }
 
 
-        val rvHomeLikeRecipe = binding.fragmentHomeRvLikeRecipe
-        val rvHomeLikeRecipeAdapter = RVHomeLikeRecipeAdapter(likeRecipeItems)
-
-        rvHomeLikeRecipe.adapter = rvHomeLikeRecipeAdapter
-        rvHomeLikeRecipe.layoutManager =
-            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-
-
         // 레시피 더 보러가기 클릭시
         binding.fragmentHomeLikeRecipeText.setOnClickListener {
             findNavController().navigate(R.id.allRecipeFragment)
@@ -131,6 +130,36 @@ class HomeFragment : Fragment() {
         }
 
 
+    }
+
+    private fun initFavoriteAdapter() {
+        mainViewModel.getLikeRecipes(sharedPreferencesUtil.getStoreId(), sharedPreferencesUtil.getUser().userId!!.toInt())
+
+        val rvHomeLikeRecipe = binding.fragmentHomeRvLikeRecipe
+        val adapter = RVHomeLikeRecipeAdapter(
+            mainViewModel.favoriteRecipeList,
+            viewLifecycleOwner
+        ) { favoriteRecipe ->
+            mainViewModel.clearData()
+            val bundle =Bundle().apply {
+                putInt("whereAmICame", 1)
+            }
+            recipeViewModel.getRecipe(favoriteRecipe.recipeId)
+            recipeViewModel.recipe.observe(viewLifecycleOwner){
+                val recipe = recipeViewModel.recipe.value
+
+                mainViewModel.setSelectedRecipes(mutableListOf(recipe!!))
+                Log.d(TAG, "initFavoriteAdapter: 보내질 레시피 ${mainViewModel.selectedRecipeList.value}")
+                findNavController().navigate(R.id.fullRecipeFragment, bundle)
+            }
+        }
+        
+        rvHomeLikeRecipe.adapter = adapter
+        rvHomeLikeRecipe.layoutManager = LinearLayoutManager(
+            context, 
+            LinearLayoutManager.HORIZONTAL, 
+            false
+        )
     }
 
 
@@ -255,7 +284,7 @@ class HomeFragment : Fragment() {
                             selectedStoreId,
                             sharedPreferencesUtil.getUser().userId!!.toInt()
                         )
-                        viewModel.getOrders()
+                        orderViewModel.getOrders()
                     }
                     Log.d(TAG, "onItemSelected: position=$position, storeId=$selectedStoreId")
                 }
@@ -294,11 +323,11 @@ class HomeFragment : Fragment() {
 
         binding.fragmentHomeRvOrder.adapter = orderAdapter
 
-        viewModel.getOrders()
+        orderViewModel.getOrders()
 
         // orderList와 recipeNameList를 동시에 관찰
-        viewModel.orderList.observe(viewLifecycleOwner) { orderList ->
-            viewModel.recipeNameList.value?.let { recipeList ->
+        orderViewModel.orderList.observe(viewLifecycleOwner) { orderList ->
+            orderViewModel.recipeNameList.value?.let { recipeList ->
                 val currentStoreId = sharedPreferencesUtil.getStoreId()
                 // 현재 선택된 가게의 완료되지 않은 주문만 필터링
                 val activeOrders = orderList.filter { order ->

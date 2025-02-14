@@ -54,6 +54,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="36dp"
+            android:paddingEnd="8dp"
+            android:clipToPadding="false"
             android:scrollbarFadeDuration="0"
             android:scrollbarThumbVertical="@drawable/scroll_bar"
             android:scrollbars="vertical"
@@ -63,5 +65,6 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </FrameLayout>
