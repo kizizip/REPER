@@ -94,11 +94,11 @@ class SharedPreferencesUtil(context: Context) {
     }
 
     fun getStoreId() :Int{
-        return preferences.getInt(STORE_ID, 1)
+        return preferences.getInt(STORE_ID, 0)
     }
 
-    fun setStoreId(storeId: Int){
-        preferences.edit().putInt(STORE_ID, storeId).apply()
+    fun setStoreId(storeId: Int?){
+        storeId?.let { preferences.edit().putInt(STORE_ID, it).apply() }
     }
 
     //사용자 정보 저장
@@ -118,22 +118,6 @@ class SharedPreferencesUtil(context: Context) {
             role = preferences.getString("role", ""),
         )
     }
-
-
-    //스토어 정보 받아 오기
-    fun addStore(storeId: Int) {
-        val editor = preferences.edit()
-        editor.putInt("storeId", storeId)
-        editor.apply()
-        Log.d("SharedPreferencesUtil", "Store ID saved: $storeId")
-    }
-
-    fun getStore(): Int {
-        val storeId = preferences.getInt("storeId", 0)
-        Log.d("SharedPreferencesUtil", "Store ID retrieved: $storeId")
-        return storeId
-    }
-
 
     fun addStateLoad(state: String?) {
         val editor = preferences.edit()

@@ -23,17 +23,20 @@ class FcmViewModel:ViewModel() {
     }
 
 
-    fun sendToUserFCM(userId: Int, title: String, content: String, targetFragment: String, requestId: Int){
+    fun sendToUserFCM(userId: Int, title: String, content: String, targetFragment: String, requestId: Int):String{
+       var result = "실패"
         viewModelScope.launch{
             runCatching {
                 RetrofitUtil.fcmService.sendToUser(userId, title, content, targetFragment, requestId)
                 Log.d(TAG, "sendToUserFCM: 함수실행중")
             }.onSuccess {
                 Log.d(TAG, "sendToUserFCM: ${title}")
+               result = "성공"
             }.onFailure {
                 Log.d(TAG, "sendToUserFCM: ${it.message}")
             }
         }
+        return result
     }
 
     fun sendToStoreFCM(storeId: Int, title: String, content: String, targetFragment: String, requestId: Int) {
@@ -44,6 +47,31 @@ class FcmViewModel:ViewModel() {
                 Log.d(TAG, "sendToStoreFCM:성공공다리 ${title}")
             }.onFailure {
                 Log.d(TAG, "sendToStoreFCM: ${it.message}")
+            }
+        }
+    }
+
+    fun  deleteUserToken(uerId : Int){
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.fcmService.deleteSUserToken()
+            }.onSuccess {
+
+            }.onFailure {
+                Log.d(TAG, "deleteUserToken: ${it.message}")
+            }
+        }
+    }
+
+
+    fun  deleteStoreToken(storeId: Int){
+        viewModelScope.launch {
+            runCatching {
+                RetrofitUtil.fcmService.deleteStoreToken()
+            }.onSuccess {
+
+            }.onFailure {
+                Log.d(TAG, "deleteUserToken: ${it.message}")
             }
         }
     }

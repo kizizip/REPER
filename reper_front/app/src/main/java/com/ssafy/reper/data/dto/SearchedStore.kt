@@ -4,3 +4,4 @@ data class SearchedStore (
     val storeId: Int? = null,
     val storeName: String? = null
 )
+

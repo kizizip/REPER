@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.Notice
+import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentWriteNotiBinding
 import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
@@ -23,8 +24,11 @@ class WriteNotiFragment : Fragment() {
     private val binding get() = _binding!!
     private val noticeViewModel: NoticeViewModel by activityViewModels()
     private val fcmViewModel: FcmViewModel by activityViewModels()
-    var userId = 1
-    var storeId = 1
+    val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
+        SharedPreferencesUtil(requireContext().applicationContext)
+    }
+    var sharedUserId = 0
+    var sharedStoreId = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,9 +46,10 @@ class WriteNotiFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        sharedStoreId = sharedPreferencesUtil.getStoreId()
+        sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
 
         noticeViewModel.type = "noticeDetail"
-
 
         //고객정보 사장인지 지원인지 따라 분기처리 필요 우선은 사장이라 생각하고 만듭니당
         if (noticeViewModel.clickNotice.value != null) {
@@ -78,8 +83,8 @@ class WriteNotiFragment : Fragment() {
 
 
         binding.notiWriteFgDeleteTv.setOnClickListener {
-            noticeViewModel.deleteNotice(storeId, noticeViewModel.clickNotice.value!!.noticeId,
-                 mapOf("userId" to userId) )
+            noticeViewModel.deleteNotice(sharedUserId, noticeViewModel.clickNotice.value!!.noticeId,
+                 mapOf("userId" to sharedUserId) )
 
             parentFragmentManager.popBackStack()
             Toast.makeText(requireContext(), "공지 삭제 완료", Toast.LENGTH_SHORT).show()
@@ -108,6 +113,12 @@ class WriteNotiFragment : Fragment() {
 
 
         binding.notiWriteFgDeleteTv.visibility = View.VISIBLE
+        if (sharedPreferencesUtil.getUser().role !="OWNER"){
+            binding.notiWriteFgModifyBtn.visibility = View.GONE
+            binding.notiWriteFgDeleteTv.visibility = View.INVISIBLE
+            binding.notiWriteFgSaveBtn.visibility = View.INVISIBLE
+        }
+
 
     }
 
@@ -132,6 +143,11 @@ class WriteNotiFragment : Fragment() {
             binding.notiWriteFgTitleET.setText(notice!!.title)
             binding.notiWriteFgContentET.setText(notice.content)
         }
+        if (sharedPreferencesUtil.getUser().role !="OWNER"){
+            binding.notiWriteFgModifyBtn.visibility = View.GONE
+            binding.notiWriteFgDeleteTv.visibility = View.INVISIBLE
+            binding.notiWriteFgSaveBtn.visibility = View.INVISIBLE
+        }
 
     }
 
@@ -140,9 +156,9 @@ class WriteNotiFragment : Fragment() {
         val title = binding.notiWriteFgTitleET.text.toString()
         val content = binding.notiWriteFgContentET.text.toString()
         val targetFragment = "WriteNoticeFragment"
-        val requestId = noticeViewModel.createNotice(storeId, userId, title, content)?.noticeId
+        val requestId = noticeViewModel.createNotice(sharedStoreId, sharedUserId, title, content)?.noticeId
         requestId?.let { id ->  // requestId가 null이 아닐 때만 실행
-            fcmViewModel.sendToStoreFCM(storeId, "새로운 공지가 등록되었습니다.", title, targetFragment, id)
+            fcmViewModel.sendToStoreFCM(sharedStoreId, "새로운 공지가 등록되었습니다.", title, targetFragment, id)
             Toast.makeText(requireContext(), "공지 작성 완료", Toast.LENGTH_SHORT).show()
             Log.d(TAG, "createNotice: ${id}")
         } ?: run {
@@ -160,10 +176,10 @@ class WriteNotiFragment : Fragment() {
         Log.d(TAG, "modifyNotice: ${requestId}")
 
         noticeViewModel.modifyNotice(
-            storeId, userId,
+            sharedStoreId, sharedUserId,
             noticeViewModel.clickNotice.value!!.noticeId, title, content
         )
-        fcmViewModel.sendToStoreFCM(storeId,"공지가 수정되었습니다.",title, targetFragment, requestId)
+        fcmViewModel.sendToStoreFCM(sharedStoreId,"공지가 수정되었습니다.",title, targetFragment, requestId)
 
         Toast.makeText(requireContext(), "공지 수정 완료", Toast.LENGTH_SHORT).show()
 

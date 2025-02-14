@@ -8,7 +8,7 @@ import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.ItemRecipeBinding
 
 private const val TAG = "RecipeAdapter_싸피"
-class RecipeAdapter(var menuList: List<Recipe>, val itemClickListener: ItemClickListener) :
+class RecipeAdapter(var menuList: MutableList<Recipe>, val itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
 
     // ViewHolder 클래스
@@ -43,8 +43,10 @@ class RecipeAdapter(var menuList: List<Recipe>, val itemClickListener: ItemClick
     }
 
     fun updateData(recipeList: List<Recipe>) {
-        menuList = recipeList
+        menuList.clear()
+        menuList.addAll(recipeList)
         Log.d(TAG, "updateData: $recipeList")
         notifyDataSetChanged()  // 변경된 데이터를 RecyclerView에 반영
     }
+
 }

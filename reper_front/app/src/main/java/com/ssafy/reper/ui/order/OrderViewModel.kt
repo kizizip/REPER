@@ -1,5 +1,6 @@
 package com.ssafy.reper.ui.order
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,23 +26,34 @@ class OrderViewModel : ViewModel() {
         get() = _recipeNameList
 
     fun getOrders() {
-        viewModelScope.launch{
-            var orderList:MutableList<Order>
-            var recipeList:MutableList<Recipe> = mutableListOf()
-            try{
-                orderList = orderService.getAllOrder(ApplicationClass.sharedPreferencesUtil.getStoreId()).sortedByDescending { it.orderDate }.toMutableList()
-                for (order in orderList){
-                    recipeList.add(recipeService.getRecipe(order.orderDetails.first().recipeId))
+        viewModelScope.launch {
+            try {
+                val storeId = ApplicationClass.sharedPreferencesUtil.getStoreId()
+                if (storeId != 0) {  // storeId가 유효한 경우에만 실행
+                    val orderList = orderService.getAllOrder(storeId)
+                        .sortedByDescending { it.orderDate }
+                        .toMutableList()
+                    
+                    val recipeList = mutableListOf<Recipe>()
+                    for (order in orderList) {
+                        if (order.orderDetails.isNotEmpty()) {
+                            val recipe = recipeService.getRecipe(order.orderDetails.first().recipeId)
+                            recipeList.add(recipe)
+                        }
+                    }
+                    
+                    _orderList.postValue(orderList)
+                    _recipeNameList.postValue(recipeList)
+                    
+                    Log.d(TAG, "getOrders success: orders=${orderList.size}, recipes=${recipeList.size}")
+                } else {
+                    Log.d(TAG, "getOrders: Invalid storeId")
                 }
-
-            }catch (e:Exception){
-                orderList = mutableListOf()
-                recipeList = mutableListOf()
+            } catch (e: Exception) {
+                Log.e(TAG, "getOrders error: ${e.message}")
+                _orderList.postValue(mutableListOf())
+                _recipeNameList.postValue(mutableListOf())
             }
-
-            _recipeNameList.value = recipeList
-            _orderList.value = orderList
-            
         }
     }
 
@@ -84,7 +96,14 @@ class OrderViewModel : ViewModel() {
 
     fun completeOrder(orderId: Int){
         viewModelScope.launch {
-            orderService.orderComplete(orderId)
+            try {
+                orderService.orderComplete(orderId)
+                // 주문 완료 후 데이터 새로고침
+                getOrders()
+                Log.d(TAG, "completeOrder: success orderId=$orderId")
+            } catch (e: Exception) {
+                Log.e(TAG, "completeOrder error: ${e.message}")
+            }
         }
     }
 }
