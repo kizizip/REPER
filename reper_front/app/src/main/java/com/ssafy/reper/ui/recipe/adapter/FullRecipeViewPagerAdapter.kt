@@ -17,7 +17,7 @@ import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentFullRecipeItemBinding
 
 private const val TAG = "FullRecipeViewPagerAdap_정언"
-class FullRecipeViewPagerAdapter(var recipeList: MutableList<Recipe>,var whereAmICame: Int, var customList: MutableList<String>, var favoriteRecipeList: List<FavoriteRecipe>?, var itemClickListener: ItemClickListener) : RecyclerView.Adapter<FullRecipeViewPagerAdapter.FullRecipeViewHolder>() {
+class FullRecipeViewPagerAdapter(var recipeList: MutableList<Recipe>,var whereAmICame: Int, var customList: MutableList<String>, var favoriteRecipeList: List<FavoriteRecipe>?, var recipeCount :Int, var itemClickListener: ItemClickListener) : RecyclerView.Adapter<FullRecipeViewPagerAdapter.FullRecipeViewHolder>() {
     private lateinit var fullRecipeListAdapter: FullRecipeListAdapter
     inner class FullRecipeViewHolder(private val binding: FragmentFullRecipeItemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bindInfo(position: Int) {
@@ -70,7 +70,7 @@ class FullRecipeViewPagerAdapter(var recipeList: MutableList<Recipe>,var whereAm
                     }
 
                     // ICE/HOT 버튼 설정
-                    if(recipeList.count() > 1){
+                    if(recipeCount > 1){
                         // hot, ice 클릭 시
                         fullrecipeFmBtnHot.setOnClickListener {
                             itemClickListener.onHotIceClick(item.recipeName, "HOT")

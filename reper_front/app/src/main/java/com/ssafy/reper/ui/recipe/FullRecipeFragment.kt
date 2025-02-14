@@ -49,7 +49,6 @@ class FullRecipeFragment : Fragment() {
     private lateinit var scrollView: LockableNestedScrollView
 
     // 레시피 리스트 recyclerView Adapter
-    private lateinit var fullRecipeListAdapter: FullRecipeListAdapter
     private lateinit var viewPagerAdapter: FullRecipeViewPagerAdapter
 
     private lateinit var mainActivity: MainActivity
@@ -90,8 +89,11 @@ class FullRecipeFragment : Fragment() {
             }
         }
         mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
-            if(it != null){
+            if(it.isNotEmpty()){
                 favoriteReicpeList = it
+            }
+            else{
+                favoriteReicpeList = mutableListOf()
             }
         }
         mainViewModel.recipeSteps.observe(viewLifecycleOwner){
@@ -157,19 +159,25 @@ class FullRecipeFragment : Fragment() {
     }
     fun initViewPager() {
         var customList:MutableList<String> = mutableListOf()
-        if(whereAmICame == 2){
+        var forAdapterSelectedRecipeList :MutableList<Recipe> = mutableListOf()
+        var recipeCount = 0
+        if(whereAmICame == 1){
+            recipeCount = selectedRecipeList.count()
+            forAdapterSelectedRecipeList = mutableListOf(selectedRecipeList.first())
+        }
+        else if(whereAmICame == 2){
             customList.clear()
             for(item in orderDetails){
                 customList.add(item.customerRequest)
             }
+            forAdapterSelectedRecipeList = selectedRecipeList
         }
-
-        mainViewModel.getLikeRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), ApplicationClass.sharedPreferencesUtil.getUser().userId!!)
         viewPagerAdapter = FullRecipeViewPagerAdapter(
-            recipeList = selectedRecipeList,
+            recipeList = forAdapterSelectedRecipeList,
             whereAmICame = whereAmICame,
             customList = customList,
             favoriteRecipeList = favoriteReicpeList,
+            recipeCount = recipeCount,
             itemClickListener = object : FullRecipeViewPagerAdapter.ItemClickListener {
                 override fun onHeartClick(recipeId: Int, isFavorite: Boolean) {
                     if (!isFavorite) {
@@ -190,9 +198,9 @@ class FullRecipeFragment : Fragment() {
                     val iceRecipe = selectedRecipeList.filter { it.type.equals("ICE") }.first()
                     val hotRecipe = selectedRecipeList.filter { it.type.equals("HOT") }.first()
                     if(type.equals("ICE")){
-                        viewPagerAdapter.recipeList = mutableListOf(iceRecipe, hotRecipe)
+                        viewPagerAdapter.recipeList = mutableListOf(iceRecipe)
                     } else if(type.equals("HOT")){
-                        viewPagerAdapter.recipeList = mutableListOf(hotRecipe, iceRecipe)
+                        viewPagerAdapter.recipeList = mutableListOf(hotRecipe)
                     }
                     viewPagerAdapter.notifyDataSetChanged()
                 }
@@ -207,11 +215,13 @@ class FullRecipeFragment : Fragment() {
             },
         )
         mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
-            if(it != null){
+            if(it.isNotEmpty()){
                 viewPagerAdapter.favoriteRecipeList = favoriteReicpeList
                 viewPagerAdapter.notifyDataSetChanged()
             }
         }
+
+        mainViewModel.getLikeRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), ApplicationClass.sharedPreferencesUtil.getUser().userId!!)
 
         fullRecipeBinding.fullrecipeFmVp.apply {
             adapter = viewPagerAdapter

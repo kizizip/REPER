@@ -309,6 +309,8 @@ class AllRecipeFragment : Fragment() {
 
                     allRecipeListAdapter.recipeList =
                         it.distinctBy { it.recipeName }.toMutableList()
+                    allRecipeListAdapter.notifyDataSetChanged()
+
                     category.clear()
                     category.add("카테고리")
                     for (recipe in it) {

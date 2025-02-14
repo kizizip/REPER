@@ -84,7 +84,7 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
             try {
                 _selectedRecipeList.value = recipeList
                 Log.d(TAG, "setSelectedRecipes: ${selectedRecipeList.value}")
-
+                
                 _nowISeeRecipe.value = 0
                 Log.d(TAG, "_nowIseeRecipe: ${nowISeeRecipe.value}")
                 _nowISeeStep.value = -1
