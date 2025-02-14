@@ -4,13 +4,16 @@ import com.d109.reper.domain.Order;
 import com.d109.reper.domain.OrderDetail;
 import com.d109.reper.domain.Recipe;
 import com.d109.reper.domain.Store;
+import com.d109.reper.fcm.OrderCreatedEvent;
 import com.d109.reper.repository.OrderDetailRepository;
 import com.d109.reper.repository.OrderRepository;
 import com.d109.reper.repository.RecipeRepository;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.response.OrderResponseDto;
 import jakarta.transaction.Transactional;
-import org.aspectj.weaver.ast.Or;
+
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,12 +32,15 @@ public class OrderService {
     private final RecipeRepository recipeRepository;
     private static final List<String> CUSTOMER_REQUESTS = List.of("시럽 추가", "샷 빼고", "연하게", "진하게", "얼음 적게");
 
-    public OrderService(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository, StoreRepository storeRepository, RecipeRepository recipeRepository) {
+    private final ApplicationEventPublisher eventPublisher;
+
+    public OrderService(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository, StoreRepository storeRepository, RecipeRepository recipeRepository, ApplicationEventPublisher eventPublisher) {
 
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.storeRepository = storeRepository;
         this.recipeRepository = recipeRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     public List<OrderResponseDto> findOrdersByStoreId(Long storeId) {
@@ -92,6 +98,10 @@ public class OrderService {
         orderRepository.save(order);
         orderDetailRepository.saveAll(orderDetails);
 
+        // 주문 생성 후 이벤트 발행
+        eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
+        System.out.println("이벤트 발생");
+
         return order;
     }
 
@@ -112,4 +122,12 @@ public class OrderService {
         }
     }
 
+    // 주문이 1분에 하나씩 생기게 스케쥴링
+//    @Scheduled(fixedDelay = 15000) // 테스트용 15초
+//    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 600000000) // 개발할때 공지 계속 오면 정신없으니 큰 값 설정
+    public void createOrder1Min() {
+        createRandomOrder();
+        System.out.println("새로운 주문 생성" + LocalDateTime.now());
+    }
 }

@@ -36,7 +36,6 @@ public interface StoreSearchRepository extends ElasticsearchRepository<StoreDocu
     """)
     List<StoreDocument> findByStoreName(String storeName, Pageable pageable);
 
-    List<StoreDocument> findByStoreNameContaining(String storeName, Pageable pageable);
 
     Optional<StoreDocument> findByStoreId(Long storeId);
 }
