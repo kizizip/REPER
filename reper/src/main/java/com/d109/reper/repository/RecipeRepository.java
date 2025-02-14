@@ -18,6 +18,8 @@ public class RecipeRepository {
     private final RecipeSearchRepository recipeSearchRepository;
 
     //레시피 저장(단건)
+
+
     public Recipe save(Recipe recipe) {
 
         em.persist(recipe);

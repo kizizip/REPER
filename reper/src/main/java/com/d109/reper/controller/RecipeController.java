@@ -9,6 +9,8 @@ import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.response.RecipeResponseDto;
 import com.d109.reper.response.RecipeStepResponseDto;
 import com.d109.reper.service.RecipeService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -45,13 +47,6 @@ public class RecipeController {
                     그냥 이것만 실행하시면 저장까지 가능.
                     """
             )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "The recipe has been successfully saved."),
-            @ApiResponse(responseCode = "400", description = "Required part 'file' is not present."),
-            @ApiResponse(responseCode = "400", description = "Store not found for the given storeId."),
-            @ApiResponse(responseCode = "500", description = "Error processing the file."),
-            @ApiResponse(responseCode = "500", description = "Python server response error.")
-    })
     public ResponseEntity<String> uploadRecipeFile(@RequestParam("file") MultipartFile file,
                                                    @RequestParam("storeId") Long storeId) {
 
@@ -89,7 +84,13 @@ public class RecipeController {
 
             // python 서버에서 받은 응답 반환
             if (response.getStatusCode() == HttpStatus.OK) {
-                return ResponseEntity.ok().body("The recipe has been successfully saved.");
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonResponse = objectMapper.readTree(response.getBody());
+
+                int recipeCount = jsonResponse.get("recipeCount").asInt();
+                return ResponseEntity.ok("Successfully uploaded " + recipeCount + " recipes.");
+
             } else {
                 return ResponseEntity.status(response.getStatusCode()).body("Python server response error.");
             }
@@ -103,7 +104,8 @@ public class RecipeController {
     @PostMapping("/stores/{storeId}/recipes")
     public ResponseEntity<Void> createRecipes(@PathVariable Long storeId,
                                               @RequestBody List<Recipe> recipes) {
-        Store store = storeRepository.findById(storeId).orElseThrow(() -> new IllegalArgumentException("Store not found for the given storeId.")); // Store 조회
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Store not found for the given storeId.")); // Store 조회
 
         for (Recipe recipe : recipes) {
             recipe.setStore(store); // storeId를 Recipe에 연결하여 특정 매장에 속하도록 설정
@@ -117,10 +119,6 @@ public class RecipeController {
     //레시피 조회(가게별)
     @GetMapping("/stores/{storeId}/recipes")
     @Operation(summary = "레시피 조회(가게별)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "json"),
-            @ApiResponse(responseCode = "404", description = "Store not found.")
-    })
     public ResponseEntity<List<RecipeResponseDto>> getRecipeByStore(@PathVariable Long storeId) {
         List<Recipe> recipes = recipeService.findRecipesByStore(storeId);
 
@@ -135,10 +133,6 @@ public class RecipeController {
     //레시피 조회(단건)
     @GetMapping("/recipes/{recipeId}")
     @Operation(summary = "레시피 조회(단건)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "json"),
-            @ApiResponse(responseCode = "404", description = "Recipe not found.")
-    })
     public ResponseEntity<RecipeResponseDto> getRecipe(@PathVariable Long recipeId) {
         Recipe recipe = recipeService.findRecipe(recipeId);
         return ResponseEntity.ok(new RecipeResponseDto(recipe));
@@ -148,10 +142,6 @@ public class RecipeController {
     //레시피 삭제(단건)
     @DeleteMapping("/recipes/{recipeId}")
     @Operation(summary = "레시피 삭제(단건)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Recipe successfully deleted."),
-            @ApiResponse(responseCode = "404", description = "Recipe not found.")
-    })
     public ResponseEntity<String> deleteRecipe(@PathVariable Long recipeId) {
         recipeService.deleteRecipe(recipeId);
         return ResponseEntity.ok().body("Recipe successfully deleted.");
