@@ -42,7 +42,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     @SuppressLint("UnsafeImplicitIntentLaunch")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        Log.d(TAG, "onMessageReceived: ${remoteMessage}메세지를 받음")
+        Log.d(TAG, "FCM Message Received")
+        Log.d(TAG, "From: ${remoteMessage.from}")
+        Log.d(TAG, "Data: ${remoteMessage.data}")
+        Log.d(TAG, "Notification: ${remoteMessage.notification}")
 
         val data = remoteMessage.data
         val notification = remoteMessage.notification
@@ -64,8 +67,24 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
         }
 
+
+        // OrderList 갱신이 필요한 경우 브로드캐스트 발송
+        if (data["targetFragment"] == "OrderFragment") {
+            try {
+                val updateIntent = Intent("com.ssafy.reper.UPDATE_ORDER_FRAGMENT").apply {
+                    putExtra("requestId", data["requestId"])
+                    addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                }
+                applicationContext.sendBroadcast(updateIntent)
+                Log.d(TAG, "BossFragment 브로드캐스트 발송 성공")
+            } catch (e: Exception) {
+                Log.e(TAG, "BossFragment 브로드캐스트 발송 실패: ${e.message}")
+            }
+        }
+
         // 권한 삭제 알림인 경우
         if (data["targetFragment"] == "MyPageFragment" && data["title"] == "권한 삭제알림") {
+            Log.d(TAG, "권한 삭제 알림 수신")
             try {
                 Log.d(TAG, "권한 삭제 브로드캐스트 발송 시도")
                 val updateIntent = Intent("com.ssafy.reper.DELETE_ACCESS").apply {
@@ -82,7 +101,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 e.printStackTrace()
             }
 
-
             notification?.let {
                 val title = it.title ?: "No title"
                 val body = it.body ?: "No body"
@@ -95,6 +113,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         }
 
+        // 일반 알림 처리
+        notification?.let {
+            Log.d(TAG, "일반 알림 수신")
+            val title = it.title ?: "알림"
+            val body = it.body ?: ""
+            sendNotification(title, body, data)
+        }
 
     }
 

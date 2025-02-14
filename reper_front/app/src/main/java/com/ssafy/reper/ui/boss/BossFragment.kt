@@ -1,11 +1,11 @@
 package com.ssafy.reper.ui.boss
 
 import AccessAdapter
-import FragmentReceiver
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.IntentFilter
+import android.os.Build
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -17,11 +17,13 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
+import com.ssafy.reper.base.FragmentReceiver
 import com.ssafy.reper.data.dto.UserToken
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentBossBinding
@@ -71,9 +73,15 @@ class BossFragment : Fragment() {
 
         // Receiver 인스턴스 생성
         receiver = FragmentReceiver()
-        // Fragment에서 Context를 안전하게 가져오기 위해 requireContext() 사용
         val filter = IntentFilter("com.ssafy.reper.UPDATE_BOSS_FRAGMENT")
-        requireContext().registerReceiver(receiver, filter)
+
+        ContextCompat.registerReceiver(
+            requireContext(),
+            receiver, // 리시버 객체
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED // 내부 앱에서만 사용
+        )
+
     }
 
     override fun onCreateView(
@@ -92,8 +100,19 @@ class BossFragment : Fragment() {
         (activity as MainActivity).hideBottomNavigation()
 
 
-        val filter = IntentFilter("com.ssafy.reper.UPDATE_BOSS_FRAGMENT")
-        context?.registerReceiver(FragmentReceiver(), filter)
+        val filter = IntentFilter().apply {
+            addAction("com.ssafy.reper.UPDATE_BOSS_FRAGMENT")
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireActivity().registerReceiver(
+                receiver,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            )
+        } else {
+            requireActivity().registerReceiver(receiver, filter)
+        }
 
         sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
         sharedStoreId = sharedPreferencesUtil.getStoreId()

@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- notification 전송 permission -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
@@ -70,11 +71,12 @@
         </service>
 
         <receiver
-            android:name="com.ssafy.reper.base.FragmentReceiver"
+            android:name=".base.FragmentReceiver"
             android:exported="false">
-            <intent-filter>
+            <intent-filter android:priority="999">
                 <action android:name="com.ssafy.reper.UPDATE_BOSS_FRAGMENT"/>
                 <action android:name="com.ssafy.reper.DELETE_ACCESS"/>
+                <action android:name="com.ssafy.reper.UPDATE_ORDER_FRAGMENT"/>
             </intent-filter>
         </receiver>
 

@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.data.local.HomeBannerModel
 import com.ssafy.reper.data.local.HomeLikeRecipeModel
-import com.ssafy.reper.data.local.HomeOrderModel
 import com.ssafy.reper.databinding.FragmentHomeBinding
 import com.ssafy.reper.ui.home.adapter.RVHomeBannerAdapter
 import com.ssafy.reper.ui.home.adapter.RVHomeLikeRecipeAdapter
@@ -80,7 +79,10 @@ class HomeFragment : Fragment() {
         if (sharedPreferencesUtil.getUser()?.role == "OWNER") {
             Log.d(TAG, "onViewCreated: Starting OWNER flow")
             bossViewModel.myStoreList.observe(viewLifecycleOwner) { storeList ->
-                Log.d(TAG, "onViewCreated: OWNER stores observer triggered, size=${storeList?.size}")
+                Log.d(
+                    TAG,
+                    "onViewCreated: OWNER stores observer triggered, size=${storeList?.size}"
+                )
                 initSpinner()
             }
             Log.d(TAG, "onViewCreated: Calling getStoreList...")
@@ -167,18 +169,18 @@ class HomeFragment : Fragment() {
 
         val observeStoreList: (List<Any>) -> Unit = { storeList ->
             Log.d(TAG, "observeStoreList: Received store list, size=${storeList.size}")
-            
+
             // 기본값으로 "등록된 가게가 없습니다" 설정
             val storeNames = mutableListOf("등록된 가게가 없습니다")
             val storeIds = mutableListOf(0)
-            
+
             // 가게 목록이 있을 경우에만 기본값을 덮어씀
             if (storeList.isNotEmpty()) {
                 when (val firstItem = storeList[0]) {
                     is SearchedStore -> {
-                        val filteredList = storeList.mapNotNull { 
-                            (it as? SearchedStore)?.takeIf { store -> 
-                                !store.storeName.isNullOrEmpty() && store.storeId != null 
+                        val filteredList = storeList.mapNotNull {
+                            (it as? SearchedStore)?.takeIf { store ->
+                                !store.storeName.isNullOrEmpty() && store.storeId != null
                             }
                         }
                         if (filteredList.isNotEmpty()) {
@@ -188,10 +190,11 @@ class HomeFragment : Fragment() {
                             storeIds.addAll(filteredList.map { it.storeId!! })
                         }
                     }
+
                     is StoreResponseUser -> {
-                        val filteredList = storeList.mapNotNull { 
-                            (it as? StoreResponseUser)?.takeIf { store -> 
-                                store.name.isNotEmpty() 
+                        val filteredList = storeList.mapNotNull {
+                            (it as? StoreResponseUser)?.takeIf { store ->
+                                store.name.isNotEmpty()
                             }
                         }
                         if (filteredList.isNotEmpty()) {
@@ -205,7 +208,7 @@ class HomeFragment : Fragment() {
             }
 
             Log.d(TAG, "initSpinner: storeNames=$storeNames, storeIds=$storeIds")
-            
+
             // Adapter 설정
             val adapter = ArrayAdapter(
                 requireContext(),
@@ -216,11 +219,11 @@ class HomeFragment : Fragment() {
             }
 
             spinner.adapter = adapter
-            
+
             // 저장된 storeId 가져오기
             val savedStoreId = sharedPreferencesUtil.getStoreId()
             val defaultIndex = storeIds.indexOfFirst { it == savedStoreId }.takeIf { it != -1 } ?: 0
-            
+
             // 기본 선택 인덱스 설정
             spinner.setSelection(defaultIndex)
 
@@ -234,7 +237,10 @@ class HomeFragment : Fragment() {
                     val selectedStoreId = storeIds.getOrNull(position) ?: 0
                     sharedPreferencesUtil.setStoreId(selectedStoreId)
                     if (selectedStoreId != 0) {
-                        noticeViewModel.getAllNotice(selectedStoreId, sharedPreferencesUtil.getUser().userId!!.toInt())
+                        noticeViewModel.getAllNotice(
+                            selectedStoreId,
+                            sharedPreferencesUtil.getUser().userId!!.toInt()
+                        )
                         viewModel.getOrders()
                     }
                     Log.d(TAG, "onItemSelected: position=$position, storeId=$selectedStoreId")
@@ -247,7 +253,7 @@ class HomeFragment : Fragment() {
         // OWNER인지 아닌지에 따라 다른 뷰모델을 사용
         if (sharedPreferencesUtil.getUser()?.role == "OWNER") {
             Log.d(TAG, "initSpinner: Observing OWNER stores")
-            bossViewModel.myStoreList.value?.let { 
+            bossViewModel.myStoreList.value?.let {
                 Log.d(TAG, "initSpinner: Current OWNER stores size=${it.size}")
                 observeStoreList(it)
             }
@@ -263,7 +269,7 @@ class HomeFragment : Fragment() {
 
     fun initOrderAdapter(selectedDate: String) {
         binding.fragmentHomeRvOrder.layoutManager = LinearLayoutManager(requireContext())
-        
+
         orderAdapter = HomeOrderAdatper(mutableListOf(), mutableListOf()) { orderId ->
             val bundle = Bundle().apply {
                 putInt("orderId", orderId)
@@ -271,30 +277,33 @@ class HomeFragment : Fragment() {
             // 주문 상세 화면으로 이동할 때 결과 리스너 설정
             findNavController().navigate(R.id.orderRecipeFragment, bundle)
         }
-        
+
         binding.fragmentHomeRvOrder.adapter = orderAdapter
 
         viewModel.getOrders()
-        
+
         // orderList와 recipeNameList를 동시에 관찰
         viewModel.orderList.observe(viewLifecycleOwner) { orderList ->
             viewModel.recipeNameList.value?.let { recipeList ->
                 val currentStoreId = sharedPreferencesUtil.getStoreId()
                 // 현재 선택된 가게의 완료되지 않은 주문만 필터링
-                val activeOrders = orderList.filter { order -> 
+                val activeOrders = orderList.filter { order ->
                     !order.completed
                 }
                 orderAdapter.orderList = activeOrders.toMutableList()
-                
+
                 // 필터링된 주문에 해당하는 레시피만 선택
-                val activeRecipes = recipeList.filterIndexed { index, _ -> 
-                    index < orderList.size && 
-                    !orderList[index].completed
+                val activeRecipes = recipeList.filterIndexed { index, _ ->
+                    index < orderList.size &&
+                            !orderList[index].completed
                 }
                 orderAdapter.recipeNameList = activeRecipes.map { it.recipeName }.toMutableList()
                 orderAdapter.notifyDataSetChanged()
-                
-                Log.d(TAG, "Orders updated: active=${activeOrders.size}, total=${orderList.size}, storeId=$currentStoreId")
+
+                Log.d(
+                    TAG,
+                    "Orders updated: active=${activeOrders.size}, total=${orderList.size}, storeId=$currentStoreId"
+                )
             }
         }
     }

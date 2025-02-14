@@ -1,7 +1,8 @@
 package com.ssafy.reper.ui
 
-import FragmentReceiver
+
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -19,12 +20,14 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.reper.R
+import com.ssafy.reper.base.FragmentReceiver
 import com.ssafy.reper.data.dto.UserToken
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.ActivityMainBinding
 import com.ssafy.reper.ui.boss.BossViewModel
 import com.ssafy.reper.ui.boss.NoticeViewModel
 import com.ssafy.reper.ui.home.StoreViewModel
+import com.ssafy.reper.ui.order.OrderViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -49,6 +52,19 @@ class MainActivity : AppCompatActivity() {
     var sharedUserId = 0
     var sharedStoreId = 0
     private lateinit var receiver: FragmentReceiver
+    private val orderViewModel: OrderViewModel by viewModels()
+
+    private val orderReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                "com.ssafy.reper.UPDATE_ORDER_FRAGMENT" -> {
+                    Log.d(TAG, "Order update received in MainActivity")
+                    // 여기서 한 번만 호출하면 두 프래그먼트 모두 갱신됨
+                    orderViewModel.getOrders()
+                }
+            }
+        }
+    }
 
 
     @SuppressLint("NewApi")
@@ -74,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         navController?.let {
             binding.activityMainBottomMenu.setupWithNavController(it)
         }
-        
+
         // FCM Token 비동기 처리
         CoroutineScope(Dispatchers.Main).launch {
             // 비동기적으로 백그라운드 스레드에서 토큰을 가져옴
@@ -142,11 +158,24 @@ class MainActivity : AppCompatActivity() {
             addAction("com.ssafy.reper.UPDATE_BOSS_FRAGMENT")
             addAction("com.ssafy.reper.DELETE_ACCESS")
         }
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
             registerReceiver(receiver, filter, RECEIVER_EXPORTED)
+        }
+
+        // 리시버 등록
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(
+                orderReceiver,
+                IntentFilter("com.ssafy.reper.UPDATE_ORDER_FRAGMENT"),
+                Context.RECEIVER_NOT_EXPORTED
+            )
+        } else {
+            registerReceiver(orderReceiver, IntentFilter("com.ssafy.reper.UPDATE_ORDER_FRAGMENT"),
+                RECEIVER_NOT_EXPORTED
+            )
         }
 
     }
@@ -159,6 +188,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Error unregistering receiver: ${e.message}")
         }
+        unregisterReceiver(orderReceiver)
     }
 
     // FCM 토큰을 비동기적으로 가져오는 함수
@@ -223,4 +253,10 @@ class MainActivity : AppCompatActivity() {
 //            super.onBackPressed()
 //        }
 //    }
+
+    // FCM 메시지를 받았을 때
+    private fun handleOrderNotification() {
+        // 주문 목록 갱신
+        orderViewModel.getOrders()  // 이 호출은 OrderFragment의 데이터도 자동으로 갱신시킴
+    }
 }
