@@ -104,14 +104,7 @@ public class RecipeController {
     @PostMapping("/stores/{storeId}/recipes")
     public ResponseEntity<Void> createRecipes(@PathVariable Long storeId,
                                               @RequestBody List<Recipe> recipes) {
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("Store not found for the given storeId.")); // Store 조회
-
-        for (Recipe recipe : recipes) {
-            recipe.setStore(store); // storeId를 Recipe에 연결하여 특정 매장에 속하도록 설정
-        }
-
-        recipeService.saveRecipes(recipes);
+        recipeService.saveRecipes(recipes, storeId);
         return ResponseEntity.ok().build();
     }
 

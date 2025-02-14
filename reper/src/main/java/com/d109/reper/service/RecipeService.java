@@ -42,11 +42,18 @@ public class RecipeService {
 
     // 레시피 저장
     @Transactional
-    public void saveRecipes(List<Recipe> recipes) {
+    public void saveRecipes(List<Recipe> recipes, Long storeId) {
 //        logger.info("트랜잭션 시작 - 레시피 저장");
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Store not found for the given storeId.")); // Store 조회
 
         for (Recipe recipe : recipes) {
 //            logger.info("레시피 저장: {}", recipe.getRecipeName());
+            // 기존 레시피 삭제
+            recipeRepository.deleteByStoreAndRecipeName(storeId, recipe.getRecipeName(), recipe.getType());
+
+            // 새로운 레시피 저장 준비
+            recipe.setStore(store);
             recipe.setCreatedAt(LocalDateTime.now());
 
             // 레시피 단계(RecipeStep) 처리
