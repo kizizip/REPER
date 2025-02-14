@@ -19,6 +19,8 @@ COPY . .
 
 # 환경변수 설정 (Jenkins에서 전달받음)
 ENV OPENAI_API_KEY=""
+ENV AWS_ACCESS_KEY_ID=""
+ENV AWS_SECRET_ACCESS_KEY=""
 
 # Flask 포트 노출
 EXPOSE 20250
