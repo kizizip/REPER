@@ -87,7 +87,7 @@
             android:background="@drawable/store_list_item"
             app:cardCornerRadius="12dp"
             android:layout_marginHorizontal="2dp"
-            android:visibility="gone"
+
             app:cardElevation="4dp"
             app:layout_constraintTop_toBottomOf="@+id/recipe_fg_search_noti">
 
@@ -116,7 +116,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:layout_marginBottom="8dp"
-                    android:text="레시피를 업로드 중입니다..."
+                    android:text="레시피를 업로드 중입니다...\n앱을 종료하지 말아주세요😊"
                     android:textSize="16sp" />
 
                 <TextView
