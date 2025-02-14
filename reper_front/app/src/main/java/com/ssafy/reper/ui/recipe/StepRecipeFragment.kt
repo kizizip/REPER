@@ -1,12 +1,13 @@
 package com.ssafy.reper.ui.recipe
 
 import MainActivityViewModel
+import android.Manifest
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.common.util.concurrent.ListenableFuture
@@ -29,19 +31,17 @@ import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.OrderDetail
 import com.ssafy.reper.data.dto.Recipe
+import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.databinding.FragmentStepRecipeBinding
 import com.ssafy.reper.ui.MainActivity
-import com.ssafy.reper.util.ViewModelSingleton
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import android.Manifest
-import android.content.pm.PackageManager
 import com.ssafy.reper.ui.recipe.adapter.RecipeIngredientsAdapter
-import com.ssafy.reper.data.remote.RetrofitUtil
+import com.ssafy.reper.util.ViewModelSingleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 private const val TAG = "StepRecipeFragment_정언"
 class StepRecipeFragment : Fragment() {
@@ -164,14 +164,48 @@ class StepRecipeFragment : Fragment() {
     }
     override fun onPause() {
         super.onPause()
+        try {
+            // 일시 정지 시에도 카메라 리소스 해제
+            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider.unbindAll()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unbinding camera use cases", e)
+        }
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
     }
     ////////////////////////////////////////////////////////////////////////////////////////
     override fun onDestroyView() {
+        try {
+            // 카메라 실행 중지
+            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider.unbindAll()
+            
+            // 실행자 종료
+            if (!cameraExecutor.isShutdown) {
+                cameraExecutor.shutdown()
+            }
+            
+            // MediaPipe 리소스 해제
+            if (::gestureRecognizer.isInitialized) {
+                gestureRecognizer.close()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error cleaning up resources", e)
+        }
+        
         super.onDestroyView()
-        cameraExecutor.shutdown()
-        gestureRecognizer.close()
         _stepRecipeBinding = null
+    }
+
+    override fun onStop() {
+        super.onStop()
+        try {
+            // Fragment가 화면에서 사라질 때도 카메라 리소스 해제
+            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider.unbindAll()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unbinding camera use cases", e)
+        }
     }
 
     fun initEvent(){
