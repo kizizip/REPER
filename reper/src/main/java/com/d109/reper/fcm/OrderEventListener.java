@@ -9,6 +9,7 @@ import com.d109.reper.service.FcmMessageService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,15 +74,17 @@ public class OrderEventListener {
 
             // 알바생들에게 보내기(isEmployed=true인 사람만)
             List<User> staffs = storeEmployeeRepository.findUsersByStoreIdAndIsEmployedTrue(order.getStore().getStoreId());
-            System.out.println("직원 목록: " + staffs);
 
             if (!staffs.isEmpty()) {
                 List<Long> staffIds = staffs.stream()
                         .map(User::getUserId)
                         .collect(Collectors.toList());
 
+                System.out.println("직원 ID 목록: " + staffIds);
+
                 List<UserToken> staffTokens = userTokenRepository.findByUserIdIn(staffIds);
                 List<FcmMessageRequest> staffMessages = staffTokens.stream()
+                        .filter(token -> token.getToken() != null && !token.getToken().isEmpty()) // 빈 값 필터링
                         .map(token -> new FcmMessageRequest(
                                 token.getToken(), title, body, targetFragment, requestId
                         ))
@@ -90,6 +93,8 @@ public class OrderEventListener {
                 if (!staffMessages.isEmpty()) {
                     fcmMessageService.sendToMultipleUsers(staffMessages);
                     System.out.println("직원들에게 FCM 메시지 전송 완료");
+                } else {
+                    System.out.println("유효한 FCM 토큰이 있는 직원이 없음, 메시지 전송 생략");
                 }
             }
 
@@ -103,5 +108,6 @@ public class OrderEventListener {
             orderRepository.save(order);
         }
     }
+
 
 }
