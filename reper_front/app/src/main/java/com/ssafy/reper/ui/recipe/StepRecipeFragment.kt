@@ -36,8 +36,10 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.ui.recipe.adapter.RecipeIngredientsAdapter
 import com.ssafy.reper.data.remote.RetrofitUtil
+import com.ssafy.reper.ui.recipe.adapter.StepLandOrderListAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,6 +52,7 @@ class StepRecipeFragment : Fragment() {
 
     // 주문 리스트 recyclerView Adapter
     private lateinit var ingredientsAdapter: RecipeIngredientsAdapter
+    private lateinit var stepLandOrderListAdapter: StepLandOrderListAdapter
 
     var nowRecipeIdx = 0
     var nowStepIdx = 0
@@ -60,10 +63,10 @@ class StepRecipeFragment : Fragment() {
     lateinit var selectedRecipeList : MutableList<Recipe>
 
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
-    private val viewModel: RecipeViewModel by viewModels()
 
     // Bundle 변수
     var whereAmICame = -1
+    lateinit var recipeIdList: MutableList<Int>
 
     // 모션인식을 위한 카메라 제공자, 실행자 초기화
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
@@ -89,6 +92,7 @@ class StepRecipeFragment : Fragment() {
         return stepRecipeBinding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d(TAG, "onViewCreated: ")
         super.onViewCreated(view, savedInstanceState)
         // 내가 어느 Fragment에서 왔는 지 Flag 처리
         whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment // 3 : FullRecipeFragment
@@ -214,36 +218,15 @@ class StepRecipeFragment : Fragment() {
     }
     // 세로 화면일 때 이벤트 처리
     fun eventPortrait(){
-
-        // stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()}")
-        // stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
-
-//        val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()
-//        val email =
-////        stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()}")
-//        stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
-        
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
-                val userInfo = withContext(Dispatchers.IO) {
-                    userService.getUserInfo(userId)
-                }
-                stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${userInfo.email}")
-            } catch (e: Exception) {
-                Log.e(TAG, "사용자 정보 조회 실패", e)
-                // 에러 시 기존 방식으로 표시
-                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()
-                stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : $userId")
-            }
-        }
+         stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${mainViewModel.userInfo.value!!.email}")
+         stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
 
         stepRecipeBinding.steprecipeFmTvMenuName?.text =
             "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
 
 
         if(nowStepIdx == -1){ // 재료를 보여줘야해!
-            showIngredient(nowRecipeIdx)
+            showIngredient(nowRecipeIdx, true)
         }
         else{ // 레시피를 보여줘야해!
             showOneStepRecipe(nowStepIdx)
@@ -251,20 +234,7 @@ class StepRecipeFragment : Fragment() {
     }
     // 가로 화면일 때 이벤트 처리
     fun eventLand(){
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
-                val userInfo = withContext(Dispatchers.IO) {
-                    userService.getUserInfo(userId)
-                }
-                stepRecipeBinding.steprecipeFmLandTvUser?.setText("이용자 : ${userInfo.email}")
-            } catch (e: Exception) {
-                Log.e(TAG, "사용자 정보 조회 실패", e)
-                // 에러 시 기존 방식으로 표시
-                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()
-                stepRecipeBinding.steprecipeFmLandTvUser?.setText("이용자 : $userId")
-            }
-        }
+        stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${mainViewModel.userInfo.value!!.email}")
 
         if(whereAmICame == 1){
             stepRecipeBinding.constraintLayout4?.visibility = View.GONE // 인덱스 안보이게
@@ -288,7 +258,7 @@ class StepRecipeFragment : Fragment() {
         }
 
         if(nowStepIdx == -1){ // 재료를 보여줘야해!
-            showIngredient(nowRecipeIdx)
+            showIngredient(nowRecipeIdx, false)
         }
         else{ // 레시피를 보여줘야해!
             showOneStepRecipe(nowStepIdx)
@@ -300,6 +270,10 @@ class StepRecipeFragment : Fragment() {
     // 3. 내가 지금 스텝인데, 마지막 스텝이라 다음 레시피의 재료를 보여줘야할 때
     // 4. 내가 지금 스텝인데, 마지막 레시피의 마지막 스탭일때
     fun nextEvent() {
+        val orientation = resources.configuration.orientation
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
+            initStepLandOrderListAdapter()
+        }
         stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.VISIBLE
 
         mainViewModel.setNowISeeStep(nowStepIdx + 1)
@@ -324,7 +298,12 @@ class StepRecipeFragment : Fragment() {
                 mainViewModel.setNowISeeRecipe(nowRecipeIdx + 1)
                 mainViewModel.setRecipeSteps(nowRecipeIdx)
                 mainViewModel.setNowISeeStep(-1)
-                showIngredient(nowRecipeIdx)
+                if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
+                    showIngredient(nowRecipeIdx, false)
+                }
+                else{
+                    showIngredient(nowRecipeIdx, true)
+                }
             }
         }
     }
@@ -334,6 +313,10 @@ class StepRecipeFragment : Fragment() {
     // 3. 내가 지금 스텝인데, 첫번쨰 스탭이라 현재 레시피의 재료를 보여줘야할 때
     // 4. 내가 재료인데, 첫번쨰 레시피의 재료일때
     fun prevEvent(){
+        val orientation = resources.configuration.orientation
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
+            initStepLandOrderListAdapter()
+        }
         stepRecipeBinding.steprecipeFmBtnRight.visibility = View.VISIBLE
 
         mainViewModel.setNowISeeStep(nowStepIdx - 1)
@@ -341,7 +324,12 @@ class StepRecipeFragment : Fragment() {
         when {
             nowStepIdx < 0 && nowRecipeIdx <= 0 ->{
                 stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.GONE
-                showIngredient(nowRecipeIdx)
+                if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
+                    showIngredient(nowRecipeIdx, false)
+                }
+                else{
+                    showIngredient(nowRecipeIdx, true)
+                }
             }
 
             // 이전 스텝이 존재하는 경우 → 이전 스텝으로 이동
@@ -350,7 +338,13 @@ class StepRecipeFragment : Fragment() {
             }
 
             nowStepIdx == -1 -> {
-                showIngredient(nowRecipeIdx)
+                val orientation = resources.configuration.orientation
+                if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
+                    showIngredient(nowRecipeIdx, false)
+                }
+                else{
+                    showIngredient(nowRecipeIdx, true)
+                }
             }
 
             nowStepIdx < 0 && nowRecipeIdx > 0-> {
@@ -366,7 +360,7 @@ class StepRecipeFragment : Fragment() {
         }
     }
     // 재료 보이게
-    fun showIngredient(recipeIdx:Int){
+    fun showIngredient(recipeIdx:Int, isPortrait:Boolean){
 //        Log.d(TAG, "showIngredient: ")
         stepRecipeBinding.lottieAnimationView.visibility = View.GONE
         stepRecipeBinding.steprecipeFmTvStep?.visibility = View.GONE
@@ -378,12 +372,14 @@ class StepRecipeFragment : Fragment() {
         }
 
         stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.VISIBLE
-        initIngredientsAdapter(recipeIdx)
+        initIngredientsAdapter(recipeIdx, isPortrait)
     }
     // 레시피 보이게
     fun showOneStepRecipe(stepIdx:Int){
 //        Log.d(TAG, "showOneStepRecipe: ")
         val recipeSteps = mainViewModel.recipeSteps.value!!
+
+        stepRecipeBinding.steprecipeFmTvMenuName?.setText("${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}")
 
         stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.GONE
         if(whereAmICame == 2){
@@ -399,11 +395,21 @@ class StepRecipeFragment : Fragment() {
         stepRecipeBinding.steprecipeFmLandTvRecipe?.setText(recipeSteps?.get(stepIdx)?.instruction)
     }
     // 재료 어뎁터 설정
-    fun initIngredientsAdapter(recipeIdx:Int) {
+    fun initIngredientsAdapter(recipeIdx:Int, isPortrait: Boolean) {
         val ingredients = mainViewModel.selectedRecipeList.value?.get(recipeIdx)?.ingredients!!
 
-        ingredientsAdapter = RecipeIngredientsAdapter(ingredients)
+        ingredientsAdapter = RecipeIngredientsAdapter(ingredients, isPortrait)
         stepRecipeBinding.steprecipeFmRvIngredients.adapter = ingredientsAdapter
+    }
+    // 가로모드일 때 선택된 메뉴 리스트 어뎁터
+    fun initStepLandOrderListAdapter(){
+        stepLandOrderListAdapter = StepLandOrderListAdapter(mainViewModel.orderRecipeList.value!!, selectedRecipeList, selectedRecipeList.get(nowRecipeIdx).recipeId)
+        stepRecipeBinding.steprecipeFmLandRvWhy!!.apply {
+            layoutManager = LinearLayoutManager(context).apply {
+                orientation = LinearLayoutManager.VERTICAL
+            }
+            adapter = stepLandOrderListAdapter
+        }
     }
 
     // 화면 회전 감지
