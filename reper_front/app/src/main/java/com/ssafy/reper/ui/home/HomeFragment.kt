@@ -23,6 +23,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
+import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.data.dto.SearchedStore
@@ -82,6 +83,8 @@ class HomeFragment : Fragment() {
         Log.d(TAG, "onViewCreated: User role = ${sharedPreferencesUtil.getUser()?.role}")
         Log.d(TAG, "onViewCreated: User ID = ${sharedPreferencesUtil.getUser()?.userId}")
 
+        recipeViewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
+
         if (sharedPreferencesUtil.getUser()?.role == "OWNER") {
             Log.d(TAG, "onViewCreated: Starting OWNER flow")
             bossViewModel.myStoreList.observe(viewLifecycleOwner) { storeList ->
@@ -128,8 +131,6 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.allRecipeFragment)
 
         }
-
-
     }
 
     private fun initFavoriteAdapter() {
@@ -144,20 +145,21 @@ class HomeFragment : Fragment() {
             val bundle =Bundle().apply {
                 putInt("whereAmICame", 1)
             }
-            recipeViewModel.getRecipe(favoriteRecipe.recipeId)
-            recipeViewModel.recipe.observe(viewLifecycleOwner){
-                val recipe = recipeViewModel.recipe.value
-
-                mainViewModel.setSelectedRecipes(mutableListOf(recipe!!))
-                Log.d(TAG, "initFavoriteAdapter: 보내질 레시피 ${mainViewModel.selectedRecipeList.value}")
+            
+             recipeViewModel.recipeList.value!!.find { it.recipeId == favoriteRecipe.recipeId }.let {
+                mainViewModel.setSelectedRecipes(mutableListOf(it!!))
                 findNavController().navigate(R.id.fullRecipeFragment, bundle)
+                 Log.d(TAG, "initFavoriteAdapter: ${it}")
             }
+            
+               
+
         }
-        
+
         rvHomeLikeRecipe.adapter = adapter
         rvHomeLikeRecipe.layoutManager = LinearLayoutManager(
-            context, 
-            LinearLayoutManager.HORIZONTAL, 
+            context,
+            LinearLayoutManager.HORIZONTAL,
             false
         )
     }
@@ -187,7 +189,7 @@ class HomeFragment : Fragment() {
         noticeViewModel.noticeList.observe(viewLifecycleOwner) { fullList ->
             // 상위 3개만 선택
             val latestNotices = fullList.take(3)
-            
+
             // 기존 데이터를 덮어쓰지 않고 새로운 리스트를 어댑터에 설정
             notiAdapter.noticeList = latestNotices
             notiAdapter.notifyDataSetChanged()
@@ -201,7 +203,7 @@ class HomeFragment : Fragment() {
 
         val observeStoreList: (List<Any>) -> Unit = { originalStoreList ->
             Log.d(TAG, "observeStoreList: Received store list, size=${originalStoreList.size}")
-            
+
             // storeId로 정렬된 리스트 생성
             val storeList = when {
                 originalStoreList.isNotEmpty() && originalStoreList[0] is SearchedStore -> {
@@ -212,7 +214,7 @@ class HomeFragment : Fragment() {
                 }
                 else -> originalStoreList
             }
-               
+
             // 기본값으로 "등록된 가게가 없습니다" 설정
             val storeNames = mutableListOf("등록된 가게가 없습니다")
             val storeIds = mutableListOf(0)
@@ -279,6 +281,7 @@ class HomeFragment : Fragment() {
                 ) {
                     val selectedStoreId = storeIds.getOrNull(position) ?: 0
                     sharedPreferencesUtil.setStoreId(selectedStoreId)
+                    recipeViewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
                     if (selectedStoreId != 0) {
                         noticeViewModel.getAllNotice(
                             selectedStoreId,

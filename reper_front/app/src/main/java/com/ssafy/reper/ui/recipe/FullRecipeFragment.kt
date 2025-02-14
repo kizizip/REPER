@@ -2,6 +2,7 @@ package com.ssafy.reper.ui.recipe
 
 import MainActivityViewModel
 import android.content.Context
+import android.os.Build.VERSION_CODES.P
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -75,6 +76,8 @@ class FullRecipeFragment : Fragment() {
         Log.d(TAG, "onViewCreated: ")
         // 내가 어느 Fragment에서 왔는 지 Flag 처리
         whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment
+        Log.d(TAG, "onViewCreated: ${whereAmICame}")
+        Log.d(TAG, "onViewCreated: ${viewModel.recipeList.value}")
 
         if(whereAmICame == 2) { // OrderRecipeFragment에서 옴
             order = mainViewModel.order.value!!
