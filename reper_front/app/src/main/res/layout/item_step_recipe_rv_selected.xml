@@ -11,6 +11,7 @@
         android:id="@+id/steprecipe_item_selected_tv_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:fontFamily="@font/pretendard_semibold"
         android:text="메뉴명"
         android:textColor="@color/lightgray"

@@ -1,6 +1,7 @@
 package com.ssafy.reper.ui
 
 
+import MainActivityViewModel
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -33,6 +34,7 @@ import com.ssafy.reper.ui.boss.BossViewModel
 import com.ssafy.reper.ui.boss.NoticeViewModel
 import com.ssafy.reper.ui.home.StoreViewModel
 import com.ssafy.reper.ui.order.OrderViewModel
+import com.ssafy.reper.util.ViewModelSingleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -55,6 +57,7 @@ class MainActivity : AppCompatActivity() {
     private val CAMERA_PERMISSION_REQUEST_CODE = 1001
     private val MICROPHONE_PERMISSION_REQUEST_CODE = 1002  // 마이크 권한 요청 코드 추가
 
+    private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val storeViewModel: StoreViewModel by viewModels()
     lateinit var sharedPreferencesUtil: SharedPreferencesUtil
     var sharedUserId = 0
@@ -77,14 +80,14 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
-
         enableEdgeToEdge()
-
         super.onCreate(savedInstanceState)
 
         sharedPreferencesUtil = SharedPreferencesUtil(applicationContext)
         sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
         sharedStoreId = sharedPreferencesUtil.getStoreId()
+
+        mainViewModel.setUserInfo(sharedUserId)
 
         // View Binding 초기화
         binding = ActivityMainBinding.inflate(layoutInflater)

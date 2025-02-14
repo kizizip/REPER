@@ -192,6 +192,7 @@ class OrderRecipeFragment : Fragment() {
         val bundle =Bundle().apply {
             putInt("whereAmICame", 2)
         }
+        mainViewModel.setOrderRecipeList(viewModel.recipeList.value!!)
         mainViewModel.setSelectedRecipes(checkedRecipeList)
         findNavController().navigate(fragmentId, bundle)
     }

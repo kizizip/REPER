@@ -73,7 +73,6 @@ class OrderFragment : Fragment() {
             }
             else{
                 orderBinding.fragmentOrderTvNoorder.visibility = View.VISIBLE
-
                 orderBinding.fragmentOrderRvOrder.visibility = View.GONE
                 orderBinding.fragmentOrderDateSpinner.visibility = View.GONE
 
@@ -141,7 +140,7 @@ class OrderFragment : Fragment() {
                     orderBinding.fragmentOrderTvNoorder.visibility = View.GONE
                     orderBinding.fragmentOrderRvOrder.visibility = View.VISIBLE
                     orderBinding.fragmentOrderDateSpinner.visibility = View.VISIBLE
-                    for (item in orderList) {
+                    for ((index, item) in orderList.withIndex()) {
                         // ISO 8601 형식의 날짜를 파싱 (UTC 기준)
                         val utcFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                         utcFormat.timeZone = TimeZone.getTimeZone("UTC") // UTC 기준
@@ -161,9 +160,9 @@ class OrderFragment : Fragment() {
                             configureDateSpinner()
                         }
                         if (selectedDate.isNotBlank() && formattedDate.substring(0, 10) == selectedDate) {
-                            if(!orderAdapter.orderList.contains(item)){
+                            if(!orderAdapter.orderList.contains(item) && index < viewModel.recipeNameList.value!!.count()){
                                 orderAdapter.orderList.add(item)
-                                orderAdapter.recipeNameList.add(viewModel.recipeNameList.value?.get(orderList.indexOf(item))?.recipeName!!)
+                                orderAdapter.recipeNameList.add(viewModel.recipeNameList.value!!.get(index).recipeName)
                             }
                         }
                     }
