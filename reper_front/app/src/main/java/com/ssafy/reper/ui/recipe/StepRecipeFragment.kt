@@ -4,7 +4,6 @@ import MainActivityViewModel
 import android.Manifest
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
@@ -31,15 +30,11 @@ import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.OrderDetail
 import com.ssafy.reper.data.dto.Recipe
-import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.databinding.FragmentStepRecipeBinding
 import com.ssafy.reper.ui.MainActivity
-import com.ssafy.reper.ui.recipe.adapter.RecipeIngredientsAdapter
-import com.ssafy.reper.util.ViewModelSingleton
 import com.ssafy.reper.util.ViewModelSingleton
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import android.Manifest
 import android.content.pm.PackageManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.ui.recipe.adapter.RecipeIngredientsAdapter
@@ -49,8 +44,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import android.content.Intent
 import android.speech.RecognitionListener
 import android.speech.SpeechRecognizer
