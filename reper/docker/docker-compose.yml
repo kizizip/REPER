@@ -18,6 +18,7 @@ services:
 
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
+      - ./jaso-analyzer:/usr/share/elasticsearch/plugins/jaso-analyzer  # 초성플러그인
 #      - ./certs:/usr/share/elasticsearch/config/certs
 #      - ./logs:/usr/share/elasticsearch/logs
     networks:
@@ -25,7 +26,7 @@ services:
     command: >
       bash -c "
       if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
-        elasticsearch-plugin install analysis-nori --batch;
+      elasticsearch-plugin install analysis-nori --batch;
       fi;
       /usr/local/bin/docker-entrypoint.sh eswrapper"
 
