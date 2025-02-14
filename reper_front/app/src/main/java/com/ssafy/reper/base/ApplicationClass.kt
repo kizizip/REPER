@@ -38,14 +38,14 @@ class ApplicationClass : Application() {
         // 부모 클래스의 onCreate 호출
         super.onCreate()
 
-        sharedPreferencesUtil= SharedPreferencesUtil(applicationContext)
+        sharedPreferencesUtil = SharedPreferencesUtil(applicationContext)
 
         // OkHttpClient 설정 (타임아웃 관련 설정 추가)
         val client = OkHttpClient.Builder()
             .connectTimeout(600, TimeUnit.SECONDS)  // 연결 타임아웃
             .writeTimeout(600, TimeUnit.SECONDS)    // 쓰기 타임아웃
             .readTimeout(600, TimeUnit.SECONDS)     // 읽기 타임아웃
-            .addInterceptor(ReceivedCookiesInterceptor())  // 쿠키 인터셉터 추가
+            .addInterceptor(ReceivedCookiesInterceptor(applicationContext))  // 쿠키 인터셉터 추가
             .build()
 
         // Kakao SDK 초기화 (카카오 로그인 기능을 위한 설정)

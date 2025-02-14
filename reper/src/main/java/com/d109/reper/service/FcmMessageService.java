@@ -16,7 +16,9 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -73,6 +75,15 @@ public class FcmMessageService {
     public void sendFcmMessage(FcmMessageRequest request) {
         initialize();
         FcmMessageResponseDto messageDto = createFcmMessage(request);
+
+        // response 데이터 확인용
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonMessage = objectMapper.writeValueAsString(messageDto);
+            System.out.println("FCM 메시지 전송: " + jsonMessage);
+        } catch (Exception e) {
+            System.err.println("FCM 메시지 변환 오류: " + e.getMessage());
+        }
         sendFcmNotification(messageDto);
     }
 
@@ -80,6 +91,15 @@ public class FcmMessageService {
      * FcmMessageRequest 객체를 이용하여 FCM 메시지 DTO 생성
      */
     private FcmMessageResponseDto createFcmMessage(FcmMessageRequest request) {
+
+        Map<String, String> data = new HashMap<>();
+        if (request.getTargetFragment() != null) {
+            data.put("targetFragment", request.getTargetFragment());
+        }
+        if (request.getRequestId() != null) {
+            data.put("requestId", String.valueOf(request.getRequestId()));
+        }
+
         return FcmMessageResponseDto.builder()
                 .message(FcmMessageResponseDto.Message.builder()
                         .token(request.getToken())  // 한 개의 토큰만 전달
@@ -87,7 +107,7 @@ public class FcmMessageService {
                                 .title(request.getTitle())
                                 .body(request.getBody())
                                 .build())
-                        .data(request.getData()) // ✅ 추가 데이터 포함
+                        .data(data)
                         .build())
                 .build();
     }
@@ -116,4 +136,6 @@ public class FcmMessageService {
             log.error("FCM 메시지 전송 중 오류 발생: ", e);
         }
     }
+
+
 }

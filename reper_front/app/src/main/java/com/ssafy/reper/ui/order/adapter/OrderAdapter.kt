@@ -89,7 +89,7 @@ class OrderAdatper(var orderList:MutableList<Order>, var recipeNameList:MutableL
         return orderList.size
     }
 
-    // 시간처리 -> 1분전... 1시간전... 2025-01-27...
+//     시간처리 -> 1분전... 1시간전... 2025-01-27...
     @RequiresApi(Build.VERSION_CODES.O)
     fun getRelativeTime(orderDate: String): String {
         // ISO 8601 형식 처리 (공백이 아니라 'T'로 구분된 문자열을 사용해야 함)

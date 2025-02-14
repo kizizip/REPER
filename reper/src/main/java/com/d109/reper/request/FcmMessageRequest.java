@@ -3,9 +3,8 @@ package com.d109.reper.request;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -31,4 +30,5 @@ public class FcmMessageRequest {
         this.data.put("targetFragment", targetFragment);  // String으로 변환해서 넣기
         this.data.put("requestId", String.valueOf(requestId));  // Integer를 String으로 변환해서 넣기
     }
+
 }

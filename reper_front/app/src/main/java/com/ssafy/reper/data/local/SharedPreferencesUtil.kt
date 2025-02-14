@@ -73,6 +73,7 @@ import android.util.Log
 import com.ssafy.reper.data.dto.LoginResponse
 import com.ssafy.reper.data.dto.UserInfo
 
+private const val TAG = "SharedPreferencesUtil_정언"
 class SharedPreferencesUtil(context: Context) {
     private var preferences: SharedPreferences = context.applicationContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
@@ -80,6 +81,7 @@ class SharedPreferencesUtil(context: Context) {
         private const val SHARED_PREFERENCES_NAME = "reper_preference"
         private const val KEY_USER_COOKIE = "user_cookie"
         private const val STORE_ID = "1"
+        private const val KEY_COOKIE_EXPIRY = "cookie_expiry"
     }
 
 
@@ -92,11 +94,11 @@ class SharedPreferencesUtil(context: Context) {
     }
 
     fun getStoreId() :Int{
-        return preferences.getInt(STORE_ID, 1)
+        return preferences.getInt(STORE_ID, 0)
     }
 
-    fun setStoreId(storeId: Int){
-        preferences.edit().putInt(STORE_ID, storeId).apply()
+    fun setStoreId(storeId: Int?){
+        storeId?.let { preferences.edit().putInt(STORE_ID, it).apply() }
     }
 
     //사용자 정보 저장
@@ -116,22 +118,6 @@ class SharedPreferencesUtil(context: Context) {
             role = preferences.getString("role", ""),
         )
     }
-
-
-    //스토어 정보 받아 오기
-    fun addStore(storeId: Int) {
-        val editor = preferences.edit()
-        editor.putInt("storeId", storeId)
-        editor.apply()
-        Log.d("SharedPreferencesUtil", "Store ID saved: $storeId")
-    }
-
-    fun getStore(): Int {
-        val storeId = preferences.getInt("storeId", 0)
-        Log.d("SharedPreferencesUtil", "Store ID retrieved: $storeId")
-        return storeId
-    }
-
 
     fun addStateLoad(state: String?) {
         val editor = preferences.edit()
@@ -166,7 +152,24 @@ class SharedPreferencesUtil(context: Context) {
             remove("userId")
             remove("username")
             remove("role")
+            remove(KEY_COOKIE_EXPIRY)
             apply()
         }
+    }
+
+    // 쿠키 만료 시간 저장
+    fun saveCookieExpiry(expiryTime: Long) {
+        preferences.edit().putLong(KEY_COOKIE_EXPIRY, expiryTime).apply()
+    }
+
+    // 쿠키 만료 시간 확인
+    fun getCookieExpiry(): Long {
+        return preferences.getLong(KEY_COOKIE_EXPIRY, 0)
+    }
+
+    // 쿠키가 유효한지 확인
+    fun isCookieValid(): Boolean {
+        val expiryTime = getCookieExpiry()
+        return expiryTime > System.currentTimeMillis()
     }
 }

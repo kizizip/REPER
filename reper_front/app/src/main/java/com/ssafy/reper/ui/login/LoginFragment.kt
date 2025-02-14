@@ -1,8 +1,10 @@
 package com.ssafy.reper.ui.login
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -36,6 +38,9 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import android.view.animation.AnimationUtils
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -45,6 +50,9 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.auth.ktx.auth
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 
 private const val TAG = "LoginFragment_레퍼"
 
@@ -276,11 +284,30 @@ class LoginFragment : Fragment() {
 
                         } else if (isGoogle) { // 구글로 회원가입을 진행했더라면
                             // 다른 소셜 로그인 으로 회원가입을 한 적이있다고 표시 하고 로그인창으로 돌려보냄
-                            Toast.makeText(requireContext(), "다른 소셜 로그인 으로 회원가입을 한 적이있다고 표시", Toast.LENGTH_SHORT).show()
-                            // parentFragmentManager.beginTransaction()
-                            //     .replace(R.id.activityLoginFragmentContainer, LoginFragment())
-                            //     .addToBackStack(null)
-                            //     .commit()
+                            val dialog = Dialog(requireContext())
+                            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                            dialog.setContentView(R.layout.dialog_social_login)
+
+                            val socialLoginTitle = dialog.findViewById<TextView>(R.id.social_login_tv_title)
+                            socialLoginTitle.text = "Google"
+                            socialLoginTitle.setTextColor(Color.parseColor("#5398FF"))
+
+                            dialog.show()
+
+                            val socialLoginBtn = dialog.findViewById<ConstraintLayout>(R.id.logout_d_btn_positive)
+                            socialLoginBtn.setOnClickListener {
+                                dialog.dismiss()
+                            }
+                        } else {
+                            val dialog = Dialog(requireContext())
+                            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                            dialog.setContentView(R.layout.dialog_inapp_login)
+                            dialog.show()
+    
+                            val socialLoginBtn = dialog.findViewById<ConstraintLayout>(R.id.logout_d_btn_positive)
+                            socialLoginBtn.setOnClickListener {
+                                dialog.dismiss()
+                            }
                         }
 
 
@@ -332,8 +359,12 @@ class LoginFragment : Fragment() {
 
 
     private fun loginWithGoogle() {
-        val signInIntent = googleSignInClient.signInIntent
-        startActivityForResult(signInIntent, RC_SIGN_IN) // Google 로그인 화면 실행
+        // 기존 로그인 정보 삭제
+        googleSignInClient.signOut().addOnCompleteListener {
+            // 로그아웃 완료 후 새로운 로그인 시도
+            val signInIntent = googleSignInClient.signInIntent
+            startActivityForResult(signInIntent, RC_SIGN_IN)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -379,7 +410,6 @@ class LoginFragment : Fragment() {
     // 로그인 성공 시 UI 업데이트 및 JoinFragment로 이동
     private suspend fun updateUI(user: FirebaseUser?) {
         if (user != null) {
-
             // 이메일 중복 확인
             val isEmailDuplicate = user.email?.let { RetrofitUtil.authService.checkEmail(it) }
 
@@ -399,12 +429,85 @@ class LoginFragment : Fragment() {
                     .addToBackStack(null)
                     .commit()
             } else {
-                // 중복일 경우 로그인 처리
-                // 로그인 처리
-//                handleLoginAttempt(user.email!!, "")
-                Toast.makeText(requireContext(), "구글 로그인 처리", Toast.LENGTH_SHORT).show()
-            }   
+                try {
+                    // 중복일 경우 로그인 처리
+                    val email = user.email
+                    val isKakao = email?.let { RetrofitUtil.authService.checkKakao(it) }
+                    val isGoogle = email?.let { RetrofitUtil.authService.checkGoogle(it) }
 
+                    if (isGoogle == true) {
+                        // 로그인 처리
+                        val userInfo = email?.let { RetrofitUtil.googleService.googleLogin(it) }
+                        
+                        // SharedPreferences에 저장
+                        val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
+
+                        val userinfo = UserInfo(
+                            userId = userInfo?.userId ?: -1,  // null일 경우 -1L을 기본값으로 사용
+                            username = userInfo?.userName ?: "",  // null일 경우 빈 문자열 사용
+                            role = userInfo?.role ?: ""  // null일 경우 빈 문자열 사용
+                        )
+
+                        sharedPreferencesUtil.addUser(userinfo)
+
+                        // 메인 화면으로 이동
+                        navigateToMainActivity()
+
+                    } else if (isKakao == true) {
+                        // 다른 소셜 로그인 으로 회원가입을 한 적이있다고 표시 하고 로그인창으로 돌려보냄
+                        val dialog = Dialog(requireContext())
+                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        dialog.setContentView(R.layout.dialog_social_login)
+                        
+                        val socialLoginTitle = dialog.findViewById<TextView>(R.id.social_login_tv_title)
+                        socialLoginTitle.text = "Kakao Talk"
+                        socialLoginTitle.setTextColor(Color.parseColor("#ADB135"))
+                        
+                        dialog.show()
+
+                        val socialLoginBtn = dialog.findViewById<ConstraintLayout>(R.id.logout_d_btn_positive)
+                        socialLoginBtn.setOnClickListener {
+                            dialog.dismiss()
+                        }
+                    } else {
+                        val dialog = Dialog(requireContext())
+                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        dialog.setContentView(R.layout.dialog_inapp_login)
+                        dialog.show()
+
+                        val socialLoginBtn = dialog.findViewById<ConstraintLayout>(R.id.logout_d_btn_positive)
+                        socialLoginBtn.setOnClickListener {
+                            dialog.dismiss()
+                        }
+                        
+                    }
+                } catch (e: HttpException) {
+                    val errorBody = e.response()?.errorBody()?.string()
+                    Log.e(TAG, "updateUI: HTTP 오류 발생")
+                    Log.e(TAG, "updateUI: 상태 코드 = ${e.code()}")
+                    Log.e(TAG, "updateUI: 에러 메시지 = ${e.message()}")
+                    Log.e(TAG, "updateUI: 에러 바디 = $errorBody")
+                    Log.e(TAG, "updateUI: 요청 URL = ${e.response()?.raw()?.request?.url}")
+                    
+                    withContext(Dispatchers.Main) {
+                        when (e.code()) {
+                            500 -> Toast.makeText(requireContext(), "서버 내부 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                            400 -> Toast.makeText(requireContext(), "잘못된 요청입니다.", Toast.LENGTH_SHORT).show()
+                            401 -> Toast.makeText(requireContext(), "인증에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                            else -> Toast.makeText(requireContext(), "오류가 발생했습니다: ${e.code()}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "updateUI: 일반 오류 발생")
+                    Log.e(TAG, "updateUI: 오류 종류 = ${e.javaClass.simpleName}")
+                    Log.e(TAG, "updateUI: 오류 메시지 = ${e.message}")
+                    Log.e(TAG, "updateUI: 발생 위치", e)  // 스택 트레이스를 통해 정확한 오류 발생 위치 확인
+                    
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "예기치 않은 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }   
+            }
 
         } else {
             Toast.makeText(requireContext(), "Firebase 인증 실패", Toast.LENGTH_SHORT).show()

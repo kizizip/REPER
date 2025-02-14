@@ -1,11 +1,13 @@
 package com.d109.reper.controller;
 
 import com.d109.reper.domain.Recipe;
+import com.d109.reper.domain.RecipeStep;
 import com.d109.reper.domain.Store;
 import com.d109.reper.elasticsearch.NoticeDocument;
 import com.d109.reper.elasticsearch.RecipeDocument;
 import com.d109.reper.repository.StoreRepository;
 import com.d109.reper.response.RecipeResponseDto;
+import com.d109.reper.response.RecipeStepResponseDto;
 import com.d109.reper.service.RecipeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api")
@@ -192,5 +195,30 @@ public class RecipeController {
 
         return ResponseEntity.ok(results);
     }
+
+
+    // 단계별 레시피 조회
+    @GetMapping("/stores/{storeId}/recipes/{recipeId}/step/{stepNumber}")
+    @Operation(summary = "레시피 특정 단계 조회")
+    public ResponseEntity<RecipeStepResponseDto> getRecipeStep(@PathVariable Long storeId, @PathVariable Long recipeId, @PathVariable Long stepNumber) {
+        try {
+            Recipe recipe = recipeService.findRecipe(recipeId);
+            if (!recipe.getStore().getStoreId().equals(storeId)) {
+                throw new IllegalArgumentException("해당 storeId와 recipeId가 일치하지 아니함.");
+            }
+
+            RecipeStep step = recipe.getRecipeSteps().stream()
+                    .filter(s -> s.getStepNumber() == stepNumber)
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchElementException("해당 stepNumber에 해당하는 데이터를 찾을 수 없음."));
+
+            RecipeStepResponseDto responseDto = new RecipeStepResponseDto(step);
+
+            return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("요청이 적절하지 않음.");
+        }
+    }
+
 
 }

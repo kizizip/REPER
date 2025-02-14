@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RequestStore
+import com.ssafy.reper.data.dto.SearchedStore
 import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.data.remote.RetrofitUtil
@@ -21,10 +22,10 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
     private val sharedPreferencesUtil = SharedPreferencesUtil(application.applicationContext)
 
     //스토어 정보 리스트
-    private val _myStoreList = MutableLiveData<List<Store>>()
-    val myStoreList: MutableLiveData<List<Store>> get() = _myStoreList
+    private val _myStoreList = MutableLiveData<List<SearchedStore>>()
+    val myStoreList: MutableLiveData<List<SearchedStore>> get() = _myStoreList
 
-    fun setMyStoreList(list: List<Store>) {
+    fun setMyStoreList(list: List<SearchedStore>) {
         _myStoreList.value = list
     }
 
@@ -62,16 +63,16 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-
     fun getAllEmployee(storeId: Int) {
         viewModelScope.launch {
             runCatching {
                 RetrofitUtil.storeService.allEmployee(storeId)
             }.onSuccess { employees ->
                 val access = employees.filter { it.employed }  // employed가 true인 직원들
-                val waiting = employees.filter { !it.employed } // employed가 false인 직원들
-                getAccessEmployeeList(access)
-                getWaitingEmployee(waiting)
+                val waiting = employees.filter { !it.employed } // employed가 false인 직원들_
+                _accessList.value = access
+                _waitingList.value = waiting
+                Log.d(TAG, "getAllEmployee: ${storeId}")
                 Log.d(TAG, "Access: $access")
                 Log.d(TAG, "Waiting: $waiting")
             }.onFailure {
@@ -80,7 +81,7 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun deleteEmployee(storeId: Int,userId: Int){
+    fun deleteEmployee(storeId: Int, userId: Int) {
         viewModelScope.launch {
             runCatching {
                 RetrofitUtil.storeEmployeeService.deleteEmployee(storeId, userId)
@@ -93,7 +94,7 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun acceptEmployee(storeId: Int,userId: Int){
+    fun acceptEmployee(storeId: Int, userId: Int) {
         viewModelScope.launch {
             runCatching {
                 RetrofitUtil.storeEmployeeService.acceptEmployee(storeId, userId)
@@ -109,13 +110,14 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getStoreList(userId: Int) {
         viewModelScope.launch {
-            runCatching {
-                RetrofitUtil.storeService.findBossStore(userId)
-            }.onSuccess {
-                _myStoreList.value = it
-                Log.d(TAG, "getStoreList: ${it}")
-            }.onFailure {
-                Log.d(TAG, "getStoreList: ${it.message}")
+            try {
+                Log.d(TAG, "getStoreList: Starting request for userId=$userId")
+                val response = RetrofitUtil.storeService.findBossStore(userId)
+                Log.d(TAG, "getStoreList: Response received, size=${response.size}")
+                _myStoreList.postValue(response)
+            } catch (e: Exception) {
+                Log.e(TAG, "getStoreList error: ${e.message}")
+                _myStoreList.postValue(emptyList())
             }
         }
     }
@@ -161,7 +163,7 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
                 Log.d(TAG, "uploadRecipe: 성공")
                 sharedPreferencesUtil.addStateLoad("success")
                 setRecipeLoad("success")
-                getMenuList(storeId )
+                getMenuList(storeId)
             }.onFailure {
                 sharedPreferencesUtil.addStateLoad("failure")
                 setRecipeLoad("failure")
@@ -177,31 +179,30 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
                 RetrofitUtil.recipeService.getStoreRecipe(storeId)
             }.onSuccess {
                 setRecipeList(it)
+                Log.d(TAG, "getMenuList: ${storeId}")
                 Log.d(TAG, "getMenuList: $it")
             }.onFailure {
+                Log.d(TAG, "getMenuList: ${storeId}")
                 Log.d(TAG, "getMenuList: ${it.message}")
             }
         }
     }
 
-    fun deleteRecipe(recipeId: Int, storeId: Int):String {
-        var message = ""
+    fun deleteRecipe(recipeId: Int, storeId: Int){
         viewModelScope.launch {
-         runCatching {
-             RetrofitUtil.recipeService.recipeDelete(recipeId)
-         }.onSuccess {
-             getMenuList(storeId)
-           message =  "레시피 삭제 성공"
-         }.onFailure {
-             message =  "레시피 삭제실패"
-             Log.d(TAG, "deleteRecipe: ${it}")
-         }
+            runCatching {
+                RetrofitUtil.recipeService.recipeDelete(recipeId)
+            }.onSuccess {
+                getMenuList(storeId)
+                Log.d(TAG, "deleteRecipe: ${recipeId}")
+            }.onFailure {
+                Log.d(TAG, "deleteRecipe: ${it}")
+            }
         }
-        return message
     }
 
 
-    fun searchRecipe(storeId: Int, recipeName: String){
+    fun searchRecipe(storeId: Int, recipeName: String) {
         viewModelScope.launch {
             runCatching {
                 RetrofitUtil.recipeService.searchRecipe(storeId, recipeName)

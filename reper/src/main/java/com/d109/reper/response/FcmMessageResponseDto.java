@@ -3,7 +3,7 @@ package com.d109.reper.response;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
+import java.util.HashMap;
 import java.util.Map;
 
 @Getter
@@ -20,7 +20,11 @@ public class FcmMessageResponseDto {
     public static class Message {
         private String token;
         private Notification notification;
-        private Map<String, String> data; // ← 추가된 부분
+
+        // order FCM respose data 위해서 필드 추가
+            // data 필요없는 알림들 위해 null 방지 default 설정
+        @Builder.Default
+        private Map<String, String> data = new HashMap<>();
     }
 
     @Getter

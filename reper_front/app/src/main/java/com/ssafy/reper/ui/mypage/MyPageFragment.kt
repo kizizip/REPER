@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,18 +19,26 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.R
+import com.ssafy.reper.base.ApplicationClass.Companion.sharedPreferencesUtil
 import com.ssafy.reper.data.dto.OwnerStore
+import com.ssafy.reper.data.dto.SearchedStore
 import com.ssafy.reper.data.dto.Store
+import com.ssafy.reper.data.dto.StoreResponseUser
 import com.ssafy.reper.data.dto.UserInfo
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.databinding.FragmentMyPageBinding
+import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
+import com.ssafy.reper.ui.boss.BossViewModel
+import com.ssafy.reper.ui.boss.NoticeViewModel
+import com.ssafy.reper.ui.home.StoreViewModel
 import com.ssafy.reper.ui.login.LoginActivity
 import com.ssafy.reper.ui.mypage.adapter.StoreSearchAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -37,12 +46,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+private const val TAG = "MyPageFragment_싸피"
+
 class MyPageFragment : Fragment() {
 
     private lateinit var mainActivity: MainActivity
 
     private var _myPageBinding: FragmentMyPageBinding? = null
     private val myPageBinding get() = _myPageBinding!!
+    private val fcmViewModel: FcmViewModel by activityViewModels()
+    private val bossViewModel: BossViewModel by activityViewModels()
+    private val storeViewModel: StoreViewModel by activityViewModels()
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -69,55 +84,25 @@ class MyPageFragment : Fragment() {
 
         val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
         val user = sharedPreferencesUtil.getUser()
-        var ownerStoreList: List<OwnerStore> = mutableListOf()  // 사장 가게 조회
-        var employeeStoreList: List<Store> = mutableListOf()    // 직원 가게 조회
-        
-        // 사장 or 직원 표시
+
         if (user.role == "OWNER") {
             myPageBinding.mypageFmTvYellow.text = "${user.username} 사장"
             myPageBinding.mypageFmBtnBossMenu.text = "사장님 메뉴"
 
-            // 사장 가게 정보 조회
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    ownerStoreList = RetrofitUtil.storeService.getStoreListByOwnerId(user.userId.toString())
-                    withContext(Dispatchers.Main) {
-                        myPageBinding.mypageFmTvStoreNum.text = "${ownerStoreList.size}"
-                        setupSpinner(ownerStoreList, user.role)  // 파라미터 전달
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(requireContext(), "매장 정보 조회 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
-
-
         } else {
             myPageBinding.mypageFmTvYellow.text = "${user.username} 직원"
             myPageBinding.mypageFmBtnBossMenu.text = "권한 요청"
-            myPageBinding.textView7.text = "근무매장 수 : "
-
-            // 직원 가게 정보 조회
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    employeeStoreList = RetrofitUtil.storeService.getStoreListByEmployeeId(user.userId)
-                    withContext(Dispatchers.Main) {
-                        myPageBinding.mypageFmTvStoreNum.text = "${employeeStoreList.size}"
-                        setupSpinner(employeeStoreList, user.role.toString())  // 파라미터 전달
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(requireContext(), "매장 정보 조회 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
         }
 
+
         startSequentialAnimation()
+        setupSpinner()
         initEvent()
+
+
     }
+
+
 
     private fun startSequentialAnimation() {
         // 뷰가 유효한지 확인
@@ -206,38 +191,85 @@ class MyPageFragment : Fragment() {
         }
     }
 
-    private fun setupSpinner(storeList: List<Any>, role: String) {
+    private fun setupSpinner() {
         val binding = _myPageBinding ?: return
-        
+
         // 가게 이름 Spinner 설정
-        val spinner = binding.mypageFmSp
-        
-        val storeNames = if (role == "OWNER") {
-            (storeList as List<OwnerStore>).map { it.storeName }
+        val spinner = myPageBinding.mypageFmSp
+
+        val observeStoreList: (List<Any>) -> Unit = { storeList ->
+            val storeNames: MutableList<String>
+            val storeIds: MutableList<Int>
+
+            // OWNER와 USER의 Store DTO가 다르므로, 그에 맞게 처리
+            if (storeList.isNotEmpty()) {
+                when (val firstItem = storeList[0]) {
+                    is SearchedStore -> {
+                        // SearchedStore DTO 처리
+                        storeNames = storeList.map { (it as SearchedStore).storeName ?: "등록된 가게가 없습니다." }.toMutableList()
+                        storeIds = storeList.map { (it as SearchedStore).storeId ?: 0}.toMutableList()
+                    }
+                    is StoreResponseUser -> {
+                        // StoreResponseUser DTO 처리
+                        storeNames = storeList.map { (it as StoreResponseUser).name}.toMutableList()
+                        storeIds = storeList.map { (it as StoreResponseUser).storeId }.toMutableList()
+                    }
+                    else -> {
+                        // 타입이 예상과 다르면 기본값 처리
+                        storeNames = mutableListOf("등록된 가게가 없습니다.")
+                        storeIds = mutableListOf(0)
+                        sharedPreferencesUtil.setStoreId(0)
+                    }
+                }
+            } else {
+                // 리스트가 비어 있으면 기본값 처리
+                storeNames = mutableListOf("등록된 가게가 없습니다.")
+                storeIds = mutableListOf(0)
+                sharedPreferencesUtil.setStoreId(0)
+            }
+
+            // Adapter 설정
+            val adapter = ArrayAdapter(
+                requireContext(),
+                R.layout.home_spinner_item,
+                storeNames
+            ).apply {
+                setDropDownViewResource(R.layout.home_spinner_item)
+            }
+
+            spinner.adapter = adapter
+
+            // 저장된 storeId 가져오기
+            val savedStoreId = sharedPreferencesUtil.getStoreId()
+            val defaultIndex = storeIds.indexOfFirst { it == savedStoreId }
+
+            // 기본 선택 인덱스 설정
+            if (defaultIndex != -1) {
+                spinner.setSelection(defaultIndex)
+            }
+
+            spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    // 선택된 storeId 저장
+                    val selectedStoreId = storeIds.getOrNull(position)
+                    selectedStoreId?.let { sharedPreferencesUtil.setStoreId(it) }
+
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        }
+
+        // OWNER인지 아닌지에 따라 다른 뷰모델을 사용
+        if (sharedPreferencesUtil.getUser().role == "OWNER") {
+            bossViewModel.myStoreList.observe(viewLifecycleOwner, observeStoreList)
         } else {
-            (storeList as List<Store>).map { it.name }
-        }
-
-        val adapter = ArrayAdapter(requireContext(), R.layout.mypage_spinner_item, storeNames).apply {
-            setDropDownViewResource(R.layout.mypage_spinner_item)
-        }
-
-        spinner.adapter = adapter
-
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val selectedItem = storeNames[position]
-                // 선택된 항목 처리
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // 아무것도 선택되지 않았을 때의 처리
-            }
+            storeViewModel.myStoreList.observe(viewLifecycleOwner, observeStoreList)
         }
     }
 
@@ -261,23 +293,41 @@ class MyPageFragment : Fragment() {
 
                 // 초기 상태 설정
                 dialog.findViewById<RecyclerView>(R.id.request_access_d_rv).visibility = View.GONE
-                dialog.findViewById<TextView>(R.id.request_access_d_no_result).visibility = View.VISIBLE
+                dialog.findViewById<TextView>(R.id.request_access_d_no_result).visibility =
+                    View.VISIBLE
 
                 dialog.findViewById<EditText>(R.id.request_access_d_et)
                     .addTextChangedListener(object : TextWatcher {
-                        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                        override fun beforeTextChanged(
+                            s: CharSequence?,
+                            start: Int,
+                            count: Int,
+                            after: Int
+                        ) {
+                        }
+
+                        override fun onTextChanged(
+                            s: CharSequence?,
+                            start: Int,
+                            before: Int,
+                            count: Int
+                        ) {
+                        }
+
                         override fun afterTextChanged(s: Editable?) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
                                     val searchText = s.toString()
                                     if (searchText.isNotEmpty()) {
                                         // 엘라스틱 서치
-                                        val storeList = RetrofitUtil.storeService.searchAllStores(searchText)
+                                        val storeList =
+                                            RetrofitUtil.storeService.searchAllStores(searchText)
                                         withContext(Dispatchers.Main) {
-                                            val recyclerView = dialog.findViewById<RecyclerView>(R.id.request_access_d_rv)
-                                            val noResultText = dialog.findViewById<TextView>(R.id.request_access_d_no_result)
-                                            
+                                            val recyclerView =
+                                                dialog.findViewById<RecyclerView>(R.id.request_access_d_rv)
+                                            val noResultText =
+                                                dialog.findViewById<TextView>(R.id.request_access_d_no_result)
+
                                             if (storeList.isEmpty()) {
                                                 // 검색 결과가 없을 때
                                                 recyclerView.visibility = View.GONE
@@ -286,7 +336,7 @@ class MyPageFragment : Fragment() {
                                                 // 검색 결과가 있을 때
                                                 recyclerView.visibility = View.VISIBLE
                                                 noResultText.visibility = View.GONE
-                                                
+
                                                 recyclerView.layoutManager =
                                                     LinearLayoutManager(requireContext())
                                                 recyclerView.addItemDecoration(
@@ -307,12 +357,13 @@ class MyPageFragment : Fragment() {
                                                     // 확인 메시지를 보여주는 레이아웃 표시
                                                     dialog.findViewById<ConstraintLayout>(R.id.request_access_d_cl_tv).visibility =
                                                         View.VISIBLE
-                                                    
+
                                                     // 확인 버튼 활성화
-                                                    dialog.findViewById<ConstraintLayout>(R.id.request_access_d_btn_positive).apply {
-                                                        isEnabled = true
-                                                        alpha = 1.0f  // 버튼 투명도를 원래대로 설정
-                                                    }
+                                                    dialog.findViewById<ConstraintLayout>(R.id.request_access_d_btn_positive)
+                                                        .apply {
+                                                            isEnabled = true
+                                                            alpha = 1.0f  // 버튼 투명도를 원래대로 설정
+                                                        }
                                                 }
                                                 recyclerView.adapter = adapter
                                             }
@@ -320,8 +371,10 @@ class MyPageFragment : Fragment() {
                                     } else {
                                         // 검색어가 비어있을 때
                                         withContext(Dispatchers.Main) {
-                                            dialog.findViewById<RecyclerView>(R.id.request_access_d_rv).visibility = View.GONE
-                                            dialog.findViewById<TextView>(R.id.request_access_d_no_result).visibility = View.VISIBLE
+                                            dialog.findViewById<RecyclerView>(R.id.request_access_d_rv).visibility =
+                                                View.GONE
+                                            dialog.findViewById<TextView>(R.id.request_access_d_no_result).visibility =
+                                                View.VISIBLE
                                         }
                                     }
                                 } catch (e: Exception) {
@@ -367,6 +420,15 @@ class MyPageFragment : Fragment() {
                                         "권한 요청 완료",
                                         Toast.LENGTH_SHORT
                                     ).show()
+                                    RetrofitUtil.storeService.getStore(storeId!!).let {
+                                        fcmViewModel.sendToUserFCM(
+                                            it.ownerId,
+                                            "권한요청알림",
+                                            "${sharedPreferencesUtil.getUser().username}님께서 ${it.storeName}에 권한을 요청하셨습니다.",
+                                            "BossFragment",
+                                            it.storeId
+                                        )
+                                    }
                                 }
 
                             } catch (e: Exception) {
@@ -381,6 +443,7 @@ class MyPageFragment : Fragment() {
                         }
                         dialog.dismiss()
                     }
+
 
                 dialog.show()
             }
@@ -414,6 +477,15 @@ class MyPageFragment : Fragment() {
 
         myPageBinding.mypageFmBtnEdit.setOnClickListener {
             findNavController().navigate(R.id.editMyAccountFragment)
+        }
+
+        myPageBinding.mypageFmBtnNotice.setOnClickListener {
+            findNavController().navigate(R.id.noticeManageFragment)
+
+        }
+        myPageBinding.mypageFmBtnRecipe.setOnClickListener {
+            findNavController().navigate(R.id.allRecipeFragment)
+
         }
     }
 }

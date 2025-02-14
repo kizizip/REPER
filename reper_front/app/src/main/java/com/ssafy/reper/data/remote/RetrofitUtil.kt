@@ -13,6 +13,7 @@ class RetrofitUtil {
         val orderService = ApplicationClass.retrofit.create(OrderService::class.java)
         val authService = ApplicationClass.retrofit.create(AuthApi::class.java)
         val kakaoService = ApplicationClass.retrofit.create(KakaoApi::class.java)
-
+        val googleService = ApplicationClass.retrofit.create(GoogleApi::class.java)
+        val userService = ApplicationClass.retrofit.create(UserService::class.java)
     }
 }
