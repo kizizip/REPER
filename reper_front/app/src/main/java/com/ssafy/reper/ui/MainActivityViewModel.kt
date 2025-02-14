@@ -5,17 +5,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeStep
 import com.ssafy.reper.data.remote.RetrofitUtil
+import com.ssafy.reper.data.remote.RetrofitUtil.Companion.storeService
+import com.ssafy.reper.data.remote.RetrofitUtil.Companion.recipeService
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 private const val TAG = "MainActivityViewModel_정언"
 class MainActivityViewModel(application: Application) :  AndroidViewModel(application) {
-    private val storeService = RetrofitUtil.storeService
-
-    private val _isDataReady = MutableLiveData<Boolean>()
+        private val _isDataReady = MutableLiveData<Boolean>()
     val isDataReady: LiveData<Boolean> = _isDataReady
 
     private val _order = MutableLiveData<Order?>(null)
@@ -36,12 +38,53 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
     private val _isEmployee = MutableLiveData<Boolean?>(null)
     val isEmployee: LiveData<Boolean?> = _isEmployee
 
-    fun setSelectedRecipes(recipeList:MutableList<Recipe>){
+    private val _favoriteRecipeList =
+        MutableLiveData<MutableList<FavoriteRecipe>>()
+    val favoriteRecipeList: LiveData<MutableList<FavoriteRecipe>>
+        get() = _favoriteRecipeList
+
+    fun getLikeRecipes(storeId:Int, userId:Int){
+        viewModelScope.launch {
+            var list:MutableList<FavoriteRecipe>
+            try {
+                list = recipeService.getLikeRecipes(storeId, userId)
+            }
+            catch (e: HttpException){
+                Log.d(TAG, "getLikeRecipes :error: ${e.response()?.errorBody().toString()}")
+                list = mutableListOf()
+            }
+            _favoriteRecipeList.value = list
+        }
+    }
+
+    fun setSelectedRecipeGoToStepRecipe(recipeList:MutableList<Recipe>, nowISeeStep:Int){
         viewModelScope.launch {
             try {
                 _selectedRecipeList.value = recipeList
                 Log.d(TAG, "setSelectedRecipes: ${selectedRecipeList.value}")
 
+                _nowISeeRecipe.value = 0
+                Log.d(TAG, "_nowIseeRecipe: ${nowISeeRecipe.value}")
+                _nowISeeStep.value = nowISeeStep
+                Log.d(TAG, "_nowISeeStep: ${nowISeeStep}")
+                _recipeSteps.value = recipeList.get(0).recipeSteps
+                Log.d(TAG, "_recipeSteps: ${recipeSteps.value}")
+                _isDataReady.postValue(true)
+                Log.d(TAG, "_isDataReady: ${isDataReady.value}")
+            }
+            catch (e:Exception){
+                Log.e(TAG, "Error fetching recipes: ${e.message}", e)
+                _isDataReady.value = false
+            }
+        }
+    }
+
+    fun setSelectedRecipes(recipeList:MutableList<Recipe>){
+        viewModelScope.launch {
+            try {
+                _selectedRecipeList.value = recipeList
+                Log.d(TAG, "setSelectedRecipes: ${selectedRecipeList.value}")
+                
                 _nowISeeRecipe.value = 0
                 Log.d(TAG, "_nowIseeRecipe: ${nowISeeRecipe.value}")
                 _nowISeeStep.value = -1

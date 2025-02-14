@@ -73,6 +73,7 @@ import android.util.Log
 import com.ssafy.reper.data.dto.LoginResponse
 import com.ssafy.reper.data.dto.UserInfo
 
+private const val TAG = "SharedPreferencesUtil_정언"
 class SharedPreferencesUtil(context: Context) {
     private var preferences: SharedPreferences = context.applicationContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 

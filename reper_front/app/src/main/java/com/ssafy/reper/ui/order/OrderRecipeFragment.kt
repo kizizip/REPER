@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
+import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentOrderRecipeBinding
@@ -55,10 +56,10 @@ class OrderRecipeFragment : Fragment() {
         // OrderFragment에서 bundle로 던진 orderId를 받음
         orderId = arguments?.getInt("orderId") ?: -1
 
-        // 어뎁터 처리
-        initAdapter()
         // 이벤트 처리
         initEvent()
+        // 어뎁터 처리
+        initAdapter()
     }
     override fun onResume() {
         super.onResume()
@@ -147,12 +148,13 @@ class OrderRecipeFragment : Fragment() {
         orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setOnClickListener {
             mainViewModel.clearData()
             mainViewModel.setOrder(order)
+            mainViewModel.getLikeRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), ApplicationClass.sharedPreferencesUtil.getUser().userId!!)
 
             if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
-                navigateToRecipeFragment()
+                navigateToRecipeFragment(R.id.fullRecipeFragment)
             }
             else if(orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected == true){
-                navigateToRecipeFragment()
+                navigateToRecipeFragment(R.id.stepRecipeFragment)
             }
         }
     }
@@ -186,11 +188,11 @@ class OrderRecipeFragment : Fragment() {
             }
         }
     }
-    fun navigateToRecipeFragment() {
+    fun navigateToRecipeFragment(fragmentId :Int) {
         val bundle =Bundle().apply {
             putInt("whereAmICame", 2)
         }
         mainViewModel.setSelectedRecipes(checkedRecipeList)
-        findNavController().navigate(R.id.stepRecipeFragment, bundle)
+        findNavController().navigate(fragmentId, bundle)
     }
 }

@@ -1,6 +1,5 @@
-package com.ssafy.reper.ui.recipe
+package com.ssafy.reper.ui.recipe.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,7 @@ import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.ItemAllRecipeRvBinding
 
 private const val TAG = "AllRecipeListAdapter_정언"
-class AllRecipeListAdapter (var recipeList:MutableList<Recipe>, var favoriteRecipeList:MutableList<FavoriteRecipe>, val itemClickListener:ItemClickListener) : RecyclerView.Adapter<AllRecipeListAdapter.AllRecipeListHolder>() {
+class AllRecipeListAdapter (var recipeList:MutableList<Recipe>, var favoriteRecipeList:MutableList<FavoriteRecipe>, val itemClickListener: ItemClickListener) : RecyclerView.Adapter<AllRecipeListAdapter.AllRecipeListHolder>() {
     inner class AllRecipeListHolder(private val binding: ItemAllRecipeRvBinding) : RecyclerView.ViewHolder(binding.root){
         fun bindInfo(position: Int){
             val item = recipeList[position]
@@ -25,7 +24,7 @@ class AllRecipeListAdapter (var recipeList:MutableList<Recipe>, var favoriteReci
             binding.alllrecipeRvItemIvFullheart.visibility= View.GONE
 
             for(favorite in favoriteRecipeList){
-                if(item.recipeId == favorite.recipeId){
+                if(item.recipeName == favorite.recipeName){
                     binding.allrecipeRvItemIvLineheart.visibility = View.GONE
                     binding.alllrecipeRvItemIvFullheart.visibility= View.VISIBLE
                 }

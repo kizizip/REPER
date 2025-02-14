@@ -19,6 +19,12 @@ import com.ssafy.reper.databinding.FragmentOrderBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.order.adapter.OrderAdatper
 import com.ssafy.reper.util.ViewModelSingleton
+import java.text.SimpleDateFormat
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import java.util.TimeZone
 
 private const val TAG = "OrderFragment_정언"
 class OrderFragment : Fragment() {
@@ -136,12 +142,25 @@ class OrderFragment : Fragment() {
                     orderBinding.fragmentOrderRvOrder.visibility = View.VISIBLE
                     orderBinding.fragmentOrderDateSpinner.visibility = View.VISIBLE
                     for (item in orderList) {
-                        if (!orderDateList.contains(item.orderDate.substring(0, 10))) {
-                            orderDateList.add(item.orderDate.substring(0, 10))
+                        // ISO 8601 형식의 날짜를 파싱 (UTC 기준)
+                        val utcFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                        utcFormat.timeZone = TimeZone.getTimeZone("UTC") // UTC 기준
+
+                        // Date 객체로 변환
+                        val date = utcFormat.parse(item.orderDate)
+
+                        // 한국 시간으로 변환
+                        val kstFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                        kstFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul") // 한국 시간
+
+                        // 변환된 날짜 출력
+                        val formattedDate = kstFormat.format(date)
+                        if (!orderDateList.contains(formattedDate.substring(0, 10))) {
+                            orderDateList.add(formattedDate.substring(0, 10))
                             orderDateList.sortedDescending()
                             configureDateSpinner()
                         }
-                        if (selectedDate.isNotBlank() && item.orderDate.substring(0, 10) == selectedDate) {
+                        if (selectedDate.isNotBlank() && formattedDate.substring(0, 10) == selectedDate) {
                             if(!orderAdapter.orderList.contains(item)){
                                 orderAdapter.orderList.add(item)
                                 orderAdapter.recipeNameList.add(viewModel.recipeNameList.value?.get(orderList.indexOf(item))?.recipeName!!)

@@ -7,13 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
-import com.ssafy.reper.data.remote.RetrofitUtil
+import com.ssafy.reper.data.remote.RetrofitUtil.Companion.recipeService
+import com.ssafy.reper.data.remote.RetrofitUtil.Companion.orderService
 import kotlinx.coroutines.launch
 
 private const val TAG = "OrderFragmentViewModel_정언"
 class OrderViewModel : ViewModel() {
-    private val orderService = RetrofitUtil.orderService
-    private val recipeService = RetrofitUtil.recipeService
 
     private val _orderList =
         MutableLiveData<MutableList<Order>>()
