@@ -17,6 +17,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +67,7 @@ public class OrderService {
 
         Order order = new Order();
         order.setStore(store);
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime());
         order.setCompleted(false);
 
         // takeout 여부를 랜덤으로 설정
