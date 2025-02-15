@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -83,11 +84,15 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
+
         sharedPreferencesUtil = SharedPreferencesUtil(applicationContext)
         sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
         sharedStoreId = sharedPreferencesUtil.getStoreId()
 
         mainViewModel.setUserInfo(sharedUserId)
+        mainViewModel.getIsEmployee(sharedUserId)
+        mainViewModel.getLikeRecipes(sharedStoreId, sharedUserId)
 
         // View Binding 초기화
         binding = ActivityMainBinding.inflate(layoutInflater)

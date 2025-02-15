@@ -52,6 +52,13 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
     private val _userInfo = MutableLiveData<User?>(null)
     val userInfo: LiveData<User?> = _userInfo
 
+    private val _nowTab = MutableLiveData<Int>(1)
+    val nowTab:LiveData<Int> = _nowTab
+
+    fun setNowTab(tab : Int){
+        _nowTab.value = tab
+    }
+
     fun setOrderRecipeList(recipeList: MutableList<Recipe>){
         _orderRecipeList.value = recipeList
     }
@@ -66,6 +73,12 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
             catch (e:Exception){
                 Log.d(TAG, "getUserInfo: ${e}")
             }
+        }
+    }
+
+    fun setLikeRecipes(list: MutableList<FavoriteRecipe>){
+        viewModelScope.launch {
+            _favoriteRecipeList.value = list
         }
     }
 
@@ -154,12 +167,11 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
                 val list = storeService.getStoreListByEmployeeId(userId)
                 for(store in list){
                     if(store.storeId == ApplicationClass.sharedPreferencesUtil.getStoreId()){
-                        _isEmployee.postValue(true)
-                        return@launch
+                        _isEmployee.value = true
                     }
                 }
             }catch (e:Exception){
-                Log.e(TAG, "getIsEmployee: ", )
+                Log.e(TAG, "getIsEmployee: ")
             }
         }
     }
@@ -171,6 +183,5 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
         _recipeSteps.value = null
         _isDataReady.value = false
         _order.value = null
-        _isEmployee.value = false
     }
 }

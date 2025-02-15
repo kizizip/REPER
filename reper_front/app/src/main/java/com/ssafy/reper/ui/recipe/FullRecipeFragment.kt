@@ -35,9 +35,9 @@ class FullRecipeFragment : Fragment() {
     var totalRecipes =  0
     var recipeSteps:MutableList<String> = mutableListOf()
     lateinit var order : Order
-    lateinit var orderDetails: MutableList<OrderDetail>
-    lateinit var selectedRecipeList : MutableList<Recipe>
-    lateinit var favoriteReicpeList : MutableList<FavoriteRecipe>
+    var orderDetails: MutableList<OrderDetail> = mutableListOf()
+    var selectedRecipeList : MutableList<Recipe> = mutableListOf()
+    var favoriteReicpeList : MutableList<FavoriteRecipe> = mutableListOf()
 
     // Bundle 변수
     var whereAmICame = -1
@@ -80,20 +80,15 @@ class FullRecipeFragment : Fragment() {
             order = mainViewModel.order.value!!
             orderDetails = order.orderDetails
         }
-
+        viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
+        mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
+            favoriteReicpeList = it
+        }
         // 전역변수 관리
         mainViewModel.nowISeeRecipe.observe(viewLifecycleOwner){
             if (it != null) {
                 nowRecipeIdx = it
                 Log.d(TAG, "onViewCreated: nowISeeRecipe: $it")
-            }
-        }
-        mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
-            if(it.isNotEmpty()){
-                favoriteReicpeList = it
-            }
-            else{
-                favoriteReicpeList = mutableListOf()
             }
         }
         mainViewModel.recipeSteps.observe(viewLifecycleOwner){
@@ -179,16 +174,22 @@ class FullRecipeFragment : Fragment() {
             favoriteRecipeList = favoriteReicpeList,
             recipeCount = recipeCount,
             itemClickListener = object : FullRecipeViewPagerAdapter.ItemClickListener {
-                override fun onHeartClick(recipeId: Int, isFavorite: Boolean) {
+                override fun onHeartClick(recipeName: String, isFavorite: Boolean) {
                     if (!isFavorite) {
-                        favoriteReicpeList.add(FavoriteRecipe(
-                            recipeId = recipeId,
-                            recipeName = selectedRecipeList.find { it.recipeId == recipeId }?.recipeName ?: ""
-                        ))
-                        viewModel.likeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipeId)
+                        for(item in viewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
+                            favoriteReicpeList.add(FavoriteRecipe(
+                                recipeId = item.recipeId,
+                                recipeName = item.recipeName
+                            ))
+                            viewModel.likeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), item.recipeId)
+                        }
+                        mainViewModel.setLikeRecipes(favoriteReicpeList)
                     } else {
-                        favoriteReicpeList.removeAll { it.recipeId == recipeId }
-                        viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipeId)
+                        favoriteReicpeList.removeAll { it.recipeName == recipeName }
+                        mainViewModel.setLikeRecipes(favoriteReicpeList)
+                        for(item in viewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
+                            viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), item.recipeId)
+                        }
                     }
                     viewPagerAdapter.favoriteRecipeList = favoriteReicpeList
                     viewPagerAdapter.notifyDataSetChanged()
@@ -214,14 +215,6 @@ class FullRecipeFragment : Fragment() {
                 }
             },
         )
-        mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
-            if(it.isNotEmpty()){
-                viewPagerAdapter.favoriteRecipeList = favoriteReicpeList
-                viewPagerAdapter.notifyDataSetChanged()
-            }
-        }
-
-        mainViewModel.getLikeRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), ApplicationClass.sharedPreferencesUtil.getUser().userId!!)
 
         fullRecipeBinding.fullrecipeFmVp.apply {
             adapter = viewPagerAdapter
