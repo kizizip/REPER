@@ -29,7 +29,6 @@ services:
     volumes:
       - elastic_data:/elasticsearch/data
       - elasticsearch_logs:/elasticsearch/logs:rw
-      - ./reper/docker/jaso-analyzer:/usr/share/elasticsearch/plugins/jaso-analyzer  # Pipeline에서 받은 폴더 마운트
       # - /home/ubuntu/docker/jaso-analyzer:/usr/share/elasticsearch/plugins/jaso-analyzer  # 플러그인 폴더 연결
     networks:
       - elastic_network

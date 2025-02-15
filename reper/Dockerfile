@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 RUN apt-get update && apt-get install -y mariadb-client && rm -rf /var/lib/apt/lists/*
 
 # Jaso Analyzer 플러그인 추가 (필요한 경우)
-COPY docker/jaso-analyzer /usr/share/elasticsearch/plugins/jaso-analyzer
+# COPY docker/jaso-analyzer /usr/share/elasticsearch/plugins/jaso-analyzer
 
 # gradle 빌드를 하면 build/libs 하위에 *.jar 생성됨. 해당 '*.jar'를 'app.jar'로 copy
 ARG JAR_FILE_PATH=build/libs/*.jar
@@ -19,10 +19,10 @@ ENV USE_PROFILE prod
 ENV FIREBASE_JSON=""
 
 # 실행 전 Jaso Analyzer 플러그인이 없으면 복사
-RUN if [ ! -d /usr/share/elasticsearch/plugins/jaso-analyzer ]; then \
-      mkdir -p /usr/share/elasticsearch/plugins/jaso-analyzer; \
-      cp -r /app/docker/jaso-analyzer/* /usr/share/elasticsearch/plugins/jaso-analyzer; \
-    fi
+# RUN if [ ! -d /usr/share/elasticsearch/plugins/jaso-analyzer ]; then \
+#      mkdir -p /usr/share/elasticsearch/plugins/jaso-analyzer; \
+#      cp -r /app/docker/jaso-analyzer/* /usr/share/elasticsearch/plugins/jaso-analyzer; \
+#    fi
 
 # 이미지 빌드 명령
 ENTRYPOINT ["java", "-Dspring.profiles.active=${USE_PROFILE}", "-jar", "app.jar"]
