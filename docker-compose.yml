@@ -29,6 +29,7 @@ services:
     volumes:
       - elastic_data:/elasticsearch/data
       - elasticsearch_logs:/elasticsearch/logs:rw
+      - ./docker/jaso-analyzer:/usr/share/elasticsearch/plugins/jaso-analyzer  # 플러그인 폴더 연결
     networks:
       - elastic_network
     command: >
