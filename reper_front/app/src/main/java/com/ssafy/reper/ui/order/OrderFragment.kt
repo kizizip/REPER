@@ -60,7 +60,7 @@ class OrderFragment : Fragment() {
 
         mainViewModel.clearData()
         mainViewModel.isEmployee.observe(viewLifecycleOwner){
-            if(it == true){
+            if(it == true || mainViewModel.userInfo.value!!.role == "OWNER"){
                 orderBinding.fragmentOrderTvNoorder.visibility = View.GONE
 
                 orderBinding.fragmentOrderRvOrder.visibility = View.VISIBLE
@@ -142,18 +142,13 @@ class OrderFragment : Fragment() {
                     orderBinding.fragmentOrderDateSpinner.visibility = View.VISIBLE
                     for ((index, item) in orderList.withIndex()) {
                         // ISO 8601 형식의 날짜를 파싱 (UTC 기준)
-                        val utcFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                        utcFormat.timeZone = TimeZone.getTimeZone("UTC") // UTC 기준
+                        val utcFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.KOREA)
+                        utcFormat.timeZone = TimeZone.getTimeZone("UTC") // UTC로 설정
 
-                        // Date 객체로 변환
                         val date = utcFormat.parse(item.orderDate)
 
-                        // 한국 시간으로 변환
-                        val kstFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                        kstFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul") // 한국 시간
-
                         // 변환된 날짜 출력
-                        val formattedDate = kstFormat.format(date)
+                        val formattedDate = utcFormat.format(date)
                         if (!orderDateList.contains(formattedDate.substring(0, 10))) {
                             orderDateList.add(formattedDate.substring(0, 10))
                             orderDateList.sortedDescending()
