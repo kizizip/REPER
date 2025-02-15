@@ -42,8 +42,14 @@ class NoticeViewModel : ViewModel() {
     fun getAllNotice(storeId: Int, userId: Int) {
         viewModelScope.launch {
             try {
-                val response = RetrofitUtil.noticeService.getAllNotice(storeId, userId)
-                _noticeList.postValue(response.get(0).notices)
+                // storeId가 0이면 빈 리스트로 설정
+                if (storeId == 0) {
+                    _noticeList.postValue(emptyList()) // 빈 리스트로 설정
+                } else {
+                    val response = RetrofitUtil.noticeService.getAllNotice(storeId, userId)
+                    // 정상적인 공지 리스트를 저장
+                    _noticeList.postValue(response.getOrNull(0)?.notices ?: emptyList())
+                }
                 Log.d(TAG, "getAllNotice: ${_noticeList.value}")
             } catch (e: Exception) {
                 Log.d(TAG, "getAllNotice: ${e.message}")
@@ -53,7 +59,8 @@ class NoticeViewModel : ViewModel() {
     }
 
     //단건은 받아온 리스트의 정보를 넣는걸로!
-    fun getNotice(storeId: Int, noticeId:Int, userId: Int) {
+    fun getNotice(storeId: Int, noticeId:Int, userId: Int):String {
+        var request = ""
         viewModelScope.launch{
             
             runCatching { 
@@ -61,11 +68,14 @@ class NoticeViewModel : ViewModel() {
             }.onSuccess {
                 Log.d(TAG, "getNotice: ${it}")
                 setClickNotice(it)
+                request ="성공"
             }.onFailure {
                 Log.d(TAG, "getNotice: ${it.message}")
+                request="실패"
             }
             
         }
+        return request
     }
 
     suspend fun createNotice(storeId: Int, userId: Int, title: String, content: String): Notice? {

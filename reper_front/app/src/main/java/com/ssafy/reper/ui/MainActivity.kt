@@ -41,6 +41,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.lifecycle.ViewModelProvider
+import com.ssafy.reper.ui.home.HomeFragment
+import kotlin.math.log
 
 
 private const val TAG = "MainActivity_싸피"
@@ -49,12 +53,14 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         var instance: MainActivity? = null
+            private set
     }
+
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장
-    private val noticeViewModel: NoticeViewModel by viewModels()
+    val noticeViewModel: NoticeViewModel by viewModels()
     private val bossViewModel: BossViewModel by viewModels()
-    private val fcmViewModel:FcmViewModel by viewModels()
+    private val fcmViewModel: FcmViewModel by viewModels()
     private val CAMERA_PERMISSION_REQUEST_CODE = 1001
     private val MICROPHONE_PERMISSION_REQUEST_CODE = 1002  // 마이크 권한 요청 코드 추가
 
@@ -64,7 +70,7 @@ class MainActivity : AppCompatActivity() {
     var sharedUserId = 0
     var sharedStoreId = 0
     private lateinit var receiver: FragmentReceiver
-    private val orderViewModel: OrderViewModel by viewModels()
+    val orderViewModel: OrderViewModel by viewModels()
 
     private val orderReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -83,6 +89,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        instance = this
+
+        // View Binding 초기화
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
 
@@ -93,10 +104,6 @@ class MainActivity : AppCompatActivity() {
         mainViewModel.setUserInfo(sharedUserId)
         mainViewModel.getIsEmployee(sharedUserId)
         mainViewModel.getLikeRecipes(sharedStoreId, sharedUserId)
-
-        // View Binding 초기화
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         sendFCMFileUpload()
 
@@ -114,8 +121,13 @@ class MainActivity : AppCompatActivity() {
                 getFCMToken()
             }
             // 토큰을 받은 후 메인 스레드에서 UI 작업
-
-            fcmViewModel.saveToken(UserToken(sharedPreferencesUtil.getStoreId(), token, sharedPreferencesUtil.getUser().userId!!.toInt()))
+            fcmViewModel.saveToken(
+                UserToken(
+                    sharedPreferencesUtil.getStoreId(),
+                    token,
+                    sharedPreferencesUtil.getUser().userId!!.toInt()
+                )
+            )
             Log.d("FCMTOKEN", token)
         }
 
@@ -123,52 +135,46 @@ class MainActivity : AppCompatActivity() {
         val targetFragment = intent.getStringExtra("targetFragment")
         val requestId = intent.getStringExtra("requestId")?.toInt()
         if (targetFragment != null) {
+            Log.d(TAG, "onCreate: ${targetFragment}")
             when (targetFragment) {
                 "OrderRecipeFragment" -> {
                     val orderId = intent.getStringExtra("requestId")!!.toInt()
                     val bundle = Bundle().apply {
                         putInt("orderId", orderId)  // orderId를 번들에 담기
                     }
-                    navController?.navigate(R.id.orderFragment, bundle)
+                    navController?.navigate(R.id.orderRecipeFragment, bundle)
                 }
+
                 "WriteNoticeFragment" -> {
-                    noticeViewModel.getNotice(sharedPreferencesUtil.getStoreId(), requestId!!.toInt(), sharedPreferencesUtil.getStoreId()).also {
-                        Log.d(TAG, "onCreate: ${targetFragment}")
-                        noticeViewModel.clickNotice.observe(this) { notice ->
-                            if (notice != null) {
-                                navController?.navigate(R.id.writeNotiFragment)
-                            }
-                        }
-                    }
+                    navController?.navigate(R.id.noticeManageFragment)
                 }
-                "BossFragment" ->{
+
+                "BossFragment" -> {
                     sharedPreferencesUtil.setStoreId(requestId)
                     navController?.navigate(R.id.bossFragment)
                     Log.d(TAG, "onCreate: ${requestId}승인요청 가게 아이디")
                     bossViewModel.getAllEmployee(requestId!!)
                     Log.d(TAG, "onCreate: ${bossViewModel.waitingList}")
+                    navController?.navigate(R.id.bossFragment)
+
                 }
-                "RecipeManageFragment"->{
+
+                "RecipeManageFragment" -> {
                     navController?.navigate(R.id.recipeManageFragment)
                 }
-                "MyPageFragment"->{
+
+                "MyPageFragment" -> {
                     sharedPreferencesUtil.setStoreId(requestId)
                     navController?.navigate(R.id.myPageFragment)
+                    if (requestId == sharedPreferencesUtil.getStoreId()) {
+                        storeViewModel.getUserStore(sharedUserId)
+                    }
                 }
-                "" -> navController?.navigate(R.id.bossFragment)
+
                 else -> navController?.navigate(R.id.homeFragment) // 기본값
             }
         }
 
-        // FCM Token 비동기 처리
-        CoroutineScope(Dispatchers.Main).launch {
-            val token = withContext(Dispatchers.IO) {
-                getFCMToken()
-            }
-
-            fcmViewModel.saveToken(UserToken(sharedPreferencesUtil.getStoreId(), token, sharedPreferencesUtil.getUser().userId!!.toInt()))
-            Log.d("FCMTOKEN", token)
-        }
 
         // 권한 체크 시작 - 카메라 권한부터 확인
         checkCameraPermission()
@@ -195,12 +201,33 @@ class MainActivity : AppCompatActivity() {
                 Context.RECEIVER_NOT_EXPORTED
             )
         } else {
-            registerReceiver(orderReceiver, IntentFilter("com.ssafy.reper.UPDATE_ORDER_FRAGMENT"),
+            registerReceiver(
+                orderReceiver, IntentFilter("com.ssafy.reper.UPDATE_ORDER_FRAGMENT"),
                 RECEIVER_NOT_EXPORTED
             )
         }
 
+        // BroadcastReceiver 등록
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            receiver,
+            IntentFilter("com.ssafy.reper.UPDATE_NOTICE")
+        )
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            receiver,
+            IntentFilter("com.ssafy.reper.APPROVE_ACCESS")
+        )
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            receiver,
+            IntentFilter("com.ssafy.reper.UPDATE_ORDER")
+        )
+
+
     }
+
+
+
 
     // 카메라 권한 확인 함수
     private fun checkCameraPermission() {
@@ -264,6 +291,7 @@ class MainActivity : AppCompatActivity() {
                     checkMicrophonePermission()
                 }
             }
+
             MICROPHONE_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // 마이크 권한이 승인된 경우
@@ -282,6 +310,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        instance = null
         // 리시버 해제
         try {
             unregisterReceiver(receiver)
@@ -289,10 +318,12 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, "Error unregistering receiver: ${e.message}")
         }
         unregisterReceiver(orderReceiver)
+        // BroadcastReceiver 해제
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
     }
 
     // FCM 토큰을 비동기적으로 가져오는 함수
-     suspend fun getFCMToken(): String {
+    suspend fun getFCMToken(): String {
         return try {
             // FCM Token을 비동기적으로 가져옴
             FirebaseMessaging.getInstance().token.await()
@@ -316,47 +347,73 @@ class MainActivity : AppCompatActivity() {
         return binding.activityMainBottomMenu
     }
 
+    private var isObserverRegistered = false // 옵저버 등록 상태를 추적하는 변수
+
     private fun sendFCMFileUpload() {
         var lastResult: String? = null // 마지막 상태를 저장할 변수
+        Log.d(TAG, "sendFCMFileUpload: 마지막 상태 ${lastResult}")
+        Log.d(TAG, "sendFCMFileUpload: 뷰모델안 상태${bossViewModel.recipeLoad.value}")
 
-        bossViewModel.recipeLoad.observe(this) { result ->
-            if (lastResult != result) { // 값이 바뀌었을 때만 실행
-                when (result) {
-                    "success" -> {
-                        fcmViewModel.sendToUserFCM(sharedUserId, "레시피 업로드 성공", sharedPreferencesUtil.getStateName(), "RecipeManageFragment", 0)
+        if (!isObserverRegistered) { // 옵저버가 등록되지 않은 경우에만 등록
+            bossViewModel.recipeLoad.observe(this) { result ->
+                if (lastResult != result) { // 값이 바뀌었을 때만 실행
+                    when (result) {
+                        "success" -> {
+                            fcmViewModel.sendToUserFCM(
+                                sharedUserId,
+                                "레시피 업로드 성공",
+                                sharedPreferencesUtil.getStateName(),
+                                "RecipeManageFragment",
+                                0
+                            )
+                        }
+
+                        "failure" -> {
+                            fcmViewModel.sendToUserFCM(
+                                sharedUserId,
+                                "레시피 업로드 실패",
+                                sharedPreferencesUtil.getStateName(),
+                                "RecipeManageFragment",
+                                0
+                            )
+                            Log.d(
+                                TAG,
+                                "sendFCMFileUpload: 알림이 확인후${bossViewModel.recipeLoad.value}"
+                            )
+                        }
                     }
-                    "failure" -> {
-                        fcmViewModel.sendToUserFCM(sharedUserId, "레시피 업로드 실패", sharedPreferencesUtil.getStateName(), "RecipeManageFragment", 0)
-                    }
+                    lastResult = result // 마지막 결과를 갱신
                 }
-                lastResult = result // 마지막 결과를 갱신
             }
+            isObserverRegistered = true // 옵저버 등록 상태 업데이트
         }
     }
-    // backstack에 아무것도없는 상태에서 뒤로가기 버튼을 눌렀을때
-    //이거 컨트롤러랑 같이 쓸수없음,,,,supportFragmentManager는 컨트롤러 안의 백스텍을 세는게아니라서,..
 
-//    @Deprecated("Deprecated in Java")
-//    override fun onBackPressed() {
-//        // 현재 BackStack에 있는 Fragment 개수 확인
-//        if (supportFragmentManager.backStackEntryCount == 0) {
-//            // 2초 이내에 뒤로가기 버튼을 한 번 더 누르면 앱 종료
-//            if (System.currentTimeMillis() - backPressedTime < 2000) {
-//                finish()
-//                return
-//            }
-//
-//            // 뒤로가기 버튼을 처음 누를 때
-//            Toast.makeText(this, "한 번 더 누르면 앱이 종료됩니다.", Toast.LENGTH_SHORT).show()
-//            backPressedTime = System.currentTimeMillis()
-//        } else {
-//            super.onBackPressed()
-//        }
-//    }
 
-    // FCM 메시지를 받았을 때
-    private fun handleOrderNotification() {
-        // 주문 목록 갱신
-        orderViewModel.getOrders()  // 이 호출은 OrderFragment의 데이터도 자동으로 갱신시킴
+    // 공지사항 리스트 갱신 메서드
+    fun refreshNoticeList() {
+        val storeId = ApplicationClass.sharedPreferencesUtil.getStoreId()
+        val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
+        Log.d(TAG, "Refreshing notice list from MainActivity - storeId: $storeId, userId: $userId")
+        noticeViewModel.getAllNotice(storeId, userId)
+    }
+
+
+    // 주문 리스트 갱신 메서드
+    fun refreshOrderList() {
+        Log.d(TAG, "refreshOrderList: 주문 리스트 갱신 시작")
+        //DB에 반영되기 전에 알림이 먼저오나...? 오더아이디가 -1된상태로 오게됨 ㅠㅠ
+        //알림 클릭도 바로누르면 안되고 시간이 좀 지나야 올바른 곳으로 가게됨...서버와 상의를 해봐야할거같아유
+        orderViewModel.getOrders()
+    }
+
+    // 스토어 리스트 갱신 메서드
+    fun refreshStoreList() {
+        val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
+        storeViewModel.getUserStore(userId)
+        Log.d(TAG, "refreshStoreList: ${storeViewModel.myStoreList.value}")
+        if (storeViewModel.myStoreList.value==null||storeViewModel.myStoreList.value!!.size == 0){
+            ApplicationClass.sharedPreferencesUtil.setStoreId(0)
+        }
     }
 }

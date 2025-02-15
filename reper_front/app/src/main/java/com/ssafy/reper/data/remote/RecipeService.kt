@@ -21,7 +21,7 @@ interface RecipeService {
     suspend fun recipeUpload(
         @Query("storeId") storeId: Int,
         @Part recipeFile: MultipartBody.Part
-    )
+    ):String
 
 
     //가게의 레시피를 삭제합니다.

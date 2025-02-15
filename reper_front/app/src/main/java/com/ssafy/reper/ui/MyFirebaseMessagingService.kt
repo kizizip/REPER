@@ -41,6 +41,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     // FCM 메시지를 수신할 때 호출되는 메서드
     @SuppressLint("UnsafeImplicitIntentLaunch")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
+
+
+
         super.onMessageReceived(remoteMessage)
         Log.d(TAG, "FCM Message Received")
         Log.d(TAG, "From: ${remoteMessage.from}")
@@ -51,7 +54,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val notification = remoteMessage.notification
         
         Log.d(TAG, "FCM Data: $data")
-        Log.d(TAG, "targetFragment: ${data["targetFragment"]}, requestId: ${data["requestId"]}")
+        Log.d(TAG, "알림수신으로 들어온 데이타targetFragment: ${data["targetFragment"]}, requestId: ${data["requestId"]}")
+
+        // 로그 추가
+        Log.d(TAG, "Received FCM with targetFragment: ${data["targetFragment"]}")
 
         // BossFragment 갱신이 필요한 경우 브로드캐스트 발송
         if (data["targetFragment"] == "BossFragment") {
@@ -69,16 +75,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
 
         // OrderList 갱신이 필요한 경우 브로드캐스트 발송
-        if (data["targetFragment"] == "OrderFragment") {
+        if (data["targetFragment"] == "OrderRecipeFragment") {
             try {
-                val updateIntent = Intent("com.ssafy.reper.UPDATE_ORDER_FRAGMENT").apply {
-                    putExtra("requestId", data["requestId"])
-                    addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                }
-                applicationContext.sendBroadcast(updateIntent)
-                Log.d(TAG, "BossFragment 브로드캐스트 발송 성공")
+                val updateIntent = Intent("com.ssafy.reper.UPDATE_ORDER")
+                // LocalBroadcastManager 사용
+                LocalBroadcastManager.getInstance(applicationContext)
+                    .sendBroadcast(updateIntent)
+                Log.d(TAG, "Order update LocalBroadcast 발송 성공")
             } catch (e: Exception) {
-                Log.e(TAG, "BossFragment 브로드캐스트 발송 실패: ${e.message}")
+                Log.e(TAG, "Order update LocalBroadcast 발송 실패: ${e.message}")
             }
         }
 
@@ -111,6 +116,37 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 sendInAppMessage(title, body)
             }
 
+        }
+
+        // 공지사항 갱신이 필요한 경우 브로드캐스트 발송
+        if (data["targetFragment"] == "WriteNoticeFragment") {
+            try {
+                val updateIntent = Intent("com.ssafy.reper.UPDATE_NOTICE").apply {
+                    putExtra("requestId", data["requestId"])
+                }
+                // LocalBroadcastManager 사용
+                LocalBroadcastManager.getInstance(applicationContext)
+                    .sendBroadcast(updateIntent)
+                Log.d(TAG, "Notice list update LocalBroadcast 발송 성공: ${data["requestId"]}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Notice list update LocalBroadcast 발송 실패: ${e.message}")
+            }
+        }
+
+
+        // 권한 허락시 스토어 리스트 갱신 필요한 경우 브로드캐스트 발송
+        if (data["targetFragment"] == "MyPageFragment") {
+            try {
+                val updateIntent = Intent("com.ssafy.reper.APPROVE_ACCESS").apply {
+                    putExtra("requestId", data["requestId"])
+                }
+                // LocalBroadcastManager 사용
+                LocalBroadcastManager.getInstance(applicationContext)
+                    .sendBroadcast(updateIntent)
+                Log.d(TAG, "onMessageReceived: 허가알림 브로드 캐스트 발송")
+            } catch (e: Exception) {
+                Log.e(TAG, "Notice list update LocalBroadcast 발송 실패: ${e.message}")
+            }
         }
 
         // 일반 알림 처리
@@ -158,7 +194,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         // 알림 생성
         val notification = NotificationCompat.Builder(this, "default_channel")
-            .setSmallIcon(R.drawable.mypage_bell_btn)  // 작은 아이콘 지정
+            .setSmallIcon(R.drawable.after_move_coffe)  // 작은 아이콘 지정
             .setContentTitle(title)
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH) // Heads-up 알림 활성화
