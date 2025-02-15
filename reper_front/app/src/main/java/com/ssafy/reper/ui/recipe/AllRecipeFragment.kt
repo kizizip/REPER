@@ -50,6 +50,7 @@ class AllRecipeFragment : Fragment() {
     private lateinit var allRecipeListAdapter: AllRecipeListAdapter
 
     private lateinit var mainActivity: MainActivity
+    private var searchQuery = ""
 
     private var _allRecipeBinding : FragmentAllRecipeBinding? = null
     private val allRecipeBinding get() =_allRecipeBinding!!
@@ -66,9 +67,13 @@ class AllRecipeFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _allRecipeBinding = FragmentAllRecipeBinding.inflate(inflater, container, false)
         return allRecipeBinding.root
+
+
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+         searchQuery = arguments?.getString("searchQuery").toString()
 
         mainViewModel.clearData()
         mainViewModel.isEmployee.observe(viewLifecycleOwner){
@@ -96,6 +101,9 @@ class AllRecipeFragment : Fragment() {
         mainViewModel.getIsEmployee(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt())
         // 이벤트 관리
         initEvent()
+        if (searchQuery != ""){
+            allRecipeBinding.allrecipeFmEtSearch.setText(searchQuery)
+        }
     }
     override fun onResume() {
         super.onResume()
@@ -109,6 +117,7 @@ class AllRecipeFragment : Fragment() {
     fun initEvent(){
         // 검색 초기 상태 설정
         allRecipeBinding.allrecipeFmEtSearch.setText("")
+
 
         // 탭 초기 상태 설정 (단계별 레시피 선택)
         allRecipeBinding.allrecipeFmStepRecipeTab.isSelected = true
@@ -137,6 +146,7 @@ class AllRecipeFragment : Fragment() {
                         viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
                         return@launch
                     }
+
 
                     when (howSearch) {
                         0 -> viewModel.searchRecipeIngredientInclude(

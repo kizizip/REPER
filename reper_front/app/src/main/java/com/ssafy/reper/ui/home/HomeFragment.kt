@@ -19,6 +19,7 @@ import com.ssafy.reper.ui.home.adapter.RVHomeBannerAdapter
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -414,7 +415,25 @@ class HomeFragment : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupBannerViewPager() {
-        val bannerAdapter = RVHomeBannerAdapter(bannerItems)
+        val bannerAdapter = RVHomeBannerAdapter(bannerItems){ selectedItem ->
+            when (selectedItem.imageUrl) {
+                R.drawable.strawberry_banner -> {
+                    val bundle = Bundle().apply {
+                        putString("searchQuery", "딸기") //검색어 전달
+                    }
+                    findNavController().navigate(R.id.allRecipeFragment,bundle)
+
+                }
+                R.drawable.banner3 -> {
+                    //노션이나 튜토리얼 액티비티
+                }
+                R.drawable.storebanner -> {
+                     findNavController().navigate(R.id.myPageFragment)
+                }
+            }
+
+
+        }
         binding.fragmentHomeVpBanner.apply {
             adapter = bannerAdapter
             orientation = ViewPager2.ORIENTATION_HORIZONTAL
