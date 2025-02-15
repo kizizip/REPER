@@ -91,7 +91,7 @@
                 android:minHeight="220dp"
                 android:nestedScrollingEnabled="true" />
 
-            <androidx.cardview.widget.CardView
+            <FrameLayout
                 android:id="@+id/nothing_notice"
                 android:layout_width="match_parent"
                 android:layout_height="220dp"
@@ -101,11 +101,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:fontFamily="@font/pretendard_semibold"
+                    android:fontFamily="@font/pretendard_regular"
                     android:text="등록된 공지가 없습니다."
                     android:textColor="@color/lightgray"
                     android:textSize="18sp" />
-            </androidx.cardview.widget.CardView>
+            </FrameLayout>
 
 
         </LinearLayout>
@@ -157,7 +157,7 @@
                 android:layout_marginTop="6dp"
                 android:nestedScrollingEnabled="true" />
 
-            <androidx.cardview.widget.CardView
+            <FrameLayout
                 android:id="@+id/nothing_recipe"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
@@ -167,11 +167,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:fontFamily="@font/pretendard_semibold"
+                    android:fontFamily="@font/pretendard_regular"
                     android:text="즐겨찾는 레시피가 없습니다."
                     android:textColor="@color/lightgray"
                     android:textSize="18sp" />
-            </androidx.cardview.widget.CardView>
+            </FrameLayout>
 
         </LinearLayout>
 
@@ -204,21 +204,21 @@
                 android:minHeight="220dp"
                 android:nestedScrollingEnabled="true" />
 
-            <androidx.cardview.widget.CardView
+            <FrameLayout
                 android:id="@+id/nothing_order"
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:visibility="gone">
+                android:layout_height="150dp"
+                      >
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:fontFamily="@font/pretendard_semibold"
+                    android:fontFamily="@font/pretendard_regular"
                     android:text="현재 진행중인 주문이 없습니다."
                     android:textColor="@color/lightgray"
                     android:textSize="18sp" />
-            </androidx.cardview.widget.CardView>
+            </FrameLayout>
 
 
         </LinearLayout>

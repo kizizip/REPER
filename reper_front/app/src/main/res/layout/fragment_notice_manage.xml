@@ -103,7 +103,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recipe_fg_search_noti" />
 
-        <androidx.cardview.widget.CardView
+        <FrameLayout
             android:id="@+id/nothing_notice_boss"
             android:visibility="gone"
             android:layout_width="match_parent"
@@ -120,7 +120,7 @@
                 android:fontFamily="@font/pretendard_semibold"
                 android:textColor="@color/lightgray"
                 />
-        </androidx.cardview.widget.CardView>
+        </FrameLayout>
 
 
         <TextView

@@ -116,8 +116,7 @@ class SharedPreferencesUtil(context: Context) {
         return LoginResponse(
             userId = 1,
             username = "사장",
-            role = "OWNER" +
-                    "",
+            role = "OWNER"
         )
     }
 

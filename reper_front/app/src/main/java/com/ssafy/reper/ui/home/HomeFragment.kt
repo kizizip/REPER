@@ -343,8 +343,7 @@ class HomeFragment : Fragment() {
                 binding.nothingOrder.visibility = View.GONE
                 
                 orderViewModel.recipeNameList.value?.let { recipeList ->
-                    val currentStoreId = sharedPreferencesUtil.getStoreId()
-                    // 현재 선택된 가게의 완료되지 않은 주문만 필터링
+
                     val activeOrders = orderList.filter { order ->
                         !order.completed
                     }

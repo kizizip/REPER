@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
 
 
 private const val TAG = "BossFragment_안주현"
@@ -131,6 +132,22 @@ class BossFragment : Fragment() {
             nonAccessAdapter.updateList(waitingEmployees)
             accessAdapter.notifyDataSetChanged()
             nonAccessAdapter.notifyDataSetChanged()
+        }
+
+        if ( bossViewModel.accessList.value ==null ||bossViewModel.accessList.value!!.isEmpty()){
+            binding.accessFalseList.visibility =View.GONE
+            binding.nothingRequest.visibility =View.VISIBLE
+        }else{
+            binding.accessFalseList.visibility =View.VISIBLE
+            binding.nothingRequest.visibility =View.GONE
+        }
+
+        if (  bossViewModel.waitingList.value ==null || bossViewModel.waitingList.value!!.isEmpty()){
+            binding.employeeList.visibility =View.GONE
+            binding.nothingEmployee.visibility =View.VISIBLE
+        }else{
+            binding.employeeList.visibility =View.VISIBLE
+            binding.nothingEmployee.visibility =View.GONE
         }
 
     }

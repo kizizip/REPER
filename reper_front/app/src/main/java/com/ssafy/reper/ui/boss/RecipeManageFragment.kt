@@ -159,6 +159,15 @@ class RecipeManageFragment : Fragment() {
             }
         }
 
+       if( bossViewModel.recipeList.value == null || bossViewModel.recipeList.value!!.isEmpty()){
+           binding.recipeFgAddRV.visibility = View.GONE
+           binding.nothingRecipe.visibility = View.VISIBLE
+
+       }else{
+           binding.recipeFgAddRV.visibility = View.VISIBLE
+           binding.nothingRecipe.visibility = View.GONE
+       }
+
     }
 
 
