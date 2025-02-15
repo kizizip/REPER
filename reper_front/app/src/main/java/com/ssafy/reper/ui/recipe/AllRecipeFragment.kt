@@ -101,7 +101,7 @@ class AllRecipeFragment : Fragment() {
         mainViewModel.getIsEmployee(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt())
         // 이벤트 관리
         initEvent()
-        if (searchQuery != ""){
+        if (searchQuery != "" && searchQuery != "null"){
             allRecipeBinding.allrecipeFmEtSearch.setText(searchQuery)
         }
     }
