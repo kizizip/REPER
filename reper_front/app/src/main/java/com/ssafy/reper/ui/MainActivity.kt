@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
         val requestId = intent.getStringExtra("requestId")?.toInt()
         if (targetFragment != null) {
             when (targetFragment) {
-                "OrderFragment" -> {
+                "OrderRecipeFragment" -> {
                     val orderId = intent.getStringExtra("requestId")!!.toInt()
                     val bundle = Bundle().apply {
                         putInt("orderId", orderId)  // orderId를 번들에 담기

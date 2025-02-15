@@ -72,6 +72,14 @@ class StoreManageFragment : Fragment() {
             storeAdapter.updateData(newStoreList)
         }
 
+      if(bossViewModel.myStoreList.value == null || bossViewModel.myStoreList.value!!.isEmpty()){
+          binding.storeFgRV.visibility =View.GONE
+          binding.nothingStore.visibility = View.VISIBLE
+      }else{
+          binding.storeFgRV.visibility =View.VISIBLE
+          binding.nothingStore.visibility = View.GONE
+      }
+
     }
 
 
@@ -140,6 +148,7 @@ class StoreManageFragment : Fragment() {
         bossViewModel.myStoreList.observe(viewLifecycleOwner) { newStoreList ->
             Log.d(TAG, "Updated store list: $newStoreList")
             storeAdapter.updateData(newStoreList)  // 데이터가 변경되면 Adapter에 새 데이터 반영
+
         }
     }
 

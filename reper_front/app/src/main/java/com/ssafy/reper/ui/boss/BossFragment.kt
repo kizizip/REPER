@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
 
 
 private const val TAG = "BossFragment_안주현"
@@ -121,16 +122,27 @@ class BossFragment : Fragment() {
         initSpinner()
         noticeViewModel.type = ""
         bossViewModel.accessList.observe(viewLifecycleOwner) { accessEmployees ->
-            accessAdapter.updateList(accessEmployees)
-            accessAdapter.notifyDataSetChanged()
-            nonAccessAdapter.notifyDataSetChanged()
+            Log.d(TAG, "Access employees size: ${accessEmployees?.size}")
+            if (accessEmployees.isNullOrEmpty()) {
+                binding.employeeList.visibility = View.GONE
+                binding.nothingEmployee.visibility = View.VISIBLE
+            } else {
+                binding.employeeList.visibility = View.VISIBLE
+                binding.nothingEmployee.visibility = View.GONE
+                accessAdapter.updateList(accessEmployees)
+            }
         }
 
-        // waitingList가 변경되면 nonAccessAdapter의 데이터 갱신
         bossViewModel.waitingList.observe(viewLifecycleOwner) { waitingEmployees ->
-            nonAccessAdapter.updateList(waitingEmployees)
-            accessAdapter.notifyDataSetChanged()
-            nonAccessAdapter.notifyDataSetChanged()
+            Log.d(TAG, "Waiting employees size: ${waitingEmployees?.size}")
+            if (waitingEmployees.isNullOrEmpty()) {
+                binding.accessFalseList.visibility = View.GONE
+                binding.nothingRequest.visibility = View.VISIBLE
+            } else {
+                binding.accessFalseList.visibility = View.VISIBLE
+                binding.nothingRequest.visibility = View.GONE
+                nonAccessAdapter.updateList(waitingEmployees)
+            }
         }
 
     }

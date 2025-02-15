@@ -85,6 +85,14 @@ class NoticeManageFragment : Fragment() {
             val searchText = binding.notiFgSearchET.text.toString()
             searchNotice(searchText)
         }
+
+        if (noticeViewModel.noticeList.value == null||noticeViewModel.noticeList.value!!.isEmpty()){
+            binding.notiList.visibility = View.GONE
+            binding.nothingNoticeBoss.visibility = View.VISIBLE
+        }else{
+            binding.notiList.visibility = View.VISIBLE
+            binding.nothingNoticeBoss.visibility = View.GONE
+        }
     }
 
     override fun onDestroyView() {

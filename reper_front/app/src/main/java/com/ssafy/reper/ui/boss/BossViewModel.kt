@@ -65,18 +65,19 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getAllEmployee(storeId: Int) {
         viewModelScope.launch {
-            runCatching {
-                RetrofitUtil.storeService.allEmployee(storeId)
-            }.onSuccess { employees ->
-                val access = employees.filter { it.employed }  // employed가 true인 직원들
-                val waiting = employees.filter { !it.employed } // employed가 false인 직원들_
-                _accessList.value = access
-                _waitingList.value = waiting
-                Log.d(TAG, "getAllEmployee: ${storeId}")
-                Log.d(TAG, "Access: $access")
-                Log.d(TAG, "Waiting: $waiting")
-            }.onFailure {
-                Log.d(TAG, "Error: ${it.message}")
+            try {
+                val employees = RetrofitUtil.storeService.allEmployee(storeId)
+                val access = employees.filter { it.employed }
+                val waiting = employees.filter { !it.employed }
+                
+                _accessList.postValue(access)
+                _waitingList.postValue(waiting)
+                
+                Log.d(TAG, "getAllEmployee: storeId=$storeId, access=${access.size}, waiting=${waiting.size}")
+            } catch (e: Exception) {
+                Log.e(TAG, "getAllEmployee error: ${e.message}")
+                _accessList.postValue(emptyList())
+                _waitingList.postValue(emptyList())
             }
         }
     }
@@ -175,15 +176,13 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getMenuList(storeId: Int) {
         viewModelScope.launch {
-            runCatching {
-                RetrofitUtil.recipeService.getStoreRecipe(storeId)
-            }.onSuccess {
-                setRecipeList(it)
-                Log.d(TAG, "getMenuList: ${storeId}")
-                Log.d(TAG, "getMenuList: $it")
-            }.onFailure {
-                Log.d(TAG, "getMenuList: ${storeId}")
-                Log.d(TAG, "getMenuList: ${it.message}")
+            try {
+                val recipes = RetrofitUtil.recipeService.getStoreRecipe(storeId)
+                _recipeList.postValue(recipes)
+                Log.d(TAG, "getMenuList: storeId=$storeId, recipes=${recipes.size}")
+            } catch (e: Exception) {
+                Log.e(TAG, "getMenuList error: ${e.message}")
+                _recipeList.postValue(emptyList())
             }
         }
     }

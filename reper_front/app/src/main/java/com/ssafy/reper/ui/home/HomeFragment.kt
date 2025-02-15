@@ -37,6 +37,7 @@ import com.ssafy.reper.ui.order.OrderViewModel
 import com.ssafy.reper.ui.order.adapter.HomeOrderAdatper
 import com.ssafy.reper.ui.recipe.AllRecipeFragment
 import com.ssafy.reper.ui.recipe.RecipeViewModel
+import kotlinx.coroutines.launch
 
 
 private const val TAG = "HomeFragment_싸피"
@@ -136,30 +137,43 @@ class HomeFragment : Fragment() {
         mainViewModel.getLikeRecipes(sharedPreferencesUtil.getStoreId(), sharedPreferencesUtil.getUser().userId!!.toInt())
 
         val rvHomeLikeRecipe = binding.fragmentHomeRvLikeRecipe
-        val adapter = RVHomeLikeRecipeAdapter(
-            mainViewModel.favoriteRecipeList,
-            viewLifecycleOwner
-        ) { favoriteRecipe ->
-            mainViewModel.clearData()
-            val bundle =Bundle().apply {
-                putInt("whereAmICame", 1)
-            }
-            recipeViewModel.getRecipe(favoriteRecipe.recipeId)
-            recipeViewModel.recipe.observe(viewLifecycleOwner){
-                val recipe = recipeViewModel.recipe.value
 
-                mainViewModel.setSelectedRecipes(mutableListOf(recipe!!))
-                Log.d(TAG, "initFavoriteAdapter: 보내질 레시피 ${mainViewModel.selectedRecipeList.value}")
-                findNavController().navigate(R.id.fullRecipeFragment, bundle)
+        mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner) { favoriteRecipes ->
+            if (favoriteRecipes.isNullOrEmpty()) {
+                // 데이터가 없을 때
+                rvHomeLikeRecipe.visibility = View.GONE
+                binding.nothingRecipe.visibility = View.VISIBLE
+            } else {
+                // 데이터가 있을 때
+                rvHomeLikeRecipe.visibility = View.VISIBLE
+                binding.nothingRecipe.visibility = View.GONE
+                
+                val adapter = RVHomeLikeRecipeAdapter(
+                    mainViewModel.favoriteRecipeList,
+                    viewLifecycleOwner
+                ) { favoriteRecipe ->
+                    mainViewModel.clearData()
+                    val bundle = Bundle().apply {
+                        putInt("whereAmICame", 1)
+                    }
+                    recipeViewModel.getRecipe(favoriteRecipe.recipeId)
+                    recipeViewModel.recipe.observe(viewLifecycleOwner) { recipe ->
+                        if (recipe != null) {
+                            mainViewModel.setSelectedRecipes(mutableListOf(recipe))
+                            Log.d(TAG, "initFavoriteAdapter: 보내질 레시피 ${mainViewModel.selectedRecipeList.value}")
+                            findNavController().navigate(R.id.fullRecipeFragment, bundle)
+                        }
+                    }
+                }
+                
+                rvHomeLikeRecipe.adapter = adapter
+                rvHomeLikeRecipe.layoutManager = LinearLayoutManager(
+                    context, 
+                    LinearLayoutManager.HORIZONTAL, 
+                    false
+                )
             }
         }
-        
-        rvHomeLikeRecipe.adapter = adapter
-        rvHomeLikeRecipe.layoutManager = LinearLayoutManager(
-            context, 
-            LinearLayoutManager.HORIZONTAL, 
-            false
-        )
     }
 
 
@@ -172,25 +186,30 @@ class HomeFragment : Fragment() {
             )
         }
         binding.fragmentHomeRvAnnouncement.layoutManager = LinearLayoutManager(requireContext())
-        notiAdapter = NotiAdapter(emptyList(), object : NotiAdapter.ItemClickListener {
-            override fun onClick(position: Int) {
-                val noticeList = noticeViewModel.noticeList.value // 현재 공지 리스트 가져오기
-                if (!noticeList.isNullOrEmpty() && position in noticeList.indices) {
-                    noticeViewModel.setClickNotice(noticeList[position])
-                    findNavController().navigate(R.id.writeNotiFragment)
-                }
-            }
-        })
-
-        binding.fragmentHomeRvAnnouncement.adapter = notiAdapter
-
+        
         noticeViewModel.noticeList.observe(viewLifecycleOwner) { fullList ->
-            // 상위 3개만 선택
-            val latestNotices = fullList.take(3)
-            
-            // 기존 데이터를 덮어쓰지 않고 새로운 리스트를 어댑터에 설정
-            notiAdapter.noticeList = latestNotices
-            notiAdapter.notifyDataSetChanged()
+            if (fullList.isNullOrEmpty()) {
+                // 데이터가 없을 때
+                binding.fragmentHomeRvAnnouncement.visibility = View.GONE
+                binding.nothingNotice.visibility = View.VISIBLE
+            } else {
+                // 데이터가 있을 때
+                binding.fragmentHomeRvAnnouncement.visibility = View.VISIBLE
+                binding.nothingNotice.visibility = View.GONE
+                
+                // 상위 3개만 선택
+                val latestNotices = fullList.take(3)
+                notiAdapter = NotiAdapter(latestNotices, object : NotiAdapter.ItemClickListener {
+                    override fun onClick(position: Int) {
+                        val noticeList = noticeViewModel.noticeList.value
+                        if (!noticeList.isNullOrEmpty() && position in noticeList.indices) {
+                            noticeViewModel.setClickNotice(noticeList[position])
+                            findNavController().navigate(R.id.writeNotiFragment)
+                        }
+                    }
+                })
+                binding.fragmentHomeRvAnnouncement.adapter = notiAdapter
+            }
         }
     }
 
@@ -285,6 +304,10 @@ class HomeFragment : Fragment() {
                             sharedPreferencesUtil.getUser().userId!!.toInt()
                         )
                         orderViewModel.getOrders()
+                        mainViewModel.getLikeRecipes(
+                            sharedPreferencesUtil.getStoreId(),
+                            sharedPreferencesUtil.getUser().userId!!
+                        )
                     }
                     Log.d(TAG, "onItemSelected: position=$position, storeId=$selectedStoreId")
                 }
@@ -312,43 +335,51 @@ class HomeFragment : Fragment() {
 
     fun initOrderAdapter(selectedDate: String) {
         binding.fragmentHomeRvOrder.layoutManager = LinearLayoutManager(requireContext())
-
-        orderAdapter = HomeOrderAdatper(mutableListOf(), mutableListOf()) { orderId ->
-            val bundle = Bundle().apply {
-                putInt("orderId", orderId)
-            }
-            // 주문 상세 화면으로 이동할 때 결과 리스너 설정
-            findNavController().navigate(R.id.orderRecipeFragment, bundle)
-        }
-
-        binding.fragmentHomeRvOrder.adapter = orderAdapter
-
-        orderViewModel.getOrders()
-
-        // orderList와 recipeNameList를 동시에 관찰
+        
         orderViewModel.orderList.observe(viewLifecycleOwner) { orderList ->
+            Log.d(TAG, "initOrderAdapter: orderList size=${orderList?.size}, data=$orderList")
+            
+            if (orderList.isNullOrEmpty()) {
+                // 주문 데이터가 없을 때
+                binding.fragmentHomeRvOrder.visibility = View.GONE
+                binding.nothingOrder.visibility = View.VISIBLE
+                return@observe
+            }
+            
             orderViewModel.recipeNameList.value?.let { recipeList ->
-                val currentStoreId = sharedPreferencesUtil.getStoreId()
-                // 현재 선택된 가게의 완료되지 않은 주문만 필터링
-                val activeOrders = orderList.filter { order ->
+                Log.d(TAG, "initOrderAdapter: recipeList size=${recipeList.size}")
+                
+                val activeOrders = orderList.filter { order -> 
                     !order.completed
                 }
-                orderAdapter.orderList = activeOrders.toMutableList()
-
-                // 필터링된 주문에 해당하는 레시피만 선택
-                val activeRecipes = recipeList.filterIndexed { index, _ ->
-                    index < orderList.size &&
-                            !orderList[index].completed
+                
+                Log.d(TAG, "initOrderAdapter: activeOrders size=${activeOrders.size}")
+                
+                if (activeOrders.isEmpty()) {
+                    // 활성화된 주문이 없을 때
+                    binding.fragmentHomeRvOrder.visibility = View.GONE
+                    binding.nothingOrder.visibility = View.VISIBLE
+                } else {
+                    // 활성화된 주문이 있을 때
+                    binding.fragmentHomeRvOrder.visibility = View.VISIBLE
+                    binding.nothingOrder.visibility = View.GONE
+                    
+                    orderAdapter = HomeOrderAdatper(
+                        activeOrders.toMutableList(),
+                        recipeList.take(activeOrders.size).map { it.recipeName }.toMutableList()
+                    ) { orderId ->
+                        val bundle = Bundle().apply {
+                            putInt("orderId", orderId)
+                        }
+                        findNavController().navigate(R.id.orderRecipeFragment, bundle)
+                    }
+                    binding.fragmentHomeRvOrder.adapter = orderAdapter
                 }
-                orderAdapter.recipeNameList = activeRecipes.map { it.recipeName }.toMutableList()
-                orderAdapter.notifyDataSetChanged()
-
-                Log.d(
-                    TAG,
-                    "Orders updated: active=${activeOrders.size}, total=${orderList.size}, storeId=$currentStoreId"
-                )
             }
         }
+        
+        // 초기 데이터 로드
+        orderViewModel.getOrders()
     }
 
 
@@ -364,23 +395,24 @@ class HomeFragment : Fragment() {
 
         bannerItems.add(
             HomeBannerModel(
-                R.drawable.christmas_banner,
-                "만들기 어려운\n크리스마스 신메뉴도\n레퍼와 함께!",
-                "사용법 보러가기기",
+                R.drawable.banner3,
+                "카페 근무는\n처음이신가요?\n레퍼와 함께!",
+                "사용법 보러가기",
                 R.color.banner_green
             )
         )
 
         bannerItems.add(
             HomeBannerModel(
-                R.drawable.christmas_banner,
-                "테스트 배너",
-                "테스트 버튼",
-                R.color.banner_green
+                R.drawable.storebanner,
+                "여러 가게 정보도\n한번에 관리\n레퍼에선 모두 됩니다!",
+                "마이페이지 보러가기",
+                R.color.banner_blue
             )
         )
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupBannerViewPager() {
         val bannerAdapter = RVHomeBannerAdapter(bannerItems)
         binding.fragmentHomeVpBanner.apply {
