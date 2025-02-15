@@ -9,6 +9,7 @@ spring:
     password: jeongeoneya0831!
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+
   jpa:
     hibernate:
       ddl-auto: update # (개발환경) -> (운영 환경) validation/none
@@ -34,6 +35,9 @@ spring:
 #      ca-certificate: classpath:docker/certs/ca.crt
 #      key: classpath:certs/elasticsearch.key
 #      certificate: classpath:certs/elasticsearch.crt
+
+firebase:
+  credential: ${FIREBASE_JSON}  # 🔥 환경 변수에서 Firebase JSON을 가져오기
 
 logging.level:
   org.hibernate.SQL: debug # (개발 환경) SQL 로그 출력

@@ -49,17 +49,17 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://i12d109.p.ssafy.io:13790/reper?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ssafy
       SPRING_DATASOURCE_PASSWORD: jeongeoneya0831!
-      FIREBASE_JSON: /app/config/firebase.json  # Firebase JSON 경로 설정
+      FIREBASE_JSON: ${FIREBASE_JSON}  # Firebase JSON을 환경 변수로 전달
     ports:
       - "48620:8080"
     depends_on:
       - mysql
+      - elasticsearch
     volumes:
       - app_logs:/app/logs
-      - ./src/main/resources/firebase/reper-7e5b4-firebase-adminsdk-fbsvc-ee6581830a.json:/app/config/firebase.json  # Firebase JSON 파일을 로컬에서 마운트
     networks:
       - app-network
-    
+
   pdf-server:
     image: pdf-server
     container_name: pdf-server
