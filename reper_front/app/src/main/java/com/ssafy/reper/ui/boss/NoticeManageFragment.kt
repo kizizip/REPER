@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentNoticeManageBinding
+import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.NotiAdapter
 
 private const val TAG = "NoticeManageFragment"
@@ -30,6 +31,11 @@ class NoticeManageFragment : Fragment() {
     private lateinit var notiAdapter: NotiAdapter
     val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
         SharedPreferencesUtil(requireContext().applicationContext)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as MainActivity).hideBottomNavigation()
     }
 
 
