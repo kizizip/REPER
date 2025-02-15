@@ -35,8 +35,7 @@ services:
       bash -c "
       if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
         elasticsearch-plugin install analysis-nori --batch;
-      fi;
-      /usr/local/bin/docker-entrypoint.sh eswrapper"
+      fi;"
 
   app:
     image: reper-server
@@ -69,6 +68,8 @@ services:
     restart: always
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     ports:
       - "20250:20250"
     depends_on:
