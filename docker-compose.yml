@@ -35,7 +35,8 @@ services:
       bash -c "
       if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
         elasticsearch-plugin install analysis-nori --batch;
-      fi;"
+      fi;
+      exec elasticsearch"
 
   app:
     image: reper-server

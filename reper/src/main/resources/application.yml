@@ -9,7 +9,6 @@ spring:
     password: jeongeoneya0831!
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-
   jpa:
     hibernate:
       ddl-auto: update # (개발환경) -> (운영 환경) validation/none
