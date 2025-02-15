@@ -104,6 +104,7 @@ class RecipeManageFragment : Fragment() {
                     binding.fileName.text = sharedPreferencesUtil.getStateName()
                     binding.successText.text = "확인"
                     binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.mainorange))
+                    bossViewModel.getMenuList(sharedStoreId)
                     binding.successText.setOnClickListener {
                         binding.uploadBar.visibility = View.GONE
                         bossViewModel.setRecipeLoad(null)
