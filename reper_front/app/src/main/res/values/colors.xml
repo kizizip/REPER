@@ -19,6 +19,7 @@
     <color name="morelightgray">#EBEBEB</color>
     <color name="banner_red">#ED3E3E</color>
     <color name="banner_green">#156651</color>
+    <color name="banner_blue">#07547B</color>
 
     <color name="mp_color_primary">#007F8B</color>
 </resources>

@@ -304,6 +304,10 @@ class HomeFragment : Fragment() {
                             sharedPreferencesUtil.getUser().userId!!.toInt()
                         )
                         orderViewModel.getOrders()
+                        mainViewModel.getLikeRecipes(
+                            sharedPreferencesUtil.getStoreId(),
+                            sharedPreferencesUtil.getUser().userId!!
+                        )
                     }
                     Log.d(TAG, "onItemSelected: position=$position, storeId=$selectedStoreId")
                 }
@@ -331,42 +335,50 @@ class HomeFragment : Fragment() {
 
     fun initOrderAdapter(selectedDate: String) {
         binding.fragmentHomeRvOrder.layoutManager = LinearLayoutManager(requireContext())
-
+        
         orderViewModel.orderList.observe(viewLifecycleOwner) { orderList ->
+            Log.d(TAG, "initOrderAdapter: orderList size=${orderList?.size}, data=$orderList")
+            
             if (orderList.isNullOrEmpty()) {
-                // 데이터가 없을 때
+                // 주문 데이터가 없을 때
                 binding.fragmentHomeRvOrder.visibility = View.GONE
                 binding.nothingOrder.visibility = View.VISIBLE
-            } else {
-                // 데이터가 있을 때
-                binding.fragmentHomeRvOrder.visibility = View.VISIBLE
-                binding.nothingOrder.visibility = View.GONE
+                return@observe
+            }
+            
+            orderViewModel.recipeNameList.value?.let { recipeList ->
+                Log.d(TAG, "initOrderAdapter: recipeList size=${recipeList.size}")
                 
-                orderViewModel.recipeNameList.value?.let { recipeList ->
-
-                    val activeOrders = orderList.filter { order ->
-                        !order.completed
-                    }
+                val activeOrders = orderList.filter { order -> 
+                    !order.completed
+                }
+                
+                Log.d(TAG, "initOrderAdapter: activeOrders size=${activeOrders.size}")
+                
+                if (activeOrders.isEmpty()) {
+                    // 활성화된 주문이 없을 때
+                    binding.fragmentHomeRvOrder.visibility = View.GONE
+                    binding.nothingOrder.visibility = View.VISIBLE
+                } else {
+                    // 활성화된 주문이 있을 때
+                    binding.fragmentHomeRvOrder.visibility = View.VISIBLE
+                    binding.nothingOrder.visibility = View.GONE
                     
-                    if (activeOrders.isEmpty()) {
-                        binding.fragmentHomeRvOrder.visibility = View.GONE
-                        binding.nothingOrder.visibility = View.VISIBLE
-                    } else {
-                        orderAdapter = HomeOrderAdatper(
-                            activeOrders.toMutableList(),
-                            recipeList.map { it.recipeName }.toMutableList()
-                        ) { orderId ->
-                            val bundle = Bundle().apply {
-                                putInt("orderId", orderId)
-                            }
-                            findNavController().navigate(R.id.orderRecipeFragment, bundle)
+                    orderAdapter = HomeOrderAdatper(
+                        activeOrders.toMutableList(),
+                        recipeList.take(activeOrders.size).map { it.recipeName }.toMutableList()
+                    ) { orderId ->
+                        val bundle = Bundle().apply {
+                            putInt("orderId", orderId)
                         }
-                        binding.fragmentHomeRvOrder.adapter = orderAdapter
+                        findNavController().navigate(R.id.orderRecipeFragment, bundle)
                     }
+                    binding.fragmentHomeRvOrder.adapter = orderAdapter
                 }
             }
         }
         
+        // 초기 데이터 로드
         orderViewModel.getOrders()
     }
 
@@ -383,23 +395,24 @@ class HomeFragment : Fragment() {
 
         bannerItems.add(
             HomeBannerModel(
-                R.drawable.christmas_banner,
-                "만들기 어려운\n크리스마스 신메뉴도\n레퍼와 함께!",
-                "사용법 보러가기기",
+                R.drawable.banner3,
+                "카페 근무는\n처음이신가요?\n레퍼와 함께!",
+                "사용법 보러가기",
                 R.color.banner_green
             )
         )
 
         bannerItems.add(
             HomeBannerModel(
-                R.drawable.christmas_banner,
-                "테스트 배너",
-                "테스트 버튼",
-                R.color.banner_green
+                R.drawable.storebanner,
+                "여러 가게 정보도\n한번에 관리\n레퍼에선 모두 됩니다!",
+                "마이페이지 보러가기",
+                R.color.banner_blue
             )
         )
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupBannerViewPager() {
         val bannerAdapter = RVHomeBannerAdapter(bannerItems)
         binding.fragmentHomeVpBanner.apply {

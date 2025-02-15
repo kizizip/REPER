@@ -122,32 +122,27 @@ class BossFragment : Fragment() {
         initSpinner()
         noticeViewModel.type = ""
         bossViewModel.accessList.observe(viewLifecycleOwner) { accessEmployees ->
-            accessAdapter.updateList(accessEmployees)
-            accessAdapter.notifyDataSetChanged()
-            nonAccessAdapter.notifyDataSetChanged()
+            Log.d(TAG, "Access employees size: ${accessEmployees?.size}")
+            if (accessEmployees.isNullOrEmpty()) {
+                binding.employeeList.visibility = View.GONE
+                binding.nothingEmployee.visibility = View.VISIBLE
+            } else {
+                binding.employeeList.visibility = View.VISIBLE
+                binding.nothingEmployee.visibility = View.GONE
+                accessAdapter.updateList(accessEmployees)
+            }
         }
 
-        // waitingList가 변경되면 nonAccessAdapter의 데이터 갱신
         bossViewModel.waitingList.observe(viewLifecycleOwner) { waitingEmployees ->
-            nonAccessAdapter.updateList(waitingEmployees)
-            accessAdapter.notifyDataSetChanged()
-            nonAccessAdapter.notifyDataSetChanged()
-        }
-
-        if ( bossViewModel.accessList.value ==null ||bossViewModel.accessList.value!!.isEmpty()){
-            binding.accessFalseList.visibility =View.GONE
-            binding.nothingRequest.visibility =View.VISIBLE
-        }else{
-            binding.accessFalseList.visibility =View.VISIBLE
-            binding.nothingRequest.visibility =View.GONE
-        }
-
-        if (  bossViewModel.waitingList.value ==null || bossViewModel.waitingList.value!!.isEmpty()){
-            binding.employeeList.visibility =View.GONE
-            binding.nothingEmployee.visibility =View.VISIBLE
-        }else{
-            binding.employeeList.visibility =View.VISIBLE
-            binding.nothingEmployee.visibility =View.GONE
+            Log.d(TAG, "Waiting employees size: ${waitingEmployees?.size}")
+            if (waitingEmployees.isNullOrEmpty()) {
+                binding.accessFalseList.visibility = View.GONE
+                binding.nothingRequest.visibility = View.VISIBLE
+            } else {
+                binding.accessFalseList.visibility = View.VISIBLE
+                binding.nothingRequest.visibility = View.GONE
+                nonAccessAdapter.updateList(waitingEmployees)
+            }
         }
 
     }

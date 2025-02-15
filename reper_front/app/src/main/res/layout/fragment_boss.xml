@@ -213,11 +213,11 @@
             android:layout_marginTop="28dp"
             android:id="@+id/nothing_request"
             android:layout_width="match_parent"
-            android:layout_height="150dp">
+            android:layout_height="100dp">
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
+                android:layout_height="100dp"
                 android:textColor="@color/lightgray"
                 android:fontFamily="@font/pretendard_regular"
                 android:text="권한 요청이 없습니다."
