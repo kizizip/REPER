@@ -63,6 +63,23 @@
             app:layout_constraintTop_toBottomOf="@+id/textView"
             tools:layout_editor_absoluteX="32dp" />
 
+        <FrameLayout
+            android:id="@+id/nothing_store"
+            android:layout_width="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            android:layout_height="0dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/lightgray"
+                android:fontFamily="@font/pretendard_semibold"
+                android:text="등록된 가게가 없습니다."
+                android:textSize="18sp"
+                android:layout_gravity="center"
+                />
+        </FrameLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

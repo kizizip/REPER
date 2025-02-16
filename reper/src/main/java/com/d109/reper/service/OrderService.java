@@ -62,7 +62,7 @@ public class OrderService {
 
     @Transactional
     public Order createRandomOrder() {
-        Store store = storeRepository.findById(1L)
+        Store store = storeRepository.findById(68L)
                 .orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
         Order order = new Order();

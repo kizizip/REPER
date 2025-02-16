@@ -48,7 +48,7 @@
         <LinearLayout
             android:id="@+id/recipe_fg_search_noti"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
             android:layout_marginTop="32dp"
             android:background="@drawable/search_bar"
             android:orientation="horizontal"
@@ -73,6 +73,10 @@
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:hint="공지를 입력해보세요."
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:maxLines="1"
+                android:singleLine="true"
                 android:textSize="16sp" />
 
 
@@ -102,6 +106,25 @@
             android:scrollbars="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recipe_fg_search_noti" />
+
+        <FrameLayout
+            android:id="@+id/nothing_notice_boss"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recipe_fg_search_noti"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="공지내역이 없습니다."
+                android:textSize="18sp"
+                android:layout_gravity="center"
+                android:fontFamily="@font/pretendard_semibold"
+                android:textColor="@color/lightgray"
+                />
+        </FrameLayout>
 
 
         <TextView

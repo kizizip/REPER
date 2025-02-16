@@ -62,17 +62,15 @@ class RVHomeLikeRecipeAdapter(
             rvImg.setImageResource(R.drawable.noimage)
 
 
-//            // 이미지 URL이 있는 경우 Glide로 로드
-//            if (!item.imageUrl.isNullOrEmpty()) {
-//                Glide.with(itemView.context)
-//                    .load(item.imageUrl)
-//                    .placeholder(R.drawable.recipe_default_img)
-//                    .error(R.drawable.recipe_default_img)
-//                    .into(rvImg)
-//            } else {
-//                // 이미지 URL이 없는 경우 기본 이미지 설정
-//                rvImg.setImageResource(R.drawable.recipe_default_img)
-//            }
+            // 이미지 설정
+            if(item.recipeImg != null){
+                Glide.with(rvImg)
+                    .load(item.recipeImg)
+                    .into(rvImg)
+            }
+            else{
+                rvImg.setImageResource(R.drawable.noimage)
+            }
         }
     }
 }

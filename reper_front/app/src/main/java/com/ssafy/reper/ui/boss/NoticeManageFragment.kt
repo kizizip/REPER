@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentNoticeManageBinding
+import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.NotiAdapter
 
 private const val TAG = "NoticeManageFragment"
@@ -30,6 +31,11 @@ class NoticeManageFragment : Fragment() {
     private lateinit var notiAdapter: NotiAdapter
     val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
         SharedPreferencesUtil(requireContext().applicationContext)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as MainActivity).hideBottomNavigation()
     }
 
 
@@ -47,6 +53,10 @@ class NoticeManageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // BottomNavigationBar 숨기기
+        (requireActivity() as MainActivity).hideBottomNavigation()
+        
         sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
         sharedStoreId = sharedPreferencesUtil.getStoreId()
 
@@ -85,10 +95,20 @@ class NoticeManageFragment : Fragment() {
             val searchText = binding.notiFgSearchET.text.toString()
             searchNotice(searchText)
         }
+
+        if (noticeViewModel.noticeList.value == null||noticeViewModel.noticeList.value!!.isEmpty()){
+            binding.notiList.visibility = View.GONE
+            binding.nothingNoticeBoss.visibility = View.VISIBLE
+        }else{
+            binding.notiList.visibility = View.VISIBLE
+            binding.nothingNoticeBoss.visibility = View.GONE
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Fragment가 사라질 때 BottomNavigationBar 다시 보이게 하기
+        (requireActivity() as MainActivity).showBottomNavigation()
         _binding = null
 
     }

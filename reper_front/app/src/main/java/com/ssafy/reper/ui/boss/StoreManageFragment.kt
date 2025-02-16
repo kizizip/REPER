@@ -10,17 +10,23 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.ColorInt
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
+import com.ssafy.reper.data.local.SharedPreferencesUtil
+import com.ssafy.reper.data.remote.FcmService
 import com.ssafy.reper.databinding.FragmentStoreManageBinding
 import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
+import com.ssafy.reper.ui.MyFirebaseMessagingService
 import com.ssafy.reper.ui.boss.adpater.StoreAdapter
 
 private const val TAG = "StoreManageFragment"
@@ -32,8 +38,10 @@ class StoreManageFragment : Fragment() {
     private lateinit var storeAdapter: StoreAdapter
     private val bossViewModel: BossViewModel by activityViewModels()
     private val fcmViewModel: FcmViewModel by activityViewModels()
-    var userId = 1
-    var storeId = 1
+    val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
+        SharedPreferencesUtil(requireContext().applicationContext)
+    }
+
     private var storeAddDialog: AlertDialog? = null
 
 
@@ -72,6 +80,14 @@ class StoreManageFragment : Fragment() {
             storeAdapter.updateData(newStoreList)
         }
 
+      if(bossViewModel.myStoreList.value == null || bossViewModel.myStoreList.value!!.isEmpty()){
+          binding.storeFgRV.visibility =View.GONE
+          binding.nothingStore.visibility = View.VISIBLE
+      }else{
+          binding.storeFgRV.visibility =View.VISIBLE
+          binding.nothingStore.visibility = View.GONE
+      }
+
     }
 
 
@@ -81,6 +97,14 @@ class StoreManageFragment : Fragment() {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(R.layout.dialog_store_add)
         dialog.findViewById<View>(R.id.store_add_content).visibility = View.GONE
+        dialog.findViewById<ConstraintLayout>(R.id.store_add_btn_positive).apply {
+            isEnabled =false
+            alpha = 0.4f
+        }
+
+
+
+
 
         val editText = dialog.findViewById<EditText>(R.id.storeAddET)
         val addButton = dialog.findViewById<TextView>(R.id.add_btn)
@@ -92,12 +116,15 @@ class StoreManageFragment : Fragment() {
                 Log.d(TAG, "showStoreAddDialog: $storeName")
                 dialog.findViewById<View>(R.id.store_add_content).visibility = View.VISIBLE
                 dialog.findViewById<TextView>(R.id.add_store_name).text = storeName
-
-                dialog.findViewById<View>(R.id.store_add_btn_cancel).setOnClickListener {
-                    dialog.dismiss()
+                dialog.findViewById<ConstraintLayout>(R.id.store_add_btn_positive).apply {
+                    isEnabled =true
+                    alpha = 1.0f
                 }
+
+
+
                 dialog.findViewById<View>(R.id.store_add_btn_positive).setOnClickListener {
-                    bossViewModel.addStore(storeName, userId)
+                    bossViewModel.addStore(storeName, sharedPreferencesUtil.getUser().userId!!.toInt())
                     dialog.dismiss()
                     Toast.makeText(requireContext(), "가게 등록 완료", Toast.LENGTH_SHORT).show()
                 }
@@ -140,6 +167,7 @@ class StoreManageFragment : Fragment() {
         bossViewModel.myStoreList.observe(viewLifecycleOwner) { newStoreList ->
             Log.d(TAG, "Updated store list: $newStoreList")
             storeAdapter.updateData(newStoreList)  // 데이터가 변경되면 Adapter에 새 데이터 반영
+
         }
     }
 
@@ -162,10 +190,11 @@ class StoreManageFragment : Fragment() {
             dialog.dismiss()
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-            bossViewModel.deleteStore(deleteStoreId, userId)
+            bossViewModel.deleteStore(deleteStoreId, sharedPreferencesUtil.getUser().userId!!.toInt())
             Log.d(TAG, "showDialog: $deleteStoreId")
             dialog.dismiss()
             Toast.makeText(requireContext(), "가게 삭제 완료", Toast.LENGTH_SHORT).show()
+            fcmViewModel.deleteStoreToken(deleteStoreId)
             fcmViewModel.deleteStoreToken(deleteStoreId)
         }
         dialog.show()
