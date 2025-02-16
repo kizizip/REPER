@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentNoticeManageBinding
+import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.NotiAdapter
 
 private const val TAG = "NoticeManageFragment"
@@ -47,6 +48,10 @@ class NoticeManageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // BottomNavigationBar 숨기기
+        (requireActivity() as MainActivity).hideBottomNavigation()
+        
         sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
         sharedStoreId = sharedPreferencesUtil.getStoreId()
 
@@ -89,6 +94,8 @@ class NoticeManageFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Fragment가 사라질 때 BottomNavigationBar 다시 보이게 하기
+        (requireActivity() as MainActivity).showBottomNavigation()
         _binding = null
 
     }
