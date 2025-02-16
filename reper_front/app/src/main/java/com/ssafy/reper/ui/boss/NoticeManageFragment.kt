@@ -53,6 +53,10 @@ class NoticeManageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // BottomNavigationBar 숨기기
+        (requireActivity() as MainActivity).hideBottomNavigation()
+        
         sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
         sharedStoreId = sharedPreferencesUtil.getStoreId()
 
@@ -103,6 +107,8 @@ class NoticeManageFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Fragment가 사라질 때 BottomNavigationBar 다시 보이게 하기
+        (requireActivity() as MainActivity).showBottomNavigation()
         _binding = null
 
     }
