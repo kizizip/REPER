@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.reper.R
 import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentAllRecipeBinding
 import com.ssafy.reper.ui.MainActivity
@@ -43,6 +44,8 @@ private const val TAG = "AllRecipeFragment_정언"
 class AllRecipeFragment : Fragment() {
     var category : MutableList<String> = mutableListOf()
 
+    var favoriteReicpeList : MutableList<FavoriteRecipe> = mutableListOf()
+
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val viewModel: RecipeViewModel by viewModels()
 
@@ -50,6 +53,7 @@ class AllRecipeFragment : Fragment() {
     private lateinit var allRecipeListAdapter: AllRecipeListAdapter
 
     private lateinit var mainActivity: MainActivity
+    private var searchQuery = ""
 
     private var _allRecipeBinding : FragmentAllRecipeBinding? = null
     private val allRecipeBinding get() =_allRecipeBinding!!
@@ -66,13 +70,17 @@ class AllRecipeFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _allRecipeBinding = FragmentAllRecipeBinding.inflate(inflater, container, false)
         return allRecipeBinding.root
+
+
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+         searchQuery = arguments?.getString("searchQuery").toString()
+
         mainViewModel.clearData()
         mainViewModel.isEmployee.observe(viewLifecycleOwner){
-            if(it == true){
+            if(it == true || mainViewModel.userInfo.value!!.role == "OWNER"){
                 allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
 
                 allRecipeBinding.allrecipeFmRv.visibility = View.VISIBLE
@@ -84,7 +92,7 @@ class AllRecipeFragment : Fragment() {
                 initAdapter()
             }
             else{
-                Log.d(TAG, "onViewCreated: ${it}")
+                Log.d(TAG, "isEmployee: ${it}")
                 allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
 
                 allRecipeBinding.allrecipeFmRv.visibility = View.GONE
@@ -93,9 +101,12 @@ class AllRecipeFragment : Fragment() {
                 allRecipeBinding.allrecipeFmBtnFilter.isEnabled = false
             }
         }
-        mainViewModel.getIsEmployee(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt())
+        favoriteReicpeList = mainViewModel.favoriteRecipeList.value ?: mutableListOf()
         // 이벤트 관리
         initEvent()
+        if (searchQuery != "" && searchQuery != "null"){
+            allRecipeBinding.allrecipeFmEtSearch.setText(searchQuery)
+        }
     }
     override fun onResume() {
         super.onResume()
@@ -110,17 +121,26 @@ class AllRecipeFragment : Fragment() {
         // 검색 초기 상태 설정
         allRecipeBinding.allrecipeFmEtSearch.setText("")
 
-        // 탭 초기 상태 설정 (단계별 레시피 선택)
-        allRecipeBinding.allrecipeFmStepRecipeTab.isSelected = true
-        allRecipeBinding.allrecipeFmFullRecipeTab.isSelected = false
 
-        // 탭 클릭 리스너 설정
-        allRecipeBinding.allrecipeFmStepRecipeTab.setOnClickListener {
+        // 탭 초기 상태 설정 (단계별 레시피 선택)
+        if(mainViewModel.nowTab.value == 1){ // 단계별
             allRecipeBinding.allrecipeFmStepRecipeTab.isSelected = true
             allRecipeBinding.allrecipeFmFullRecipeTab.isSelected = false
         }
+        else{ // 전체
+            allRecipeBinding.allrecipeFmStepRecipeTab.isSelected = false
+            allRecipeBinding.allrecipeFmFullRecipeTab.isSelected = true
+        }
 
+        // 단계별 탭 클릭 리스너 설정
+        allRecipeBinding.allrecipeFmStepRecipeTab.setOnClickListener {
+            mainViewModel.setNowTab(1)
+            allRecipeBinding.allrecipeFmStepRecipeTab.isSelected = true
+            allRecipeBinding.allrecipeFmFullRecipeTab.isSelected = false
+        }
+        // 전체 탭 클릭 리스너 설정
         allRecipeBinding.allrecipeFmFullRecipeTab.setOnClickListener {
+            mainViewModel.setNowTab(2)
             allRecipeBinding.allrecipeFmStepRecipeTab.isSelected = false
             allRecipeBinding.allrecipeFmFullRecipeTab.isSelected = true
         }
@@ -137,6 +157,7 @@ class AllRecipeFragment : Fragment() {
                         viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
                         return@launch
                     }
+
 
                     when (howSearch) {
                         0 -> viewModel.searchRecipeIngredientInclude(
@@ -230,14 +251,25 @@ class AllRecipeFragment : Fragment() {
     }
     fun initAdapter() {
         // allrecipe item 클릭 이벤트 리스너
-        allRecipeListAdapter = AllRecipeListAdapter(mutableListOf(), mutableListOf()) { id, recipeName, recipeId ->
+        allRecipeListAdapter = AllRecipeListAdapter(mutableListOf(), mutableListOf()) { id, recipeName, recipeId, recipeImg ->
             // 즐겨찾기 버튼을 눌렀을 때
             if(id == 0){
-                viewModel.likeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipeId)
+                for(item in viewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
+                    favoriteReicpeList.add(FavoriteRecipe(
+                        recipeId = item.recipeId,
+                        recipeName = item.recipeName
+                    ))
+                    viewModel.likeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), item.recipeId)
+                }
+                mainViewModel.setLikeRecipes(favoriteReicpeList)
             }
             // 즐겨찾기 제외 버튼을 눌렀을 떄
             else if(id == 1){
-                viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), recipeId)
+                favoriteReicpeList.removeAll { it.recipeName == recipeName }
+                mainViewModel.setLikeRecipes(favoriteReicpeList)
+                for(item in viewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
+                    viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), item.recipeId)
+                }
             }
             // 아이템을 눌렀을 때
             else if(id == 2){
@@ -291,11 +323,6 @@ class AllRecipeFragment : Fragment() {
             allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
 
             viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
-            mainViewModel.getLikeRecipes(
-                ApplicationClass.sharedPreferencesUtil.getStoreId(),
-                ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
-            )
-
             viewModel.recipeList.observe(viewLifecycleOwner) {
                 if (it.isEmpty()) {
                     allRecipeBinding.allrecipeFmRv.visibility = View.GONE
@@ -309,7 +336,11 @@ class AllRecipeFragment : Fragment() {
 
                     allRecipeListAdapter.recipeList =
                         it.distinctBy { it.recipeName }.toMutableList()
-                    allRecipeListAdapter.notifyDataSetChanged()
+
+                    mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
+                        allRecipeListAdapter.favoriteRecipeList = it
+                        adapter = allRecipeListAdapter
+                    }
 
                     category.clear()
                     category.add("카테고리")
@@ -322,10 +353,6 @@ class AllRecipeFragment : Fragment() {
                 }
             }
 
-            mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner) {
-                allRecipeListAdapter.favoriteRecipeList = it
-                adapter = allRecipeListAdapter
-            }
         }
     }
     fun initSpinner(){
