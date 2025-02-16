@@ -24,6 +24,8 @@ class ApplicationClass : Application() {
     companion object {
         // 서버 URL 상수 선언 (실제 서버 주소로 설정됨)
         // const val SERVER_URL = "http://10.0.2.2:8080/"  // 안드로이드 에뮬레이터용
+
+
         const val SERVER_URL = "http://i12d109.p.ssafy.io:48620/api/"
         
         // Retrofit 인스턴스를 lateinit으로 선언 (나중에 초기화)

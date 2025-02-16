@@ -9,6 +9,7 @@ import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.kakao.sdk.common.KakaoSdk.type
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.FavoriteRecipe
@@ -26,6 +27,14 @@ class FullRecipeViewPagerAdapter(var recipeList: MutableList<Recipe>,var whereAm
 
                 fullrecipeFmTvCategory.setText(item.category)
                 fullrecipeFmTvMenuName.setText(item.recipeName)
+
+                if(item.recipeImg != null){
+                    Glide.with(binding.root)
+                        .load(item.recipeImg)
+                        .into(fullrecipeFmIv)
+                }else{
+                    fullrecipeFmIv.setBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.green))
+                }
 
                 // 재료 표시
                 val ingredient = item.ingredients.joinToString(", ") { it.ingredientName }
@@ -57,16 +66,16 @@ class FullRecipeViewPagerAdapter(var recipeList: MutableList<Recipe>,var whereAm
                     textView11.visibility = View.GONE
 
                     // 즐겨찾기 상태 설정
-                    val isFavorite = favoriteRecipeList?.any { it.recipeId == item.recipeId } ?: false
+                    val isFavorite = favoriteRecipeList?.any { it.recipeName == item.recipeName } ?: false
                     fullrecipeFmIvLineheart.visibility = if (isFavorite) View.GONE else View.VISIBLE
                     fullrecipeFmIvFullheart.visibility = if (isFavorite) View.VISIBLE else View.GONE
 
                     // 즐겨찾기 버튼 클릭 이벤트
                     fullrecipeFmBtnHeart.setOnClickListener {
-                        val isFavorite = favoriteRecipeList?.any { it.recipeId == item.recipeId } ?: false
+                        val isFavorite = favoriteRecipeList?.any { it.recipeName == item.recipeName } ?: false
                         fullrecipeFmIvLineheart.visibility = if (isFavorite) View.GONE else View.VISIBLE
                         fullrecipeFmIvFullheart.visibility = if (isFavorite) View.VISIBLE else View.GONE
-                        itemClickListener.onHeartClick(item.recipeId, isFavorite)
+                        itemClickListener.onHeartClick(item.recipeName, isFavorite)
                     }
 
                     // ICE/HOT 버튼 설정
@@ -131,7 +140,7 @@ class FullRecipeViewPagerAdapter(var recipeList: MutableList<Recipe>,var whereAm
 
     //클릭 인터페이스 정의 사용하는 곳에서 만들어준다.
     interface ItemClickListener {
-        fun onHeartClick(recipeId: Int, isFavorite:Boolean)
+        fun onHeartClick(recipeName: String, isFavorite:Boolean)
         fun onHotIceClick(recipeName: String, type:String)
         fun onRecipeStepClick(recipe :Recipe, nowISeeStep:Int)
     }

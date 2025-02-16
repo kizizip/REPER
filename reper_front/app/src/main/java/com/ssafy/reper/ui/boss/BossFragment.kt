@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
 
 
 private const val TAG = "BossFragment_안주현"
@@ -47,9 +48,7 @@ class BossFragment : Fragment() {
     val bossViewModel: BossViewModel by activityViewModels()
     private val noticeViewModel: NoticeViewModel by activityViewModels()
     private val fcmViewModel: FcmViewModel by activityViewModels()
-    val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
-        SharedPreferencesUtil(requireContext().applicationContext)
-    }
+    private lateinit var sharedPreferencesUtil: SharedPreferencesUtil
 
 
     //sharedPreferencesUtil정보로 바꾸기
@@ -65,6 +64,9 @@ class BossFragment : Fragment() {
         if (context is MainActivity) {
             mainActivity = context
         }
+
+        sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
+
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
@@ -121,16 +123,27 @@ class BossFragment : Fragment() {
         initSpinner()
         noticeViewModel.type = ""
         bossViewModel.accessList.observe(viewLifecycleOwner) { accessEmployees ->
-            accessAdapter.updateList(accessEmployees)
-            accessAdapter.notifyDataSetChanged()
-            nonAccessAdapter.notifyDataSetChanged()
+            Log.d(TAG, "Access employees size: ${accessEmployees?.size}")
+            if (accessEmployees.isNullOrEmpty()) {
+                binding.employeeList.visibility = View.GONE
+                binding.nothingEmployee.visibility = View.VISIBLE
+            } else {
+                binding.employeeList.visibility = View.VISIBLE
+                binding.nothingEmployee.visibility = View.GONE
+                accessAdapter.updateList(accessEmployees)
+            }
         }
 
-        // waitingList가 변경되면 nonAccessAdapter의 데이터 갱신
         bossViewModel.waitingList.observe(viewLifecycleOwner) { waitingEmployees ->
-            nonAccessAdapter.updateList(waitingEmployees)
-            accessAdapter.notifyDataSetChanged()
-            nonAccessAdapter.notifyDataSetChanged()
+            Log.d(TAG, "Waiting employees size: ${waitingEmployees?.size}")
+            if (waitingEmployees.isNullOrEmpty()) {
+                binding.accessFalseList.visibility = View.GONE
+                binding.nothingRequest.visibility = View.VISIBLE
+            } else {
+                binding.accessFalseList.visibility = View.VISIBLE
+                binding.nothingRequest.visibility = View.GONE
+                nonAccessAdapter.updateList(waitingEmployees)
+            }
         }
 
     }
@@ -163,17 +176,23 @@ class BossFragment : Fragment() {
             override fun onAcceptClick(position: Int) {
                 if (position in nonAccessAdapter.employeeList.indices) { // ✅ 범위 체크
                     val userId = nonAccessAdapter.employeeList[position].userId
-                    bossViewModel.acceptEmployee(sharedStoreId, userId)
-
-                    if (position in nonAccessAdapter.employeeList.indices) { // ✅ 또 다른 범위 체크
-                        fcmViewModel.sendToUserFCM(
-                            nonAccessAdapter.employeeList[position].userId,
-                            "권한 허가 알림",
-                            "${storeName}에서 권한을 허락했습니다.",
-                            "MyPageFragment",
-                            sharedStoreId
-                        )
+                    bossViewModel.acceptEmployee(sharedStoreId, userId).let{
+                        if (it =="성공"){
+                            if (position in nonAccessAdapter.employeeList.indices) { // ✅ 또 다른 범위 체크
+                                fcmViewModel.sendToUserFCM(
+                                    nonAccessAdapter.employeeList[position].userId,
+                                    "권한 허가 알림",
+                                    "${storeName}에서 권한을 허락했습니다.",
+                                    "MyPageFragment",
+                                    sharedStoreId
+                                )
+                            }else{
+                                Log.d(TAG, "onAcceptClick: 권한허가 실패")
+                            }
+                        }
                     }
+
+                   
                 } else {
                     Log.e(
                         "BossFragment",
@@ -300,6 +319,7 @@ class BossFragment : Fragment() {
                 sharedPreferencesUtil.setStoreId(selectedStore.storeId)
                 bossViewModel.getAllEmployee(selectedStore.storeId!!)
                 Log.d(TAG, "onItemSelected: ${selectedStore.storeId}")
+
                 CoroutineScope(Dispatchers.Main).launch {
                     val token = withContext(Dispatchers.IO) {
                         mainActivity.getFCMToken()

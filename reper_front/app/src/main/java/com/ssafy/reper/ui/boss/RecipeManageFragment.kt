@@ -104,6 +104,7 @@ class RecipeManageFragment : Fragment() {
                     binding.fileName.text = sharedPreferencesUtil.getStateName()
                     binding.successText.text = "확인"
                     binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.mainorange))
+                    bossViewModel.getMenuList(sharedStoreId)
                     binding.successText.setOnClickListener {
                         binding.uploadBar.visibility = View.GONE
                         bossViewModel.setRecipeLoad(null)
@@ -159,27 +160,43 @@ class RecipeManageFragment : Fragment() {
             }
         }
 
+       if( bossViewModel.recipeList.value == null || bossViewModel.recipeList.value!!.isEmpty()){
+           binding.recipeFgAddRV.visibility = View.GONE
+           binding.nothingRecipe.visibility = View.VISIBLE
+
+       }else{
+           binding.recipeFgAddRV.visibility = View.VISIBLE
+           binding.nothingRecipe.visibility = View.GONE
+       }
+
     }
 
 
     private fun initAdapter() {
-        // MenuList를 불러오기 전에 어댑터 초기화
         bossViewModel.getMenuList(sharedStoreId)
-
+        
         binding.recipeFgAddRV.layoutManager = LinearLayoutManager(requireContext())
         val recipeAdapter = RecipeAdapter(mutableListOf(), object : RecipeAdapter.ItemClickListener {
             override fun onItemClick(position: Int) {
                 val selectedRecipe = bossViewModel.recipeList.value?.get(position)
-                showDialog(selectedRecipe!!.recipeName, selectedRecipe!!.recipeId)
+                selectedRecipe?.let {
+                    showDialog(it.recipeName, it.recipeId)
+                }
             }
         })
         binding.recipeFgAddRV.adapter = recipeAdapter
 
-        bossViewModel.recipeList.observe(viewLifecycleOwner) {
-            recipeAdapter.updateData(it)
-            recipeAdapter.notifyDataSetChanged() // 🔹 데이터 갱신 후 어댑터 갱신
+        bossViewModel.recipeList.observe(viewLifecycleOwner) { recipes ->
+            Log.d(TAG, "Recipe list updated: size=${recipes?.size}")
+            if (recipes.isNullOrEmpty()) {
+                binding.recipeFgAddRV.visibility = View.GONE
+                binding.nothingRecipe.visibility = View.VISIBLE
+            } else {
+                binding.recipeFgAddRV.visibility = View.VISIBLE
+                binding.nothingRecipe.visibility = View.GONE
+                recipeAdapter.updateData(recipes)
+            }
         }
-
     }
 
     override fun onDestroyView() {
