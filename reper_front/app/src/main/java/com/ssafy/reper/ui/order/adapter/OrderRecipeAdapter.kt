@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.OrderDetail
@@ -31,10 +33,19 @@ class OrderRecipeAdatper(var orderDetailList: MutableList<OrderDetail>, var reci
         fun bindInfo(position: Int){
             val item = orderDetailList[position]
             val recipe = recipeList[position]
+            Log.d(TAG, "bindInfo: ${recipe.recipeId} / ${recipe.recipeName}")
 
             binding.rvOrderRecipeTitle.text = "${recipe.recipeName} ${recipe.type}"
             binding.rvOrderRecipeQuantity.text = item.quantity.toString()
             binding.rvOrderRecipeMessage.text = item.customerRequest
+
+            if(recipe.recipeImg != null){
+                Glide.with(binding.root)
+                    .load(recipe.recipeImg)
+                    .into(binding.rvOrderRecipeImg)
+            }else{
+                binding.rvOrderRecipeImg.setImageResource(R.drawable.noimage)
+            }
 
             binding.rvOrderRecipeCheckbox.isChecked = false
             if(checkedRecipeList.isNotEmpty()){
