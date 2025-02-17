@@ -13,6 +13,7 @@
         android:gravity="bottom"
         app:umanoDragView="@id/fullrecipe_fm_slide_layout"
         app:umanoPanelHeight="450dp">
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fullrecipe_fm_back_layout"
             android:layout_width="match_parent"
