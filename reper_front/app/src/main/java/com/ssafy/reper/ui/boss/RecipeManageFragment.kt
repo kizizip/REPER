@@ -49,14 +49,13 @@ class RecipeManageFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private val bossViewModel: BossViewModel by activityViewModels()
     private val fcmViewModel: FcmViewModel by activityViewModels()
+
     val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
         SharedPreferencesUtil(requireContext().applicationContext)
     }
 
     var sharedStoreId = 0
     var pdfName = ""
-
-
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -93,17 +92,12 @@ class RecipeManageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedStoreId = sharedPreferencesUtil.getStoreId()
-
-       if( bossViewModel.recipeLoad.value != null){
-           initUi()
-       }else if (bossViewModel.recipeLoad.value == "loading"){
-           observerRecipe()
-       }else{
-           observerRecipe()
-       }
-
-
         Log.d(TAG, "onViewCreated: 뷰모델은 이거입니다! ${bossViewModel.recipeLoad.value}")
+
+           initUi()
+           observerRecipe()
+
+
         binding.uploadBar.visibility = View.GONE
 
         binding.recipeFgAddTv.setOnClickListener {
@@ -155,6 +149,7 @@ class RecipeManageFragment : Fragment() {
     fun initUi() {
         val result = bossViewModel.recipeLoad.value
         updateUI(result) // LiveData 값 기반으로 UI 초기 설정
+        Log.d(TAG, "initUi: 원래저장된 값 ${result}")
     }
 
     fun observerRecipe() {
@@ -250,10 +245,11 @@ class RecipeManageFragment : Fragment() {
             } else {
                 binding.recipeFgAddRV.visibility = View.VISIBLE
                 binding.nothingRecipe.visibility = View.GONE
-                recipeAdapter.updateData(recipes.reversed()) // 리스트를 역순으로 정렬
+                recipeAdapter.updateData(recipes) // 리스트를 역순으로 정렬
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

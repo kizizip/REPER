@@ -205,7 +205,8 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val recipes = RetrofitUtil.recipeService.getStoreRecipe(storeId)
-                _recipeList.postValue(recipes)
+                // 여기서 recipes를 역순으로 뒤집어서 _recipeList에 저장
+                _recipeList.postValue(recipes.reversed())
                 Log.d(TAG, "getMenuList: storeId=$storeId, recipes=${recipes.size}")
             } catch (e: Exception) {
                 Log.e(TAG, "getMenuList error: ${e.message}")
