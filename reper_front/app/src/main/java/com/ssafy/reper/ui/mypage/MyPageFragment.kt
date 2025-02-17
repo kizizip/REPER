@@ -429,8 +429,8 @@ class MyPageFragment : Fragment() {
                                 val userId = sharedPreferencesUtil.getUser().userId
 
                                 RetrofitUtil.storeService.approveEmployee(
-                                    storeId.toString(),
-                                    userId.toString()
+                                    storeId!!,
+                                    userId!!
                                 )
                                 withContext(Dispatchers.Main) {  // Main 스레드에서 토스트 메시지 표시
                                     Toast.makeText(
@@ -439,6 +439,7 @@ class MyPageFragment : Fragment() {
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     RetrofitUtil.storeService.getStore(storeId!!).let {
+                                        Log.d(TAG, "initEvent: ${it.ownerId}")
                                         fcmViewModel.sendToUserFCM(
                                             it.ownerId,
                                             "권한요청알림",

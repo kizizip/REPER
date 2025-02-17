@@ -52,39 +52,15 @@ class BossFragment : Fragment() {
     private lateinit var sharedPreferencesUtil: SharedPreferencesUtil
 
 
-    //sharedPreferencesUtil정보로 바꾸기
-    private var sharedUserId = 0
-    private var sharedStoreId = 0
-
     lateinit var storeName: String
 
-    private lateinit var receiver: FragmentReceiver
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is MainActivity) {
             mainActivity = context
         }
-
         sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
-
-    }
-
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Receiver 인스턴스 생성
-        receiver = FragmentReceiver()
-        val filter = IntentFilter("com.ssafy.reper.UPDATE_BOSS_FRAGMENT")
-
-        ContextCompat.registerReceiver(
-            requireContext(),
-            receiver, // 리시버 객체
-            filter,
-            ContextCompat.RECEIVER_NOT_EXPORTED // 내부 앱에서만 사용
-        )
-
     }
 
     override fun onCreateView(
@@ -102,23 +78,6 @@ class BossFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).hideBottomNavigation()
 
-
-        val filter = IntentFilter().apply {
-            addAction("com.ssafy.reper.UPDATE_BOSS_FRAGMENT")
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requireActivity().registerReceiver(
-                receiver,
-                filter,
-                Context.RECEIVER_NOT_EXPORTED
-            )
-        } else {
-            requireActivity().registerReceiver(receiver, filter)
-        }
-
-        sharedUserId = sharedPreferencesUtil.getUser().userId!!.toInt()
-        sharedStoreId = sharedPreferencesUtil.getStoreId()
         initAdapter()
         moveFragment()
         initSpinner()
@@ -161,7 +120,7 @@ class BossFragment : Fragment() {
 
 
     private fun initAdapter() {
-        bossViewModel.getAllEmployee(sharedStoreId)
+        bossViewModel.getAllEmployee(sharedPreferencesUtil.getStoreId())
         // AccessAdapter 초기화
         accessAdapter = AccessAdapter(mutableListOf(), object : AccessAdapter.ItemClickListener {
             override fun onDeleteClick(position: Int) {
@@ -181,23 +140,23 @@ class BossFragment : Fragment() {
             override fun onAcceptClick(position: Int) {
                 if (position in nonAccessAdapter.employeeList.indices) { // ✅ 범위 체크
                     val userId = nonAccessAdapter.employeeList[position].userId
-                    bossViewModel.acceptEmployee(sharedStoreId, userId).let{
-                        if (it =="성공"){
+                    bossViewModel.acceptEmployee(sharedPreferencesUtil.getStoreId(), userId).let {
+                        if (it == "성공") {
                             if (position in nonAccessAdapter.employeeList.indices) { // ✅ 또 다른 범위 체크
                                 fcmViewModel.sendToUserFCM(
                                     nonAccessAdapter.employeeList[position].userId,
                                     "권한 허가 알림",
                                     "${storeName}에서 권한을 허락했습니다.",
                                     "MyPageFragment",
-                                    sharedStoreId
+                                    sharedPreferencesUtil.getStoreId()
                                 )
-                            }else{
+                            } else {
                                 Log.d(TAG, "onAcceptClick: 권한허가 실패")
                             }
                         }
                     }
 
-                   
+
                 } else {
                     Log.e(
                         "BossFragment",
@@ -226,7 +185,7 @@ class BossFragment : Fragment() {
             override fun onAcceptClick(position: Int) {
                 if (position in nonAccessAdapter.employeeList.indices) { // ✅ 범위 체크
                     val userId = nonAccessAdapter.employeeList[position].userId
-                    bossViewModel.acceptEmployee(sharedStoreId, userId)
+                    bossViewModel.acceptEmployee(sharedPreferencesUtil.getStoreId(), userId)
 
                     if (position in nonAccessAdapter.employeeList.indices) { // ✅ 또 다른 범위 체크
                         fcmViewModel.sendToUserFCM(
@@ -234,7 +193,7 @@ class BossFragment : Fragment() {
                             "권한 허가 알림",
                             "${storeName}에서 권한을 허락했습니다.",
                             "MyPageFragment",
-                            sharedStoreId
+                            sharedPreferencesUtil.getStoreId()
                         )
                     }
                 } else {
@@ -284,13 +243,14 @@ class BossFragment : Fragment() {
             if (storeNames.isEmpty()) {
                 spinner.setSelection(0)
             } else {
-                if (sharedStoreId != 0){
-                    val selectedStoreName = storeList.find { it.storeId == sharedStoreId }?.storeName
+                if (sharedPreferencesUtil.getStoreId() != 0) {
+                    val selectedStoreName =
+                        storeList.find { it.storeId == sharedPreferencesUtil.getStoreId() }?.storeName
                     selectedStoreName?.let {
                         val position = storeNames.indexOf(it)
                         spinner.setSelection(position)
                     }
-                }else{
+                } else {
                     val selectedStoreName = storeList[0].storeName
                     selectedStoreName?.let {
                         val position = storeNames.indexOf(it)
@@ -301,7 +261,7 @@ class BossFragment : Fragment() {
         }
 
         // 데이터 요청
-        bossViewModel.getStoreList(sharedUserId)
+        bossViewModel.getStoreList(sharedPreferencesUtil.getUser().userId!!)
 
         // 스피너 선택 이벤트 설정
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -388,13 +348,13 @@ class BossFragment : Fragment() {
             dialog.dismiss()
         }
         dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-            bossViewModel.deleteEmployee(sharedStoreId, userId)
+            bossViewModel.deleteEmployee(sharedPreferencesUtil.getStoreId(), userId)
             fcmViewModel.sendToUserFCM(
                 userId,
                 "권한 삭제알림",
                 "${storeName}에서 권한을 삭제했습니다.",
                 "MyPageFragment",
-                sharedStoreId
+                sharedPreferencesUtil.getStoreId()
             ).let {
                 if (it.equals("성공")) {
                     fcmViewModel.deleteUserToken(userId)
@@ -410,11 +370,6 @@ class BossFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
-        try {
-            requireContext().unregisterReceiver(receiver)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error unregistering receiver: ${e.message}")
-        }
     }
 
 

@@ -35,6 +35,8 @@ class FragmentReceiver : BroadcastReceiver() {
                         Log.d(TAG, "스토어 리스트 갱신")
                         activity.runOnUiThread {
                             activity.refreshStoreList()
+                            activity.refreshOrderList()
+                            activity.refreshEmployeeList(requestId!!.toInt())
                             activity.showDeleteDialog(requestId!!.toInt())
                         }
                     } ?: run {
@@ -44,13 +46,25 @@ class FragmentReceiver : BroadcastReceiver() {
                     Log.e(TAG, "Error refreshing store list: ${e.message}")
                     e.printStackTrace()
                 }
-
             }
+
             "com.ssafy.reper.UPDATE_BOSS_FRAGMENT" -> {
                 Log.d(TAG, "UPDATE_BOSS_FRAGMENT action received")
                 val requestId = intent.getStringExtra("requestId")
                 Log.d(TAG, "RequestId: $requestId")
-                handleBossFragmentUpdate(context, intent)
+                try {
+                    MainActivity.instance?.let { activity ->
+                        Log.d(TAG, "직원 리스트 갱신")
+                        activity.runOnUiThread {
+                            activity.refreshEmployeeList(requestId!!.toInt())
+                        }
+                    } ?: run {
+                        Log.e(TAG, "MainActivity instance is null")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error refreshing store list: ${e.message}")
+                    e.printStackTrace()
+                }
             }
 
             "com.ssafy.reper.APPROVE_ACCESS" -> {
@@ -120,25 +134,6 @@ class FragmentReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun handleBossFragmentUpdate(context: Context?, intent: Intent) {
-        try {
-            val requestId = intent.getStringExtra("requestId")
-            Log.d(TAG, "Updating BossFragment with requestId: $requestId")
-
-            val activity = context as? MainActivity
-            val navHostFragment = activity?.supportFragmentManager?.findFragmentById(R.id.activityMainFragmentContainer)
-            val currentFragment = navHostFragment?.childFragmentManager?.fragments?.firstOrNull() as? BossFragment
-
-            currentFragment?.let {
-                Log.d(TAG, "BossFragment found, updating...")
-                it.bossViewModel.getAllEmployee(requestId!!.toInt())
-                Log.d(TAG, "BossFragment update completed")
-            } ?: Log.e(TAG, "BossFragment not found")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error in handleBossFragmentUpdate: ${e.message}")
-            e.printStackTrace()
-        }
-    }
 
     private fun handleDeleteAccess(context: Context?, intent: Intent) {
         Log.d(TAG, "handleDeleteAccess started")

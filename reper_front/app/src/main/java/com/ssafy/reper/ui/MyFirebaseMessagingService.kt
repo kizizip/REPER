@@ -42,8 +42,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     @SuppressLint("UnsafeImplicitIntentLaunch")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
 
-
-
         super.onMessageReceived(remoteMessage)
         Log.d(TAG, "FCM Message Received")
         Log.d(TAG, "From: ${remoteMessage.from}")
@@ -58,6 +56,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         // 로그 추가
         Log.d(TAG, "Received FCM with targetFragment: ${data["targetFragment"]}")
+
+        val title = notification?.title
+        val body = notification?.body
+        Log.d(TAG, "FCM Notification Title: $title")
+        Log.d(TAG, "FCM Notification Body: $body")
+
 
         // BossFragment 갱신이 필요한 경우 브로드캐스트 발송
         if (data["targetFragment"] == "BossFragment") {
@@ -88,7 +92,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
 
         // 권한 삭제 알림인 경우
-        if (data["targetFragment"] == "MyPageFragment" && data["title"] == "권한 삭제알림") {
+        if (data["targetFragment"] == "MyPageFragment" && title == "권한 삭제알림") {
             Log.d(TAG, "권한 삭제 알림 수신")
             try {
                 Log.d(TAG, "권한 삭제 브로드캐스트 발송 시도")
@@ -113,7 +117,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
                 // 데이터 메시지도 함께 전달
                 sendNotification(title, body, data)
-                sendInAppMessage(title, body)
             }
 
         }
@@ -135,7 +138,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
 
         // 권한 허락시 스토어 리스트 갱신 필요한 경우 브로드캐스트 발송
-        if (data["targetFragment"] == "MyPageFragment") {
+        if (data["targetFragment"] == "MyPageFragment" && title == "권한 허가 알림" ) {
             try {
                 val updateIntent = Intent("com.ssafy.reper.APPROVE_ACCESS").apply {
                     putExtra("requestId", data["requestId"])
@@ -148,6 +151,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 Log.e(TAG, "Notice list update LocalBroadcast 발송 실패: ${e.message}")
             }
         }
+
 
         // 일반 알림 처리
         notification?.let {
@@ -205,52 +209,5 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         notificationManager.notify(0, notification)
     }
-
-
-    private fun sendInAppMessage(title: String, body: String) {
-        val activity = MainActivity.instance
-        activity?.runOnUiThread {
-            try {
-                // 커스텀 다이얼로그 생성
-                val dialog = Dialog(activity)
-                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                dialog.setContentView(R.layout.dialog_delete)
-
-                // 텍스트뷰 설정
-                val nameTextView = dialog.findViewById<TextView>(R.id.dialog_delete_bold_tv)
-                val middleTV = dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv)
-                val text = dialog.findViewById<TextView>(R.id.dialog_delete_tv)
-                Log.d(TAG, "sendInAppMessage: 여기는 인앱메세지에서 생성됨")
-
-                // 상단 텍스트 숨기기
-                nameTextView.visibility = View.GONE
-                middleTV.visibility = View.GONE
-                text.text = body
-
-                // 취소 버튼 숨기기
-                dialog.findViewById<View>(R.id.dialog_delete_cancle_btn).visibility = View.GONE
-
-                // 삭제 버튼을 확인 버튼으로 변경
-                dialog.findViewById<TextView>(R.id.dialog_delete_delete_btn).apply {
-                    setText("확인")
-                    setOnClickListener {
-                        dialog.dismiss()
-                        // 홈 프래그먼트로 이동
-                        activity.findNavController(R.id.activityMainFragmentContainer)
-                            .navigate(R.id.homeFragment)
-                    }
-                }
-
-                dialog.setCancelable(false)
-                dialog.show()
-                Log.d(TAG, "In-app dialog shown successfully")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error showing in-app dialog: ${e.message}")
-                e.printStackTrace()
-            }
-        }
-    }
-
-
 
 }
