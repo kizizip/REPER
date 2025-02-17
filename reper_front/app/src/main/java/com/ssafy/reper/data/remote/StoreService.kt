@@ -50,7 +50,7 @@ interface StoreService {
 
     // 알바생 -> 사장 권한 요청
     @POST("stores/{storeId}/employees/{userId}/approve")
-    suspend fun approveEmployee(@Path("storeId") storeId: String, @Path("userId") userId: String)
+    suspend fun approveEmployee(@Path("storeId") storeId: Int, @Path("userId") userId: Int)
 
     // OWNER인 {userId}에 해당하는 모든 store를 조회
     @GET("stores/owner/{userId}")

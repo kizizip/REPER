@@ -67,7 +67,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityMainBinding
-    private var backPressedTime: Long = 0    // 뒤로가기 버튼을 누른 시간 저장
     val noticeViewModel: NoticeViewModel by viewModels()
     private val bossViewModel: BossViewModel by viewModels()
     private val fcmViewModel: FcmViewModel by viewModels()
@@ -414,6 +413,14 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    fun refreshEmployeeList(storeId: Int) {
+        if (sharedPreferencesUtil.getStoreId() == storeId) {
+            Log.d(TAG, "refreshEmployeeList: 직원리스트 업로드")
+            bossViewModel.getAllEmployee(storeId)
+        }
+    }
+
+
     // 주문 리스트 갱신 메서드
     fun refreshOrderList() {
         Log.d(TAG, "refreshOrderList: 주문 리스트 갱신 시작")
@@ -441,7 +448,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 
                 val dialog = Dialog(this@MainActivity)
-                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                 dialog.setContentView(R.layout.dialog_delete_acccess)
                 
                 if (store != null) {
@@ -449,9 +455,13 @@ class MainActivity : AppCompatActivity() {
                     dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv).text = " ${sharedPreferencesUtil.getUser().username}"
                     
                     dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-                        val navHostFragment = supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer) as NavHostFragment
-                        val navController = navHostFragment.navController
-                        navController.navigate(R.id.homeFragment)
+                        if(sharedStoreId == storeId){
+                            val navHostFragment =
+                                supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer) as NavHostFragment
+                            val navController = navHostFragment.navController
+                            navController.navigate(R.id.homeFragment)
+                            sharedPreferencesUtil.setStoreId(0)
+                        }
                         dialog.dismiss()
                     }
                     

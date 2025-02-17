@@ -36,19 +36,26 @@ class StoreViewModel : ViewModel() {
         }
     }
 
-    fun getStore(storeId: Int): StoreResponse? {
-        var store: StoreResponse? = null
+    suspend fun getStore(storeId: Int): StoreResponse? {
+        return try {
+            RetrofitUtil.storeService.getStore(storeId)
+        } catch (e: Exception) {
+            Log.d(TAG, "getStore error: ${e.message}")
+            null
+        }
+    }
+
+    fun deleteStore(storeId: Int, userId: Int){
         viewModelScope.launch {
             runCatching {
-                RetrofitUtil.storeService.getStore(storeId)
+                RetrofitUtil.storeEmployeeService.deleteEmployee(storeId,userId)
             }.onSuccess {
-                Log.d(TAG, "getStore: ${it}")
-                store = it
+                getUserStore(storeId)
+                Log.d(TAG, "deleteStore: 삭제성공 ${myStoreList.value}")
             }.onFailure {
-                Log.d(TAG, "getStore: ${it.message}")
+                Log.d(TAG, "deleteStore:${it.message} ")
             }
         }
-        return store
     }
 
 }

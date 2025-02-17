@@ -176,6 +176,7 @@ class FullRecipeFragment : Fragment() {
             customList = customList,
             favoriteRecipeList = favoriteReicpeList,
             recipeCount = recipeCount,
+            email = mainViewModel.userInfo.value!!.email,
             itemClickListener = object : FullRecipeViewPagerAdapter.ItemClickListener {
                 override fun onHeartClick(recipeName: String, isFavorite: Boolean) {
                     if (!isFavorite) {

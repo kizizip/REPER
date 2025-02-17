@@ -75,7 +75,7 @@ class HomeFragment : Fragment() {
     private val bossViewModel: BossViewModel by activityViewModels()
     val noticeViewModel: NoticeViewModel by activityViewModels()
     private val storeViewModel: StoreViewModel by activityViewModels()
-    private val orderViewModel: OrderViewModel by viewModels()
+    private val orderViewModel: OrderViewModel by activityViewModels()
     private val recipeViewModel: RecipeViewModel by viewModels()
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val fcmViewModel: FcmViewModel by activityViewModels()
@@ -351,7 +351,6 @@ class HomeFragment : Fragment() {
                     }
 
 
-                    if (selectedStoreId != 0) {
                         noticeViewModel.getAllNotice(
                             selectedStoreId,
                             sharedPreferencesUtil.getUser().userId!!.toInt()
@@ -361,17 +360,6 @@ class HomeFragment : Fragment() {
                             sharedPreferencesUtil.getStoreId(),
                             sharedPreferencesUtil.getUser().userId!!
                         )
-                    } else {
-                        noticeViewModel.getAllNotice(
-                            selectedStoreId,
-                            sharedPreferencesUtil.getUser().userId!!.toInt()
-                        )
-                        orderViewModel.getOrders()
-                        mainViewModel.getLikeRecipes(
-                            sharedPreferencesUtil.getStoreId(),
-                            sharedPreferencesUtil.getUser().userId!!
-                        )
-                    }
                     Log.d(TAG, "onItemSelected: position=$position, storeId=$selectedStoreId")
                 }
 
@@ -421,13 +409,6 @@ class HomeFragment : Fragment() {
 
         orderViewModel.orderList.observe(viewLifecycleOwner) { orderList ->
             Log.d(TAG, "initOrderAdapter: orderList changed, size=${orderList?.size}")
-
-            if (orderList.isNullOrEmpty()) {
-                // 주문 데이터가 없을 때
-                binding.fragmentHomeRvOrder.visibility = View.GONE
-                binding.nothingOrder.visibility = View.VISIBLE
-                return@observe
-            }
 
             orderViewModel.recipeNameList.value?.let { recipeList ->
                 Log.d(TAG, "initOrderAdapter: recipeList size=${recipeList.size}")
