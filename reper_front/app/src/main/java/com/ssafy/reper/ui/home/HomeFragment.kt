@@ -51,10 +51,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContentProviderCompat.requireContext
+import com.ssafy.reper.base.ApplicationClass.Companion.sharedPreferencesUtil
 import com.ssafy.reper.ui.login.LoginActivity
+import com.ssafy.reper.util.ViewModelSingleton
 
 
 private const val TAG = "HomeFragment_싸피"
+private const val TAG1 = "HomeFragment_정언"
 
 class HomeFragment : Fragment() {
 
@@ -73,7 +77,7 @@ class HomeFragment : Fragment() {
     private val storeViewModel: StoreViewModel by activityViewModels()
     private val orderViewModel: OrderViewModel by viewModels()
     private val recipeViewModel: RecipeViewModel by viewModels()
-    private val mainViewModel: MainActivityViewModel by viewModels()
+    private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val fcmViewModel: FcmViewModel by activityViewModels()
 
     val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
@@ -100,20 +104,15 @@ class HomeFragment : Fragment() {
         super.onAttach(context)
         mainActivity = context as MainActivity
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).showBottomNavigation()
+
+        mainViewModel.getRecipeList()
 
         Log.d(TAG, "onViewCreated: User role = ${sharedPreferencesUtil.getUser()?.role}")
         Log.d(TAG, "onViewCreated: User ID = ${sharedPreferencesUtil.getUser()?.userId}")
@@ -177,15 +176,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun initFavoriteAdapter() {
-        mainViewModel.getLikeRecipes(
-            sharedPreferencesUtil.getStoreId(),
-            sharedPreferencesUtil.getUser().userId!!.toInt()
-        )
-
         val rvHomeLikeRecipe = binding.fragmentHomeRvLikeRecipe
 
-        mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner) { favoriteRecipes ->
-            if (favoriteRecipes.isNullOrEmpty()) {
+        mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
+            if (mainViewModel.favoriteRecipeList.value.isNullOrEmpty()) {
                 // 데이터가 없을 때
                 rvHomeLikeRecipe.visibility = View.GONE
                 binding.nothingRecipe.visibility = View.VISIBLE
@@ -194,50 +188,24 @@ class HomeFragment : Fragment() {
                 rvHomeLikeRecipe.visibility = View.VISIBLE
                 binding.nothingRecipe.visibility = View.GONE
 
-                val adapter = RVHomeLikeRecipeAdapter(
-                    mainViewModel.favoriteRecipeList,
-                    viewLifecycleOwner
-                ) { favoriteRecipe ->
+                val adapter = RVHomeLikeRecipeAdapter(mainViewModel.favoriteRecipeList.value!!.distinctBy { it.recipeName }.toMutableList()) { favoriteRecipe ->
                     mainViewModel.clearData()
+                    // 먼저 레시피 데이터를 로드
+                    val list = mainViewModel.recipeList.value!!.filter { it.recipeName == favoriteRecipe.recipeName }.toMutableList()
+                    Log.d(TAG1, "recipeList: ${list}")
                     val bundle = Bundle().apply {
                         putInt("whereAmICame", 1)
                     }
-
-                    // 먼저 레시피 데이터를 로드
-                    recipeViewModel.getRecipe(favoriteRecipe.recipeId)
-
-                    // recipeViewModel의 데이터가 준비될 때까지 기다림
-                    recipeViewModel.recipe.observe(viewLifecycleOwner) { recipe ->
-                        if (recipe != null) {
-                            // recipeViewModel의 데이터가 준비되면 mainViewModel 설정
-                            mainViewModel.setSelectedRecipes(mutableListOf(recipe))
-
-                            // mainViewModel의 데이터가 준비될 때까지 기다림
-
-                            var dataReadyObserver: androidx.lifecycle.Observer<Boolean>? = null
-                            dataReadyObserver = androidx.lifecycle.Observer { isReady ->
-                                if (isReady) {
-                                    Log.d(TAG, "initFavoriteAdapter: 모든 데이터 준비 완료, 화면 이동")
-                                    mainViewModel.setSelectedRecipes(mutableListOf())
-                                    findNavController().navigate(
-                                        R.id.stepRecipeFragment,
-                                        bundle
-                                    )
-                                }
-                            }
-                            mainViewModel.isDataReady.observe(
-                                viewLifecycleOwner,
-                                dataReadyObserver!!
-                            )
-                        }
-                    }
+                    // recipeViewModel의 데이터가 준비되면 mainViewModel 설정
+                    mainViewModel.setSelectedRecipes(list)
+                    findNavController().navigate(R.id.fullRecipeFragment, bundle)
                 }
-                rvHomeLikeRecipe.adapter = adapter
                 rvHomeLikeRecipe.layoutManager = LinearLayoutManager(
                     context,
                     LinearLayoutManager.HORIZONTAL,
                     false
                 )
+                rvHomeLikeRecipe.adapter = adapter
             }
         }
     }
