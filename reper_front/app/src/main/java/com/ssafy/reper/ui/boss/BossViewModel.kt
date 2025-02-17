@@ -8,11 +8,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.data.dto.Recipe
+import com.ssafy.reper.data.dto.RecipeResponse
 import com.ssafy.reper.data.dto.RequestStore
 import com.ssafy.reper.data.dto.SearchedStore
 import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.data.remote.RetrofitUtil
+import com.ssafy.reper.data.remote.RetrofitUtil.Companion.recipeService
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
@@ -39,13 +41,33 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     //레시피 업로드 상태 관찰
-    private val _recipeLoad = MutableLiveData<String?>()
-    val recipeLoad: MutableLiveData<String?> get() = _recipeLoad
+    private val _recipeLoad = MutableLiveData<String?>().apply {
+        value = null  // 초기값 설정
+    }
+    val recipeLoad: LiveData<String?> = _recipeLoad
+
+    // 업로드 상태를 저장할 변수 추가
+    private var lastUploadState: String? = null
 
     fun setRecipeLoad(result: String?) {
-        _recipeLoad.value = result
-        Log.d(TAG, "setRecipeLoad: ${result}")
+        lastUploadState = result  // 상태 저장
+        _recipeLoad.postValue(result)
+        Log.d(TAG, "setRecipeLoad: current state = $result")
     }
+
+    // 마지막 업로드 상태를 가져오는 함수
+    fun getLastUploadState(): String? = lastUploadState
+
+    // Fragment가 재생성될 때 마지막 상태를 복원하는 함수
+    fun restoreUploadState() {
+        _recipeLoad.value = lastUploadState
+        Log.d(TAG, "restoreUploadState: restored state = $lastUploadState")
+    }
+
+    //레시피 파일이름 저장
+    var fileName:String =""
+    var uploadNum = 0;
+
 
     //승인된 직원 리스트
     private val _accessList = MutableLiveData<List<Employee>>()
@@ -155,7 +177,7 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    fun uploadRecipe(storeId: Int, recipeFile: MultipartBody.Part) {
+    fun uploadRecipe(storeId: Int, recipeFile: MultipartBody.Part){
         Log.d(TAG, "uploadRecipe: 파일명=${recipeFile.headers}")
         val requestBody = recipeFile.body
         Log.d(TAG, "uploadRecipe: 파일 RequestBody 크기=${requestBody?.contentLength()} bytes")
@@ -164,17 +186,18 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
             runCatching {
                 val response = RetrofitUtil.recipeService.recipeUpload(storeId, recipeFile)
                 Log.d(TAG, "uploadRecipe: 서버 응답 = ${response}")
+                uploadNum = response.toInt()
             }.onSuccess {
                 Log.d(TAG, "uploadRecipe: 성공")
-                sharedPreferencesUtil.addStateLoad("success")
+                Log.d(TAG, "uploadRecipe: ${it}")
                 setRecipeLoad("success")
                 getMenuList(storeId)
             }.onFailure {
-                sharedPreferencesUtil.addStateLoad("failure")
                 setRecipeLoad("failure")
                 Log.d(TAG, "uploadRecipe: 실패 - ${it.message}")
             }
         }
+
     }
 
 
@@ -205,15 +228,21 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    fun searchRecipe(storeId: Int, recipeName: String) {
+    fun searchRecipe(storeId: Int, name: String) {
         viewModelScope.launch {
-            runCatching {
-                RetrofitUtil.recipeService.searchRecipe(storeId, recipeName)
-            }.onSuccess {
-                setRecipeList(it)
-            }.onFailure {
-                Log.d(TAG, "searchRecipe: ${it.message}")
+            var list:MutableList<RecipeResponse>
+            var result:MutableList<Recipe> = mutableListOf()
+            try {
+                list = recipeService.searchRecipeName(storeId, name)
+                for(item in list){
+                    result.add(recipeService.getRecipe(item.recipeId))
+                }
             }
+
+            catch (e:Exception){
+                result = mutableListOf()
+            }
+            _recipeList.value = result
         }
     }
 
