@@ -28,12 +28,14 @@ class FragmentReceiver : BroadcastReceiver() {
         when (intent?.action) {
             "com.ssafy.reper.DELETE_ACCESS" -> {
                 Log.d(TAG, "DELETE_ACCESS action received")
+                val requestId = intent.getStringExtra("requestId")
                 handleDeleteAccess(context, intent)
                 try {
                     MainActivity.instance?.let { activity ->
                         Log.d(TAG, "스토어 리스트 갱신")
                         activity.runOnUiThread {
                             activity.refreshStoreList()
+                            activity.showDeleteDialog(requestId!!.toInt())
                         }
                     } ?: run {
                         Log.e(TAG, "MainActivity instance is null")

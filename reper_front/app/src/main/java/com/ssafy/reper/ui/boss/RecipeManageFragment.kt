@@ -186,19 +186,6 @@ class RecipeManageFragment : Fragment() {
         })
 
 
-
-/// allRecipeBinding.allrecipeFmEtSearch.addTextChangedListener(object : TextWatcher {
-//            override fun afterTextChanged(s: Editable?) {
-//                searchJob?.cancel()
-//                searchJob = lifecycleScope.launch {
-//                    delay(300)
-//                    val searchText = s.toString()
-//
-//                    if (searchText.isEmpty()) {
-//                        viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
-//                        return@launch
-//                    }
-
        if( bossViewModel.recipeList.value == null || bossViewModel.recipeList.value!!.isEmpty()){
            binding.recipeFgAddRV.visibility = View.GONE
            binding.nothingRecipe.visibility = View.VISIBLE

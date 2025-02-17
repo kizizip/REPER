@@ -3,22 +3,27 @@ package com.ssafy.reper.ui
 
 import MainActivityViewModel
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.IntentFilter
 import android.content.pm.ActivityInfo
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.PackageManagerCompat
 import androidx.navigation.fragment.findNavController
@@ -43,6 +48,9 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import com.ssafy.reper.ui.home.HomeFragment
 import kotlin.math.log
 
@@ -223,6 +231,10 @@ class MainActivity : AppCompatActivity() {
             IntentFilter("com.ssafy.reper.UPDATE_ORDER")
         )
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            receiver,
+            IntentFilter("com.ssafy.reper.DELETE_ACCESS")
+        )
 
     }
 
@@ -414,6 +426,38 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "refreshStoreList: ${storeViewModel.myStoreList.value}")
         if (storeViewModel.myStoreList.value==null||storeViewModel.myStoreList.value!!.size == 0){
             ApplicationClass.sharedPreferencesUtil.setStoreId(0)
+        }
+    }
+
+    fun showDeleteDialog(storeId: Int) {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                // 스토어 정보를 받아올 때까지 대기
+                val store = withContext(Dispatchers.IO) {
+                    storeViewModel.getStore(storeId)
+                }
+                
+                val dialog = Dialog(this@MainActivity)
+                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                dialog.setContentView(R.layout.dialog_delete_acccess)
+                
+                if (store != null) {
+                    dialog.findViewById<TextView>(R.id.dialog_delete_bold_tv).text = " ${store.storeName}"
+                    dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv).text = " ${sharedPreferencesUtil.getUser().username}"
+                    
+                    dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
+                        val navHostFragment = supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer) as NavHostFragment
+                        val navController = navHostFragment.navController
+                        navController.navigate(R.id.homeFragment)
+                        dialog.dismiss()
+                    }
+                    
+                    dialog.show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.d(TAG, "showDeleteDialog: ${e.message}")
+            }
         }
     }
 }
