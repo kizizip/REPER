@@ -2,6 +2,7 @@ package com.ssafy.reper.ui.recipe
 
 import MainActivityViewModel
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Build.VERSION_CODES.P
 import android.os.Bundle
 import android.util.Log
@@ -124,6 +125,7 @@ class FullRecipeFragment : Fragment() {
         )
 
         mainActivity.hideBottomNavigation()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onPause() {
         super.onPause()
@@ -210,11 +212,20 @@ class FullRecipeFragment : Fragment() {
                 }
 
                 override fun onRecipeStepClick(recipe: Recipe, nowISeeStep: Int) {
-                    val bundle = Bundle().apply {
-                        putInt("whereAmICame", 3)
+                    if(whereAmICame == 1){
+                        val bundle = Bundle().apply {
+                            putInt("whereAmICame", 3)
+                        }
+                        mainViewModel.setSelectedRecipeGoToStepRecipe(mutableListOf(recipe), nowISeeStep)
+                        findNavController().navigate(R.id.stepRecipeFragment, bundle)
                     }
-                    mainViewModel.setSelectedRecipeGoToStepRecipe(mutableListOf(recipe), nowISeeStep)
-                    findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                    else if(whereAmICame == 2){
+                        val bundle = Bundle().apply {
+                            putInt("whereAmICame", 4)
+                        }
+                        mainViewModel.setSelectedRecipeGoToStepRecipe(mutableListOf(recipe), nowISeeStep)
+                        findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                    }
                 }
             },
         )

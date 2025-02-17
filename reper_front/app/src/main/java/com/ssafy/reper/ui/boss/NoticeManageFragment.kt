@@ -1,6 +1,8 @@
 package com.ssafy.reper.ui.boss
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -33,9 +35,17 @@ class NoticeManageFragment : Fragment() {
         SharedPreferencesUtil(requireContext().applicationContext)
     }
 
+    private lateinit var mainActivity: MainActivity
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mainActivity = context as MainActivity
+    }
+
     override fun onResume() {
         super.onResume()
         (activity as MainActivity).hideBottomNavigation()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
 
 

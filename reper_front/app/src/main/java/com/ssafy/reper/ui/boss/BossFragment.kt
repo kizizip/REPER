@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -148,6 +149,10 @@ class BossFragment : Fragment() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

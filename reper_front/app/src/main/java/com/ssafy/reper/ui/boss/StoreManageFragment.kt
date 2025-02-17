@@ -3,6 +3,7 @@ package com.ssafy.reper.ui.boss
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -90,6 +91,10 @@ class StoreManageFragment : Fragment() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
+    }
 
     private fun showStoreAddDialog() {
         if (!isAdded) return

@@ -3,6 +3,7 @@ package com.ssafy.reper.ui.mypage
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -101,6 +102,11 @@ class MyPageFragment : Fragment() {
         initEvent()
 
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
 
 

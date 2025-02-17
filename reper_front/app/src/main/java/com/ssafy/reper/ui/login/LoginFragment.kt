@@ -3,6 +3,7 @@ package com.ssafy.reper.ui.login
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -69,6 +70,13 @@ class LoginFragment : Fragment() {
 
     // Google 로그인 요청 코드 (onActivityResult에서 요청을 구분하기 위함)
     private val RC_SIGN_IN = 9001
+
+    private lateinit var loginAcitivty: LoginActivity
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        loginAcitivty = context as LoginActivity
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -147,6 +155,11 @@ class LoginFragment : Fragment() {
             // 구글 로그인 요청 호출
             loginWithGoogle()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loginAcitivty.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
 
     private fun startSequentialAnimation() {
