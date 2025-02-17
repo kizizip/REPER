@@ -31,6 +31,7 @@ import com.ssafy.reper.data.dto.SearchedStore
 import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.data.dto.StoreResponseUser
 import com.ssafy.reper.data.dto.UserInfo
+import com.ssafy.reper.data.dto.UserToken
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.databinding.FragmentMyPageBinding
@@ -263,7 +264,13 @@ class MyPageFragment : Fragment() {
                     // 선택된 storeId 저장
                     val selectedStoreId = storeIds.getOrNull(position)
                     selectedStoreId?.let { sharedPreferencesUtil.setStoreId(it) }
-
+                    CoroutineScope(Dispatchers.Main).launch {
+                        val token = withContext(Dispatchers.IO) {
+                            (activity as MainActivity).getFCMToken()
+                        }
+                        fcmViewModel.saveToken(UserToken(sharedPreferencesUtil.getStoreId(), token, sharedPreferencesUtil.getUser().userId!!.toInt()))
+                        Log.d("FCMTOKEN", token)
+                    }
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -463,6 +470,8 @@ class MyPageFragment : Fragment() {
                 dialog.dismiss()
             }
             dialog.findViewById<View>(R.id.logout_d_btn_positive).setOnClickListener {
+
+                fcmViewModel.deleteUserToken(sharedPreferencesUtil.getUser().userId!!.toInt())
 
                 //로그아웃
                 val sharedPreferencesUtil = SharedPreferencesUtil(requireContext())

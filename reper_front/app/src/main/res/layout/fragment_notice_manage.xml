@@ -48,7 +48,7 @@
         <LinearLayout
             android:id="@+id/recipe_fg_search_noti"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
             android:layout_marginTop="32dp"
             android:background="@drawable/search_bar"
             android:orientation="horizontal"
@@ -73,6 +73,10 @@
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:hint="공지를 입력해보세요."
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:maxLines="1"
+                android:singleLine="true"
                 android:textSize="16sp" />
 
 

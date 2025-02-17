@@ -9,9 +9,12 @@ import com.ssafy.reper.data.dto.FavoriteRecipe
 import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeStep
+import com.ssafy.reper.data.dto.User
+import com.ssafy.reper.data.dto.UserInfo
 import com.ssafy.reper.data.remote.RetrofitUtil
 import com.ssafy.reper.data.remote.RetrofitUtil.Companion.storeService
 import com.ssafy.reper.data.remote.RetrofitUtil.Companion.recipeService
+import com.ssafy.reper.data.remote.RetrofitUtil.Companion.userService
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -25,6 +28,9 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
 
     private val _selectedRecipeList = MutableLiveData<MutableList<Recipe>?>(null)
     val selectedRecipeList: LiveData<MutableList<Recipe>?> = _selectedRecipeList
+
+    private val _orderRecipeList = MutableLiveData<MutableList<Recipe>?>(null)
+    val orderRecipeList: LiveData<MutableList<Recipe>?> = _orderRecipeList
 
     private val _nowISeeStep = MutableLiveData<Int?>(null)
     val nowISeeStep: LiveData<Int?> = _nowISeeStep
@@ -42,6 +48,39 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
         MutableLiveData<MutableList<FavoriteRecipe>>()
     val favoriteRecipeList: LiveData<MutableList<FavoriteRecipe>>
         get() = _favoriteRecipeList
+
+    private val _userInfo = MutableLiveData<User?>(null)
+    val userInfo: LiveData<User?> = _userInfo
+
+    private val _nowTab = MutableLiveData<Int>(1)
+    val nowTab:LiveData<Int> = _nowTab
+
+    fun setNowTab(tab : Int){
+        _nowTab.value = tab
+    }
+
+    fun setOrderRecipeList(recipeList: MutableList<Recipe>){
+        _orderRecipeList.value = recipeList
+    }
+
+    fun setUserInfo(userId: Int){
+        viewModelScope.launch {
+            var data: User
+            try {
+                data = userService.getUserInfo(userId)
+                _userInfo.value = data
+            }
+            catch (e:Exception){
+                Log.d(TAG, "getUserInfo: ${e}")
+            }
+        }
+    }
+
+    fun setLikeRecipes(list: MutableList<FavoriteRecipe>){
+        viewModelScope.launch {
+            _favoriteRecipeList.value = list
+        }
+    }
 
     fun getLikeRecipes(storeId:Int, userId:Int){
         viewModelScope.launch {
@@ -128,12 +167,11 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
                 val list = storeService.getStoreListByEmployeeId(userId)
                 for(store in list){
                     if(store.storeId == ApplicationClass.sharedPreferencesUtil.getStoreId()){
-                        _isEmployee.postValue(true)
-                        return@launch
+                        _isEmployee.value = true
                     }
                 }
             }catch (e:Exception){
-                Log.e(TAG, "getIsEmployee: ", )
+                Log.e(TAG, "getIsEmployee: ")
             }
         }
     }
@@ -145,6 +183,5 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
         _recipeSteps.value = null
         _isDataReady.value = false
         _order.value = null
-        _isEmployee.value = false
     }
 }

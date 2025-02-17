@@ -95,17 +95,21 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun acceptEmployee(storeId: Int, userId: Int) {
+    fun acceptEmployee(storeId: Int, userId: Int):String {
+        var result : String = ""
         viewModelScope.launch {
             runCatching {
                 RetrofitUtil.storeEmployeeService.acceptEmployee(storeId, userId)
             }.onSuccess {
                 Log.d(TAG, "acceptEmployee: 성공")
                 getAllEmployee(storeId)
+                result = "성공"
             }.onFailure {
                 Log.d(TAG, "acceptEmployee: ${it.message}")
+                result = "실패"
             }
         }
+        return result
     }
 
 

@@ -48,9 +48,7 @@ class BossFragment : Fragment() {
     val bossViewModel: BossViewModel by activityViewModels()
     private val noticeViewModel: NoticeViewModel by activityViewModels()
     private val fcmViewModel: FcmViewModel by activityViewModels()
-    val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
-        SharedPreferencesUtil(requireContext().applicationContext)
-    }
+    private lateinit var sharedPreferencesUtil: SharedPreferencesUtil
 
 
     //sharedPreferencesUtil정보로 바꾸기
@@ -66,6 +64,9 @@ class BossFragment : Fragment() {
         if (context is MainActivity) {
             mainActivity = context
         }
+
+        sharedPreferencesUtil = SharedPreferencesUtil(requireContext())
+
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
@@ -175,17 +176,23 @@ class BossFragment : Fragment() {
             override fun onAcceptClick(position: Int) {
                 if (position in nonAccessAdapter.employeeList.indices) { // ✅ 범위 체크
                     val userId = nonAccessAdapter.employeeList[position].userId
-                    bossViewModel.acceptEmployee(sharedStoreId, userId)
-
-                    if (position in nonAccessAdapter.employeeList.indices) { // ✅ 또 다른 범위 체크
-                        fcmViewModel.sendToUserFCM(
-                            nonAccessAdapter.employeeList[position].userId,
-                            "권한 허가 알림",
-                            "${storeName}에서 권한을 허락했습니다.",
-                            "MyPageFragment",
-                            sharedStoreId
-                        )
+                    bossViewModel.acceptEmployee(sharedStoreId, userId).let{
+                        if (it =="성공"){
+                            if (position in nonAccessAdapter.employeeList.indices) { // ✅ 또 다른 범위 체크
+                                fcmViewModel.sendToUserFCM(
+                                    nonAccessAdapter.employeeList[position].userId,
+                                    "권한 허가 알림",
+                                    "${storeName}에서 권한을 허락했습니다.",
+                                    "MyPageFragment",
+                                    sharedStoreId
+                                )
+                            }else{
+                                Log.d(TAG, "onAcceptClick: 권한허가 실패")
+                            }
+                        }
                     }
+
+                   
                 } else {
                     Log.e(
                         "BossFragment",
@@ -312,6 +319,7 @@ class BossFragment : Fragment() {
                 sharedPreferencesUtil.setStoreId(selectedStore.storeId)
                 bossViewModel.getAllEmployee(selectedStore.storeId!!)
                 Log.d(TAG, "onItemSelected: ${selectedStore.storeId}")
+
                 CoroutineScope(Dispatchers.Main).launch {
                     val token = withContext(Dispatchers.IO) {
                         mainActivity.getFCMToken()

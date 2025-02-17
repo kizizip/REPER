@@ -1,12 +1,12 @@
 package com.ssafy.reper.ui.recipe
 
 import MainActivityViewModel
+import android.Manifest
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +17,7 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.common.util.concurrent.ListenableFuture
@@ -34,14 +35,19 @@ import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.util.ViewModelSingleton
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import android.Manifest
 import android.content.pm.PackageManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.ui.recipe.adapter.RecipeIngredientsAdapter
 import com.ssafy.reper.data.remote.RetrofitUtil
+import com.ssafy.reper.ui.recipe.adapter.StepLandOrderListAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.content.Intent
+import android.speech.RecognitionListener
+import android.speech.SpeechRecognizer
+import android.speech.RecognizerIntent
 
 private const val TAG = "StepRecipeFragment_정언"
 class StepRecipeFragment : Fragment() {
@@ -50,6 +56,7 @@ class StepRecipeFragment : Fragment() {
 
     // 주문 리스트 recyclerView Adapter
     private lateinit var ingredientsAdapter: RecipeIngredientsAdapter
+    private lateinit var stepLandOrderListAdapter: StepLandOrderListAdapter
 
     var nowRecipeIdx = 0
     var nowStepIdx = 0
@@ -60,10 +67,10 @@ class StepRecipeFragment : Fragment() {
     lateinit var selectedRecipeList : MutableList<Recipe>
 
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
-    private val viewModel: RecipeViewModel by viewModels()
 
     // Bundle 변수
     var whereAmICame = -1
+    lateinit var recipeIdList: MutableList<Int>
 
     // 모션인식을 위한 카메라 제공자, 실행자 초기화
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
@@ -77,6 +84,9 @@ class StepRecipeFragment : Fragment() {
 
     private val userService = RetrofitUtil.userService
 
+    private lateinit var speechRecognizer: SpeechRecognizer
+    private var isListening = false
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mainActivity = context as MainActivity
@@ -89,6 +99,7 @@ class StepRecipeFragment : Fragment() {
         return stepRecipeBinding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d(TAG, "onViewCreated: ")
         super.onViewCreated(view, savedInstanceState)
         // 내가 어느 Fragment에서 왔는 지 Flag 처리
         whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment // 3 : FullRecipeFragment
@@ -135,22 +146,8 @@ class StepRecipeFragment : Fragment() {
             orderDetails = order.orderDetails
         }
 
-        // 카메라 권한 체크 추가
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED) {
-            // 권한이 있으면 카메라 설정
-            cameraExecutor = Executors.newSingleThreadExecutor()
-            setupGestureRecognizer()
-            setupCamera()
-        } else {
-            // 권한이 없으면 요청
-            requestPermissions(
-                arrayOf(Manifest.permission.CAMERA),
-                CAMERA_PERMISSION_REQUEST_CODE
-            )
-        }
+        // 카메라 권한 체크 시작
+        checkCameraPermission()
     }
 
     //캡쳐방지 코드입니다! 메시지 내용은 수정불가능,, 핸드폰내에 저장된 메시지가 뜨는 거라고 하네요
@@ -164,14 +161,54 @@ class StepRecipeFragment : Fragment() {
     }
     override fun onPause() {
         super.onPause()
+        try {
+            // 일시 정지 시에도 카메라 리소스 해제
+            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider.unbindAll()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unbinding camera use cases", e)
+        }
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
     }
     ////////////////////////////////////////////////////////////////////////////////////////
     override fun onDestroyView() {
+        try {
+            // 카메라 실행 중지
+            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider.unbindAll()
+            
+            // 실행자 종료
+            if (!cameraExecutor.isShutdown) {
+                cameraExecutor.shutdown()
+            }
+            
+            // MediaPipe 리소스 해제
+            if (::gestureRecognizer.isInitialized) {
+                gestureRecognizer.close()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error cleaning up resources", e)
+        }
+        
         super.onDestroyView()
-        cameraExecutor.shutdown()
-        gestureRecognizer.close()
         _stepRecipeBinding = null
+        
+        // 음성 인식기 해제
+        if (::speechRecognizer.isInitialized) {
+            isListening = false
+            speechRecognizer.destroy()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        try {
+            // Fragment가 화면에서 사라질 때도 카메라 리소스 해제
+            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider.unbindAll()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unbinding camera use cases", e)
+        }
     }
 
     fun initEvent(){
@@ -214,36 +251,15 @@ class StepRecipeFragment : Fragment() {
     }
     // 세로 화면일 때 이벤트 처리
     fun eventPortrait(){
-
-        // stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()}")
-        // stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
-
-//        val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()
-//        val email =
-////        stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()}")
-//        stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
-        
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
-                val userInfo = withContext(Dispatchers.IO) {
-                    userService.getUserInfo(userId)
-                }
-                stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${userInfo.email}")
-            } catch (e: Exception) {
-                Log.e(TAG, "사용자 정보 조회 실패", e)
-                // 에러 시 기존 방식으로 표시
-                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()
-                stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : $userId")
-            }
-        }
+         stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${mainViewModel.userInfo.value!!.email}")
+         stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
 
         stepRecipeBinding.steprecipeFmTvMenuName?.text =
             "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
 
 
         if(nowStepIdx == -1){ // 재료를 보여줘야해!
-            showIngredient(nowRecipeIdx)
+            showIngredient(nowRecipeIdx, true)
         }
         else{ // 레시피를 보여줘야해!
             showOneStepRecipe(nowStepIdx)
@@ -251,20 +267,7 @@ class StepRecipeFragment : Fragment() {
     }
     // 가로 화면일 때 이벤트 처리
     fun eventLand(){
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
-                val userInfo = withContext(Dispatchers.IO) {
-                    userService.getUserInfo(userId)
-                }
-                stepRecipeBinding.steprecipeFmLandTvUser?.setText("이용자 : ${userInfo.email}")
-            } catch (e: Exception) {
-                Log.e(TAG, "사용자 정보 조회 실패", e)
-                // 에러 시 기존 방식으로 표시
-                val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId.toString()
-                stepRecipeBinding.steprecipeFmLandTvUser?.setText("이용자 : $userId")
-            }
-        }
+        stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${mainViewModel.userInfo.value!!.email}")
 
         if(whereAmICame == 1){
             stepRecipeBinding.constraintLayout4?.visibility = View.GONE // 인덱스 안보이게
@@ -288,7 +291,7 @@ class StepRecipeFragment : Fragment() {
         }
 
         if(nowStepIdx == -1){ // 재료를 보여줘야해!
-            showIngredient(nowRecipeIdx)
+            showIngredient(nowRecipeIdx, false)
         }
         else{ // 레시피를 보여줘야해!
             showOneStepRecipe(nowStepIdx)
@@ -300,6 +303,10 @@ class StepRecipeFragment : Fragment() {
     // 3. 내가 지금 스텝인데, 마지막 스텝이라 다음 레시피의 재료를 보여줘야할 때
     // 4. 내가 지금 스텝인데, 마지막 레시피의 마지막 스탭일때
     fun nextEvent() {
+        val orientation = resources.configuration.orientation
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
+            initStepLandOrderListAdapter()
+        }
         stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.VISIBLE
 
         mainViewModel.setNowISeeStep(nowStepIdx + 1)
@@ -324,7 +331,12 @@ class StepRecipeFragment : Fragment() {
                 mainViewModel.setNowISeeRecipe(nowRecipeIdx + 1)
                 mainViewModel.setRecipeSteps(nowRecipeIdx)
                 mainViewModel.setNowISeeStep(-1)
-                showIngredient(nowRecipeIdx)
+                if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
+                    showIngredient(nowRecipeIdx, false)
+                }
+                else{
+                    showIngredient(nowRecipeIdx, true)
+                }
             }
         }
     }
@@ -334,6 +346,10 @@ class StepRecipeFragment : Fragment() {
     // 3. 내가 지금 스텝인데, 첫번쨰 스탭이라 현재 레시피의 재료를 보여줘야할 때
     // 4. 내가 재료인데, 첫번쨰 레시피의 재료일때
     fun prevEvent(){
+        val orientation = resources.configuration.orientation
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
+            initStepLandOrderListAdapter()
+        }
         stepRecipeBinding.steprecipeFmBtnRight.visibility = View.VISIBLE
 
         mainViewModel.setNowISeeStep(nowStepIdx - 1)
@@ -341,7 +357,12 @@ class StepRecipeFragment : Fragment() {
         when {
             nowStepIdx < 0 && nowRecipeIdx <= 0 ->{
                 stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.GONE
-                showIngredient(nowRecipeIdx)
+                if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
+                    showIngredient(nowRecipeIdx, false)
+                }
+                else{
+                    showIngredient(nowRecipeIdx, true)
+                }
             }
 
             // 이전 스텝이 존재하는 경우 → 이전 스텝으로 이동
@@ -350,7 +371,13 @@ class StepRecipeFragment : Fragment() {
             }
 
             nowStepIdx == -1 -> {
-                showIngredient(nowRecipeIdx)
+                val orientation = resources.configuration.orientation
+                if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
+                    showIngredient(nowRecipeIdx, false)
+                }
+                else{
+                    showIngredient(nowRecipeIdx, true)
+                }
             }
 
             nowStepIdx < 0 && nowRecipeIdx > 0-> {
@@ -366,7 +393,7 @@ class StepRecipeFragment : Fragment() {
         }
     }
     // 재료 보이게
-    fun showIngredient(recipeIdx:Int){
+    fun showIngredient(recipeIdx:Int, isPortrait:Boolean){
 //        Log.d(TAG, "showIngredient: ")
         stepRecipeBinding.lottieAnimationView.visibility = View.GONE
         stepRecipeBinding.steprecipeFmTvStep?.visibility = View.GONE
@@ -378,12 +405,14 @@ class StepRecipeFragment : Fragment() {
         }
 
         stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.VISIBLE
-        initIngredientsAdapter(recipeIdx)
+        initIngredientsAdapter(recipeIdx, isPortrait)
     }
     // 레시피 보이게
     fun showOneStepRecipe(stepIdx:Int){
 //        Log.d(TAG, "showOneStepRecipe: ")
         val recipeSteps = mainViewModel.recipeSteps.value!!
+
+        stepRecipeBinding.steprecipeFmTvMenuName?.setText("${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}")
 
         stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.GONE
         if(whereAmICame == 2){
@@ -399,11 +428,21 @@ class StepRecipeFragment : Fragment() {
         stepRecipeBinding.steprecipeFmLandTvRecipe?.setText(recipeSteps?.get(stepIdx)?.instruction)
     }
     // 재료 어뎁터 설정
-    fun initIngredientsAdapter(recipeIdx:Int) {
+    fun initIngredientsAdapter(recipeIdx:Int, isPortrait: Boolean) {
         val ingredients = mainViewModel.selectedRecipeList.value?.get(recipeIdx)?.ingredients!!
 
-        ingredientsAdapter = RecipeIngredientsAdapter(ingredients)
+        ingredientsAdapter = RecipeIngredientsAdapter(ingredients, isPortrait)
         stepRecipeBinding.steprecipeFmRvIngredients.adapter = ingredientsAdapter
+    }
+    // 가로모드일 때 선택된 메뉴 리스트 어뎁터
+    fun initStepLandOrderListAdapter(){
+        stepLandOrderListAdapter = StepLandOrderListAdapter(mainViewModel.orderRecipeList.value!!, selectedRecipeList, selectedRecipeList.get(nowRecipeIdx).recipeId)
+        stepRecipeBinding.steprecipeFmLandRvWhy!!.apply {
+            layoutManager = LinearLayoutManager(context).apply {
+                orientation = LinearLayoutManager.VERTICAL
+            }
+            adapter = stepLandOrderListAdapter
+        }
     }
 
     // 화면 회전 감지
@@ -571,6 +610,135 @@ class StepRecipeFragment : Fragment() {
         }
     }
 
+    private fun initSpeechRecognizer() {
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(requireContext())
+        
+        speechRecognizer.setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {
+                isListening = true
+                Log.d(TAG, "onReadyForSpeech: 음성 인식 준비됨")
+            }
+
+            override fun onResults(results: Bundle?) {
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                matches?.get(0)?.let { result ->
+                    Log.d(TAG, "음성 인식 결과: $result")
+                    when {
+                        result.contains("다음") -> {
+                            if (!(nowRecipeIdx >= totalRecipes - 1 && nowStepIdx >= totalSteps - 1)) {
+                                nextEvent()
+                            }
+                        }
+                        result.contains("이전") -> {
+                            if (!(nowRecipeIdx == 0 && nowStepIdx == -1)) {
+                                prevEvent()
+                            }
+                        }
+                    }
+                }
+                // 음성 인식 결과 처리 후 다시 시작
+                startListening()
+            }
+
+            override fun onError(error: Int) {
+                val message = when (error) {
+                    SpeechRecognizer.ERROR_AUDIO -> "오디오 에러"
+                    SpeechRecognizer.ERROR_CLIENT -> "클라이언트 에러"
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "권한 없음"
+                    SpeechRecognizer.ERROR_NETWORK -> "네트워크 에러"
+                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "네트워크 타임아웃"
+                    SpeechRecognizer.ERROR_NO_MATCH -> "음성 인식 실패"
+                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "음성 인식기 사용 중"
+                    SpeechRecognizer.ERROR_SERVER -> "서버 에러"
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "음성 입력 없음"
+                    else -> "알 수 없는 에러"
+                }
+                Log.e(TAG, "Speech recognition error: $message")
+                isListening = false
+                
+                // 에러 발생 시 재시작
+                startListening()
+            }
+
+            // 다른 필수 메서드들
+            override fun onBeginningOfSpeech() {}
+            override fun onEndOfSpeech() {
+                isListening = false
+            }
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onPartialResults(partialResults: Bundle?) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
+    }
+
+    private fun startListening() {
+        if (!isListening) {
+            try {
+                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
+                    putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, requireContext().packageName)
+                    putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+
+                    // 음성 감도 관련 설정 수정
+                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 300L)         // 0.3초로 감소
+                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1000L)  // 1초로 감소
+                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)          // 1.5초로 감소
+                    putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+                }
+                
+                speechRecognizer.startListening(intent)
+            } catch (e: Exception) {
+                Log.e(TAG, "음성 인식 시작 실패: ${e.message}")
+            }
+        }
+    }
+
+    // 카메라 권한 확인 함수
+    private fun checkCameraPermission() {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // 카메라 권한이 있는 경우
+            Log.d(TAG, "checkCameraPermission: 카메라 권한 있음")
+            cameraExecutor = Executors.newSingleThreadExecutor()
+            setupGestureRecognizer()
+            setupCamera()
+            // 카메라 권한 확인 후 마이크 권한 확인
+            checkMicrophonePermission()
+        } else {
+            // 카메라 권한이 없는 경우 권한 요청
+            requestPermissions(
+                arrayOf(Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST_CODE
+            )
+        }
+    }
+
+    // 마이크 권한 확인 함수
+    private fun checkMicrophonePermission() {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // 마이크 권한이 있는 경우
+            Log.d(TAG, "checkMicrophonePermission: 마이크 권한 있음")
+            initSpeechRecognizer()
+            startListening()
+        } else {
+            // 마이크 권한이 없는 경우 권한 요청
+            requestPermissions(
+                arrayOf(Manifest.permission.RECORD_AUDIO),
+                MICROPHONE_PERMISSION_REQUEST_CODE
+            )
+        }
+    }
+
+    // 권한 요청 결과 처리
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -578,16 +746,36 @@ class StepRecipeFragment : Fragment() {
     ) {
         when (requestCode) {
             CAMERA_PERMISSION_REQUEST_CODE -> {
-                if (grantResults.isNotEmpty() && 
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // 권한이 승인되면 카메라 설정
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // 카메라 권한이 승인된 경우
+                    Log.d(TAG, "onRequestPermissionsResult: 카메라 권한 승인됨")
+                    cameraExecutor = Executors.newSingleThreadExecutor()
                     setupGestureRecognizer()
                     setupCamera()
+                    // 카메라 권한 승인 후 마이크 권한 확인
+                    checkMicrophonePermission()
                 } else {
-                    // 권한이 거부되면 사용자에게 알림
+                    // 카메라 권한이 거부된 경우
                     Toast.makeText(
                         requireContext(),
-                        "카메라 권한이 필요합니다.",
+                        "제스처 인식을 위해 카메라 권한이 필요합니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    // 카메라 권한이 거부되어도 마이크 권한 확인
+                    checkMicrophonePermission()
+                }
+            }
+            MICROPHONE_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // 마이크 권한이 승인된 경우
+                    Log.d(TAG, "onRequestPermissionsResult: 마이크 권한 승인됨")
+                    initSpeechRecognizer()
+                    startListening()
+                } else {
+                    // 마이크 권한이 거부된 경우
+                    Toast.makeText(
+                        requireContext(),
+                        "음성 인식을 위해 마이크 권한이 필요합니다.",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -597,5 +785,6 @@ class StepRecipeFragment : Fragment() {
 
     companion object {
         private const val CAMERA_PERMISSION_REQUEST_CODE = 1001
+        private const val MICROPHONE_PERMISSION_REQUEST_CODE = 1002
     }
 }
