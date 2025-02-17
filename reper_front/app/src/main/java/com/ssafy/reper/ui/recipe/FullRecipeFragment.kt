@@ -212,11 +212,20 @@ class FullRecipeFragment : Fragment() {
                 }
 
                 override fun onRecipeStepClick(recipe: Recipe, nowISeeStep: Int) {
-                    val bundle = Bundle().apply {
-                        putInt("whereAmICame", 3)
+                    if(whereAmICame == 1){
+                        val bundle = Bundle().apply {
+                            putInt("whereAmICame", 3)
+                        }
+                        mainViewModel.setSelectedRecipeGoToStepRecipe(mutableListOf(recipe), nowISeeStep)
+                        findNavController().navigate(R.id.stepRecipeFragment, bundle)
                     }
-                    mainViewModel.setSelectedRecipeGoToStepRecipe(mutableListOf(recipe), nowISeeStep)
-                    findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                    else if(whereAmICame == 2){
+                        val bundle = Bundle().apply {
+                            putInt("whereAmICame", 4)
+                        }
+                        mainViewModel.setSelectedRecipeGoToStepRecipe(mutableListOf(recipe), nowISeeStep)
+                        findNavController().navigate(R.id.stepRecipeFragment, bundle)
+                    }
                 }
             },
         )
