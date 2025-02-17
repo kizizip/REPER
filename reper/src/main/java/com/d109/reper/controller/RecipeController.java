@@ -89,7 +89,7 @@ public class RecipeController {
                 JsonNode jsonResponse = objectMapper.readTree(response.getBody());
 
                 int recipeCount = jsonResponse.get("recipeCount").asInt();
-                return ResponseEntity.ok("Successfully uploaded " + recipeCount + " recipes.");
+                return ResponseEntity.ok(String.valueOf(recipeCount));
 
             } else {
                 return ResponseEntity.status(response.getStatusCode()).body("Python server response error.");
