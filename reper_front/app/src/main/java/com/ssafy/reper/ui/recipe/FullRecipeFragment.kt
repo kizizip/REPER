@@ -2,6 +2,7 @@ package com.ssafy.reper.ui.recipe
 
 import MainActivityViewModel
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Build.VERSION_CODES.P
 import android.os.Bundle
 import android.util.Log
@@ -124,6 +125,7 @@ class FullRecipeFragment : Fragment() {
         )
 
         mainActivity.hideBottomNavigation()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onPause() {
         super.onPause()

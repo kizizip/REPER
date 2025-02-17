@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -50,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.activity.OnBackPressedCallback
+import com.ssafy.reper.ui.login.LoginActivity
 
 
 private const val TAG = "HomeFragment_싸피"
@@ -90,6 +92,13 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private lateinit var mainActivity: MainActivity
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mainActivity = context as MainActivity
     }
 
     override fun onCreateView(
@@ -591,6 +600,8 @@ class HomeFragment : Fragment() {
     // 화면이 다시 보일 때 자동 스크롤 재시작
     override fun onResume() {
         super.onResume()
+
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
 
         // 자동 배너 스크롤 시작
         startBannerAutoScroll()

@@ -83,6 +83,7 @@ class OrderFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mainActivity.showBottomNavigation()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onDestroyView() {
         super.onDestroyView()

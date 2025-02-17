@@ -1,5 +1,7 @@
 package com.ssafy.reper.ui.boss
 
+import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -30,6 +32,13 @@ class WriteNotiFragment : Fragment() {
     var sharedUserId = 0
     var sharedStoreId = 0
 
+    private lateinit var mainActivity: MainActivity
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mainActivity = context as MainActivity
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,6 +52,7 @@ class WriteNotiFragment : Fragment() {
         super.onResume()
 
         (activity as MainActivity).hideBottomNavigation()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

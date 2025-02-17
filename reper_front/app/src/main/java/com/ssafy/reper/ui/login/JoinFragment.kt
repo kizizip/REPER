@@ -16,11 +16,13 @@ import com.ssafy.reper.databinding.FragmentJoinBinding
 import kotlinx.coroutines.launch
 import android.graphics.drawable.GradientDrawable
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.text.Editable
 import android.text.TextWatcher
 import com.ssafy.reper.data.dto.JoinRequest
 import com.ssafy.reper.data.dto.RequestStore
 import android.view.animation.AnimationUtils
+import com.ssafy.reper.ui.MainActivity
 
 
 class JoinFragment : Fragment() {
@@ -32,6 +34,13 @@ class JoinFragment : Fragment() {
     private var isPasswordError = true
     private var isNameError = true
     private var isPhoneError = true
+
+    private lateinit var loginAcitivty: LoginActivity
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        loginAcitivty = context as LoginActivity
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -415,6 +424,11 @@ class JoinFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loginAcitivty.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
 
     private fun updateEmailInputState(isError: Boolean, message: String) {

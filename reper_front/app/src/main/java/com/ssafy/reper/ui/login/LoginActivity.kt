@@ -21,8 +21,6 @@ class LoginActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
-
         val sharedPreferencesUtil = SharedPreferencesUtil(this)
         
         // 자동 로그인 체크
