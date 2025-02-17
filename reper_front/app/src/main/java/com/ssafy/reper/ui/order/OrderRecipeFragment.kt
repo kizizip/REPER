@@ -128,21 +128,13 @@ class OrderRecipeFragment : Fragment() {
             }
 
             // order를 이미 완료 처리한 상태라면, 완료 버튼 안보이게!
-            orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.let {
-                if(order.completed){
-                    it.visibility = View.GONE
-                }
-                else{
-                    it.visibility = View.VISIBLE
-                }
+            if(order.completed){
+                orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.visibility = View.GONE
+                orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setBackgroundResource(R.drawable.btn)
             }
-            orderRecipebinding.orderRecipeFragmentGoRecipeBtn.let {
-                if(order.completed){
-                    it.setBackgroundResource(R.drawable.btn)
-                }
-                else{
-                    it.setBackgroundResource(R.drawable.medium_green_button)
-                }
+            else{
+                orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.visibility = View.VISIBLE
+                orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setBackgroundResource(R.drawable.medium_green_button)
             }
         }
 
