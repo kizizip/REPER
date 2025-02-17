@@ -117,7 +117,6 @@ class SharedPreferencesUtil(context: Context) {
             role = preferences.getString("role", ""),
         )
     }
-
     fun addStateLoad(state: String?) {
         val editor = preferences.edit()
         editor.putString("state", state)

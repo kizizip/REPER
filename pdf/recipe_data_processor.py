@@ -39,7 +39,7 @@ ANIMATIONS = [
     {"keyword": "블루베리를 블렌더에 넣고 혼합합니다.", "url": "https://cdn.lottielab.com/l/FFMJLV74Qm6bfo.json"},
     {"keyword": "자바칩을 블렌더에 넣고 혼합합니다.", "url": "https://cdn.lottielab.com/l/ENtDzinSoQZDPq.json"},
     {"keyword": "민트초코 재료를 블렌더에 넣고 혼합합니다.", "url": "https://cdn.lottielab.com/l/95Dg6EC3kRfgri.json"},
-    {"keyword": "쿠키 앤 크림을 블렌더에 넣고 혼합합니다.", "url": "https://cdn.lottielab.com/l/7XThKYcimpCMMt.json"},
+    {"keyword": "쿠앤크를를 블렌더에 넣고 혼합합니다.", "url": "https://cdn.lottielab.com/l/7XThKYcimpCMMt.json"},
     {"keyword": "딸기를 블렌더에 넣고 혼합합니다.", "url": "https://cdn.lottielab.com/l/4gZp1dQ4pj4mB1.json"},
     {"keyword": "요거트를 블렌더에 넣고 혼합합니다.", "url": "https://cdn.lottielab.com/l/Dybf1Je8jZjR1L.json"},
     {"keyword": "초코 파우더를 컵에 담습니다.", "url": "https://cdn.lottielab.com/l/7FQ8q41J2syYBB.json"},
@@ -203,53 +203,37 @@ def process_recipe_text(text):
             },
             {"role": "user", "content": text}
         ],
-        response_format={
-            "type": "json_schema",
-            "json_schema": {
-                "name": "recipe_schema",
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "recipes": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "recipeName": {"type": "string"},
-                                    "category": {"type": "string"},
-                                    "type": {"type": "string"},
-                                    "ingredients": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "items": {"type": "string"}
-                                    },
-                                    "recipeSteps": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "items": {
-                                            "type": "object",
-                                            "properties" : {
-                                                "instruction" : {"type": "string"}
-                                                # The animationUrl field will be added later.
-                                            },
-                                            "required": ["instruction"],
-                                            "additionalPropertie": False
-                                        }
-                                    }
-                                },
-                                "required": ["recipeName", "category", "type", "ingredients", "recipeSteps"],
-                                "additionalProperties": False
+        response_format={"type": "json_schema", "json_schema": {"name": "recipe_schema", "schema": {
+            "type": "object",
+            "properties": {
+                "recipes": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "recipeName": {"type": "string"},
+                            "category": {"type": "string"},
+                            "type": {"type": "string"},
+                            "ingredients": {
+                                "type": "array",
+                                "items": {"type": "object", "properties": {"ingredientName": {"type": "string"}}, "required": ["ingredientName"], "additionalProperties": False}
+                            },
+                            "recipeSteps": {
+                                "type": "array",
+                                "items": {"type": "object", "properties": {"instruction": {"type": "string"}}, "required": ["instruction"], "additionalProperties": False}
                             }
-                        }
-                    },
-                    "required": ["recipes"],
-                    "additionalProperties": False
+                        },
+                        "required": ["recipeName", "category", "type", "ingredients", "recipeSteps"]
+                    }
                 }
-            }
-        }
-    )
-    return response.choices[0].message.content
+            },
 
+            "required": ["recipes"],
+            "additionalProperties": False
+        }}}
+    )
+
+    return response.choices[0].message.content
 
 
 # Spring Boot로 JSON 데이터 전송 함수

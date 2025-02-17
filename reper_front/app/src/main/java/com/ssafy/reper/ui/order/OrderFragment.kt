@@ -58,6 +58,7 @@ class OrderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        mainViewModel.getRecipeList()
         mainViewModel.clearData()
         mainViewModel.isEmployee.observe(viewLifecycleOwner){
             if(it == true || mainViewModel.userInfo.value!!.role == "OWNER"){
@@ -83,6 +84,7 @@ class OrderFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mainActivity.showBottomNavigation()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onDestroyView() {
         super.onDestroyView()

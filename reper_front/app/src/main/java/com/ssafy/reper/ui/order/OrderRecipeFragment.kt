@@ -2,6 +2,7 @@ package com.ssafy.reper.ui.order
 
 import MainActivityViewModel
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -64,6 +65,7 @@ class OrderRecipeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mainActivity.hideBottomNavigation()
+        mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onDestroy() {
         super.onDestroy()

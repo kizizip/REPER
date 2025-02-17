@@ -48,6 +48,7 @@ import android.content.Intent
 import android.speech.RecognitionListener
 import android.speech.SpeechRecognizer
 import android.speech.RecognizerIntent
+import androidx.lifecycle.whenResumed
 
 private const val TAG = "StepRecipeFragment_정언"
 class StepRecipeFragment : Fragment() {
@@ -82,8 +83,6 @@ class StepRecipeFragment : Fragment() {
     private var _stepRecipeBinding : FragmentStepRecipeBinding? = null
     private val stepRecipeBinding get() =_stepRecipeBinding!!
 
-    private val userService = RetrofitUtil.userService
-
     private lateinit var speechRecognizer: SpeechRecognizer
     private var isListening = false
 
@@ -99,10 +98,9 @@ class StepRecipeFragment : Fragment() {
         return stepRecipeBinding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(TAG, "onViewCreated: ")
         super.onViewCreated(view, savedInstanceState)
         // 내가 어느 Fragment에서 왔는 지 Flag 처리
-        whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment // 3 : FullRecipeFragment
+        whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment // 3 : FullRecipeFragment // 4 : OrderRecipe Full
 
         // 전역변수 관리
         mainViewModel.nowISeeRecipe.observe(viewLifecycleOwner){
@@ -137,10 +135,10 @@ class StepRecipeFragment : Fragment() {
             }
         }
 
-        if(whereAmICame == 1){ // ALlRecipeFragment에서 옴
+        if(whereAmICame == 1 || whereAmICame == 3 ){ // ALlRecipeFragment에서 옴
             mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
         }
-        else if(whereAmICame == 2) { // OrderRecipeFragment에서 옴
+        else if(whereAmICame == 2 || whereAmICame == 4) { // OrderRecipeFragment에서 옴
             mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // 화면 회전 잠금 해제
             order = mainViewModel.order.value!!
             orderDetails = order.orderDetails
@@ -149,7 +147,6 @@ class StepRecipeFragment : Fragment() {
         // 카메라 권한 체크 시작
         checkCameraPermission()
     }
-
     //캡쳐방지 코드입니다! 메시지 내용은 수정불가능,, 핸드폰내에 저장된 메시지가 뜨는 거라고 하네요
     override fun onResume() {
         super.onResume()
@@ -171,6 +168,16 @@ class StepRecipeFragment : Fragment() {
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
     }
     ////////////////////////////////////////////////////////////////////////////////////////
+    override fun onStop() {
+        super.onStop()
+        try {
+            // Fragment가 화면에서 사라질 때도 카메라 리소스 해제
+            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider.unbindAll()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unbinding camera use cases", e)
+        }
+    }
     override fun onDestroyView() {
         try {
             // 카메라 실행 중지
@@ -197,17 +204,6 @@ class StepRecipeFragment : Fragment() {
         if (::speechRecognizer.isInitialized) {
             isListening = false
             speechRecognizer.destroy()
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        try {
-            // Fragment가 화면에서 사라질 때도 카메라 리소스 해제
-            val cameraProvider = cameraProviderFuture.get()
-            cameraProvider.unbindAll()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error unbinding camera use cases", e)
         }
     }
 
@@ -242,7 +238,7 @@ class StepRecipeFragment : Fragment() {
         }
 
         // 추가사항 처리
-        if(whereAmICame == 1){
+        if(whereAmICame == 1 || whereAmICame == 3){
             stepRecipeBinding.constraintLayout2.visibility = View.GONE // 추가사항 안보이게
         }else{
             stepRecipeBinding.constraintLayout2.visibility = View.VISIBLE // 추가사항 보이게
@@ -251,12 +247,11 @@ class StepRecipeFragment : Fragment() {
     }
     // 세로 화면일 때 이벤트 처리
     fun eventPortrait(){
-         stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${mainViewModel.userInfo.value!!.email}")
-         stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
+        stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${mainViewModel.userInfo.value!!.email}")
+        stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
 
         stepRecipeBinding.steprecipeFmTvMenuName?.text =
             "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
-
 
         if(nowStepIdx == -1){ // 재료를 보여줘야해!
             showIngredient(nowRecipeIdx, true)
@@ -267,12 +262,12 @@ class StepRecipeFragment : Fragment() {
     }
     // 가로 화면일 때 이벤트 처리
     fun eventLand(){
-        stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${mainViewModel.userInfo.value!!.email}")
+        stepRecipeBinding.steprecipeFmLandTvUser?.setText("이용자 : ${mainViewModel.userInfo.value!!.email}")
 
-        if(whereAmICame == 1){
+        if(whereAmICame == 1 || whereAmICame == 3){
             stepRecipeBinding.constraintLayout4?.visibility = View.GONE // 인덱스 안보이게
         }
-        else if(whereAmICame == 2){
+        else if(whereAmICame == 2 || whereAmICame == 4){
             stepRecipeBinding.constraintLayout4?.visibility = View.VISIBLE // 인덱스 보이게
             stepRecipeBinding.steprecipeFmTvIndex.let{ it->
                 var quantities = 0
@@ -400,7 +395,7 @@ class StepRecipeFragment : Fragment() {
         stepRecipeBinding.steprecipeFmTvMenuName?.setText("${selectedRecipeList.get(recipeIdx).recipeName} ${selectedRecipeList.get(recipeIdx).type}")
         stepRecipeBinding.steprecipeFmLandTvRecipe?.setText("${selectedRecipeList.get(recipeIdx).recipeName} ${selectedRecipeList.get(recipeIdx).type}")
 
-        if(whereAmICame == 2){
+        if(whereAmICame == 2 || whereAmICame == 4){
             stepRecipeBinding.steprecipeFmTvCustom.setText("${orderDetails.get(recipeIdx).customerRequest}")
         }
 
@@ -415,7 +410,7 @@ class StepRecipeFragment : Fragment() {
         stepRecipeBinding.steprecipeFmTvMenuName?.setText("${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}")
 
         stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.GONE
-        if(whereAmICame == 2){
+        if(whereAmICame == 2 || whereAmICame == 4){
             stepRecipeBinding.steprecipeFmTvCustom.setText("${orderDetails.get(nowRecipeIdx).customerRequest}")
         }
 
