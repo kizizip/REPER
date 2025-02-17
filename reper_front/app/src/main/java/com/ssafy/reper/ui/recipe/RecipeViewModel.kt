@@ -1,5 +1,6 @@
 package com.ssafy.reper.ui.recipe
 
+import MainActivityViewModel
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.dto.RecipeResponse
 import com.ssafy.reper.data.remote.RetrofitUtil.Companion.recipeService
+import com.ssafy.reper.util.ViewModelSingleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -17,23 +19,13 @@ import kotlinx.coroutines.withContext
 private const val TAG = "RecipeViewModel_정언"
 class RecipeViewModel : ViewModel() {
 
-    private val _recipeList =
-        MutableLiveData<MutableList<Recipe>>()
-    val recipeList: LiveData<MutableList<Recipe>>
-        get() = _recipeList
+    private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
 
-    fun getRecipes(storeId: Int){
-        viewModelScope.launch {
-            var list: MutableList<Recipe>
-            try {
-                list = recipeService.getAllRecipes(storeId)
-            }
-            catch (e:Exception){
-                Log.d(TAG, "error: ${e}")
-                list = mutableListOf()
-            }
-            _recipeList.value = list
-        }
+    private val _recipeList = MutableLiveData<MutableList<Recipe>>(mutableListOf())
+    val recipeList: LiveData<MutableList<Recipe>> = _recipeList
+
+    fun setAllRecipes(){
+        _recipeList.value = mainViewModel.recipeList.value
     }
     
     fun searchRecipeName(storeId: Int, name: String) {
@@ -133,33 +125,14 @@ class RecipeViewModel : ViewModel() {
         get() = _recipe
 
     fun getRecipe(recipeId: Int){
-        var recipe = Recipe(
-            category = "",
-            ingredients = mutableListOf(),
-            recipeId = recipeId,
-            recipeImg = null,
-            recipeName = "",
-            recipeSteps = mutableListOf(),
-            type = ""
-        )
         viewModelScope.launch {
             try {
-                recipe = recipeService.getRecipe(recipeId)
-                Log.d(TAG, "getRecipe: ${recipe}")
+                val recipe = recipeService.getRecipe(recipeId)
+                _recipe.postValue(recipe)
             }
             catch (e:Exception){
                 Log.d(TAG, "getRecipe : error: ${e.message.toString()}")
-                recipe = Recipe(
-                    category = "",
-                    ingredients = mutableListOf(),
-                    recipeId = recipeId,
-                    recipeImg = null,
-                    recipeName = "",
-                    recipeSteps = mutableListOf(),
-                    type = ""
-                )
             }
         }
-        _recipe.value = recipe
     }
 }

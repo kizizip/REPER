@@ -40,6 +40,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale.filter
 
 private const val TAG = "AllRecipeFragment_정언"
 class AllRecipeFragment : Fragment() {
@@ -71,13 +72,11 @@ class AllRecipeFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _allRecipeBinding = FragmentAllRecipeBinding.inflate(inflater, container, false)
         return allRecipeBinding.root
-
-
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-         searchQuery = arguments?.getString("searchQuery").toString()
+        searchQuery = arguments?.getString("searchQuery").toString()
 
         mainViewModel.clearData()
         mainViewModel.isEmployee.observe(viewLifecycleOwner){
@@ -88,6 +87,11 @@ class AllRecipeFragment : Fragment() {
                 allRecipeBinding.allrecipeFmSp.visibility = View.VISIBLE
                 allRecipeBinding.allrecipeFmEtSearch.isEnabled = true
                 allRecipeBinding.allrecipeFmBtnFilter.isEnabled = true
+
+                mainViewModel.getRecipeList()
+                mainViewModel.recipeList.observe(viewLifecycleOwner){
+                    viewModel.setAllRecipes()
+                }
 
                 // RecyclerView adapter 처리
                 initAdapter()
@@ -102,6 +106,7 @@ class AllRecipeFragment : Fragment() {
                 allRecipeBinding.allrecipeFmBtnFilter.isEnabled = false
             }
         }
+
         favoriteReicpeList = mainViewModel.favoriteRecipeList.value ?: mutableListOf()
         // 이벤트 관리
         initEvent()
@@ -115,6 +120,7 @@ class AllRecipeFragment : Fragment() {
         mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onDestroyView() {
+        super.onDestroyView()
         super.onDestroyView()
         _allRecipeBinding = null
     }
@@ -156,7 +162,7 @@ class AllRecipeFragment : Fragment() {
                     val searchText = s.toString()
                     
                     if (searchText.isEmpty()) {
-                        viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
+                        initAdapter()
                         return@launch
                     }
 
@@ -256,7 +262,7 @@ class AllRecipeFragment : Fragment() {
         allRecipeListAdapter = AllRecipeListAdapter(mutableListOf(), mutableListOf()) { id, recipeName, recipeId, recipeImg ->
             // 즐겨찾기 버튼을 눌렀을 때
             if(id == 0){
-                for(item in viewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
+                for(item in mainViewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
                     favoriteReicpeList.add(FavoriteRecipe(
                         recipeId = item.recipeId,
                         recipeName = item.recipeName
@@ -269,7 +275,7 @@ class AllRecipeFragment : Fragment() {
             else if(id == 1){
                 favoriteReicpeList.removeAll { it.recipeName == recipeName }
                 mainViewModel.setLikeRecipes(favoriteReicpeList)
-                for(item in viewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
+                for(item in mainViewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
                     viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), item.recipeId)
                 }
             }
@@ -280,12 +286,10 @@ class AllRecipeFragment : Fragment() {
 
                 // 레시피 이름이 동일한 경우는 ICE HOT 일 거라 가정. -> 하지만..! 동일한 이름의 레시피 짱 많음..! => 가장 마지막으로 추가된 걸로...
                 // 클릭한 레시피와 동일한 이름의 레시피를 모두 가져와서 ice와 hot을 구별
-                val iceRecipe =
-                    viewModel.recipeList.value!!
+                val iceRecipe = viewModel.recipeList.value!!
                         .filter { it.recipeName == recipeName && it.type.equals("ICE") }
                         .maxByOrNull { it.recipeId }
-                val hotRecipe =
-                    viewModel.recipeList.value!!
+                val hotRecipe = viewModel.recipeList.value!!
                         .filter { it.recipeName == recipeName && it.type.equals("HOT") }
                         .maxByOrNull { it.recipeId }
                 val selectedRecipes = mutableListOf<Recipe>()
@@ -324,37 +328,33 @@ class AllRecipeFragment : Fragment() {
 
             allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
 
-            viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
-            viewModel.recipeList.observe(viewLifecycleOwner) {
-                if (it.isEmpty()) {
-                    allRecipeBinding.allrecipeFmRv.visibility = View.GONE
-                    allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
-                    category.clear()
-                    category.add("카테고리")
-                    initSpinner()
-                } else {
-                    allRecipeBinding.allrecipeFmRv.visibility = View.VISIBLE
-                    allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
+            if (viewModel.recipeList.value!!.isEmpty()) {
+                allRecipeBinding.allrecipeFmRv.visibility = View.GONE
+                allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
+                category.clear()
+                category.add("카테고리")
+                initSpinner()
+            } else {
+                allRecipeBinding.allrecipeFmRv.visibility = View.VISIBLE
+                allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
 
-                    allRecipeListAdapter.recipeList =
-                        it.distinctBy { it.recipeName }.toMutableList()
+                allRecipeListAdapter.recipeList =
+                    viewModel.recipeList.value!!.distinctBy { it.recipeName }.toMutableList()
 
-                    mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
-                        allRecipeListAdapter.favoriteRecipeList = it
-                        adapter = allRecipeListAdapter
-                    }
-
-                    category.clear()
-                    category.add("카테고리")
-                    for (recipe in it) {
-                        if (!category.contains(recipe.category)) {
-                            category.add(recipe.category)
-                        }
-                    }
-                    initSpinner()
+                mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
+                    allRecipeListAdapter.favoriteRecipeList = it
+                    adapter = allRecipeListAdapter
                 }
-            }
 
+                category.clear()
+                category.add("카테고리")
+                for (recipe in viewModel.recipeList.value!!) {
+                    if (!category.contains(recipe.category)) {
+                        category.add(recipe.category)
+                    }
+                }
+                initSpinner()
+            }
         }
     }
     fun initSpinner(){

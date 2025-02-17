@@ -43,6 +43,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.lifecycle.ViewModelProvider
+import com.ssafy.reper.base.ApplicationClass.Companion.sharedPreferencesUtil
 import com.ssafy.reper.ui.home.HomeFragment
 import kotlin.math.log
 
@@ -104,6 +105,7 @@ class MainActivity : AppCompatActivity() {
         mainViewModel.setUserInfo(sharedUserId)
         mainViewModel.getIsEmployee(sharedUserId)
         mainViewModel.getLikeRecipes(sharedStoreId, sharedUserId)
+        mainViewModel.getRecipeList()
 
         sendFCMFileUpload()
 

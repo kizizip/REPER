@@ -83,8 +83,6 @@ class StepRecipeFragment : Fragment() {
     private var _stepRecipeBinding : FragmentStepRecipeBinding? = null
     private val stepRecipeBinding get() =_stepRecipeBinding!!
 
-    private val userService = RetrofitUtil.userService
-
     private lateinit var speechRecognizer: SpeechRecognizer
     private var isListening = false
 
@@ -100,7 +98,6 @@ class StepRecipeFragment : Fragment() {
         return stepRecipeBinding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(TAG, "onViewCreated: ")
         super.onViewCreated(view, savedInstanceState)
         // 내가 어느 Fragment에서 왔는 지 Flag 처리
         whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment // 3 : FullRecipeFragment // 4 : OrderRecipe Full
@@ -150,7 +147,6 @@ class StepRecipeFragment : Fragment() {
         // 카메라 권한 체크 시작
         checkCameraPermission()
     }
-
     //캡쳐방지 코드입니다! 메시지 내용은 수정불가능,, 핸드폰내에 저장된 메시지가 뜨는 거라고 하네요
     override fun onResume() {
         super.onResume()
@@ -172,6 +168,16 @@ class StepRecipeFragment : Fragment() {
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
     }
     ////////////////////////////////////////////////////////////////////////////////////////
+    override fun onStop() {
+        super.onStop()
+        try {
+            // Fragment가 화면에서 사라질 때도 카메라 리소스 해제
+            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider.unbindAll()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unbinding camera use cases", e)
+        }
+    }
     override fun onDestroyView() {
         try {
             // 카메라 실행 중지
@@ -198,17 +204,6 @@ class StepRecipeFragment : Fragment() {
         if (::speechRecognizer.isInitialized) {
             isListening = false
             speechRecognizer.destroy()
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        try {
-            // Fragment가 화면에서 사라질 때도 카메라 리소스 해제
-            val cameraProvider = cameraProviderFuture.get()
-            cameraProvider.unbindAll()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error unbinding camera use cases", e)
         }
     }
 
@@ -252,12 +247,11 @@ class StepRecipeFragment : Fragment() {
     }
     // 세로 화면일 때 이벤트 처리
     fun eventPortrait(){
-         stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${mainViewModel.userInfo.value!!.email}")
-         stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
+        stepRecipeBinding.steprecipeFmTvUser?.setText("이용자 : ${mainViewModel.userInfo.value!!.email}")
+        stepRecipeBinding.steprecipeFmTvMenuName?.text = "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
 
         stepRecipeBinding.steprecipeFmTvMenuName?.text =
             "${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}"
-
 
         if(nowStepIdx == -1){ // 재료를 보여줘야해!
             showIngredient(nowRecipeIdx, true)
