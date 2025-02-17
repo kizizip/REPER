@@ -10,6 +10,8 @@ import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -22,14 +24,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
+import com.ssafy.reper.base.ApplicationClass
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentRecipeManageBinding
 import com.ssafy.reper.ui.FcmViewModel
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.RecipeAdapter
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -147,17 +154,49 @@ class RecipeManageFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.recipeSearchBarET.setOnEditorActionListener { v, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
-                val query = binding.recipeSearchBarET.text.toString().trim()
-                if (query.isNotEmpty()) {
-                    bossViewModel.searchRecipe(sharedStoreId, query)
+        var searchJob: Job? = null
+
+        binding.recipeSearchBarET.addTextChangedListener(object : TextWatcher {
+
+            override fun afterTextChanged(s: Editable?) {
+              searchJob?.cancel()
+                searchJob = lifecycleScope.launch {
+                    delay(300)
+                    val searchText =s.toString()
+
+                    if (searchText.isEmpty()){
+                        bossViewModel.getMenuList(ApplicationClass.sharedPreferencesUtil.getStoreId())
+                        return@launch
+                    }else{
+                        bossViewModel.searchRecipe(sharedStoreId, searchText)
+                    }
+
                 }
-                true  // 이벤트 소비 (키보드 내림)
-            } else {
-                false // 기본 동작 수행
             }
-        }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                TODO("Not yet implemented")
+            }
+
+        })
+
+
+
+/// allRecipeBinding.allrecipeFmEtSearch.addTextChangedListener(object : TextWatcher {
+//            override fun afterTextChanged(s: Editable?) {
+//                searchJob?.cancel()
+//                searchJob = lifecycleScope.launch {
+//                    delay(300)
+//                    val searchText = s.toString()
+//
+//                    if (searchText.isEmpty()) {
+//                        viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
+//                        return@launch
+//                    }
 
        if( bossViewModel.recipeList.value == null || bossViewModel.recipeList.value!!.isEmpty()){
            binding.recipeFgAddRV.visibility = View.GONE
