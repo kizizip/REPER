@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
@@ -34,7 +35,7 @@ class OrderFragment : Fragment() {
     var orderDateList: MutableList<String> = mutableListOf()
 
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
-    private val viewModel: OrderViewModel by viewModels()
+    private val viewModel: OrderViewModel by activityViewModels()
 
     // 주문 리스트 recyclerView Adapter
     private lateinit var orderAdapter : OrderAdatper

@@ -13,6 +13,9 @@
         android:gravity="bottom"
         app:umanoDragView="@id/fullrecipe_fm_slide_layout"
         app:umanoPanelHeight="450dp">
+
+
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fullrecipe_fm_back_layout"
             android:layout_width="match_parent"
@@ -98,7 +101,6 @@
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fullrecipe_fm_slide_layout"
             android:layout_width="match_parent"
@@ -113,7 +115,12 @@
                 android:id="@+id/scrollView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scrollbars="vertical">
+                android:scrollbars="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
@@ -122,33 +129,33 @@
                         android:id="@+id/fullrecipe_fm_btngroup"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
-                        app:singleSelection="true"
-                        app:checkedButton="@+id/fullrecipe_fm_btn_ice"
+                        android:layout_marginTop="16dp"
                         android:backgroundTint="@color/darkgreen"
+                        app:checkedButton="@+id/fullrecipe_fm_btn_ice"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
+                        app:layout_constraintTop_toBottomOf="@+id/fullrecipe_fm_tv_user"
+                        app:singleSelection="true">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/fullrecipe_fm_btn_ice"
+                            style="@style/CheckedToggleButtonStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            style="@style/CheckedToggleButtonStyle"
                             android:fontFamily="@font/pretendard_bold"
                             android:text="Ice"
-                            android:textSize="20sp"
                             android:textAllCaps="false"
+                            android:textSize="20sp"
                             android:visibility="visible" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/fullrecipe_fm_btn_hot"
+                            style="@style/BaseToggleButtonStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            style="@style/BaseToggleButtonStyle"
-                            android:text="Hot"
-                            android:textSize="20sp"
                             android:fontFamily="@font/pretendard_bold"
+                            android:text="Hot"
                             android:textAllCaps="false"
+                            android:textSize="20sp"
                             android:visibility="visible" />
 
                     </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -170,10 +177,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
+                        android:fontFamily="@font/pretendard_regular"
                         android:text="재료"
                         android:textColor="@color/black"
                         android:textSize="20sp"
-                        android:fontFamily="@font/pretendard_regular"
                         app:layout_constraintStart_toStartOf="@+id/textView5"
                         app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
@@ -216,13 +223,36 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
+                        android:fontFamily="@font/pretendard_regular"
                         android:text="고객 요청 사항"
                         android:textColor="@color/black"
                         android:textSize="20sp"
-                        android:fontFamily="@font/pretendard_regular"
                         app:layout_constraintStart_toStartOf="@+id/textView11"
                         app:layout_constraintTop_toBottomOf="@+id/textView11" />
+
+                    <TextView
+                        android:id="@+id/textView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/pretendard_regular"
+                        android:text="무단으로 복제, 유포 시 법적 처벌을 받을수 있습니다."
+                        android:textColor="@color/lightgray"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toEndOf="@+id/fullrecipe_fm_tv_user"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/fullrecipe_fm_tv_user"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/pretendard_regular"
+                        android:text="이용자 : 0000@naver.com"
+                        android:textColor="@color/lightgray"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView2" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
             </com.ssafy.reper.ui.recipe.LockableNestedScrollView>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>

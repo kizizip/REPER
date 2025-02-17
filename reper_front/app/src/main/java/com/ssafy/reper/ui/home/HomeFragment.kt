@@ -75,7 +75,7 @@ class HomeFragment : Fragment() {
     private val bossViewModel: BossViewModel by activityViewModels()
     val noticeViewModel: NoticeViewModel by activityViewModels()
     private val storeViewModel: StoreViewModel by activityViewModels()
-    private val orderViewModel: OrderViewModel by viewModels()
+    private val orderViewModel: OrderViewModel by activityViewModels()
     private val recipeViewModel: RecipeViewModel by viewModels()
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val fcmViewModel: FcmViewModel by activityViewModels()

@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -140,16 +141,22 @@ class OrderRecipeFragment : Fragment() {
 
         // 레시피 보기 버튼 클릭
         orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setOnClickListener {
-            mainViewModel.clearData()
-            mainViewModel.setOrder(order)
-            mainViewModel.getLikeRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), ApplicationClass.sharedPreferencesUtil.getUser().userId!!)
+            if(checkedRecipeList.isNotEmpty()){
+                mainViewModel.clearData()
+                mainViewModel.setOrder(order)
+                mainViewModel.getLikeRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), ApplicationClass.sharedPreferencesUtil.getUser().userId!!)
 
-            if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
-                navigateToRecipeFragment(R.id.fullRecipeFragment)
+                if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
+                    navigateToRecipeFragment(R.id.fullRecipeFragment)
+                }
+                else if(orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected == true){
+                    navigateToRecipeFragment(R.id.stepRecipeFragment)
+                }
             }
-            else if(orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected == true){
-                navigateToRecipeFragment(R.id.stepRecipeFragment)
+            else{
+                Toast.makeText(mainActivity, "레시피를 골라주세요!", Toast.LENGTH_SHORT).show()
             }
+
         }
     }
     // 어뎁터 설정
