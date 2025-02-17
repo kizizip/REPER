@@ -299,9 +299,6 @@ class StepRecipeFragment : Fragment() {
     // 4. 내가 지금 스텝인데, 마지막 레시피의 마지막 스탭일때
     fun nextEvent() {
         val orientation = resources.configuration.orientation
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
-            initStepLandOrderListAdapter()
-        }
         stepRecipeBinding.steprecipeFmBtnLeft.visibility = View.VISIBLE
 
         mainViewModel.setNowISeeStep(nowStepIdx + 1)
@@ -342,9 +339,7 @@ class StepRecipeFragment : Fragment() {
     // 4. 내가 재료인데, 첫번쨰 레시피의 재료일때
     fun prevEvent(){
         val orientation = resources.configuration.orientation
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE){ // 가로야?
-            initStepLandOrderListAdapter()
-        }
+
         stepRecipeBinding.steprecipeFmBtnRight.visibility = View.VISIBLE
 
         mainViewModel.setNowISeeStep(nowStepIdx - 1)
@@ -400,11 +395,15 @@ class StepRecipeFragment : Fragment() {
         }
 
         stepRecipeBinding.steprecipeFmRvIngredients.visibility = View.VISIBLE
+        val orientation = resources.configuration.orientation
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) { // 가로모드 처리
+            initStepLandOrderListAdapter()
+        }
+
         initIngredientsAdapter(recipeIdx, isPortrait)
     }
     // 레시피 보이게
     fun showOneStepRecipe(stepIdx:Int){
-//        Log.d(TAG, "showOneStepRecipe: ")
         val recipeSteps = mainViewModel.recipeSteps.value!!
 
         stepRecipeBinding.steprecipeFmTvMenuName?.setText("${selectedRecipeList.get(nowRecipeIdx).recipeName} ${selectedRecipeList.get(nowRecipeIdx).type}")
@@ -421,6 +420,11 @@ class StepRecipeFragment : Fragment() {
         stepRecipeBinding.steprecipeFmTvStep?.visibility = View.VISIBLE
         stepRecipeBinding.steprecipeFmTvStep?.setText(recipeSteps?.get(stepIdx)?.instruction)
         stepRecipeBinding.steprecipeFmLandTvRecipe?.setText(recipeSteps?.get(stepIdx)?.instruction)
+
+        val orientation = resources.configuration.orientation
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) { // 가로모드 처리
+            initStepLandOrderListAdapter()
+        }
     }
     // 재료 어뎁터 설정
     fun initIngredientsAdapter(recipeIdx:Int, isPortrait: Boolean) {
@@ -432,7 +436,7 @@ class StepRecipeFragment : Fragment() {
     // 가로모드일 때 선택된 메뉴 리스트 어뎁터
     fun initStepLandOrderListAdapter(){
         stepLandOrderListAdapter = StepLandOrderListAdapter(mainViewModel.orderRecipeList.value!!, selectedRecipeList, selectedRecipeList.get(nowRecipeIdx).recipeId)
-        stepRecipeBinding.steprecipeFmLandRvWhy!!.apply {
+        stepRecipeBinding.steprecipeFmLandRvWhy?.apply {
             layoutManager = LinearLayoutManager(context).apply {
                 orientation = LinearLayoutManager.VERTICAL
             }

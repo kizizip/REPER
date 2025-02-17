@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -128,36 +129,34 @@ class OrderRecipeFragment : Fragment() {
             }
 
             // order를 이미 완료 처리한 상태라면, 완료 버튼 안보이게!
-            orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.let {
-                if(order.completed){
-                    it.visibility = View.GONE
-                }
-                else{
-                    it.visibility = View.VISIBLE
-                }
+            if(order.completed){
+                orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.visibility = View.GONE
+                orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setBackgroundResource(R.drawable.btn)
             }
-            orderRecipebinding.orderRecipeFragmentGoRecipeBtn.let {
-                if(order.completed){
-                    it.setBackgroundResource(R.drawable.btn)
-                }
-                else{
-                    it.setBackgroundResource(R.drawable.medium_green_button)
-                }
+            else{
+                orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.visibility = View.VISIBLE
+                orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setBackgroundResource(R.drawable.medium_green_button)
             }
         }
 
         // 레시피 보기 버튼 클릭
         orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setOnClickListener {
-            mainViewModel.clearData()
-            mainViewModel.setOrder(order)
-            mainViewModel.getLikeRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), ApplicationClass.sharedPreferencesUtil.getUser().userId!!)
+            if(checkedRecipeList.isNotEmpty()){
+                mainViewModel.clearData()
+                mainViewModel.setOrder(order)
+                mainViewModel.getLikeRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId(), ApplicationClass.sharedPreferencesUtil.getUser().userId!!)
 
-            if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
-                navigateToRecipeFragment(R.id.fullRecipeFragment)
+                if(orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected == true){
+                    navigateToRecipeFragment(R.id.fullRecipeFragment)
+                }
+                else if(orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected == true){
+                    navigateToRecipeFragment(R.id.stepRecipeFragment)
+                }
             }
-            else if(orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected == true){
-                navigateToRecipeFragment(R.id.stepRecipeFragment)
+            else{
+                Toast.makeText(mainActivity, "레시피를 골라주세요!", Toast.LENGTH_SHORT).show()
             }
+
         }
     }
     // 어뎁터 설정
