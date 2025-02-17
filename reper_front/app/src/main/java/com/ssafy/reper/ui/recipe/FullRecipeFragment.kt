@@ -74,17 +74,15 @@ class FullRecipeFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "onViewCreated: ")
         // 내가 어느 Fragment에서 왔는 지 Flag 처리
         whereAmICame = arguments?.getInt("whereAmICame") ?: -1 // 1 : AllRecipeFragment // 2 : OrderRecipeFragment
-        Log.d(TAG, "onViewCreated: ${whereAmICame}")
-        Log.d(TAG, "onViewCreated: ${viewModel.recipeList.value}")
+        Log.d(TAG, "whereAmICame: ${whereAmICame}")
 
         if(whereAmICame == 2) { // OrderRecipeFragment에서 옴
             order = mainViewModel.order.value!!
             orderDetails = order.orderDetails
         }
-        viewModel.getRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
+
         mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
             favoriteReicpeList = it
         }
@@ -181,7 +179,7 @@ class FullRecipeFragment : Fragment() {
             itemClickListener = object : FullRecipeViewPagerAdapter.ItemClickListener {
                 override fun onHeartClick(recipeName: String, isFavorite: Boolean) {
                     if (!isFavorite) {
-                        for(item in viewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
+                        for(item in mainViewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
                             favoriteReicpeList.add(FavoriteRecipe(
                                 recipeId = item.recipeId,
                                 recipeName = item.recipeName
@@ -192,7 +190,7 @@ class FullRecipeFragment : Fragment() {
                     } else {
                         favoriteReicpeList.removeAll { it.recipeName == recipeName }
                         mainViewModel.setLikeRecipes(favoriteReicpeList)
-                        for(item in viewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
+                        for(item in mainViewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
                             viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), item.recipeId)
                         }
                     }

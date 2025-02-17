@@ -12,44 +12,13 @@ import com.bumptech.glide.Glide
 import com.ssafy.reper.R
 import com.ssafy.reper.data.dto.FavoriteRecipe
 
-class RVHomeLikeRecipeAdapter(
-    private val favoriteRecipes: LiveData<MutableList<FavoriteRecipe>>,
-    private val lifecycleOwner: LifecycleOwner,
-    private val onItemClick: (FavoriteRecipe) -> Unit
-) : RecyclerView.Adapter<RVHomeLikeRecipeAdapter.ViewHolder>() {
-
-    private var recipeList: List<FavoriteRecipe> = emptyList()
-
-    init {
-        favoriteRecipes.observe(lifecycleOwner) { recipes ->
-            recipeList = recipes
-            notifyDataSetChanged()
-        }
-    }
-
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
-    ): ViewHolder {
-        val v = LayoutInflater.from(parent.context)
-            .inflate(R.layout.rv_home_like_recipe_item, parent, false)
-        return ViewHolder(v)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItems(recipeList[position])
-    }
-
-    override fun getItemCount(): Int {
-        return recipeList.size
-    }
-
+class RVHomeLikeRecipeAdapter(private val favoriteRecipes: MutableList<FavoriteRecipe>, private val onItemClick: (FavoriteRecipe) -> Unit) : RecyclerView.Adapter<RVHomeLikeRecipeAdapter.ViewHolder>() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         init {
             itemView.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    onItemClick(recipeList[position])
+                    onItemClick(favoriteRecipes[position])
                 }
             }
         }
@@ -72,5 +41,18 @@ class RVHomeLikeRecipeAdapter(
                 rvImg.setImageResource(R.drawable.noimage)
             }
         }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.rv_home_like_recipe_item, parent, false)
+        return ViewHolder(v)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bindItems(favoriteRecipes[position])
+    }
+
+    override fun getItemCount(): Int {
+        return favoriteRecipes.size
     }
 }

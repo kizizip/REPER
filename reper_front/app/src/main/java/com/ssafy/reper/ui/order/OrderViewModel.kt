@@ -1,5 +1,6 @@
 package com.ssafy.reper.ui.order
 
+import MainActivityViewModel
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,10 +11,13 @@ import com.ssafy.reper.data.dto.Order
 import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.remote.RetrofitUtil.Companion.recipeService
 import com.ssafy.reper.data.remote.RetrofitUtil.Companion.orderService
+import com.ssafy.reper.util.ViewModelSingleton
 import kotlinx.coroutines.launch
 
 private const val TAG = "OrderFragmentViewModel_정언"
 class OrderViewModel : ViewModel() {
+
+    private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
 
     private val _orderList =
         MutableLiveData<MutableList<Order>>()
@@ -34,18 +38,16 @@ class OrderViewModel : ViewModel() {
                         .sortedByDescending { it.orderDate }
                         .toMutableList()
                     
-                    val recipeList = mutableListOf<Recipe>()
+                    val recipeList = mainViewModel.recipeList.value!!
                     for (order in orderList) {
                         if (order.orderDetails.isNotEmpty()) {
-                            val recipe = recipeService.getRecipe(order.orderDetails.first().recipeId)
+                            val recipe = recipeList.filter {  it.recipeId == order.orderDetails.first().recipeId }.first()
                             recipeList.add(recipe)
                         }
                     }
                     
                     _orderList.value = orderList
                     _recipeNameList.value = recipeList
-                    
-                    Log.d(TAG, "getOrders success: orders=${orderList.size}, recipes=${recipeList.size}")
                 } else {
                     Log.d(TAG, "getOrders: Invalid storeId")
                 }
@@ -76,7 +78,7 @@ class OrderViewModel : ViewModel() {
                 item.orderDetails?.let {
                     it.sortBy { it.recipeId }
                     for(detail in it){
-                        list.add(recipeService.getRecipe(detail.recipeId))
+                        list.add(mainViewModel.recipeList.value!!.filter { it.recipeId == detail.recipeId}.first())
                     }
                 }
             }

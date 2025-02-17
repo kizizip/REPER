@@ -52,6 +52,8 @@ class HomeOrderAdatper(var orderList:MutableList<Order>, var recipeNameList:Muta
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "bindInfo error: ${e.message}")
+                Log.d(TAG, "bindInfo: ${orderList}")
+                Log.d(TAG, "bindInfo: ${recipeNameList}")
             }
         }
     }

@@ -58,6 +58,7 @@ class OrderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        mainViewModel.getRecipeList()
         mainViewModel.clearData()
         mainViewModel.isEmployee.observe(viewLifecycleOwner){
             if(it == true || mainViewModel.userInfo.value!!.role == "OWNER"){

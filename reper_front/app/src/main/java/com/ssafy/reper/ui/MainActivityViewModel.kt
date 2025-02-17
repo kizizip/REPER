@@ -45,7 +45,7 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
     val isEmployee: LiveData<Boolean?> = _isEmployee
 
     private val _favoriteRecipeList =
-        MutableLiveData<MutableList<FavoriteRecipe>>()
+        MutableLiveData<MutableList<FavoriteRecipe>>(mutableListOf())
     val favoriteRecipeList: LiveData<MutableList<FavoriteRecipe>>
         get() = _favoriteRecipeList
 
@@ -54,6 +54,20 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
 
     private val _nowTab = MutableLiveData<Int>(1)
     val nowTab:LiveData<Int> = _nowTab
+
+    private val _recipeList = MutableLiveData<MutableList<Recipe>>(mutableListOf())
+    val recipeList: LiveData<MutableList<Recipe>> = _recipeList
+
+    fun getRecipeList(){
+        viewModelScope.launch {
+            try{
+                val list = recipeService.getAllRecipes(ApplicationClass.sharedPreferencesUtil.getStoreId())
+                _recipeList.value = list
+            }catch (e:Exception) {
+                Log.d(TAG, "getRecipeList: ${e}")
+            }
+        }
+    }
 
     fun setNowTab(tab : Int){
         _nowTab.value = tab
@@ -84,15 +98,13 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
 
     fun getLikeRecipes(storeId:Int, userId:Int){
         viewModelScope.launch {
-            var list:MutableList<FavoriteRecipe>
             try {
-                list = recipeService.getLikeRecipes(storeId, userId)
+                val list = recipeService.getLikeRecipes(storeId, userId)
+                _favoriteRecipeList.value = list
             }
             catch (e: HttpException){
                 Log.d(TAG, "getLikeRecipes :error: ${e.response()?.errorBody().toString()}")
-                list = mutableListOf()
             }
-            _favoriteRecipeList.value = list
         }
     }
 
@@ -130,7 +142,7 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
                 Log.d(TAG, "_nowISeeStep: ${nowISeeStep.value}")
                 _recipeSteps.value = recipeList.get(0).recipeSteps
                 Log.d(TAG, "_recipeSteps: ${recipeSteps.value}")
-                _isDataReady.postValue(true)
+                _isDataReady.value = true
                 Log.d(TAG, "_isDataReady: ${isDataReady.value}")
             }
             catch (e:Exception){

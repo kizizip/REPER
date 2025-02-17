@@ -51,6 +51,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
+
+import com.ssafy.reper.base.ApplicationClass.Companion.sharedPreferencesUtil
 import com.ssafy.reper.ui.home.HomeFragment
 import kotlin.math.log
 
@@ -112,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         mainViewModel.setUserInfo(sharedUserId)
         mainViewModel.getIsEmployee(sharedUserId)
         mainViewModel.getLikeRecipes(sharedStoreId, sharedUserId)
+        mainViewModel.getRecipeList()
 
         sendFCMFileUpload()
 
