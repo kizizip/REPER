@@ -6,6 +6,44 @@
 | 팀장 | 심근원 |
 | 팀원 | 김정언, 박재영, 안주현, 이서현, 임지혜 |
 
+## 🚀 기술 스택
+
+| 분야        | 사용 기술 |
+|------------|--------------------------------|
+| **Backend** | ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat&logo=springboot&logoColor=white), ![JPA](https://img.shields.io/badge/JPA-6DB33F?style=flat) ,  ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white), ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat&logo=openai&logoColor=white), ![Flask](https://img.shields.io/badge/Flask-000000?style=flat&logo=flask&logoColor=white), ![Elasticsearch](https://img.shields.io/badge/Elasticsearch-005571?style=flat&logo=elasticsearch&logoColor=white), ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=white) |
+| **Frontend** | ![Android Studio](https://img.shields.io/badge/Android%20Studio-3DDC84?style=flat&logo=android-studio&logoColor=white), ![Kotlin](https://img.shields.io/badge/Kotlin-0095D5?style=flat&logo=kotlin&logoColor=white), ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=white), ![MediaPipe](https://img.shields.io/badge/MediaPipe-FF6600?style=flat), ![Retrofit2](https://img.shields.io/badge/Retrofit2-007ACC?style=flat)    |
+| **Infra** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white), ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=flat&logo=jenkins&logoColor=white) |
+| **CI/CD** | ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat&logo=github-actions&logoColor=white), ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=flat&logo=jenkins&logoColor=white) |
+| **Collaboration Tools** | ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white), ![GitLab](https://img.shields.io/badge/GitLab-FC6D26?style=flat&logo=gitlab&logoColor=white), ![Jira](https://img.shields.io/badge/Jira-0052CC?style=flat&logo=jira&logoColor=white), ![Figma](https://img.shields.io/badge/Figma-F24E1E?style=flat&logo=figma&logoColor=white), ![Notion](https://img.shields.io/badge/Notion-000000?style=flat&logo=notion&logoColor=white) |
+
+## 👨‍💻 팀원별 기술 기여
+
+### 🔹 **Backend**
+#### 🏷 박재영
+- 
+#### 🏷 이서현
+- 
+
+#### 🏷 임지혜 
+- 
+---
+
+### 🔹 **Frontend**
+#### 🏷 김정언 
+- 
+
+#### 🏷 심근원
+- 
+
+#### 🏷 안주현
+- 
+---
+### 🔹 **Infra**
+#### 🏷 김정언
+- 
+
+
+
 ## 📊 프로젝트 기획
 
 ### 💡 기획 의도
