@@ -72,6 +72,7 @@ class OrderFragment : Fragment() {
                 // recipeList 준비 상태 확인
                 mainViewModel.recipeList.observe(viewLifecycleOwner) { recipes ->
                     if (!recipes.isNullOrEmpty()) {
+                        viewModel.getOrders()
                         //  초기화
                         resetData()
                         //어뎁터설정
@@ -167,10 +168,8 @@ class OrderFragment : Fragment() {
                         if (selectedDate.isNotBlank() && formattedDate.substring(0, 10) == selectedDate) {
                             if(!orderAdapter.orderList.contains(item)){
                                 orderAdapter.orderList.add(item)
-                                Log.d(TAG, "storeId: ${ApplicationClass.sharedPreferencesUtil.getStoreId()}")
-                                Log.d(TAG, "item recipeId: ${item.orderDetails.first().recipeId}")
-                                Log.d(TAG, "recipeList: ${recipeList.filter { it.recipeName.equals("얼그레이") }}")
-                                orderAdapter.recipeNameList.add(recipeList.filter { item.orderDetails.first().recipeId == it.recipeId }.first().recipeName)
+                                val details = item.orderDetails.sortedBy { it.recipeId }
+                                orderAdapter.recipeNameList.add(recipeList.filter { details.first().recipeId == it.recipeId }.first().recipeName)
                             }
                         }
                     }
