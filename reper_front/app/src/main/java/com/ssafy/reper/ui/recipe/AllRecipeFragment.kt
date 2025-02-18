@@ -162,7 +162,7 @@ class AllRecipeFragment : Fragment() {
                     val searchText = s.toString()
                     
                     if (searchText.isEmpty()) {
-                        initAdapter()
+                        viewModel.setAllRecipes()
                         return@launch
                     }
 
@@ -171,15 +171,15 @@ class AllRecipeFragment : Fragment() {
                         0 -> viewModel.searchRecipeIngredientInclude(
                             ApplicationClass.sharedPreferencesUtil.getStoreId(),
                             searchText
-                        )
+                            )
                         1 -> viewModel.searchRecipeIngredientExclude(
                             ApplicationClass.sharedPreferencesUtil.getStoreId(),
                             searchText
-                        )
+                            )
                         else -> viewModel.searchRecipeName(
                             ApplicationClass.sharedPreferencesUtil.getStoreId(),
                             searchText
-                        )
+                            )
                     }
                 }
             }
@@ -262,7 +262,7 @@ class AllRecipeFragment : Fragment() {
         allRecipeListAdapter = AllRecipeListAdapter(mutableListOf(), mutableListOf()) { id, recipeName, recipeId, recipeImg ->
             // 즐겨찾기 버튼을 눌렀을 때
             if(id == 0){
-                for(item in mainViewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
+                for(item in viewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
                     favoriteReicpeList.add(FavoriteRecipe(
                         recipeId = item.recipeId,
                         recipeName = item.recipeName
@@ -275,7 +275,7 @@ class AllRecipeFragment : Fragment() {
             else if(id == 1){
                 favoriteReicpeList.removeAll { it.recipeName == recipeName }
                 mainViewModel.setLikeRecipes(favoriteReicpeList)
-                for(item in mainViewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
+                for(item in viewModel.recipeList.value!!.filter { it.recipeName == recipeName }){
                     viewModel.unLikeRecipe(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt(), item.recipeId)
                 }
             }
@@ -320,40 +320,40 @@ class AllRecipeFragment : Fragment() {
             }
         }
 
-        allRecipeBinding.allrecipeFmRv.apply {
-            if(itemDecorationCount == 0){
-                addItemDecoration(GridSpacingItemDecoration(2, 10)) // 2열, 20dp 간격
-            }
-            layoutManager = GridLayoutManager(mainActivity, 2)
+        viewModel.recipeList.observe(viewLifecycleOwner){
+            allRecipeBinding.allrecipeFmRv.apply {
+                if(itemDecorationCount == 0){
+                    addItemDecoration(GridSpacingItemDecoration(2, 10)) // 2열, 20dp 간격
+                }
+                layoutManager = GridLayoutManager(mainActivity, 2)
 
-            allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
-
-            if (viewModel.recipeList.value!!.isEmpty()) {
-                allRecipeBinding.allrecipeFmRv.visibility = View.GONE
-                allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
-                category.clear()
-                category.add("카테고리")
-                initSpinner()
-            } else {
-                allRecipeBinding.allrecipeFmRv.visibility = View.VISIBLE
                 allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
 
-                allRecipeListAdapter.recipeList =
-                    viewModel.recipeList.value!!.distinctBy { it.recipeName }.toMutableList()
+                if (viewModel.recipeList.value!!.isEmpty()) {
+                    allRecipeBinding.allrecipeFmRv.visibility = View.GONE
+                    allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.VISIBLE
+                    category.clear()
+                    category.add("카테고리")
+                    initSpinner()
+                } else {
+                    allRecipeBinding.allrecipeFmRv.visibility = View.VISIBLE
+                    allRecipeBinding.allrecipeFmTvNorecipe.visibility = View.GONE
 
-                mainViewModel.favoriteRecipeList.observe(viewLifecycleOwner){
-                    allRecipeListAdapter.favoriteRecipeList = it
+                    allRecipeListAdapter.recipeList =
+                        viewModel.recipeList.value!!.distinctBy { it.recipeName }.toMutableList()
+
+                    allRecipeListAdapter.favoriteRecipeList = mainViewModel.favoriteRecipeList.value!!
                     adapter = allRecipeListAdapter
-                }
 
-                category.clear()
-                category.add("카테고리")
-                for (recipe in viewModel.recipeList.value!!) {
-                    if (!category.contains(recipe.category)) {
-                        category.add(recipe.category)
+                    category.clear()
+                    category.add("카테고리")
+                    for (recipe in viewModel.recipeList.value!!) {
+                        if (!category.contains(recipe.category)) {
+                            category.add(recipe.category)
+                        }
                     }
+                    initSpinner()
                 }
-                initSpinner()
             }
         }
     }

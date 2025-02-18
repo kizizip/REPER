@@ -130,6 +130,25 @@ class MainActivityViewModel(application: Application) :  AndroidViewModel(applic
         }
     }
 
+    fun setSelectedRecipeGoToStepRecipeOnOrder(recipe:Recipe, thisNowISeeStep:Int){
+        viewModelScope.launch {
+            try {
+                _nowISeeRecipe.value = selectedRecipeList.value!!.indexOf(recipe)
+                Log.d(TAG, "_nowIseeRecipe: ${nowISeeRecipe.value}")
+                _nowISeeStep.value = thisNowISeeStep
+                Log.d(TAG, "_nowISeeStep: ${nowISeeStep}")
+                _recipeSteps.value = selectedRecipeList.value!!.get(nowISeeRecipe.value!!).recipeSteps
+                Log.d(TAG, "_recipeSteps: ${recipeSteps.value}")
+                _isDataReady.postValue(true)
+                Log.d(TAG, "_isDataReady: ${isDataReady.value}")
+            }
+            catch (e:Exception){
+                Log.e(TAG, "Error fetching recipes: ${e.message}", e)
+                _isDataReady.value = false
+            }
+        }
+    }
+
     fun setSelectedRecipes(recipeList:MutableList<Recipe>){
         viewModelScope.launch {
             try {

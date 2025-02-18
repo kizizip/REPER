@@ -222,7 +222,7 @@ class FullRecipeFragment : Fragment() {
                         val bundle = Bundle().apply {
                             putInt("whereAmICame", 4)
                         }
-                        mainViewModel.setSelectedRecipeGoToStepRecipe(mutableListOf(recipe), nowISeeStep)
+                        mainViewModel.setSelectedRecipeGoToStepRecipeOnOrder(recipe, nowISeeStep)
                         findNavController().navigate(R.id.stepRecipeFragment, bundle)
                     }
                 }
