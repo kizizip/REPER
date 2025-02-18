@@ -29,6 +29,7 @@ import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.recipe.adapter.FullRecipeListAdapter
 import com.ssafy.reper.ui.recipe.adapter.FullRecipeViewPagerAdapter
 import com.ssafy.reper.util.ViewModelSingleton
+import androidx.viewpager2.widget.ViewPager2
 
 private const val TAG = "FullRecipeFragment_정언"
 class FullRecipeFragment : Fragment() {
@@ -141,14 +142,48 @@ class FullRecipeFragment : Fragment() {
         slidingUpPanelLayout = fullRecipeItemBinding.fullrecipeFmSlideuppanel // XML의 SlidingUpPanelLayout id
         scrollView = fullRecipeItemBinding.scrollView // XML의 NestedScrollView id
         scrollView.isScrollable = false
+
+        // ViewPager2 제스처 처리 추가
+        val viewPager = fullRecipeBinding.fullrecipeFmVp
+        
+        // ViewPager의 터치 이벤트를 직접 제어
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageScrollStateChanged(state: Int) {
+                super.onPageScrollStateChanged(state)
+                // 패널이 열려있을 때는 스크롤 무시
+                if (slidingUpPanelLayout.panelState == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                    viewPager.isUserInputEnabled = false
+                }
+            }
+        })
+
         slidingUpPanelLayout.addPanelSlideListener(object : SlidingUpPanelLayout.PanelSlideListener {
             override fun onPanelSlide(panel: View, slideOffset: Float) {
                 scrollView.isScrollable = slideOffset == 1.0f
+                // 패널이 움직이는 동안에는 ViewPager 스와이프 비활성화
+                viewPager.isUserInputEnabled = slideOffset == 0f
             }
+            
             override fun onPanelStateChanged(panel: View, previousState: SlidingUpPanelLayout.PanelState, newState: SlidingUpPanelLayout.PanelState) {
-                // 상태 변화에 따른 추가 처리가 필요하면 여기에 작성
+                when (newState) {
+                    SlidingUpPanelLayout.PanelState.EXPANDED -> {
+                        // 패널이 완전히 열렸을 때
+                        viewPager.isUserInputEnabled = false
+                    }
+                    SlidingUpPanelLayout.PanelState.COLLAPSED -> {
+                        // 패널이 완전히 닫혔을 때
+                        viewPager.isUserInputEnabled = true
+                    }
+                    else -> {
+                        // 드래그 중에는 ViewPager 비활성화
+                        viewPager.isUserInputEnabled = false
+                    }
+                }
             }
         })
+
+        // SlidingUpPanel의 드래그 영역 설정
+        slidingUpPanelLayout.setDragView(fullRecipeItemBinding.fullrecipeFmSlideLayout)
 
         // 돌아가기 버튼을 누르면 이전 Fragment로 돌아감.
         fullRecipeBinding.fullrecipeFmBtnBack.setOnClickListener {
