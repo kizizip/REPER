@@ -233,12 +233,15 @@ class MyPageFragment : Fragment() {
                         sharedPreferencesUtil.setStoreId(0)
                     }
                 }
+
             } else {
                 storeNames = mutableListOf("등록된 가게가 없습니다.")
                 storeIds = mutableListOf(0)
                 sharedPreferencesUtil.setStoreId(0)
                 myPageBinding.mypageFmTvStoreNum.text = "0"
             }
+
+
 
             // Adapter 설정
             val adapter = ArrayAdapter(
@@ -258,6 +261,7 @@ class MyPageFragment : Fragment() {
             // 기본 선택 인덱스 설정
             if (defaultIndex != -1) {
                 spinner.setSelection(defaultIndex)
+                sharedPreferencesUtil.setStoreId(storeIds[defaultIndex])
             }
 
             spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -505,6 +509,7 @@ class MyPageFragment : Fragment() {
 
         }
         myPageBinding.mypageFmBtnRecipe.setOnClickListener {
+            findNavController().popBackStack()
             findNavController().navigate(R.id.allRecipeFragment)
 
         }

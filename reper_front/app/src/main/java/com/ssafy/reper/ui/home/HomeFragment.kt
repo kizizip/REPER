@@ -51,8 +51,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.activity.OnBackPressedCallback
-import androidx.core.content.ContentProviderCompat.requireContext
-import com.ssafy.reper.base.ApplicationClass.Companion.sharedPreferencesUtil
+import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.base.ApplicationClass.Companion
 import com.ssafy.reper.ui.login.LoginActivity
 import com.ssafy.reper.util.ViewModelSingleton
 
@@ -161,6 +161,7 @@ class HomeFragment : Fragment() {
 
         // 레시피 더 보러가기 클릭시
         binding.fragmentHomeLikeRecipeText.setOnClickListener {
+            findNavController().popBackStack()
             findNavController().navigate(R.id.allRecipeFragment)
 
         }
@@ -322,6 +323,7 @@ class HomeFragment : Fragment() {
 
             // 기본 선택 인덱스 설정
             spinner.setSelection(defaultIndex)
+            ApplicationClass.sharedPreferencesUtil.setStoreId(storeIds[defaultIndex])
 
             spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
@@ -483,6 +485,7 @@ class HomeFragment : Fragment() {
                     val bundle = Bundle().apply {
                         putString("searchQuery", "딸기") //검색어 전달
                     }
+                    findNavController().popBackStack()
                     findNavController().navigate(R.id.allRecipeFragment, bundle)
 
                 }
@@ -492,6 +495,7 @@ class HomeFragment : Fragment() {
                 }
 
                 R.drawable.storebanner -> {
+                    findNavController().popBackStack()
                     findNavController().navigate(R.id.myPageFragment)
                 }
             }

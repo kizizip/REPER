@@ -54,6 +54,7 @@ class StoreManageFragment : Fragment() {
     }
 
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -93,6 +94,7 @@ class StoreManageFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        mainActivity.hideBottomNavigation()
         mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
 

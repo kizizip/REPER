@@ -97,8 +97,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             try {
                 Log.d(TAG, "권한 삭제 브로드캐스트 발송 시도")
                 val updateIntent = Intent("com.ssafy.reper.DELETE_ACCESS").apply {
-                    putExtra("title", data["title"])
-                    putExtra("body", data["body"])  // FCM 메시지의 내용
+                    putExtra("title", title)
+                    putExtra("body", body)
+                    putExtra("requestId", data["requestId"])  // FCM 메시지의 내용
                     `package` = packageName
                     addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -189,6 +190,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("targetFragment", targetFragment)
             putExtra("requestId", requestId)
+            putExtra("title",title)
+            putExtra("body",body)
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
