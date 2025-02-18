@@ -509,6 +509,7 @@ class MyPageFragment : Fragment() {
 
         }
         myPageBinding.mypageFmBtnRecipe.setOnClickListener {
+            findNavController().popBackStack()
             findNavController().navigate(R.id.allRecipeFragment)
 
         }

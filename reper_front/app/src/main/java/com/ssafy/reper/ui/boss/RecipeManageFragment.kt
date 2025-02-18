@@ -230,7 +230,7 @@ class RecipeManageFragment : Fragment() {
                     uploadState.text = "레시피 업로드 실패"
                     successText.apply {
                         text = "확인"
-                        setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.mainorange))
                         setOnClickListener {
                             clearUploadState()
                         }
@@ -257,7 +257,7 @@ class RecipeManageFragment : Fragment() {
                     uploadState.text = bossViewModel.fcmBody
                     successText.apply {
                         text = "확인"
-                        setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.mainorange))
                         setOnClickListener {
                             clearUploadState()
                         }

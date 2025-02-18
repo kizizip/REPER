@@ -166,6 +166,7 @@ class HomeFragment : Fragment() {
 
         // 레시피 더 보러가기 클릭시
         binding.fragmentHomeLikeRecipeText.setOnClickListener {
+            findNavController().popBackStack()
             findNavController().navigate(R.id.allRecipeFragment)
 
         }
@@ -520,6 +521,7 @@ class HomeFragment : Fragment() {
                     val bundle = Bundle().apply {
                         putString("searchQuery", "딸기") //검색어 전달
                     }
+                    findNavController().popBackStack()
                     findNavController().navigate(R.id.allRecipeFragment, bundle)
 
                 }
@@ -529,6 +531,7 @@ class HomeFragment : Fragment() {
                 }
 
                 R.drawable.storebanner -> {
+                    findNavController().popBackStack()
                     findNavController().navigate(R.id.myPageFragment)
                 }
             }

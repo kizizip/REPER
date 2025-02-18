@@ -20,6 +20,7 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -50,6 +51,7 @@ import kotlinx.coroutines.withContext
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import com.ssafy.reper.ui.home.HomeFragment
@@ -115,12 +117,48 @@ class MainActivity : AppCompatActivity() {
 
         sendFCMFileUpload()
 
-        val navController =
-            supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer)
-                ?.findNavController()
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer) as? NavHostFragment
+        val navController = navHostFragment?.navController
+
         navController?.let {
             binding.activityMainBottomMenu.setupWithNavController(it)
         }
+
+// 바텀 네비게이션이 보이는 프래그먼트 목록 정의
+        val bottomNavFragments = setOf(
+            R.id.homeFragment,
+            R.id.allRecipeFragment,
+            R.id.orderFragment,
+            R.id.myPageFragment
+        )
+
+// 현재 프래그먼트에 따라 뒤로 가기 버튼 동작 변경
+        navController?.addOnDestinationChangedListener { _, destination, _ ->
+            val isBottomNavVisible = bottomNavFragments.contains(destination.id)
+
+            onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (isBottomNavVisible) {
+                        // 바텀 네비게이션이 보이는 경우
+                        if (navController.currentDestination?.id != R.id.homeFragment) {
+                            navController.navigate(R.id.homeFragment)
+                        } else {
+                            finish()
+                        }
+                    } else {
+                        // 바텀 네비게이션이 없는 경우 → 백 스택에서 이전 화면으로 이동
+                        if (!navController.popBackStack()) {
+                            // 백 스택에 남은 게 없으면 종료
+                            finish()
+                        }
+                    }
+                }
+            })
+        }
+
+
+
 
         // FCM Token 비동기 처리
         CoroutineScope(Dispatchers.Main).launch {
