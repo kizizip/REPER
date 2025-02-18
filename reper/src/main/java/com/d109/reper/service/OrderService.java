@@ -74,7 +74,7 @@ public class OrderService {
         boolean isTakeout = new Random().nextBoolean();
         order.setTakeout(isTakeout);
 
-        List<Recipe> recipes = recipeRepository.findAllRecipes();
+        List<Recipe> recipes = recipeRepository.findByStore(store.getStoreId());
         if (recipes.isEmpty()) {
             throw new IllegalStateException("No recipes available");
         }
