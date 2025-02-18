@@ -59,25 +59,29 @@ class OrderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mainViewModel.getRecipeList()
         mainViewModel.clearData()
-        mainViewModel.isEmployee.observe(viewLifecycleOwner){
-            if(it == true || mainViewModel.userInfo.value!!.role == "OWNER"){
+        mainViewModel.isEmployee.observe(viewLifecycleOwner) { isEmployee ->
+            if(isEmployee == true || mainViewModel.userInfo.value!!.role == "OWNER") {
                 orderBinding.fragmentOrderTvNoorder.visibility = View.GONE
-
                 orderBinding.fragmentOrderRvOrder.visibility = View.VISIBLE
                 orderBinding.fragmentOrderDateSpinner.visibility = View.VISIBLE
 
-                //  초기화
-                resetData()
-                //어뎁터설정
-                initAdapter("")
-            }
-            else{
+                // recipeList 준비 상태 확인
+                mainViewModel.recipeList.observe(viewLifecycleOwner) { recipes ->
+                    if (!recipes.isNullOrEmpty()) {
+                        //  초기화
+                        resetData()
+                        //어뎁터설정
+                        initAdapter("")
+                    } else {
+                        // recipeList가 비어있으면 다시 요청
+                        mainViewModel.getRecipeList()
+                    }
+                }
+            } else {
                 orderBinding.fragmentOrderTvNoorder.visibility = View.VISIBLE
                 orderBinding.fragmentOrderRvOrder.visibility = View.GONE
                 orderBinding.fragmentOrderDateSpinner.visibility = View.GONE
-
             }
         }
         mainViewModel.getIsEmployee(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt())
@@ -131,8 +135,8 @@ class OrderFragment : Fragment() {
 
         // 데이터 저장
         orderBinding.fragmentOrderRvOrder.apply {
-            viewModel.getOrders()
             viewModel.orderList.observe(viewLifecycleOwner) { orderList ->
+                Log.d(TAG, "initAdapter: ${orderList}")
                 orderAdapter.orderList.clear()
                 orderAdapter.recipeNameList.clear()
                 if(orderList.isEmpty()){
@@ -165,7 +169,6 @@ class OrderFragment : Fragment() {
                         }
                     }
                 }
-
                 adapter = orderAdapter
             }
         }

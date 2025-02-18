@@ -112,8 +112,6 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).showBottomNavigation()
 
-        mainViewModel.getRecipeList()
-
         Log.d(TAG, "onViewCreated: User role = ${sharedPreferencesUtil.getUser()?.role}")
         Log.d(TAG, "onViewCreated: User ID = ${sharedPreferencesUtil.getUser()?.userId}")
 

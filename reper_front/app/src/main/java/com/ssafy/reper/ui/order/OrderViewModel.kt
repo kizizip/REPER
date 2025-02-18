@@ -34,26 +34,26 @@ class OrderViewModel : ViewModel() {
             try {
                 val storeId = ApplicationClass.sharedPreferencesUtil.getStoreId()
                 if (storeId != 0) {  // storeId가 유효한 경우에만 실행
-                    val orderList = orderService.getAllOrder(storeId)
+                    val thisOrderList = orderService.getAllOrder(storeId)
                         .sortedByDescending { it.orderDate }
                         .toMutableList()
                     
-                    val recipeList = mainViewModel.recipeList.value!!
-                    for (order in orderList) {
-                        if (order.orderDetails.isNotEmpty()) {
-                            val recipe = recipeList.filter {  it.recipeId == order.orderDetails.first().recipeId }.first()
-                            recipeList.add(recipe)
+                    val recipeList = mainViewModel.recipeList.value
+                    if (!recipeList.isNullOrEmpty()) {
+                        val recipeNameList = mutableListOf<Recipe>()
+                        for (order in thisOrderList) {
+                            if (order.orderDetails.isNotEmpty()) {
+                                recipeList.find { it.recipeId == order.orderDetails.first().recipeId }?.let {
+                                    recipeNameList.add(it)
+                                }
+                            }
                         }
+                        _recipeNameList.value = recipeNameList
                     }
-                    
-                    _orderList.value = orderList
-                    _recipeNameList.value = recipeList
-                } else {
-                    Log.d(TAG, "getOrders: Invalid storeId")
+                    _orderList.value = thisOrderList
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "getOrders error: ${e.message}")
-                _orderList.postValue(mutableListOf())
                 _recipeNameList.postValue(mutableListOf())
             }
         }
