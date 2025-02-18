@@ -363,17 +363,17 @@ class MainActivity : AppCompatActivity() {
             when (result) {
                 "success" -> {
                     if (bossViewModel.uploadNum != 0) {
-                        sharedPreferencesUtil.setFileState("success")
                         fcmViewModel.sendToUserFCM(
                             sharedUserId,
-                            "레시피 업로드 성공",
-                            bossViewModel.fileName,
+                            "${bossViewModel.fileName}레시피 업로드 성공",
+                            "${bossViewModel.uploadNum}개의 레시피 업로드를 성공했습니다",
                             "RecipeManageFragment",
                             0
                         )
+                        sharedPreferencesUtil.setFileNum(bossViewModel.uploadNum)
+                        sharedPreferencesUtil.setFileState("success")
+                        sharedPreferencesUtil.setFileName(bossViewModel.fileName)
                     } else {
-                        sharedPreferencesUtil.setFileState("failure")
-
                         fcmViewModel.sendToUserFCM(
                             sharedUserId,
                             "레시피 업로드 실패",
@@ -381,10 +381,12 @@ class MainActivity : AppCompatActivity() {
                             "RecipeManageFragment",
                             0
                         )
+                        sharedPreferencesUtil.setFileNum(bossViewModel.uploadNum)
+                        sharedPreferencesUtil.setFileState("failure")
+                        sharedPreferencesUtil.setFileName(bossViewModel.fileName)
                     }
                 }
                 "failure" -> {
-                    sharedPreferencesUtil.setFileState("failure")
                     fcmViewModel.sendToUserFCM(
                         sharedUserId,
                         "레시피 업로드 실패",
@@ -392,6 +394,9 @@ class MainActivity : AppCompatActivity() {
                         "RecipeManageFragment",
                         0
                     )
+                    sharedPreferencesUtil.setFileNum(bossViewModel.uploadNum)
+                    sharedPreferencesUtil.setFileState("failure")
+                    sharedPreferencesUtil.setFileName(bossViewModel.fileName)
                     Log.d(
                         TAG,
                         "sendFCMFileUpload: 알림이 확인후${bossViewModel.recipeLoad.value}"
@@ -422,8 +427,6 @@ class MainActivity : AppCompatActivity() {
     // 주문 리스트 갱신 메서드
     fun refreshOrderList() {
         Log.d(TAG, "refreshOrderList: 주문 리스트 갱신 시작")
-        //DB에 반영되기 전에 알림이 먼저오나...? 오더아이디가 -1된상태로 오게됨 ㅠㅠ
-        //알림 클릭도 바로누르면 안되고 시간이 좀 지나야 올바른 곳으로 가게됨...서버와 상의를 해봐야할거같아유
         orderViewModel.getOrders()
     }
 
@@ -438,6 +441,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun showDeleteDialog(storeId: Int) {
+        Log.d(TAG, "showDeleteDialog: 불리고있나?")
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 // 스토어 정보를 받아올 때까지 대기
@@ -450,9 +454,9 @@ class MainActivity : AppCompatActivity() {
 
                 if (store != null) {
                     dialog.findViewById<TextView>(R.id.dialog_delete_bold_tv).text =
-                        " ${store.storeName}"
+                        "${store.storeName}"
                     dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv).text =
-                        " ${sharedPreferencesUtil.getUser().username}"
+                        "${sharedPreferencesUtil.getUser().username}"
 
                     dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
                         if (sharedStoreId == storeId) {

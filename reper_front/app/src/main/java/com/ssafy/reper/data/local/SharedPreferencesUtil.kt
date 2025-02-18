@@ -135,7 +135,14 @@ class SharedPreferencesUtil(context: Context) {
         preferences.edit().putString("fileName", fileName).apply()  // 파일 이름 저장
     }
 
+    // 파일 개수를 저장하는 메소드
+    fun getFileNum(): Int {
+        return preferences.getInt("fileNum",0)  // 파일 이름
+    }
 
+    fun setFileNum(num: Int) {
+        preferences.edit().putInt("fileNum", num).apply()  // 파일 이름 저장
+    }
 
 
 

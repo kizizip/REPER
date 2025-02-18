@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.data.dto.Recipe
@@ -41,28 +42,18 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     //레시피 업로드 상태 관찰
-    private val _recipeLoad = MutableLiveData<String?>().apply {
-        value = null  // 초기값 설정
+    private val _recipeLoad = MutableLiveData<String>()
+    val recipeLoad: LiveData<String> = _recipeLoad
+    
+    // 현재 상태를 저장할 변수 추가
+    private var currentState: String? = null
+    
+    fun setRecipeLoad(value: String?) {
+        Log.d(TAG, "setRecipeLoad: Previous: ${_recipeLoad.value}, New: $value")
+        currentState = value  // 현재 상태 저장
+        _recipeLoad.value = value
     }
-    val recipeLoad: LiveData<String?> = _recipeLoad
-
-    // 업로드 상태를 저장할 변수 추가
-    private var lastUploadState: String? = null
-
-    fun setRecipeLoad(result: String?) {
-        lastUploadState = result  // 상태 저장
-        _recipeLoad.postValue(result)
-        Log.d(TAG, "setRecipeLoad: current state = $result")
-    }
-
-    // 마지막 업로드 상태를 가져오는 함수
-    fun getLastUploadState(): String? = lastUploadState
-
-    // Fragment가 재생성될 때 마지막 상태를 복원하는 함수
-    fun restoreUploadState() {
-        _recipeLoad.value = lastUploadState
-        Log.d(TAG, "restoreUploadState: restored state = $lastUploadState")
-    }
+    
 
     //레시피 파일이름 저장
     var fileName:String =""
