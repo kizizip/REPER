@@ -51,6 +51,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.activity.OnBackPressedCallback
+import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.base.ApplicationClass.Companion
 import com.ssafy.reper.ui.login.LoginActivity
 
 
@@ -356,6 +358,7 @@ class HomeFragment : Fragment() {
 
             // 기본 선택 인덱스 설정
             spinner.setSelection(defaultIndex)
+            ApplicationClass.sharedPreferencesUtil.setStoreId(storeIds[defaultIndex])
 
             spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(

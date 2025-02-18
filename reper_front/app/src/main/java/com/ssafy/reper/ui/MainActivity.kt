@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.PackageManagerCompat
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -386,6 +387,7 @@ class MainActivity : AppCompatActivity() {
                         sharedPreferencesUtil.setFileName(bossViewModel.fileName)
                     }
                 }
+
                 "failure" -> {
                     fcmViewModel.sendToUserFCM(
                         sharedUserId,
@@ -434,10 +436,13 @@ class MainActivity : AppCompatActivity() {
     fun refreshStoreList() {
         val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
         storeViewModel.getUserStore(userId)
-        Log.d(TAG, "refreshStoreList: ${storeViewModel.myStoreList.value}")
-        if (storeViewModel.myStoreList.value == null || storeViewModel.myStoreList.value!!.size == 0) {
-            ApplicationClass.sharedPreferencesUtil.setStoreId(0)
-        }
+        storeViewModel.myStoreList.observe(this, Observer {
+            Log.d(TAG, "refreshStoreList: 등록될때${storeViewModel.myStoreList.value}")
+            if (storeViewModel.myStoreList.value == null || storeViewModel.myStoreList.value!!.size == 0) {
+                ApplicationClass.sharedPreferencesUtil.setStoreId(0)
+            }
+        })
+
     }
 
     fun showDeleteDialog(storeId: Int) {
@@ -451,22 +456,24 @@ class MainActivity : AppCompatActivity() {
 
                 val dialog = Dialog(this@MainActivity)
                 dialog.setContentView(R.layout.dialog_delete_acccess)
+                dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+
+                Log.d(TAG, "showDeleteDialog: ${sharedStoreId}나의 현재 아이디, ${storeId}")
 
                 if (store != null) {
                     dialog.findViewById<TextView>(R.id.dialog_delete_bold_tv).text =
                         "${store.storeName}"
                     dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv).text =
-                        "${sharedPreferencesUtil.getUser().username}"
+                        "${sharedPreferencesUtil.getUser().username}님의 권한을"
 
                     dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-                        if (sharedStoreId == storeId) {
-                            val navHostFragment =
-                                supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer) as NavHostFragment
-                            val navController = navHostFragment.navController
-                            navController.navigate(R.id.homeFragment)
-                            sharedPreferencesUtil.setStoreId(0)
-                        }
                         dialog.dismiss()
+                        val navHostFragment =
+                            supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer) as NavHostFragment
+                        val navController = navHostFragment.navController
+                        navController.navigate(R.id.homeFragment)
+                        sharedPreferencesUtil.setStoreId(0)
                     }
 
                     dialog.show()

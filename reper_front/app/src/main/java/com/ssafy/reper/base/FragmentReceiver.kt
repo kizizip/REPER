@@ -12,6 +12,7 @@ import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import android.util.Log
+import android.view.WindowManager
 import androidx.navigation.findNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.data.local.SharedPreferencesUtil
@@ -21,6 +22,7 @@ import com.ssafy.reper.ui.boss.WriteNotiFragment
 import com.ssafy.reper.ui.home.HomeFragment
 
 private const val TAG = "FragmentReceiver"
+
 class FragmentReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         Log.d(TAG, "FragmentReceiver onReceive called")
@@ -30,14 +32,18 @@ class FragmentReceiver : BroadcastReceiver() {
         when (intent?.action) {
             "com.ssafy.reper.DELETE_ACCESS" -> {
                 Log.d(TAG, "DELETE_ACCESS action received")
-                val requestId = intent.getStringExtra("requestId")
-                handleDeleteAccess(context, intent)
+                Log.d(TAG, "onReceive: ${intent.data}")
+                val requestId = intent?.getStringExtra("requestId")
+                Log.d(TAG, "RequestId from intent: $requestId")
                 try {
                     MainActivity.instance?.let { activity ->
                         Log.d(TAG, "스토어 리스트 갱신")
                         activity.runOnUiThread {
+                            if (ApplicationClass.sharedPreferencesUtil.getStoreId() == requestId!!.toInt()){
+                                Log.d(TAG, "onReceive:지금의 아이디 ${ApplicationClass.sharedPreferencesUtil.getStoreId()} &&받아온아이디${requestId}")
+                                activity.showDeleteDialog(requestId!!.toInt())
+                            }
                             activity.refreshStoreList()
-                            activity.showDeleteDialog(requestId!!.toInt())
                         }
                     } ?: run {
                         Log.e(TAG, "MainActivity instance is null")
@@ -81,7 +87,7 @@ class FragmentReceiver : BroadcastReceiver() {
                                 ?.childFragmentManager
                                 ?.fragments
                                 ?.firstOrNull()
-                            
+
                             if (currentFragment is HomeFragment) {
                                 Log.d(TAG, "Current fragment is HomeFragment, updating spinner")
                                 currentFragment.initSpinner()
@@ -94,7 +100,8 @@ class FragmentReceiver : BroadcastReceiver() {
                 }
             }
 
-            "com.ssafy.reper.UPDATE_ORDER"->{  Log.d(TAG, "UPDATE_ORDER")
+            "com.ssafy.reper.UPDATE_ORDER" -> {
+                Log.d(TAG, "UPDATE_ORDER")
                 try {
                     MainActivity.instance?.let { activity ->
                         Log.d(TAG, "오더리스트 갱신")
@@ -135,41 +142,43 @@ class FragmentReceiver : BroadcastReceiver() {
     }
 
 
-    private fun handleDeleteAccess(context: Context?, intent: Intent) {
-        Log.d(TAG, "handleDeleteAccess started")
-        try {
-            val activity = context as? MainActivity
-            if (activity == null) {
-                Log.e(TAG, "Activity is null")
-                return
-            }
+//    private fun handleDeleteAccess(context: Context?, intent: Intent) {
+//        Log.d(TAG, "handleDeleteAccess started")
+//        try {
+//            val activity = context as? MainActivity
+//            if (activity == null) {
+//                Log.e(TAG, "Activity is null")
+//                return
+//            }
+//
+//            val messageBody = intent.getStringExtra("body") ?: "권한이 삭제되었습니다."
+//
+//            Log.d(TAG, "Activity found, showing dialog with message: $messageBody")
+//            activity.runOnUiThread {
+//                try {
+//                    // 커스텀 다이얼로그 생성
+//                    val dialog = AlertDialog.Builder(activity)
+//                        .setView(R.layout.dialog_delete_acccess)
+//                        .setCancelable(false)
+//                        .create()
+//                    dialog.findViewById<TextView>(R.id.dialog_delete_tv).text = messageBody
+//                    dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+//
+//                    val width = WindowManager.LayoutParams.WRAP_CONTENT
+//                    val height = WindowManager.LayoutParams.WRAP_CONTENT
+//
+//                    dialog.window?.setLayout(width, height)
+//                    dialog.show()  // 다이얼로그를 실제로 화면에 표시
+//                    Log.d(TAG, "Dialog shown successfully")
+//                } catch (e: Exception) {
+//                    Log.e(TAG, "Error showing dialog: ${e.message}")
+//                    e.printStackTrace()
+//                }
+//            }
+//        } catch (e: Exception) {
+//            Log.e(TAG, "Error in handleDeleteAccess: ${e.message}")
+//            e.printStackTrace()
+//        }
+//    }
 
-            val messageBody = intent.getStringExtra("body") ?: "권한이 삭제되었습니다."
-
-            Log.d(TAG, "Activity found, showing dialog with message: $messageBody")
-            activity.runOnUiThread {
-                try {
-                    // 커스텀 다이얼로그 생성
-                    val dialog = AlertDialog.Builder(activity)
-                        .setTitle("권한 삭제")
-                        .setMessage(messageBody)
-                        .setPositiveButton("확인") { dialog, _ ->
-                            dialog.dismiss()
-                            activity.findNavController(R.id.activityMainFragmentContainer)
-                                .navigate(R.id.homeFragment)
-                        }
-                        .setCancelable(false)
-                        .create()
-                    dialog.show()
-                    Log.d(TAG, "Dialog shown successfully")
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error showing dialog: ${e.message}")
-                    e.printStackTrace()
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error in handleDeleteAccess: ${e.message}")
-            e.printStackTrace()
-        }
-    }
-} 
+}
