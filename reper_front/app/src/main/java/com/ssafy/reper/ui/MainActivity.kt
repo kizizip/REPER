@@ -169,6 +169,12 @@ class MainActivity : AppCompatActivity() {
 
                 "RecipeManageFragment" -> {
                     navController?.navigate(R.id.recipeManageFragment)
+                    bossViewModel.setRecipeLoad("fcm")
+                    val title = intent.getStringExtra("title")
+                    val body = intent.getStringExtra("body")
+                    bossViewModel.fcmTitle = title!!
+                    bossViewModel.fcmBody = body!!
+
                 }
 
                 "MyPageFragment" -> {
@@ -366,7 +372,7 @@ class MainActivity : AppCompatActivity() {
                     if (bossViewModel.uploadNum != 0) {
                         fcmViewModel.sendToUserFCM(
                             sharedUserId,
-                            "${bossViewModel.fileName}레시피 업로드 성공",
+                            "${bossViewModel.fileName}",
                             "${bossViewModel.uploadNum}개의 레시피 업로드를 성공했습니다",
                             "RecipeManageFragment",
                             0
@@ -377,8 +383,8 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         fcmViewModel.sendToUserFCM(
                             sharedUserId,
-                            "레시피 업로드 실패",
-                            bossViewModel.fileName,
+                            "${bossViewModel.fileName}",
+                            "레시피 업로드 실패\n파일형식을 확인해주세요",
                             "RecipeManageFragment",
                             0
                         )
@@ -391,8 +397,8 @@ class MainActivity : AppCompatActivity() {
                 "failure" -> {
                     fcmViewModel.sendToUserFCM(
                         sharedUserId,
-                        "레시피 업로드 실패",
-                        bossViewModel.fileName,
+                        "${bossViewModel.fileName}",
+                        "파일 업로드에 실패했습니다.",
                         "RecipeManageFragment",
                         0
                     )
@@ -419,10 +425,7 @@ class MainActivity : AppCompatActivity() {
 
 
     fun refreshEmployeeList(storeId: Int) {
-        if (sharedPreferencesUtil.getStoreId() == storeId) {
-            Log.d(TAG, "refreshEmployeeList: 직원리스트 업로드")
             bossViewModel.getAllEmployee(storeId)
-        }
     }
 
 

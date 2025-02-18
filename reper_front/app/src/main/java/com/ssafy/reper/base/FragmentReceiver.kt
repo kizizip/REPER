@@ -1,24 +1,12 @@
 package com.ssafy.reper.base
 
-import android.app.AlertDialog
+
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.os.Build.VERSION_CODES.S
-import android.os.Handler
-import android.os.Looper
-import android.view.View
-import android.widget.TextView
 import android.util.Log
-import android.view.WindowManager
-import androidx.navigation.findNavController
 import com.ssafy.reper.R
-import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.ui.MainActivity
-import com.ssafy.reper.ui.boss.BossFragment
-import com.ssafy.reper.ui.boss.WriteNotiFragment
 import com.ssafy.reper.ui.home.HomeFragment
 
 private const val TAG = "FragmentReceiver"
@@ -30,6 +18,7 @@ class FragmentReceiver : BroadcastReceiver() {
         Log.d(TAG, "Extras: ${intent?.extras}")
 
         when (intent?.action) {
+            //권한삭제알림을 받았을때 -> 스토어 리스트갱신, 현재 그가게를 이용중이면 다이얼로그
             "com.ssafy.reper.DELETE_ACCESS" -> {
                 Log.d(TAG, "DELETE_ACCESS action received")
                 Log.d(TAG, "onReceive: ${intent.data}")
@@ -54,15 +43,18 @@ class FragmentReceiver : BroadcastReceiver() {
                 }
             }
 
+            //권한요청, 직원삭제 -> 가게 직원리스트 갱신
             "com.ssafy.reper.UPDATE_BOSS_FRAGMENT" -> {
                 Log.d(TAG, "UPDATE_BOSS_FRAGMENT action received")
                 val requestId = intent.getStringExtra("requestId")
                 Log.d(TAG, "RequestId: $requestId")
                 try {
                     MainActivity.instance?.let { activity ->
-                        Log.d(TAG, "직원 리스트 갱신")
-                        activity.runOnUiThread {
-                            activity.refreshEmployeeList(requestId!!.toInt())
+                        if (ApplicationClass.sharedPreferencesUtil.getStoreId() == requestId!!.toInt()){
+                            Log.d(TAG, "직원 리스트 갱신")
+                            activity.runOnUiThread {
+                                activity.refreshEmployeeList(requestId!!.toInt())
+                            }
                         }
                     } ?: run {
                         Log.e(TAG, "MainActivity instance is null")
@@ -73,6 +65,7 @@ class FragmentReceiver : BroadcastReceiver() {
                 }
             }
 
+            //권한 승인 개인 스토어 리스트 갱신
             "com.ssafy.reper.APPROVE_ACCESS" -> {
                 Log.d(TAG, "APPROVE_ACCESS action received")
                 try {
@@ -100,6 +93,7 @@ class FragmentReceiver : BroadcastReceiver() {
                 }
             }
 
+            //주문알림
             "com.ssafy.reper.UPDATE_ORDER" -> {
                 Log.d(TAG, "UPDATE_ORDER")
                 try {
@@ -118,6 +112,7 @@ class FragmentReceiver : BroadcastReceiver() {
 
             }
 
+            //공지알림
             "com.ssafy.reper.UPDATE_NOTICE" -> {
                 Log.d(TAG, "UPDATE_NOTICE action received")
                 try {
@@ -140,45 +135,5 @@ class FragmentReceiver : BroadcastReceiver() {
             }
         }
     }
-
-
-//    private fun handleDeleteAccess(context: Context?, intent: Intent) {
-//        Log.d(TAG, "handleDeleteAccess started")
-//        try {
-//            val activity = context as? MainActivity
-//            if (activity == null) {
-//                Log.e(TAG, "Activity is null")
-//                return
-//            }
-//
-//            val messageBody = intent.getStringExtra("body") ?: "권한이 삭제되었습니다."
-//
-//            Log.d(TAG, "Activity found, showing dialog with message: $messageBody")
-//            activity.runOnUiThread {
-//                try {
-//                    // 커스텀 다이얼로그 생성
-//                    val dialog = AlertDialog.Builder(activity)
-//                        .setView(R.layout.dialog_delete_acccess)
-//                        .setCancelable(false)
-//                        .create()
-//                    dialog.findViewById<TextView>(R.id.dialog_delete_tv).text = messageBody
-//                    dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-//
-//                    val width = WindowManager.LayoutParams.WRAP_CONTENT
-//                    val height = WindowManager.LayoutParams.WRAP_CONTENT
-//
-//                    dialog.window?.setLayout(width, height)
-//                    dialog.show()  // 다이얼로그를 실제로 화면에 표시
-//                    Log.d(TAG, "Dialog shown successfully")
-//                } catch (e: Exception) {
-//                    Log.e(TAG, "Error showing dialog: ${e.message}")
-//                    e.printStackTrace()
-//                }
-//            }
-//        } catch (e: Exception) {
-//            Log.e(TAG, "Error in handleDeleteAccess: ${e.message}")
-//            e.printStackTrace()
-//        }
-//    }
 
 }

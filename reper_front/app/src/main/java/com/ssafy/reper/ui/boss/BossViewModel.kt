@@ -42,8 +42,8 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     //레시피 업로드 상태 관찰
-    private val _recipeLoad = MutableLiveData<String>()
-    val recipeLoad: LiveData<String> = _recipeLoad
+    private val _recipeLoad = MutableLiveData<String?>()
+    val recipeLoad: MutableLiveData<String?> = _recipeLoad
     
     // 현재 상태를 저장할 변수 추가
     private var currentState: String? = null
@@ -58,6 +58,9 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
     //레시피 파일이름 저장
     var fileName:String =""
     var uploadNum = 0;
+
+    var fcmTitle = ""
+    var fcmBody = ""
 
 
     //승인된 직원 리스트

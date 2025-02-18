@@ -247,6 +247,24 @@ class RecipeManageFragment : Fragment() {
                     uploadState.text = "레시피를 업로드 중입니다...\n앱을 종료하지 말아주세요!"
                 }
             }
+
+            "fcm" -> {
+                Log.d(TAG, "updateUI: fcm case")
+                binding.apply {
+                    uploadBar.visibility = View.VISIBLE
+                    successText.visibility = View.VISIBLE
+                    fileName.text =bossViewModel.fcmTitle
+                    uploadState.text = bossViewModel.fcmBody
+                    successText.apply {
+                        text = "확인"
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
+                        setOnClickListener {
+                            clearUploadState()
+                        }
+                    }
+                }
+
+            }
         }
     }
 
@@ -254,15 +272,6 @@ class RecipeManageFragment : Fragment() {
     private fun clearUploadState() {
         binding.uploadBar.visibility = View.GONE
         bossViewModel.setRecipeLoad(null)
-        sharedPreferencesUtil.apply {
-            setFileName("")
-            setFileState("")
-            setFileNum(0)
-        }
-
-        bossViewModel.setRecipeLoad("")
-        Log.d(TAG, "clearUploadState: 상태 초기화 완료")
-        Log.d(TAG, "clearUploadState: ${sharedPreferencesUtil.getFileState()}")
     }
 
     private fun initAdapter() {

@@ -190,6 +190,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("targetFragment", targetFragment)
             putExtra("requestId", requestId)
+            putExtra("title",title)
+            putExtra("body",body)
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
