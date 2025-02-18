@@ -69,7 +69,6 @@ package com.ssafy.reper.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import com.ssafy.reper.data.dto.LoginResponse
 import com.ssafy.reper.data.dto.UserInfo
 
@@ -117,31 +116,30 @@ class SharedPreferencesUtil(context: Context) {
             role = preferences.getString("role", ""),
         )
     }
-    fun addStateLoad(state: String?) {
-        val editor = preferences.edit()
-        editor.putString("state", state)
-        editor.apply()
-        Log.d("SharedPreferencesUtil", "stateLoad saved: $state")
+
+    // 파일 상태와 파일 이름을 저장하는 메소드
+    fun getFileState(): String? {
+        return preferences.getString("fileState", "")  // 파일 상태
     }
 
-    fun getStateLoad(): String {
-        val state = preferences.getString("state", "non")
-        Log.d("SharedPreferencesUtil", "state retrieved: $state")
-        return state!!
+    fun setFileState(fileState: String) {
+        preferences.edit().putString("fileState", fileState).apply()  // 파일 상태 저장
     }
 
-    fun addStateName(state: String?) {
-        val editor = preferences.edit()
-        editor.putString("name", state)
-        editor.apply()
-        Log.d("SharedPreferencesUtil", "addStateName saved: $state")
+    // 파일 이름을 저장하는 메소드
+    fun getFileName(): String? {
+        return preferences.getString("fileName", "")  // 파일 이름
     }
 
-    fun getStateName(): String {
-        val state = preferences.getString("name", "non")
-        Log.d("SharedPreferencesUtil", "addStateName retrieved: $state")
-        return state!!
+    fun setFileName(fileName: String?) {
+        preferences.edit().putString("fileName", fileName).apply()  // 파일 이름 저장
     }
+
+
+
+
+
+
 
     // 모든 사용자 데이터 삭제
     fun clearUserData() {

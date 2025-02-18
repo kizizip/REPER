@@ -14,11 +14,9 @@ import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,7 +27,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.reper.R
 import com.ssafy.reper.base.ApplicationClass
-import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentRecipeManageBinding
 import com.ssafy.reper.ui.FcmViewModel
@@ -52,14 +49,13 @@ class RecipeManageFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private val bossViewModel: BossViewModel by activityViewModels()
     private val fcmViewModel: FcmViewModel by activityViewModels()
+
     val sharedPreferencesUtil: SharedPreferencesUtil by lazy {
         SharedPreferencesUtil(requireContext().applicationContext)
     }
 
     var sharedStoreId = 0
     var pdfName = ""
-
-
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -96,56 +92,13 @@ class RecipeManageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedStoreId = sharedPreferencesUtil.getStoreId()
-        Log.d(TAG, "onViewCreated:지금은 이상태입니다 ${sharedPreferencesUtil.getStateLoad()}")
-        bossViewModel.setRecipeLoad(sharedPreferencesUtil.getStateLoad())
         Log.d(TAG, "onViewCreated: 뷰모델은 이거입니다! ${bossViewModel.recipeLoad.value}")
-        bossViewModel.recipeLoad.observe(viewLifecycleOwner) { result ->
-            Log.d(TAG, "onViewCreated: 받아오는건..? ${result}")
-            when (result) {
-               "non" -> {
-                    binding.uploadBar.visibility = View.GONE
-                   sharedPreferencesUtil.addStateLoad("non")
-                }
-                "success" -> {
-                    binding.uploadBar.visibility = View.VISIBLE
-                    binding.uploadState.text = "레시피 업로드 성공"
-                    binding.successText.visibility = View.VISIBLE
-                    binding.fileName.text = sharedPreferencesUtil.getStateName()
-                    binding.successText.text = "확인"
-                    binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.mainorange))
-                    bossViewModel.getMenuList(sharedStoreId)
-                    binding.successText.setOnClickListener {
-                        binding.uploadBar.visibility = View.GONE
-                        bossViewModel.setRecipeLoad(null)
-                        sharedPreferencesUtil.addStateLoad("non")
-                        sharedPreferencesUtil.addStateName("non")
-                    }
-                }
-                "failure" -> {
-                    binding.uploadBar.visibility = View.VISIBLE
-                    binding.uploadState.text = "레시피 업로드 실패"
-                    binding.successText.visibility = View.VISIBLE
-                    binding.fileName.text = sharedPreferencesUtil.getStateName()
-                    binding.successText.text = "확인"
-                    binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
-                    binding.successText.setOnClickListener {
-                        binding.uploadBar.visibility = View.GONE
-                        bossViewModel.setRecipeLoad(null)
-                        sharedPreferencesUtil.addStateLoad("non")
-                        sharedPreferencesUtil.addStateName("non")
 
-                    }
-                }
-                "loading" -> {
-                    binding.uploadBar.visibility = View.VISIBLE
-                    binding.successText.visibility = View.GONE
-                    binding.fileName.text = sharedPreferencesUtil.getStateName()
-                    binding.successText.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgray))
-                    sharedPreferencesUtil.addStateLoad("loading")
+           initUi()
+           observerRecipe()
 
-                }
-            }
-        }
+
+        binding.uploadBar.visibility = View.GONE
 
         binding.recipeFgAddTv.setOnClickListener {
             selectPdfFile()
@@ -162,47 +115,117 @@ class RecipeManageFragment : Fragment() {
         binding.recipeSearchBarET.addTextChangedListener(object : TextWatcher {
 
             override fun afterTextChanged(s: Editable?) {
-              searchJob?.cancel()
+                searchJob?.cancel()
                 searchJob = lifecycleScope.launch {
                     delay(300)
-                    val searchText =s.toString()
+                    val searchText = s.toString()
 
-                    if (searchText.isEmpty()){
+                    if (searchText.isEmpty()) {
                         bossViewModel.getMenuList(ApplicationClass.sharedPreferencesUtil.getStoreId())
                         return@launch
-                    }else{
+                    } else {
                         bossViewModel.searchRecipe(sharedStoreId, searchText)
                     }
 
                 }
             }
 
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                TODO("Not yet implemented")
-            }
-
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
 
 
-       if( bossViewModel.recipeList.value == null || bossViewModel.recipeList.value!!.isEmpty()){
-           binding.recipeFgAddRV.visibility = View.GONE
-           binding.nothingRecipe.visibility = View.VISIBLE
+        if (bossViewModel.recipeList.value == null || bossViewModel.recipeList.value!!.isEmpty()) {
+            binding.recipeFgAddRV.visibility = View.GONE
+            binding.nothingRecipe.visibility = View.VISIBLE
 
-       }else{
-           binding.recipeFgAddRV.visibility = View.VISIBLE
-           binding.nothingRecipe.visibility = View.GONE
-       }
+        } else {
+            binding.recipeFgAddRV.visibility = View.VISIBLE
+            binding.nothingRecipe.visibility = View.GONE
+        }
 
+    }
+
+    fun initUi() {
+        val result = bossViewModel.recipeLoad.value
+        updateUI(result) // LiveData 값 기반으로 UI 초기 설정
+        Log.d(TAG, "initUi: 원래저장된 값 ${result}")
+    }
+
+    fun observerRecipe() {
+        bossViewModel.recipeLoad.observe(viewLifecycleOwner) { result ->
+            Log.d(TAG, "onViewCreated: 받아오는 값 -> $result")
+            updateUI(result) // 값이 변경될 때마다 UI 업데이트
+        }
+    }
+
+    private fun updateUI(result: String?) {
+        Log.d(TAG, "updateUI: ${result}")
+        when (result) {
+            null -> {
+                binding.uploadBar.visibility = View.GONE
+            }
+
+            "success" -> {
+                binding.uploadBar.visibility = View.VISIBLE
+                if (bossViewModel.uploadNum > 0) {
+                    binding.uploadState.text = "${bossViewModel.uploadNum}개의 레시피 업로드 성공!"
+                } else {
+                    binding.uploadState.text = "레시피 업로드 실패! 올바른 파일인지 확인해 주세요"
+                }
+
+                binding.successText.visibility = View.VISIBLE
+                binding.fileName.text = bossViewModel.fileName
+                binding.successText.text = "확인"
+                binding.successText.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.mainorange
+                    )
+                )
+                bossViewModel.getMenuList(sharedStoreId)
+                binding.successText.setOnClickListener {
+                    binding.uploadBar.visibility = View.GONE
+                    bossViewModel.setRecipeLoad(null)
+                }
+            }
+
+            "failure" -> {
+                binding.uploadBar.visibility = View.VISIBLE
+                binding.uploadState.text = "레시피 업로드 실패"
+                binding.successText.visibility = View.VISIBLE
+                binding.fileName.text = bossViewModel.fileName
+                binding.successText.text = "확인"
+                binding.successText.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.darkgray
+                    )
+                )
+                binding.successText.setOnClickListener {
+                    binding.uploadBar.visibility = View.GONE
+                    bossViewModel.setRecipeLoad(null)
+                }
+            }
+
+            "loading" -> {
+                binding.uploadBar.visibility = View.VISIBLE
+                binding.successText.visibility = View.GONE
+                binding.fileName.text = bossViewModel.fileName
+                binding.successText.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.darkgray
+                    )
+                )
+            }
+        }
     }
 
 
     private fun initAdapter() {
         bossViewModel.getMenuList(sharedStoreId)
-        
+
         binding.recipeFgAddRV.layoutManager = LinearLayoutManager(requireContext())
         val recipeAdapter = RecipeAdapter(mutableListOf(), object : RecipeAdapter.ItemClickListener {
             override fun onItemClick(position: Int) {
@@ -222,10 +245,11 @@ class RecipeManageFragment : Fragment() {
             } else {
                 binding.recipeFgAddRV.visibility = View.VISIBLE
                 binding.nothingRecipe.visibility = View.GONE
-                recipeAdapter.updateData(recipes)
+                recipeAdapter.updateData(recipes) // 리스트를 역순으로 정렬
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -306,9 +330,7 @@ class RecipeManageFragment : Fragment() {
             pdfName = contentDisposition?.substringAfter("filename=")?.replace("\"", "") ?: "알 수 없는 파일"
             binding.fileName.text = pdfName
             bossViewModel.setRecipeLoad("loading")
-            sharedPreferencesUtil.addStateLoad("loading")
-            sharedPreferencesUtil.addStateName(pdfName)
-
+            bossViewModel.fileName = pdfName
         }
 
 

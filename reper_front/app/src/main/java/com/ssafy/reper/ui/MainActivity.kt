@@ -241,8 +241,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-
     // 카메라 권한 확인 함수
     private fun checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(
@@ -361,45 +359,48 @@ class MainActivity : AppCompatActivity() {
         return binding.activityMainBottomMenu
     }
 
-    private var isObserverRegistered = false // 옵저버 등록 상태를 추적하는 변수
 
     private fun sendFCMFileUpload() {
-        var lastResult: String? = null // 마지막 상태를 저장할 변수
-        Log.d(TAG, "sendFCMFileUpload: 마지막 상태 ${lastResult}")
         Log.d(TAG, "sendFCMFileUpload: 뷰모델안 상태${bossViewModel.recipeLoad.value}")
+        bossViewModel.recipeLoad.observe(this) { result ->
+            when (result) {
+                "success" -> {
+                    if (bossViewModel.uploadNum != 0) {
+                        sharedPreferencesUtil.setFileState("success")
+                        fcmViewModel.sendToUserFCM(
+                            sharedUserId,
+                            "레시피 업로드 성공",
+                            bossViewModel.fileName,
+                            "RecipeManageFragment",
+                            0
+                        )
+                    } else {
+                        sharedPreferencesUtil.setFileState("failure")
 
-        if (!isObserverRegistered) { // 옵저버가 등록되지 않은 경우에만 등록
-            bossViewModel.recipeLoad.observe(this) { result ->
-                if (lastResult != result) { // 값이 바뀌었을 때만 실행
-                    when (result) {
-                        "success" -> {
-                            fcmViewModel.sendToUserFCM(
-                                sharedUserId,
-                                "레시피 업로드 성공",
-                                sharedPreferencesUtil.getStateName(),
-                                "RecipeManageFragment",
-                                0
-                            )
-                        }
-
-                        "failure" -> {
-                            fcmViewModel.sendToUserFCM(
-                                sharedUserId,
-                                "레시피 업로드 실패",
-                                sharedPreferencesUtil.getStateName(),
-                                "RecipeManageFragment",
-                                0
-                            )
-                            Log.d(
-                                TAG,
-                                "sendFCMFileUpload: 알림이 확인후${bossViewModel.recipeLoad.value}"
-                            )
-                        }
+                        fcmViewModel.sendToUserFCM(
+                            sharedUserId,
+                            "레시피 업로드 실패",
+                            bossViewModel.fileName,
+                            "RecipeManageFragment",
+                            0
+                        )
                     }
-                    lastResult = result // 마지막 결과를 갱신
+                }
+                "failure" -> {
+                    sharedPreferencesUtil.setFileState("failure")
+                    fcmViewModel.sendToUserFCM(
+                        sharedUserId,
+                        "레시피 업로드 실패",
+                        bossViewModel.fileName,
+                        "RecipeManageFragment",
+                        0
+                    )
+                    Log.d(
+                        TAG,
+                        "sendFCMFileUpload: 알림이 확인후${bossViewModel.recipeLoad.value}"
+                    )
                 }
             }
-            isObserverRegistered = true // 옵저버 등록 상태 업데이트
         }
     }
 
@@ -434,7 +435,7 @@ class MainActivity : AppCompatActivity() {
         val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
         storeViewModel.getUserStore(userId)
         Log.d(TAG, "refreshStoreList: ${storeViewModel.myStoreList.value}")
-        if (storeViewModel.myStoreList.value==null||storeViewModel.myStoreList.value!!.size == 0){
+        if (storeViewModel.myStoreList.value == null || storeViewModel.myStoreList.value!!.size == 0) {
             ApplicationClass.sharedPreferencesUtil.setStoreId(0)
         }
     }
@@ -446,16 +447,18 @@ class MainActivity : AppCompatActivity() {
                 val store = withContext(Dispatchers.IO) {
                     storeViewModel.getStore(storeId)
                 }
-                
+
                 val dialog = Dialog(this@MainActivity)
                 dialog.setContentView(R.layout.dialog_delete_acccess)
-                
+
                 if (store != null) {
-                    dialog.findViewById<TextView>(R.id.dialog_delete_bold_tv).text = " ${store.storeName}"
-                    dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv).text = " ${sharedPreferencesUtil.getUser().username}"
-                    
+                    dialog.findViewById<TextView>(R.id.dialog_delete_bold_tv).text =
+                        " ${store.storeName}"
+                    dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv).text =
+                        " ${sharedPreferencesUtil.getUser().username}"
+
                     dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-                        if(sharedStoreId == storeId){
+                        if (sharedStoreId == storeId) {
                             val navHostFragment =
                                 supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer) as NavHostFragment
                             val navController = navHostFragment.navController
@@ -464,11 +467,12 @@ class MainActivity : AppCompatActivity() {
                         }
                         dialog.dismiss()
                     }
-                    
+
                     dialog.show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
                 Log.d(TAG, "showDeleteDialog: ${e.message}")
             }
         }
