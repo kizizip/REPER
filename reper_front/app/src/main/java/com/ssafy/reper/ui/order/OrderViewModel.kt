@@ -24,37 +24,19 @@ class OrderViewModel : ViewModel() {
     val orderList: LiveData<MutableList<Order>>
         get() = _orderList
 
-    private val _recipeNameList =
-        MutableLiveData<MutableList<Recipe>>()
-    val recipeNameList: LiveData<MutableList<Recipe>>
-        get() = _recipeNameList
-
     fun getOrders() {
         viewModelScope.launch {
             try {
                 val storeId = ApplicationClass.sharedPreferencesUtil.getStoreId()
                 if (storeId != 0) {  // storeId가 유효한 경우에만 실행
+                    Log.d(TAG, "getOrders: ${storeId}")
                     val thisOrderList = orderService.getAllOrder(storeId)
                         .sortedByDescending { it.orderDate }
                         .toMutableList()
-                    
-                    val recipeList = mainViewModel.recipeList.value
-                    if (!recipeList.isNullOrEmpty()) {
-                        val recipeNameList = mutableListOf<Recipe>()
-                        for (order in thisOrderList) {
-                            if (order.orderDetails.isNotEmpty()) {
-                                recipeList.find { it.recipeId == order.orderDetails.first().recipeId }?.let {
-                                    recipeNameList.add(it)
-                                }
-                            }
-                        }
-                        _recipeNameList.value = recipeNameList
-                    }
                     _orderList.value = thisOrderList
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "getOrders error: ${e.message}")
-                _recipeNameList.postValue(mutableListOf())
             }
         }
     }

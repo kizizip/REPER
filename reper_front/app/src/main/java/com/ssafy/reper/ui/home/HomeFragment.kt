@@ -408,7 +408,7 @@ class HomeFragment : Fragment() {
         orderViewModel.orderList.observe(viewLifecycleOwner) { orderList ->
             Log.d(TAG, "initOrderAdapter: orderList changed, size=${orderList?.size}")
 
-            orderViewModel.recipeNameList.value?.let { recipeList ->
+            mainViewModel.recipeList.value?.let { recipeList ->
                 Log.d(TAG, "initOrderAdapter: recipeList size=${recipeList.size}")
 
                 val activeOrders = orderList.filter { order ->

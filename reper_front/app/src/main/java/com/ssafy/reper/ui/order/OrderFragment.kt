@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentOrderBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.order.adapter.OrderAdatper
@@ -33,6 +34,8 @@ class OrderFragment : Fragment() {
     var selectedDate:String = ""
     // 주문 날짜 모음 yyyy-MM-dd 형식
     var orderDateList: MutableList<String> = mutableListOf()
+
+    var recipeList :MutableList<Recipe> = mutableListOf()
 
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val viewModel: OrderViewModel by activityViewModels()
@@ -73,6 +76,7 @@ class OrderFragment : Fragment() {
                         resetData()
                         //어뎁터설정
                         initAdapter("")
+                        recipeList = recipes
                     } else {
                         // recipeList가 비어있으면 다시 요청
                         mainViewModel.getRecipeList()
@@ -136,7 +140,6 @@ class OrderFragment : Fragment() {
         // 데이터 저장
         orderBinding.fragmentOrderRvOrder.apply {
             viewModel.orderList.observe(viewLifecycleOwner) { orderList ->
-                Log.d(TAG, "initAdapter: ${orderList}")
                 orderAdapter.orderList.clear()
                 orderAdapter.recipeNameList.clear()
                 if(orderList.isEmpty()){
@@ -147,7 +150,7 @@ class OrderFragment : Fragment() {
                     orderBinding.fragmentOrderTvNoorder.visibility = View.GONE
                     orderBinding.fragmentOrderRvOrder.visibility = View.VISIBLE
                     orderBinding.fragmentOrderDateSpinner.visibility = View.VISIBLE
-                    for ((index, item) in orderList.withIndex()) {
+                    for (item in orderList) {
                         // ISO 8601 형식의 날짜를 파싱 (UTC 기준)
                         val utcFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.KOREA)
                         utcFormat.timeZone = TimeZone.getTimeZone("UTC") // UTC로 설정
@@ -162,9 +165,12 @@ class OrderFragment : Fragment() {
                             configureDateSpinner()
                         }
                         if (selectedDate.isNotBlank() && formattedDate.substring(0, 10) == selectedDate) {
-                            if(!orderAdapter.orderList.contains(item) && index < viewModel.recipeNameList.value!!.count()){
+                            if(!orderAdapter.orderList.contains(item)){
                                 orderAdapter.orderList.add(item)
-                                orderAdapter.recipeNameList.add(viewModel.recipeNameList.value!!.get(index).recipeName)
+                                Log.d(TAG, "storeId: ${ApplicationClass.sharedPreferencesUtil.getStoreId()}")
+                                Log.d(TAG, "item recipeId: ${item.orderDetails.first().recipeId}")
+                                Log.d(TAG, "recipeList: ${recipeList.filter { it.recipeName.equals("얼그레이") }}")
+                                orderAdapter.recipeNameList.add(recipeList.filter { item.orderDetails.first().recipeId == it.recipeId }.first().recipeName)
                             }
                         }
                     }
