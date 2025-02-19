@@ -92,7 +92,6 @@ class AllRecipeFragment : Fragment() {
                 mainViewModel.recipeList.observe(viewLifecycleOwner){
                     viewModel.setAllRecipes()
                 }
-
                 // RecyclerView adapter 처리
                 initAdapter()
             }
@@ -110,14 +109,20 @@ class AllRecipeFragment : Fragment() {
         favoriteReicpeList = mainViewModel.favoriteRecipeList.value ?: mutableListOf()
         // 이벤트 관리
         initEvent()
-        if (searchQuery != "" && searchQuery != "null"){
-            allRecipeBinding.allrecipeFmEtSearch.setText(searchQuery)
-        }
     }
     override fun onResume() {
         super.onResume()
         mainActivity.showBottomNavigation()
         mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
+        
+        // 다른 프래그먼트에서 돌아올 때 검색어 초기화
+        if (searchQuery == "" || searchQuery == "null") {
+            allRecipeBinding.allrecipeFmEtSearch.setText("")
+        }
+        else{
+            allRecipeBinding.searchLoadingLayout.visibility = View.VISIBLE
+            allRecipeBinding.allrecipeFmEtSearch.setText(searchQuery)
+        }
     }
     override fun onDestroyView() {
         super.onDestroyView()
@@ -158,28 +163,40 @@ class AllRecipeFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {
                 searchJob?.cancel()
                 searchJob = lifecycleScope.launch {
-                    delay(300)
                     val searchText = s.toString()
-                    
+
                     if (searchText.isEmpty()) {
-                        viewModel.setAllRecipes()
+                        withContext(Dispatchers.Main) {
+                            allRecipeBinding.searchLoadingLayout.visibility = View.GONE
+                            viewModel.setAllRecipes()
+                        }
                         return@launch
                     }
 
+                    // 로딩 화면 표시
+                    withContext(Dispatchers.Main) {
+                        allRecipeBinding.searchLoadingLayout.visibility = View.VISIBLE
+                    }
 
                     when (howSearch) {
                         0 -> viewModel.searchRecipeIngredientInclude(
                             ApplicationClass.sharedPreferencesUtil.getStoreId(),
                             searchText
-                            )
+                        )
                         1 -> viewModel.searchRecipeIngredientExclude(
                             ApplicationClass.sharedPreferencesUtil.getStoreId(),
                             searchText
-                            )
+                        )
                         else -> viewModel.searchRecipeName(
                             ApplicationClass.sharedPreferencesUtil.getStoreId(),
                             searchText
-                            )
+                        )
+                    }
+
+                    // 검색 완료 후 로딩 화면 숨기기
+                    withContext(Dispatchers.Main) {
+                        delay(800)
+                        allRecipeBinding.searchLoadingLayout.visibility = View.GONE
                     }
                 }
             }
@@ -187,6 +204,12 @@ class AllRecipeFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
+
+        // viewModel의 recipeList 관찰
+        viewModel.recipeList.observe(viewLifecycleOwner) {
+            // 데이터가 업데이트되면 로딩 화면 숨기기
+            allRecipeBinding.searchLoadingLayout.visibility = View.GONE
+        }
 
         allRecipeBinding.allrecipeFmBtnFilter.setOnClickListener {
             val dialog = Dialog(mainActivity)
