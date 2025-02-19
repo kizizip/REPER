@@ -17,6 +17,7 @@ import android.view.animation.LayoutAnimationController
 import android.view.animation.TranslateAnimation
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.view.ViewCompat.animate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -185,27 +186,6 @@ class OrderFragment : Fragment() {
                     }
                 }
 
-                layoutAnimation = LayoutAnimationController(AnimationSet(true).apply {
-                    val translate = TranslateAnimation(
-                        Animation.RELATIVE_TO_SELF, 0f,
-                        Animation.RELATIVE_TO_SELF, 0f,
-                        Animation.RELATIVE_TO_SELF, -1f,
-                        Animation.RELATIVE_TO_SELF, 0f
-                    ).apply {
-                        duration = 500
-                    }
-
-                    val alpha = AlphaAnimation(0f, 1f).apply {
-                        duration = 1000
-                    }
-
-                    addAnimation(translate)
-                    addAnimation(alpha)
-                }).apply {
-                    delay = 0.15f
-                    order = LayoutAnimationController.ORDER_NORMAL
-                }
-
                 adapter = orderAdapter
             }
         }
@@ -213,23 +193,37 @@ class OrderFragment : Fragment() {
 
     private fun startAnimations() {
         // 1. 헤더 애니메이션 (이미지뷰와 텍스트)
-        val headerViews = listOf(orderBinding.imageView, orderBinding.tvJumunneyeok)
+        val headerViews = listOf(orderBinding.imageView)
         
         headerViews.forEach { view ->
-            view.translationY = -200f
+            view.translationY = -50f
             view.animate()
                 .translationY(0f)
                 .setDuration(1000)
         }
 
+        // 첫 번째 그룹 (상단 프로필 영역) - 투명도로 페이드인
+        val firstGroup = listOf(orderBinding.tvJumunneyeok)
+
+        firstGroup.forEach { view ->
+            view.alpha = 0f
+            view.animate()
+                .alpha(1f)
+                .setDuration(500)
+                .setStartDelay(400)
+                .withEndAction {
+                    if (_orderBinding == null) return@withEndAction
+                }
+        }
+
         // 2. 스피너 애니메이션
         orderBinding.fragmentOrderDateSpinner.apply {
-            translationX = -200f
+            translationX = -500f
             alpha = 0f
             animate()
                 .translationX(0f)
                 .alpha(1f)
-                .setDuration(800)
+                .setDuration(1000)
         }
     }
 }
