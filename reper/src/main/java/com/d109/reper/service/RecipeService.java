@@ -142,7 +142,15 @@ public class RecipeService {
 
         Pageable pageable = PageRequest.of(0, 1000);
 
-        return recipeSearchRepository.searchByStoreIdAndRecipeName(storeId, keyword, pageable);
+        long start = System.nanoTime(); // 시작 시간 측정
+        List<RecipeDocument> result = recipeSearchRepository.searchByStoreIdAndRecipeName(storeId, keyword, pageable);
+        long end = System.nanoTime(); // 끝나는 시간 측정
+
+        long elapsedTime = end - start; // 걸린 시간 (나노초)
+        double elapsedMs = elapsedTime / 1_000_000.0; // 밀리초(ms) 변환
+        System.out.println("[Elasticsearch] 검색 시간: " + elapsedMs + "ms (" + elapsedTime + "ns)");
+
+        return result;
     }
 
 
@@ -212,7 +220,14 @@ public class RecipeService {
         }
 
         Pageable pageable = PageRequest.of(0, size);
+
+        long start = System.nanoTime(); // 시작 시간 측정(나노 초 단위)
         List<Recipe> recipes = recipeJpaRepository.searchByStoreIdAndRecipeName(storeId, keyword, pageable);
+        long end = System.nanoTime(); // 끝나는 시간 측정
+
+        long elapsedTime = end - start; // 걸린 시간 (나노초)
+        double elapsedMs = elapsedTime / 1_000_000.0; // 밀리초(ms) 변환
+        System.out.println("[JPA] 검색 시간: " + elapsedMs + "ms (" + elapsedTime + "ns)");
 
         // 결과를 RecipeResponseDto로 변환
         return recipes.stream()
