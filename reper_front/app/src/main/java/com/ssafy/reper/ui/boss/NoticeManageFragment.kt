@@ -20,6 +20,11 @@ import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.databinding.FragmentNoticeManageBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.boss.adpater.NotiAdapter
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.LayoutAnimationController
+import android.view.animation.TranslateAnimation
+import android.view.animation.AlphaAnimation
 
 private const val TAG = "NoticeManageFragment"
 
@@ -163,7 +168,7 @@ class NoticeManageFragment : Fragment() {
         binding.notiList.layoutManager = LinearLayoutManager(requireContext())
         notiAdapter = NotiAdapter(emptyList(), object : NotiAdapter.ItemClickListener {
             override fun onClick(position: Int) {
-                val noticeList = noticeViewModel.noticeList.value // 현재 공지 리스트 가져오기
+                val noticeList = noticeViewModel.noticeList.value
                 if (!noticeList.isNullOrEmpty() && position in noticeList.indices) {
                     noticeViewModel.setClickNotice(noticeList[position])
                     findNavController().navigate(R.id.writeNotiFragment)
@@ -171,13 +176,45 @@ class NoticeManageFragment : Fragment() {
             }
         })
 
+        // 애니메이션 설정 추가
+        val animationSet = AnimationSet(true).apply {
+            val translateAnim = TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, -1f,
+                Animation.RELATIVE_TO_SELF, 0f
+            ).apply {
+                duration = 500
+            }
+
+            val alphaAnim = AlphaAnimation(0f, 1f).apply {
+                duration = 500
+            }
+
+            addAnimation(translateAnim)
+            addAnimation(alphaAnim)
+        }
+
+        binding.notiList.layoutAnimation = LayoutAnimationController(animationSet).apply {
+            delay = 0.1f
+            order = LayoutAnimationController.ORDER_NORMAL
+        }
+
         binding.notiList.adapter = notiAdapter
 
-        noticeViewModel.noticeList.observe(viewLifecycleOwner, { newList ->
-            // 기존 데이터를 덮어쓰지 않고 새로운 리스트를 어댑터에 설정
-            notiAdapter.noticeList = newList
-            notiAdapter.notifyDataSetChanged() // 리스트 업데이트
-        })
+        noticeViewModel.noticeList.observe(viewLifecycleOwner) { newList ->
+            if (newList.isNullOrEmpty()) {
+                binding.notiList.visibility = View.GONE
+                binding.nothingNoticeBoss.visibility = View.VISIBLE
+            } else {
+                binding.notiList.visibility = View.VISIBLE
+                binding.nothingNoticeBoss.visibility = View.GONE
+                notiAdapter.noticeList = newList
+                notiAdapter.notifyDataSetChanged()
+                // 데이터가 업데이트될 때마다 애니메이션 재실행
+                binding.notiList.scheduleLayoutAnimation()
+            }
+        }
     }
 
     // 검색 기능

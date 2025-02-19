@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:elevation="5dp"
             android:scaleType="center"
-            android:src="@drawable/top_bar"
+            android:src="@drawable/fragment_order_background"
             android:translationZ="5dp" />
 
     </LinearLayout>
@@ -89,7 +89,7 @@
                     android:layout_height="47dp"
                     android:layout_marginTop="8dp"
                     android:src="@drawable/outline_add_business_24"
-                    android:tint="#ED9049"
+                    android:tint="@color/green"
                     tools:ignore="UseAppTint" />
 
                 <TextView
@@ -129,7 +129,7 @@
                     android:layout_height="47dp"
                     android:layout_marginTop="8dp"
                     android:src="@drawable/list_alt_24px"
-                    android:tint="#ED9049"
+                    android:tint="@color/green"
                     tools:ignore="UseAppTint" />
 
                 <TextView
@@ -169,7 +169,7 @@
                     android:layout_height="47dp"
                     android:layout_marginTop="8dp"
                     android:src="@drawable/menu_book_24px"
-                    android:tint="#ED9049"
+                    android:tint="@color/green"
                     tools:ignore="UseAppTint" />
 
                 <TextView

@@ -88,10 +88,6 @@ class MyPageFragment : Fragment() {
         val user = sharedPreferencesUtil.getUser()
 
         if (user.role == "OWNER") {
-            myPageBinding.imageView4.setImageResource(R.drawable.mypage_header_owner)
-            myPageBinding.imageView5.setImageResource(R.drawable.mypage_notice_btn_owner)
-            myPageBinding.imageView7.setImageResource(R.drawable.mypage_recipe_btn_owner)
-            myPageBinding.imageView8.setImageResource(R.drawable.mypage_editmy_btn_owner)
             myPageBinding.mypageFmTvYellow.text = "${user.username} 사장"
             myPageBinding.mypageFmBtnBossMenu.text = "사장님 메뉴"
 
@@ -122,23 +118,23 @@ class MyPageFragment : Fragment() {
             translationY = -200f
             animate()
                 .translationY(0f)
-                .setDuration(1000)
+                .setDuration(500)
                 .withEndAction {
                     if (_myPageBinding == null) return@withEndAction
                     // 바운스 효과
                     animate()
                         .translationY(-30f)
-                        .setDuration(150)
+                        .setDuration(100)
                         .withEndAction {
                             if (_myPageBinding == null) return@withEndAction
                             animate()
                                 .translationY(0f)
-                                .setDuration(150)
+                                .setDuration(100)
                         }
                 }
         }
 
-        // 첫 번째 그룹 (상단 프로필 영역) - 투명도로 페이드인
+        // 첫 번째 그룹 (상단 프로필 영역)
         val firstGroup = listOf(
             binding.mypageFmTvYellow,
             binding.mypageFmTvName,
@@ -150,14 +146,14 @@ class MyPageFragment : Fragment() {
             view.alpha = 0f
             view.animate()
                 .alpha(1f)
-                .setDuration(800)
-                .setStartDelay(500)
+                .setDuration(400)
+                .setStartDelay(300)
                 .withEndAction {
                     if (_myPageBinding == null) return@withEndAction
                 }
         }
 
-        // 두 번째 그룹 (매장 정보 영역) - 왼쪽에서 슬라이드
+        // 두 번째 그룹 (매장 정보 영역)
         val secondGroup = listOf(
             binding.textView7,
             binding.mypageFmTvStoreNum,
@@ -171,14 +167,14 @@ class MyPageFragment : Fragment() {
             view.animate()
                 .translationX(0f)
                 .alpha(1f)
-                .setDuration(800)
-                .setStartDelay(1000)
+                .setDuration(400)
+                .setStartDelay(500)
                 .withEndAction {
                     if (_myPageBinding == null) return@withEndAction
                 }
         }
 
-        // 세 번째 그룹 (하단 버튼들) - 아래에서 위로 슬라이드
+        // 세 번째 그룹 (하단 버튼들)
         val thirdGroup = listOf(
             binding.mypageFmBtnNotice,
             binding.mypageFmBtnRecipe,
@@ -191,8 +187,8 @@ class MyPageFragment : Fragment() {
             view.animate()
                 .translationY(0f)
                 .alpha(1f)
-                .setDuration(800)
-                .setStartDelay(1500)
+                .setDuration(400)
+                .setStartDelay(700)
                 .withEndAction {
                     if (_myPageBinding == null) return@withEndAction
                 }
