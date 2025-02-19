@@ -10,8 +10,10 @@ import com.d109.reper.domain.Store;
 import com.d109.reper.elasticsearch.RecipeDocument;
 import com.d109.reper.elasticsearch.RecipeEventListener;
 import com.d109.reper.elasticsearch.RecipeSearchRepository;
+import com.d109.reper.repository.RecipeJpaRepository;
 import com.d109.reper.repository.RecipeRepository;
 import com.d109.reper.repository.StoreRepository;
+import com.d109.reper.response.RecipeResponseDto;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -36,6 +38,7 @@ public class RecipeService {
     private final RecipeSearchRepository recipeSearchRepository;
     private final ElasticsearchClient elasticsearchClient;
     private final RecipeEventListener recipeEventListener;
+    private final RecipeJpaRepository recipeJpaRepository;
     private final EntityManager em;
     private static final Logger logger = LoggerFactory.getLogger(RecipeService.class);
 
@@ -201,6 +204,21 @@ public class RecipeService {
         }
     }
 
+
+    //일반 JPA 사용한 레시피 검색 기능
+    public List<RecipeResponseDto> searchRecipeNameWithoutElasticsearch(Long storeId, String keyword, int size) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
+
+        Pageable pageable = PageRequest.of(0, size);
+        List<Recipe> recipes = recipeJpaRepository.searchByStoreIdAndRecipeName(storeId, keyword, pageable);
+
+        // 결과를 RecipeResponseDto로 변환
+        return recipes.stream()
+                .map(RecipeResponseDto::new)
+                .toList();
+    }
 
     // ElasticSearch 레시피 동기화 test용 API
         // DB의 모든 레시피를 Elasticsearch로 동기화

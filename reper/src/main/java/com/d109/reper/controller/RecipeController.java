@@ -204,4 +204,16 @@ public class RecipeController {
     }
 
 
+    // Jpa 사용한 일반 검색 구현
+    @GetMapping("/stores/{storeId}/recipes/search-jpa")
+    @Operation(summary = "레시피 속도 비교용 JPA 일반 검색 구현")
+    public ResponseEntity<List<RecipeResponseDto>> searchRecipesByJpa(
+            @PathVariable Long storeId,
+            @RequestParam String recipeName,
+            @RequestParam(defaultValue = "1000") int size
+    ) {
+        List<RecipeResponseDto> recipes = recipeService.searchRecipeNameWithoutElasticsearch(storeId, recipeName, size);
+        return ResponseEntity.ok(recipes);
+    }
+
 }
