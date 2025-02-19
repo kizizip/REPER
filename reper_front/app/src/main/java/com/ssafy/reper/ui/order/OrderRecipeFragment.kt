@@ -9,6 +9,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.LayoutAnimationController
+import android.view.animation.TranslateAnimation
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
@@ -51,6 +56,17 @@ class OrderRecipeFragment : Fragment() {
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _orderRecipebinding = FragmentOrderRecipeBinding.inflate(inflater, container, false)
+        
+        // 주문 완료 상태에 따라 초기 버튼 visibility 설정
+        viewModel.order.value?.let { order ->
+            orderRecipebinding.orderRecipeFragmentCompleteOrderBtn.visibility = 
+                if (order.completed) View.GONE else View.VISIBLE
+            
+            orderRecipebinding.orderRecipeFragmentGoRecipeBtn.setBackgroundResource(
+                if (order.completed) R.drawable.btn else R.drawable.medium_green_button
+            )
+        }
+        
         return orderRecipebinding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -186,6 +202,27 @@ class OrderRecipeFragment : Fragment() {
                 orderRecipeAdapter.orderDetailList = viewModel.order.value!!.orderDetails
                 orderRecipeAdapter.recipeList = it
                 adapter = orderRecipeAdapter
+            }
+
+            layoutAnimation = LayoutAnimationController(AnimationSet(true).apply {
+                val translate = TranslateAnimation(
+                    Animation.RELATIVE_TO_SELF, 0f,
+                    Animation.RELATIVE_TO_SELF, 0f,
+                    Animation.RELATIVE_TO_SELF, -1f,
+                    Animation.RELATIVE_TO_SELF, 0f
+                ).apply {
+                    duration = 500
+                }
+
+                val alpha = AlphaAnimation(0f, 1f).apply {
+                    duration = 500
+                }
+
+                addAnimation(translate)
+                addAnimation(alpha)
+            }).apply {
+                delay = 0.1f
+                order = LayoutAnimationController.ORDER_NORMAL
             }
         }
     }

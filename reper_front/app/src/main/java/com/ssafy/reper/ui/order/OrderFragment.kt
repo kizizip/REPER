@@ -186,6 +186,27 @@ class OrderFragment : Fragment() {
                     }
                 }
 
+                layoutAnimation = LayoutAnimationController(AnimationSet(true).apply {
+                    val translate = TranslateAnimation(
+                        Animation.RELATIVE_TO_SELF, 0f,
+                        Animation.RELATIVE_TO_SELF, 0f,
+                        Animation.RELATIVE_TO_SELF, -1f,
+                        Animation.RELATIVE_TO_SELF, 0f
+                    ).apply {
+                        duration = 500
+                    }
+
+                    val alpha = AlphaAnimation(0f, 1f).apply {
+                        duration = 500
+                    }
+
+                    addAnimation(translate)
+                    addAnimation(alpha)
+                }).apply {
+                    delay = 0.1f
+                    order = LayoutAnimationController.ORDER_NORMAL
+                }
+
                 adapter = orderAdapter
             }
         }
