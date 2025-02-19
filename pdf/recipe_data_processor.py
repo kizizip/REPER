@@ -14,6 +14,7 @@ from sentence_transformers import SentenceTransformer
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
 from concurrent.futures import ThreadPoolExecutor
+import re
 
 # .env 파일 로드
 load_dotenv()
@@ -61,7 +62,7 @@ ANIMATIONS = [
     {"keyword": "딸기 베이스를 컵에 담습니다.", "url": "https://cdn.lottielab.com/l/2Y6Ggm7jWcNaJ6.json"},
     {"keyword": "레몬청을 스푼으로 덜어 냅니다.", "url": "https://cdn.lottielab.com/l/A95CqnJxqAfT79.json"},
     {"keyword": "자몽청을 스푼으로 덜어 냅니다.", "url": "https://cdn.lottielab.com/l/CLut8Kky51eJ7B.json"},
-    {"keyword": "크림베이스를 스푼으로 올립니다.", "url": "https://cdn.lottielab.com/l/3Zb2Fu2gKEqwdu.json"},
+    {"keyword": "크림베이스 소스를 스푼으로 올립니다.", "url": "https://cdn.lottielab.com/l/3Zb2Fu2gKEqwdu.json"},
     {"keyword": "우유 거품을 스푼으로 떠서 올립니다.", "url": "https://cdn.lottielab.com/l/3Zb2Fu2gKEqwdu.json"},
     {"keyword": "대추청을 스푼으로 덜어 냅니다.", "url": "https://cdn.lottielab.com/l/6Tm6WxmBktLg6d.json"},
     {"keyword": "초코 소스를 스푼으로 추가합니다.", "url": "https://cdn.lottielab.com/l/81ckDCvhP5kb4H.json"},
@@ -72,33 +73,57 @@ ANIMATIONS = [
 
 
 # PDF 파일에서 텍스트 추출
+# def extract_text_from_pdf(pdf_path):
+#     doc = fitz.open(pdf_path)
+#     docs = []
+#     for page in doc:
+#         text = page.get_text()
+
+#         if text.strip():
+#             doc_object = Document(page_content=text)
+#             docs.append(doc_object)
+
+#     return docs
+
+
+# # 텍스트 chunk 분할
+# def split_text(docs):
+#     text_splitter = RecursiveCharacterTextSplitter(
+#         chunk_size=500,
+#         chunk_overlap=100
+#     )
+    
+#     return text_splitter.split_documents(docs)
+
+
 def extract_text_from_pdf(pdf_path):
     doc = fitz.open(pdf_path)
-    docs = []
+    full_text = ""
+
     for page in doc:
-        text = page.get_text()
+        full_text += page.get_text() + "\n"
 
-        if text.strip():
-            doc_object = Document(page_content=text)
-            docs.append(doc_object)
+    menu_blocks = re.split(r"\n이름: ", full_text)
 
-    return docs
+    if menu_blocks[0].strip() == "":
+        menu_blocks = menu_blocks[1:]
 
+    menu_blocks = [f"이름: {block.strip()}" for block in menu_blocks]
 
-# 텍스트 chunk 분할
-def split_text(docs):
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=100
-    )
-    
-    return text_splitter.split_documents(docs)
+    return menu_blocks
+
+def chunk_menus(menu_blocks, chunk_size=3):
+    menu_chunks = []
+    for i in range(0, len(menu_blocks), chunk_size):
+        chunk = menu_blocks[i:i + chunk_size]
+        menu_chunks.append(chunk)
+    return menu_chunks
 
 
 # 병렬로  GPT API 요청 보내기
 def process_recipe_text_parallel(chunks):
     with ThreadPoolExecutor() as excutor:
-        results = list(excutor.map(process_recipe_text, [chunk.page_content for chunk in chunks]))
+        results = list(excutor.map(process_recipe_text, chunks))
 
         combined_data = {"recipes": []}
         for result in results:
@@ -110,6 +135,9 @@ def process_recipe_text_parallel(chunks):
 
 # GPT API를 사용해 레시피 데이터를 JSON으로 변환
 def process_recipe_text(text):
+    if not isinstance(text, str):
+        text = str(text)
+
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -120,8 +148,7 @@ def process_recipe_text(text):
                 Please ensure:
                 - The response follows the JSON schema exactly.
                 - **ALL recipes in the input text** must be included in the response. DO NOT OMIT any recipes.*
-                - Steps must be separated into distinct actions (not combined in one sentence).
-                - Each `recipeStep` must contain only one distinct action per step.
+                - Steps must be separated into distinct actions (not combined in one sentence)..
                 - The `type` field **MUST be one of**: `HOT`, `ICE`.
                 - The `category` field **MUST be one of**: `COFFEE`, `NON_COFFEE`, `ADE`, `TEA`, `SMOOTHIE`, `FRAPPE`.
                 - **DO NOT** generate any other values for `type` and `category`."
@@ -326,7 +353,7 @@ def upload_file():
         docs = extract_text_from_pdf(file_path)
 
         # 청크 분할할
-        text_chunks = split_text(docs)
+        text_chunks = chunk_menus(docs)
 
         # 병렬로 GPT API로 JSON 구조 생성
         structured_json = process_recipe_text_parallel(text_chunks)
