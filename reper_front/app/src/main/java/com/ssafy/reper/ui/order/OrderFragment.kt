@@ -8,6 +8,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.BounceInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LayoutAnimationController
+import android.view.animation.TranslateAnimation
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
@@ -78,6 +85,7 @@ class OrderFragment : Fragment() {
                         //어뎁터설정
                         initAdapter("")
                         recipeList = recipes
+                        startAnimations()  // 데이터가 준비된 후 애니메이션 시작
                     } else {
                         // recipeList가 비어있으면 다시 요청
                         mainViewModel.getRecipeList()
@@ -90,6 +98,8 @@ class OrderFragment : Fragment() {
             }
         }
         mainViewModel.getIsEmployee(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt())
+
+        startAnimations()
     }
     override fun onResume() {
         super.onResume()
@@ -147,7 +157,7 @@ class OrderFragment : Fragment() {
                     orderBinding.fragmentOrderTvNoorder.visibility = View.VISIBLE
                     orderBinding.fragmentOrderRvOrder.visibility = View.GONE
                     orderBinding.fragmentOrderDateSpinner.visibility = View.GONE
-                }else{
+                }else {
                     orderBinding.fragmentOrderTvNoorder.visibility = View.GONE
                     orderBinding.fragmentOrderRvOrder.visibility = View.VISIBLE
                     orderBinding.fragmentOrderDateSpinner.visibility = View.VISIBLE
@@ -174,8 +184,52 @@ class OrderFragment : Fragment() {
                         }
                     }
                 }
+
+                layoutAnimation = LayoutAnimationController(AnimationSet(true).apply {
+                    val translate = TranslateAnimation(
+                        Animation.RELATIVE_TO_SELF, 0f,
+                        Animation.RELATIVE_TO_SELF, 0f,
+                        Animation.RELATIVE_TO_SELF, -1f,
+                        Animation.RELATIVE_TO_SELF, 0f
+                    ).apply {
+                        duration = 500
+                    }
+
+                    val alpha = AlphaAnimation(0f, 1f).apply {
+                        duration = 1000
+                    }
+
+                    addAnimation(translate)
+                    addAnimation(alpha)
+                }).apply {
+                    delay = 0.15f
+                    order = LayoutAnimationController.ORDER_NORMAL
+                }
+
                 adapter = orderAdapter
             }
+        }
+    }
+
+    private fun startAnimations() {
+        // 1. 헤더 애니메이션 (이미지뷰와 텍스트)
+        val headerViews = listOf(orderBinding.imageView, orderBinding.tvJumunneyeok)
+        
+        headerViews.forEach { view ->
+            view.translationY = -200f
+            view.animate()
+                .translationY(0f)
+                .setDuration(1000)
+        }
+
+        // 2. 스피너 애니메이션
+        orderBinding.fragmentOrderDateSpinner.apply {
+            translationX = -200f
+            alpha = 0f
+            animate()
+                .translationX(0f)
+                .alpha(1f)
+                .setDuration(800)
         }
     }
 }
