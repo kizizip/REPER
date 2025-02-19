@@ -88,6 +88,10 @@ class MyPageFragment : Fragment() {
         val user = sharedPreferencesUtil.getUser()
 
         if (user.role == "OWNER") {
+            myPageBinding.imageView4.setImageResource(R.drawable.mypage_header_owner)
+            myPageBinding.imageView5.setImageResource(R.drawable.mypage_notice_btn_owner)
+            myPageBinding.imageView7.setImageResource(R.drawable.mypage_recipe_btn_owner)
+            myPageBinding.imageView8.setImageResource(R.drawable.mypage_editmy_btn_owner)
             myPageBinding.mypageFmTvYellow.text = "${user.username} 사장"
             myPageBinding.mypageFmBtnBossMenu.text = "사장님 메뉴"
 
@@ -100,8 +104,6 @@ class MyPageFragment : Fragment() {
         startSequentialAnimation()
         setupSpinner()
         initEvent()
-
-
     }
 
     override fun onResume() {

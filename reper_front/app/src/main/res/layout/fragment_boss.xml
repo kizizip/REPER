@@ -87,7 +87,7 @@
                     android:layout_height="47dp"
                     android:layout_marginTop="8dp"
                     android:src="@drawable/outline_add_business_24"
-                    android:tint="@color/maingreen"
+                    android:tint="#ED9049"
                     tools:ignore="UseAppTint" />
 
                 <TextView
@@ -127,7 +127,7 @@
                     android:layout_height="47dp"
                     android:layout_marginTop="8dp"
                     android:src="@drawable/list_alt_24px"
-                    android:tint="@color/maingreen"
+                    android:tint="#ED9049"
                     tools:ignore="UseAppTint" />
 
                 <TextView
@@ -167,7 +167,7 @@
                     android:layout_height="47dp"
                     android:layout_marginTop="8dp"
                     android:src="@drawable/menu_book_24px"
-                    android:tint="@color/maingreen"
+                    android:tint="#ED9049"
                     tools:ignore="UseAppTint" />
 
                 <TextView
