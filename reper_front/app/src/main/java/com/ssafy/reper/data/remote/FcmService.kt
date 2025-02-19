@@ -28,7 +28,7 @@ interface FcmService {
     suspend fun deleteStoreToken(@Path("storeId") storeId: Int)
 
     //한 직원의 토큰 삭제-->로그 아웃, 권한 삭제..., 알림 끄기
-    @DELETE("token/deleteTokensForUser/{userId}")
-    suspend fun deleteSUserToken(@Path("userId") userId: Int)
+    @DELETE("token/deleteTokenForUser/{userId}")
+    suspend fun deleteSUserToken(@Path("userId") userId: Int): String
 
 }

@@ -17,6 +17,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.LayoutAnimationController
+import android.view.animation.TranslateAnimation
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -287,6 +292,8 @@ class RecipeManageFragment : Fragment() {
                     }
                 }
             })
+
+
         binding.recipeFgAddRV.adapter = recipeAdapter
 
         bossViewModel.recipeList.observe(viewLifecycleOwner) { recipes ->
@@ -298,6 +305,28 @@ class RecipeManageFragment : Fragment() {
                 binding.recipeFgAddRV.visibility = View.VISIBLE
                 binding.nothingRecipe.visibility = View.GONE
                 recipeAdapter.updateData(recipes) // 리스트를 역순으로 정렬
+            }
+            binding.recipeFgAddRV.apply {
+                layoutAnimation = LayoutAnimationController(AnimationSet(true).apply {
+                    val translate = TranslateAnimation(
+                        Animation.RELATIVE_TO_SELF, 0f,
+                        Animation.RELATIVE_TO_SELF, 0f,
+                        Animation.RELATIVE_TO_SELF, -1f,
+                        Animation.RELATIVE_TO_SELF, 0f
+                    ).apply {
+                        duration = 500
+                    }
+
+                    val alpha = AlphaAnimation(0f, 1f).apply {
+                        duration = 500
+                    }
+
+                    addAnimation(translate)
+                    addAnimation(alpha)
+                }).apply {
+                    delay = 0.1f
+                    order = LayoutAnimationController.ORDER_NORMAL
+                }
             }
         }
     }
