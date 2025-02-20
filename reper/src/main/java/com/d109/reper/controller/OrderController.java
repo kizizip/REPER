@@ -73,8 +73,8 @@ public class OrderController {
     // 시연용 정해진 주문 API
     @PostMapping("/create")
     @Operation(summary = "발표용 주문 API")
-    public ResponseEntity<OrderResponseDto> createOrder(@PathVariable Long storeId) {
-        OrderResponseDto orderResponse = orderService.createOrder(storeId);
-        return ResponseEntity.ok(orderResponse);
+    public ResponseEntity<OrderResponseDto> createJpaOrder(@PathVariable Long storeId) {
+        OrderResponseDto orderResponseDto = orderService.createOrder(storeId);
+        return ResponseEntity.ok(orderResponseDto);
     }
 }
