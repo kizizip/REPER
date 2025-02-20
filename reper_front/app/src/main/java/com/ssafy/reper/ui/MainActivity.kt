@@ -20,12 +20,14 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.PackageManagerCompat
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -49,6 +51,7 @@ import kotlinx.coroutines.withContext
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 
@@ -117,12 +120,48 @@ class MainActivity : AppCompatActivity() {
 
         sendFCMFileUpload()
 
-        val navController =
-            supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer)
-                ?.findNavController()
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer) as? NavHostFragment
+        val navController = navHostFragment?.navController
+
         navController?.let {
             binding.activityMainBottomMenu.setupWithNavController(it)
         }
+
+// 바텀 네비게이션이 보이는 프래그먼트 목록 정의
+        val bottomNavFragments = setOf(
+            R.id.homeFragment,
+            R.id.allRecipeFragment,
+            R.id.orderFragment,
+            R.id.myPageFragment
+        )
+
+// 현재 프래그먼트에 따라 뒤로 가기 버튼 동작 변경
+        navController?.addOnDestinationChangedListener { _, destination, _ ->
+            val isBottomNavVisible = bottomNavFragments.contains(destination.id)
+
+            onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (isBottomNavVisible) {
+                        // 바텀 네비게이션이 보이는 경우
+                        if (navController.currentDestination?.id != R.id.homeFragment) {
+                            navController.navigate(R.id.homeFragment)
+                        } else {
+                            finish()
+                        }
+                    } else {
+                        // 바텀 네비게이션이 없는 경우 → 백 스택에서 이전 화면으로 이동
+                        if (!navController.popBackStack()) {
+                            // 백 스택에 남은 게 없으면 종료
+                            finish()
+                        }
+                    }
+                }
+            })
+        }
+
+
+
 
         // FCM Token 비동기 처리
         CoroutineScope(Dispatchers.Main).launch {
@@ -156,7 +195,16 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 "WriteNoticeFragment" -> {
-                    navController?.navigate(R.id.noticeManageFragment)
+                    Log.d(TAG, "onCreate: 일단 여기는옵ㄴ니다")
+                    noticeViewModel.getNotice(sharedStoreId, requestId!!.toInt(), sharedUserId)
+                    noticeViewModel.clickNotice.observe(this) { result ->
+                        if (result !=null) {
+                            Log.d(TAG, "onCreatenoti: $result")
+                            navController?.navigate(R.id.writeNotiFragment)
+                        } else {
+                            Log.d(TAG, "onCreatenoti: $result")
+                        }
+                    }
                 }
 
                 "BossFragment" -> {
@@ -171,6 +219,12 @@ class MainActivity : AppCompatActivity() {
 
                 "RecipeManageFragment" -> {
                     navController?.navigate(R.id.recipeManageFragment)
+                    bossViewModel.setRecipeLoad("fcm")
+                    val title = intent.getStringExtra("title")
+                    val body = intent.getStringExtra("body")
+                    bossViewModel.fcmTitle = title!!
+                    bossViewModel.fcmBody = body!!
+
                 }
 
                 "MyPageFragment" -> {
@@ -239,8 +293,6 @@ class MainActivity : AppCompatActivity() {
         )
 
     }
-
-
 
 
     // 카메라 권한 확인 함수
@@ -361,45 +413,54 @@ class MainActivity : AppCompatActivity() {
         return binding.activityMainBottomMenu
     }
 
-    private var isObserverRegistered = false // 옵저버 등록 상태를 추적하는 변수
 
     private fun sendFCMFileUpload() {
-        var lastResult: String? = null // 마지막 상태를 저장할 변수
-        Log.d(TAG, "sendFCMFileUpload: 마지막 상태 ${lastResult}")
         Log.d(TAG, "sendFCMFileUpload: 뷰모델안 상태${bossViewModel.recipeLoad.value}")
-
-        if (!isObserverRegistered) { // 옵저버가 등록되지 않은 경우에만 등록
-            bossViewModel.recipeLoad.observe(this) { result ->
-                if (lastResult != result) { // 값이 바뀌었을 때만 실행
-                    when (result) {
-                        "success" -> {
-                            fcmViewModel.sendToUserFCM(
-                                sharedUserId,
-                                "레시피 업로드 성공",
-                                sharedPreferencesUtil.getStateName(),
-                                "RecipeManageFragment",
-                                0
-                            )
-                        }
-
-                        "failure" -> {
-                            fcmViewModel.sendToUserFCM(
-                                sharedUserId,
-                                "레시피 업로드 실패",
-                                sharedPreferencesUtil.getStateName(),
-                                "RecipeManageFragment",
-                                0
-                            )
-                            Log.d(
-                                TAG,
-                                "sendFCMFileUpload: 알림이 확인후${bossViewModel.recipeLoad.value}"
-                            )
-                        }
+        bossViewModel.recipeLoad.observe(this) { result ->
+            when (result) {
+                "success" -> {
+                    if (bossViewModel.uploadNum != 0) {
+                        fcmViewModel.sendToUserFCM(
+                            sharedUserId,
+                            "${bossViewModel.fileName}",
+                            "${bossViewModel.uploadNum}개의 레시피 업로드를 성공했습니다",
+                            "RecipeManageFragment",
+                            0
+                        )
+                        sharedPreferencesUtil.setFileNum(bossViewModel.uploadNum)
+                        sharedPreferencesUtil.setFileState("success")
+                        sharedPreferencesUtil.setFileName(bossViewModel.fileName)
+                    } else {
+                        fcmViewModel.sendToUserFCM(
+                            sharedUserId,
+                            "${bossViewModel.fileName}",
+                            "레시피 업로드 실패\n파일형식을 확인해주세요",
+                            "RecipeManageFragment",
+                            0
+                        )
+                        sharedPreferencesUtil.setFileNum(bossViewModel.uploadNum)
+                        sharedPreferencesUtil.setFileState("failure")
+                        sharedPreferencesUtil.setFileName(bossViewModel.fileName)
                     }
-                    lastResult = result // 마지막 결과를 갱신
+                }
+
+                "failure" -> {
+                    fcmViewModel.sendToUserFCM(
+                        sharedUserId,
+                        "${bossViewModel.fileName}",
+                        "파일 업로드에 실패했습니다.",
+                        "RecipeManageFragment",
+                        0
+                    )
+                    sharedPreferencesUtil.setFileNum(bossViewModel.uploadNum)
+                    sharedPreferencesUtil.setFileState("failure")
+                    sharedPreferencesUtil.setFileName(bossViewModel.fileName)
+                    Log.d(
+                        TAG,
+                        "sendFCMFileUpload: 알림이 확인후${bossViewModel.recipeLoad.value}"
+                    )
                 }
             }
-            isObserverRegistered = true // 옵저버 등록 상태 업데이트
         }
     }
 
@@ -414,18 +475,13 @@ class MainActivity : AppCompatActivity() {
 
 
     fun refreshEmployeeList(storeId: Int) {
-        if (sharedPreferencesUtil.getStoreId() == storeId) {
-            Log.d(TAG, "refreshEmployeeList: 직원리스트 업로드")
             bossViewModel.getAllEmployee(storeId)
-        }
     }
 
 
     // 주문 리스트 갱신 메서드
     fun refreshOrderList() {
         Log.d(TAG, "refreshOrderList: 주문 리스트 갱신 시작")
-        //DB에 반영되기 전에 알림이 먼저오나...? 오더아이디가 -1된상태로 오게됨 ㅠㅠ
-        //알림 클릭도 바로누르면 안되고 시간이 좀 지나야 올바른 곳으로 가게됨...서버와 상의를 해봐야할거같아유
         orderViewModel.getOrders()
     }
 
@@ -433,42 +489,51 @@ class MainActivity : AppCompatActivity() {
     fun refreshStoreList() {
         val userId = ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt()
         storeViewModel.getUserStore(userId)
-        Log.d(TAG, "refreshStoreList: ${storeViewModel.myStoreList.value}")
-        if (storeViewModel.myStoreList.value==null||storeViewModel.myStoreList.value!!.size == 0){
-            ApplicationClass.sharedPreferencesUtil.setStoreId(0)
-        }
+        storeViewModel.myStoreList.observe(this, Observer {
+            Log.d(TAG, "refreshStoreList: 등록될때${storeViewModel.myStoreList.value}")
+            if (storeViewModel.myStoreList.value == null || storeViewModel.myStoreList.value!!.size == 0) {
+                ApplicationClass.sharedPreferencesUtil.setStoreId(0)
+            }
+        })
+
     }
 
     fun showDeleteDialog(storeId: Int) {
+        Log.d(TAG, "showDeleteDialog: 불리고있나?")
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 // 스토어 정보를 받아올 때까지 대기
                 val store = withContext(Dispatchers.IO) {
                     storeViewModel.getStore(storeId)
                 }
-                
+
                 val dialog = Dialog(this@MainActivity)
                 dialog.setContentView(R.layout.dialog_delete_acccess)
-                
+                dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+
+                Log.d(TAG, "showDeleteDialog: ${sharedStoreId}나의 현재 아이디, ${storeId}")
+
                 if (store != null) {
-                    dialog.findViewById<TextView>(R.id.dialog_delete_bold_tv).text = " ${store.storeName}"
-                    dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv).text = " ${sharedPreferencesUtil.getUser().username}"
-                    
+                    dialog.findViewById<TextView>(R.id.dialog_delete_bold_tv).text =
+                        "${store.storeName}"
+                    dialog.findViewById<TextView>(R.id.dialog_delete_rle_tv).text =
+                        "${sharedPreferencesUtil.getUser().username}님의 권한을"
+
                     dialog.findViewById<View>(R.id.dialog_delete_delete_btn).setOnClickListener {
-                        if(sharedStoreId == storeId){
-                            val navHostFragment =
-                                supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer) as NavHostFragment
-                            val navController = navHostFragment.navController
-                            navController.navigate(R.id.homeFragment)
-                            sharedPreferencesUtil.setStoreId(0)
-                        }
                         dialog.dismiss()
+                        val navHostFragment =
+                            supportFragmentManager.findFragmentById(R.id.activityMainFragmentContainer) as NavHostFragment
+                        val navController = navHostFragment.navController
+                        navController.navigate(R.id.homeFragment)
+                        sharedPreferencesUtil.setStoreId(0)
                     }
-                    
+
                     dialog.show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
                 Log.d(TAG, "showDeleteDialog: ${e.message}")
             }
         }

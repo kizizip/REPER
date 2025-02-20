@@ -100,8 +100,6 @@ class MyPageFragment : Fragment() {
         startSequentialAnimation()
         setupSpinner()
         initEvent()
-
-
     }
 
     override fun onResume() {
@@ -120,23 +118,23 @@ class MyPageFragment : Fragment() {
             translationY = -200f
             animate()
                 .translationY(0f)
-                .setDuration(1000)
+                .setDuration(500)
                 .withEndAction {
                     if (_myPageBinding == null) return@withEndAction
                     // 바운스 효과
                     animate()
                         .translationY(-30f)
-                        .setDuration(150)
+                        .setDuration(100)
                         .withEndAction {
                             if (_myPageBinding == null) return@withEndAction
                             animate()
                                 .translationY(0f)
-                                .setDuration(150)
+                                .setDuration(100)
                         }
                 }
         }
 
-        // 첫 번째 그룹 (상단 프로필 영역) - 투명도로 페이드인
+        // 첫 번째 그룹 (상단 프로필 영역)
         val firstGroup = listOf(
             binding.mypageFmTvYellow,
             binding.mypageFmTvName,
@@ -148,14 +146,14 @@ class MyPageFragment : Fragment() {
             view.alpha = 0f
             view.animate()
                 .alpha(1f)
-                .setDuration(800)
-                .setStartDelay(500)
+                .setDuration(400)
+                .setStartDelay(300)
                 .withEndAction {
                     if (_myPageBinding == null) return@withEndAction
                 }
         }
 
-        // 두 번째 그룹 (매장 정보 영역) - 왼쪽에서 슬라이드
+        // 두 번째 그룹 (매장 정보 영역)
         val secondGroup = listOf(
             binding.textView7,
             binding.mypageFmTvStoreNum,
@@ -169,14 +167,14 @@ class MyPageFragment : Fragment() {
             view.animate()
                 .translationX(0f)
                 .alpha(1f)
-                .setDuration(800)
-                .setStartDelay(1000)
+                .setDuration(400)
+                .setStartDelay(500)
                 .withEndAction {
                     if (_myPageBinding == null) return@withEndAction
                 }
         }
 
-        // 세 번째 그룹 (하단 버튼들) - 아래에서 위로 슬라이드
+        // 세 번째 그룹 (하단 버튼들)
         val thirdGroup = listOf(
             binding.mypageFmBtnNotice,
             binding.mypageFmBtnRecipe,
@@ -189,8 +187,8 @@ class MyPageFragment : Fragment() {
             view.animate()
                 .translationY(0f)
                 .alpha(1f)
-                .setDuration(800)
-                .setStartDelay(1500)
+                .setDuration(400)
+                .setStartDelay(700)
                 .withEndAction {
                     if (_myPageBinding == null) return@withEndAction
                 }
@@ -233,12 +231,15 @@ class MyPageFragment : Fragment() {
                         sharedPreferencesUtil.setStoreId(0)
                     }
                 }
+
             } else {
                 storeNames = mutableListOf("등록된 가게가 없습니다.")
                 storeIds = mutableListOf(0)
                 sharedPreferencesUtil.setStoreId(0)
                 myPageBinding.mypageFmTvStoreNum.text = "0"
             }
+
+
 
             // Adapter 설정
             val adapter = ArrayAdapter(
@@ -258,6 +259,7 @@ class MyPageFragment : Fragment() {
             // 기본 선택 인덱스 설정
             if (defaultIndex != -1) {
                 spinner.setSelection(defaultIndex)
+                sharedPreferencesUtil.setStoreId(storeIds[defaultIndex])
             }
 
             spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -505,6 +507,7 @@ class MyPageFragment : Fragment() {
 
         }
         myPageBinding.mypageFmBtnRecipe.setOnClickListener {
+            findNavController().popBackStack()
             findNavController().navigate(R.id.allRecipeFragment)
 
         }

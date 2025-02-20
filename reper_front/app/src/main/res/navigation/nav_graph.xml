@@ -5,6 +5,28 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/homeFragment">
 
+    <!-- 전역 액션 정의 -->
+    <action
+        android:id="@+id/action_global_homeFragment"
+        app:destination="@id/homeFragment"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true"/>
+
+    <action
+        android:id="@+id/action_global_myPageFragment"
+        app:destination="@id/myPageFragment"
+        app:launchSingleTop="true"/>
+
+    <action
+        android:id="@+id/action_global_allRecipeFragment"
+        app:destination="@id/allRecipeFragment"
+        app:launchSingleTop="true"/>
+
+    <action
+        android:id="@+id/action_global_orderFragment"
+        app:destination="@id/orderFragment"
+        app:launchSingleTop="true"/>
 
     <fragment
         android:id="@+id/homeFragment"

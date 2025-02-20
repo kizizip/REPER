@@ -27,7 +27,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.log
 
-private const val TAG = "OrderAdapter_정언"
+private const val TAG = "OrderRecipeAdapter_정언"
 class OrderRecipeAdatper(var orderDetailList: MutableList<OrderDetail>, var recipeList: MutableList<Recipe>, var checkedRecipeList:MutableList<Recipe>, val itemClickListener:ItemClickListener) : RecyclerView.Adapter<OrderRecipeAdatper.OrderDetailListHolder>() {
     inner class OrderDetailListHolder(private val binding: RvOrderRecipeItemBinding) : RecyclerView.ViewHolder(binding.root){
         fun bindInfo(position: Int){

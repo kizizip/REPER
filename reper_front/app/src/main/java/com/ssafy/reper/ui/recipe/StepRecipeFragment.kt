@@ -85,6 +85,7 @@ class StepRecipeFragment : Fragment() {
 
     private lateinit var speechRecognizer: SpeechRecognizer
     private var isListening = false
+    private var isFragmentActive = true
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -150,14 +151,20 @@ class StepRecipeFragment : Fragment() {
     //캡쳐방지 코드입니다! 메시지 내용은 수정불가능,, 핸드폰내에 저장된 메시지가 뜨는 거라고 하네요
     override fun onResume() {
         super.onResume()
+        isFragmentActive = true
         activity?.window?.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
         )
         mainActivity.hideBottomNavigation()
+        // 음성 인식 재시작
+        if (!isListening && isFragmentActive) {
+            startListening()
+        }
     }
     override fun onPause() {
         super.onPause()
+        isFragmentActive = false
         try {
             // 일시 정지 시에도 카메라 리소스 해제
             val cameraProvider = cameraProviderFuture.get()
@@ -166,16 +173,26 @@ class StepRecipeFragment : Fragment() {
             Log.e(TAG, "Error unbinding camera use cases", e)
         }
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        // 음성 인식 일시 중지
+        if (::speechRecognizer.isInitialized) {
+            speechRecognizer.stopListening()
+            isListening = false
+        }
     }
-    ////////////////////////////////////////////////////////////////////////////////////////
     override fun onStop() {
         super.onStop()
+        isFragmentActive = false
         try {
             // Fragment가 화면에서 사라질 때도 카메라 리소스 해제
             val cameraProvider = cameraProviderFuture.get()
             cameraProvider.unbindAll()
         } catch (e: Exception) {
             Log.e(TAG, "Error unbinding camera use cases", e)
+        }
+        // 음성 인식 중지
+        if (::speechRecognizer.isInitialized) {
+            speechRecognizer.stopListening()
+            isListening = false
         }
     }
     override fun onDestroyView() {
@@ -619,6 +636,8 @@ class StepRecipeFragment : Fragment() {
             }
 
             override fun onResults(results: Bundle?) {
+                if (!isFragmentActive) return  // Fragment가 비활성 상태면 처리하지 않음
+                
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 matches?.get(0)?.let { result ->
                     Log.d(TAG, "음성 인식 결과: $result")
@@ -635,11 +654,17 @@ class StepRecipeFragment : Fragment() {
                         }
                     }
                 }
-                // 음성 인식 결과 처리 후 다시 시작
-                startListening()
+                
+                isListening = false
+                // Fragment가 활성 상태일 때만 재시작
+                if (isFragmentActive) {
+                    startListening()
+                }
             }
 
             override fun onError(error: Int) {
+                if (!isFragmentActive) return  // Fragment가 비활성 상태면 처리하지 않음
+                
                 val message = when (error) {
                     SpeechRecognizer.ERROR_AUDIO -> "오디오 에러"
                     SpeechRecognizer.ERROR_CLIENT -> "클라이언트 에러"
@@ -655,8 +680,10 @@ class StepRecipeFragment : Fragment() {
                 Log.e(TAG, "Speech recognition error: $message")
                 isListening = false
                 
-                // 에러 발생 시 재시작
-                startListening()
+                // Fragment가 활성 상태일 때만 재시작
+                if (isFragmentActive) {
+                    startListening()
+                }
             }
 
             // 다른 필수 메서드들
@@ -671,8 +698,9 @@ class StepRecipeFragment : Fragment() {
         })
     }
 
+    // 음성 인식 시작 함수 수정
     private fun startListening() {
-        if (!isListening) {
+        if (!isListening && isFragmentActive) {
             try {
                 val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -680,16 +708,19 @@ class StepRecipeFragment : Fragment() {
                     putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, requireContext().packageName)
                     putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
 
-                    // 음성 감도 관련 설정 수정
-                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 300L)         // 0.3초로 감소
-                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1000L)  // 1초로 감소
-                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)          // 1.5초로 감소
+                    // 음성 감도 설정
+                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 300L)
+                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1000L)
+                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)
                     putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
                 }
                 
                 speechRecognizer.startListening(intent)
+                isListening = true
+                Log.d(TAG, "음성 인식 시작")
             } catch (e: Exception) {
                 Log.e(TAG, "음성 인식 시작 실패: ${e.message}")
+                isListening = false
             }
         }
     }

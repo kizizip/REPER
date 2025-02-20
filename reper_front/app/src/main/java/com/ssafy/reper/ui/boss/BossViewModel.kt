@@ -5,14 +5,17 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ssafy.reper.data.dto.Employee
 import com.ssafy.reper.data.dto.Recipe
+import com.ssafy.reper.data.dto.RecipeResponse
 import com.ssafy.reper.data.dto.RequestStore
 import com.ssafy.reper.data.dto.SearchedStore
 import com.ssafy.reper.data.dto.Store
 import com.ssafy.reper.data.local.SharedPreferencesUtil
 import com.ssafy.reper.data.remote.RetrofitUtil
+import com.ssafy.reper.data.remote.RetrofitUtil.Companion.recipeService
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
@@ -40,12 +43,25 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
 
     //레시피 업로드 상태 관찰
     private val _recipeLoad = MutableLiveData<String?>()
-    val recipeLoad: MutableLiveData<String?> get() = _recipeLoad
-
-    fun setRecipeLoad(result: String?) {
-        _recipeLoad.value = result
-        Log.d(TAG, "setRecipeLoad: ${result}")
+    val recipeLoad: MutableLiveData<String?> = _recipeLoad
+    
+    // 현재 상태를 저장할 변수 추가
+    private var currentState: String? = null
+    
+    fun setRecipeLoad(value: String?) {
+        Log.d(TAG, "setRecipeLoad: Previous: ${_recipeLoad.value}, New: $value")
+        currentState = value  // 현재 상태 저장
+        _recipeLoad.value = value
     }
+    
+
+    //레시피 파일이름 저장
+    var fileName:String =""
+    var uploadNum = 0;
+
+    var fcmTitle = ""
+    var fcmBody = ""
+
 
     //승인된 직원 리스트
     private val _accessList = MutableLiveData<List<Employee>>()
@@ -155,7 +171,7 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    fun uploadRecipe(storeId: Int, recipeFile: MultipartBody.Part) {
+    fun uploadRecipe(storeId: Int, recipeFile: MultipartBody.Part){
         Log.d(TAG, "uploadRecipe: 파일명=${recipeFile.headers}")
         val requestBody = recipeFile.body
         Log.d(TAG, "uploadRecipe: 파일 RequestBody 크기=${requestBody?.contentLength()} bytes")
@@ -164,17 +180,18 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
             runCatching {
                 val response = RetrofitUtil.recipeService.recipeUpload(storeId, recipeFile)
                 Log.d(TAG, "uploadRecipe: 서버 응답 = ${response}")
+                uploadNum = response.toInt()
             }.onSuccess {
                 Log.d(TAG, "uploadRecipe: 성공")
-                sharedPreferencesUtil.addStateLoad("success")
+                Log.d(TAG, "uploadRecipe: ${it}")
                 setRecipeLoad("success")
                 getMenuList(storeId)
             }.onFailure {
-                sharedPreferencesUtil.addStateLoad("failure")
                 setRecipeLoad("failure")
                 Log.d(TAG, "uploadRecipe: 실패 - ${it.message}")
             }
         }
+
     }
 
 
@@ -182,7 +199,8 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val recipes = RetrofitUtil.recipeService.getStoreRecipe(storeId)
-                _recipeList.postValue(recipes)
+                // 여기서 recipes를 역순으로 뒤집어서 _recipeList에 저장
+                _recipeList.postValue(recipes.reversed())
                 Log.d(TAG, "getMenuList: storeId=$storeId, recipes=${recipes.size}")
             } catch (e: Exception) {
                 Log.e(TAG, "getMenuList error: ${e.message}")
@@ -205,15 +223,21 @@ class BossViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    fun searchRecipe(storeId: Int, recipeName: String) {
+    fun searchRecipe(storeId: Int, name: String) {
         viewModelScope.launch {
-            runCatching {
-                RetrofitUtil.recipeService.searchRecipe(storeId, recipeName)
-            }.onSuccess {
-                setRecipeList(it)
-            }.onFailure {
-                Log.d(TAG, "searchRecipe: ${it.message}")
+            var list:MutableList<RecipeResponse>
+            var result:MutableList<Recipe> = mutableListOf()
+            try {
+                list = recipeService.searchRecipeName(storeId, name)
+                for(item in list){
+                    result.add(recipeService.getRecipe(item.recipeId))
+                }
             }
+
+            catch (e:Exception){
+                result = mutableListOf()
+            }
+            _recipeList.value = result
         }
     }
 

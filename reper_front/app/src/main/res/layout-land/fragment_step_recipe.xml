@@ -127,8 +127,8 @@
                 android:textColor="@color/lightgray"
                 android:textSize="12sp"
                 app:layout_constraintBottom_toTopOf="@+id/steprecipe_fm_land_tv_user"
-                app:layout_constraintEnd_toStartOf="@+id/steprecipe_fm_btn_right"
-                app:layout_constraintStart_toEndOf="@+id/steprecipe_fm_btn_left" />
+                app:layout_constraintEnd_toEndOf="@+id/steprecipe_fm_land_tv_recipe"
+                app:layout_constraintStart_toStartOf="@+id/steprecipe_fm_land_tv_recipe" />
 
             <TextView
                 android:id="@+id/steprecipe_fm_land_tv_user"

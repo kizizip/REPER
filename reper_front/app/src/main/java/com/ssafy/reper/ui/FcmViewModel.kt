@@ -59,6 +59,7 @@ class FcmViewModel:ViewModel() {
                 Log.d(TAG, "deleteUserToken: ${userId}")
             }.onFailure {
                 Log.d(TAG, "deleteUserToken: ${it.message}")
+                Log.d(TAG, "deleteUserToken: ${it}")
             }
         }
     }

@@ -8,14 +8,23 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.BounceInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LayoutAnimationController
+import android.view.animation.TranslateAnimation
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.view.ViewCompat.animate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.ssafy.reper.R
 import com.ssafy.reper.base.ApplicationClass
+import com.ssafy.reper.data.dto.Recipe
 import com.ssafy.reper.databinding.FragmentOrderBinding
 import com.ssafy.reper.ui.MainActivity
 import com.ssafy.reper.ui.order.adapter.OrderAdatper
@@ -33,6 +42,8 @@ class OrderFragment : Fragment() {
     var selectedDate:String = ""
     // 주문 날짜 모음 yyyy-MM-dd 형식
     var orderDateList: MutableList<String> = mutableListOf()
+
+    var recipeList :MutableList<Recipe> = mutableListOf()
 
     private val mainViewModel: MainActivityViewModel by lazy { ViewModelSingleton.mainActivityViewModel }
     private val viewModel: OrderViewModel by activityViewModels()
@@ -59,28 +70,37 @@ class OrderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mainViewModel.getRecipeList()
         mainViewModel.clearData()
-        mainViewModel.isEmployee.observe(viewLifecycleOwner){
-            if(it == true || mainViewModel.userInfo.value!!.role == "OWNER"){
+        mainViewModel.isEmployee.observe(viewLifecycleOwner) { isEmployee ->
+            if(isEmployee == true || mainViewModel.userInfo.value!!.role == "OWNER") {
                 orderBinding.fragmentOrderTvNoorder.visibility = View.GONE
-
                 orderBinding.fragmentOrderRvOrder.visibility = View.VISIBLE
                 orderBinding.fragmentOrderDateSpinner.visibility = View.VISIBLE
 
-                //  초기화
-                resetData()
-                //어뎁터설정
-                initAdapter("")
-            }
-            else{
+                // recipeList 준비 상태 확인
+                mainViewModel.recipeList.observe(viewLifecycleOwner) { recipes ->
+                    if (!recipes.isNullOrEmpty()) {
+                        viewModel.getOrders()
+                        //  초기화
+                        resetData()
+                        //어뎁터설정
+                        initAdapter("")
+                        recipeList = recipes
+                        startAnimations()  // 데이터가 준비된 후 애니메이션 시작
+                    } else {
+                        // recipeList가 비어있으면 다시 요청
+                        mainViewModel.getRecipeList()
+                    }
+                }
+            } else {
                 orderBinding.fragmentOrderTvNoorder.visibility = View.VISIBLE
                 orderBinding.fragmentOrderRvOrder.visibility = View.GONE
                 orderBinding.fragmentOrderDateSpinner.visibility = View.GONE
-
             }
         }
         mainViewModel.getIsEmployee(ApplicationClass.sharedPreferencesUtil.getUser().userId!!.toInt())
+
+        startAnimations()
     }
     override fun onResume() {
         super.onResume()
@@ -131,7 +151,6 @@ class OrderFragment : Fragment() {
 
         // 데이터 저장
         orderBinding.fragmentOrderRvOrder.apply {
-            viewModel.getOrders()
             viewModel.orderList.observe(viewLifecycleOwner) { orderList ->
                 orderAdapter.orderList.clear()
                 orderAdapter.recipeNameList.clear()
@@ -139,11 +158,11 @@ class OrderFragment : Fragment() {
                     orderBinding.fragmentOrderTvNoorder.visibility = View.VISIBLE
                     orderBinding.fragmentOrderRvOrder.visibility = View.GONE
                     orderBinding.fragmentOrderDateSpinner.visibility = View.GONE
-                }else{
+                }else {
                     orderBinding.fragmentOrderTvNoorder.visibility = View.GONE
                     orderBinding.fragmentOrderRvOrder.visibility = View.VISIBLE
                     orderBinding.fragmentOrderDateSpinner.visibility = View.VISIBLE
-                    for ((index, item) in orderList.withIndex()) {
+                    for (item in orderList) {
                         // ISO 8601 형식의 날짜를 파싱 (UTC 기준)
                         val utcFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.KOREA)
                         utcFormat.timeZone = TimeZone.getTimeZone("UTC") // UTC로 설정
@@ -158,16 +177,74 @@ class OrderFragment : Fragment() {
                             configureDateSpinner()
                         }
                         if (selectedDate.isNotBlank() && formattedDate.substring(0, 10) == selectedDate) {
-                            if(!orderAdapter.orderList.contains(item) && index < viewModel.recipeNameList.value!!.count()){
+                            if(!orderAdapter.orderList.contains(item)){
                                 orderAdapter.orderList.add(item)
-                                orderAdapter.recipeNameList.add(viewModel.recipeNameList.value!!.get(index).recipeName)
+                                val details = item.orderDetails.sortedBy { it.recipeId }
+                                orderAdapter.recipeNameList.add(recipeList.filter { details.first().recipeId == it.recipeId }.first().recipeName)
                             }
                         }
                     }
                 }
 
+                layoutAnimation = LayoutAnimationController(AnimationSet(true).apply {
+                    val translate = TranslateAnimation(
+                        Animation.RELATIVE_TO_SELF, 0f,
+                        Animation.RELATIVE_TO_SELF, 0f,
+                        Animation.RELATIVE_TO_SELF, -1f,
+                        Animation.RELATIVE_TO_SELF, 0f
+                    ).apply {
+                        duration = 500
+                    }
+
+                    val alpha = AlphaAnimation(0f, 1f).apply {
+                        duration = 500
+                    }
+
+                    addAnimation(translate)
+                    addAnimation(alpha)
+                }).apply {
+                    delay = 0.1f
+                    order = LayoutAnimationController.ORDER_NORMAL
+                }
+
                 adapter = orderAdapter
             }
+        }
+    }
+
+    private fun startAnimations() {
+        // 1. 헤더 애니메이션 (이미지뷰와 텍스트)
+        val headerViews = listOf(orderBinding.imageView)
+        
+        headerViews.forEach { view ->
+            view.translationY = -50f
+            view.animate()
+                .translationY(0f)
+                .setDuration(1000)
+        }
+
+        // 첫 번째 그룹 (상단 프로필 영역) - 투명도로 페이드인
+        val firstGroup = listOf(orderBinding.tvJumunneyeok)
+
+        firstGroup.forEach { view ->
+            view.alpha = 0f
+            view.animate()
+                .alpha(1f)
+                .setDuration(500)
+                .setStartDelay(400)
+                .withEndAction {
+                    if (_orderBinding == null) return@withEndAction
+                }
+        }
+
+        // 2. 스피너 애니메이션
+        orderBinding.fragmentOrderDateSpinner.apply {
+            translationX = -500f
+            alpha = 0f
+            animate()
+                .translationX(0f)
+                .alpha(1f)
+                .setDuration(1000)
         }
     }
 }

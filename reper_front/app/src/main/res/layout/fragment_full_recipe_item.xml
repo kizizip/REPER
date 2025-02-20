@@ -12,7 +12,9 @@
         android:layout_height="match_parent"
         android:gravity="bottom"
         app:umanoDragView="@id/fullrecipe_fm_slide_layout"
-        app:umanoPanelHeight="450dp">
+        app:umanoOverlay="true"
+        app:umanoPanelHeight="450dp"
+        app:umanoShadowHeight="12dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fullrecipe_fm_back_layout"

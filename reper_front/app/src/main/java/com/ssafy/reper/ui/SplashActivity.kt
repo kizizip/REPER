@@ -1,6 +1,7 @@
 package com.ssafy.reper.ui
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -58,6 +59,11 @@ class SplashActivity : AppCompatActivity() {
             handler.removeCallbacks(imageRunnable)
             finish()
         }, 2000)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
 
     override fun onDestroy() {

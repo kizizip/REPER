@@ -207,11 +207,13 @@
             <FrameLayout
                 android:id="@+id/nothing_order"
                 android:layout_width="match_parent"
-                android:layout_height="150dp">
+                android:layout_marginTop="6dp"
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="150dp"
+                    android:gravity="center"
                     android:layout_gravity="center"
                     android:fontFamily="@font/pretendard_regular"
                     android:text="현재 진행중인 주문이 없습니다."

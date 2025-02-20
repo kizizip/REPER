@@ -11,6 +11,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.LayoutAnimationController
+import android.view.animation.TranslateAnimation
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -54,6 +59,7 @@ class StoreManageFragment : Fragment() {
     }
 
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -93,6 +99,7 @@ class StoreManageFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        mainActivity.hideBottomNavigation()
         mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
 
@@ -155,24 +162,53 @@ class StoreManageFragment : Fragment() {
             override fun onClick(position: Int) {
                 storeAdapter.storeList[position].storeName?.let {
                     storeAdapter.storeList[position].storeId?.let { it1 ->
-                        showDialog(
-                            it,
-                            it1
-                        )
+                        showDialog(it, it1)
                     }
                 }
-
             }
         })
 
         binding.storeFgRV.layoutManager = LinearLayoutManager(requireContext())
+
+        // 애니메이션 설정 추가
+        val animationSet = AnimationSet(true).apply {
+            val translateAnim = TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, -1f,
+                Animation.RELATIVE_TO_SELF, 0f
+            ).apply {
+                duration = 500
+            }
+
+            val alphaAnim = AlphaAnimation(0f, 1f).apply {
+                duration = 500
+            }
+
+            addAnimation(translateAnim)
+            addAnimation(alphaAnim)
+        }
+
+        binding.storeFgRV.layoutAnimation = LayoutAnimationController(animationSet).apply {
+            delay = 0.1f
+            order = LayoutAnimationController.ORDER_NORMAL
+        }
+
         binding.storeFgRV.adapter = storeAdapter
 
         // ViewModel 초기화 및 LiveData 관찰
         bossViewModel.myStoreList.observe(viewLifecycleOwner) { newStoreList ->
             Log.d(TAG, "Updated store list: $newStoreList")
-            storeAdapter.updateData(newStoreList)  // 데이터가 변경되면 Adapter에 새 데이터 반영
-
+            if (newStoreList.isNullOrEmpty()) {
+                binding.storeFgRV.visibility = View.GONE
+                binding.nothingStore.visibility = View.VISIBLE
+            } else {
+                binding.storeFgRV.visibility = View.VISIBLE
+                binding.nothingStore.visibility = View.GONE
+                storeAdapter.updateData(newStoreList)
+                // 데이터가 업데이트될 때마다 애니메이션 재실행
+                binding.storeFgRV.scheduleLayoutAnimation()
+            }
         }
     }
 
