@@ -90,7 +90,11 @@ class AllRecipeFragment : Fragment() {
 
                 mainViewModel.getRecipeList()
                 mainViewModel.recipeList.observe(viewLifecycleOwner){
-                    viewModel.setAllRecipes()
+                    if(searchQuery == "딸기"){
+                        viewModel.setSRecipes()
+                    }else{
+                        viewModel.setAllRecipes()
+                    }
                 }
                 // RecyclerView adapter 처리
                 initAdapter()
@@ -109,20 +113,15 @@ class AllRecipeFragment : Fragment() {
         favoriteReicpeList = mainViewModel.favoriteRecipeList.value ?: mutableListOf()
         // 이벤트 관리
         initEvent()
+
+//        if (searchQuery != "" || searchQuery != "null") {
+//            allRecipeBinding.allrecipeFmEtSearch.setText(searchQuery)
+//        }
     }
     override fun onResume() {
         super.onResume()
         mainActivity.showBottomNavigation()
         mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
-        
-        // 다른 프래그먼트에서 돌아올 때 검색어 초기화
-        if (searchQuery == "" || searchQuery == "null") {
-            allRecipeBinding.allrecipeFmEtSearch.setText("")
-        }
-        else{
-            allRecipeBinding.searchLoadingLayout.visibility = View.VISIBLE
-            allRecipeBinding.allrecipeFmEtSearch.setText(searchQuery)
-        }
     }
     override fun onDestroyView() {
         super.onDestroyView()

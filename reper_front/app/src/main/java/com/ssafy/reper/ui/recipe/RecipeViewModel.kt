@@ -24,6 +24,10 @@ class RecipeViewModel : ViewModel() {
     private val _recipeList = MutableLiveData<MutableList<Recipe>>(mutableListOf())
     val recipeList: LiveData<MutableList<Recipe>> = _recipeList
 
+    fun setSRecipes(){
+        _recipeList.value = mainViewModel.recipeList.value!!.filter { it.recipeName.contains("딸기") }.toMutableList()
+    }
+
     fun setAllRecipes(){
         _recipeList.value = mainViewModel.recipeList.value
     }
