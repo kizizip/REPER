@@ -62,7 +62,7 @@ public class OrderService {
 
     @Transactional
     public Order createRandomOrder() {
-        Store store = storeRepository.findById(68L)
+        Store store = storeRepository.findById(97L)
                 .orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
         Order order = new Order();
@@ -149,9 +149,9 @@ public class OrderService {
 
         addOrderDetail(order, 1839L, "얼음 적게");
         addOrderDetail(order, 1841L, "샷 추가");
-        addOrderDetail(order, 1863L, "뜨겁게");
         addOrderDetail(order, 1873L, null);
         addOrderDetail(order, 1881L, "디카페인");
+        addOrderDetail(order, 1863L, "뜨겁게");
 
         // 주문 생성 후 이벤트 발행 (FCM 전송 포함)
         eventPublisher.publishEvent(new OrderCreatedEvent(this, order));

@@ -40,9 +40,9 @@ public class OrderController {
 
 
     // 랜덤으로 더미데이터 생성 (주문 한 건씩)
-    // storeId는 68L로 통일합니다. 수정이 필요할 시 추후에 요청해 주세요.
+    // storeId는 97L로 통일합니다. 수정이 필요할 시 추후에 요청해 주세요.
     @PostMapping
-    @Operation(summary = "클릭시 주문 한 건씩 추가합니다.", description = "주문 한 건당 1~3개의 음료(recipe)가 포함됩니다. storeId는 68로 통일. 수정이 필요하다면 추후 요청해 주세요.")
+    @Operation(summary = "클릭시 주문 한 건씩 추가합니다.", description = "주문 한 건당 1~3개의 음료(recipe)가 포함됩니다. storeId는 97로 통일. 수정이 필요하다면 추후 요청해 주세요.")
     public ResponseEntity<OrderResponseDto> createOrder() {
         Order order = orderService.createRandomOrder();
 
