@@ -195,7 +195,16 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 "WriteNoticeFragment" -> {
-                    navController?.navigate(R.id.noticeManageFragment)
+                    Log.d(TAG, "onCreate: 일단 여기는옵ㄴ니다")
+                    noticeViewModel.getNotice(sharedStoreId, requestId!!.toInt(), sharedUserId)
+                    noticeViewModel.clickNotice.observe(this) { result ->
+                        if (result !=null) {
+                            Log.d(TAG, "onCreatenoti: $result")
+                            navController?.navigate(R.id.writeNotiFragment)
+                        } else {
+                            Log.d(TAG, "onCreatenoti: $result")
+                        }
+                    }
                 }
 
                 "BossFragment" -> {
