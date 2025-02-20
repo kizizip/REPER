@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgwhite"
+    android:elevation="0dp"
+    tools:context=".ui.boss.BossFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/boss_header_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="5dp"
+            android:scaleType="center"
+            android:src="@drawable/fragment_order_background"
+            android:translationZ="5dp" />
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/boss_header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="24dp">
+
+        <ImageView
+            android:id="@+id/store_fg_back_icon"
+            android:layout_width="30sp"
+            android:layout_height="28sp"
+            android:layout_marginTop="62dp"
+            android:src="@drawable/baseline_arrow_back_ios_24"
+            android:tint="@color/bgwhite"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="UseAppTint" />
+
+        <TextView
+            android:id="@+id/boss_menu"
+            style="@style/titleFontStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:gravity="center"
+            android:text="사장님 메뉴"
+            android:textColor="@color/bgwhite"
+            app:layout_constraintStart_toEndOf="@+id/store_fg_back_icon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <Spinner
+            android:id="@+id/boss_fg_store_spiner"
+            android:layout_width="match_parent"
+            android:layout_height="52sp"
+            android:layout_marginHorizontal="2dp"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/boss_spinner_background"
+            android:overlapAnchor="false"
+            android:spinnerMode="dropdown"
+            app:layout_constraintTop_toBottomOf="@+id/boss_menu"
+            tools:layout_editor_absoluteX="24dp" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/boss_fg_store_add"
+            android:layout_width="110dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="32dp"
+            android:elevation="5dp"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/boss_fg_store_spiner">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+
+                <ImageView
+                    android:layout_width="47dp"
+                    android:layout_height="47dp"
+                    android:layout_marginTop="8dp"
+                    android:src="@drawable/outline_add_business_24"
+                    android:tint="@color/green"
+                    tools:ignore="UseAppTint" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:text="가게 관리"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/boss_fg_notice_list"
+            android:layout_width="110dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="32dp"
+            android:elevation="5dp"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/boss_fg_recipe_manage"
+            app:layout_constraintStart_toEndOf="@+id/boss_fg_store_add"
+            app:layout_constraintTop_toBottomOf="@+id/boss_fg_store_spiner">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+
+                <ImageView
+                    android:layout_width="47dp"
+                    android:layout_height="47dp"
+                    android:layout_marginTop="8dp"
+                    android:src="@drawable/list_alt_24px"
+                    android:tint="@color/green"
+                    tools:ignore="UseAppTint" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:text="공지 내역"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/boss_fg_recipe_manage"
+            android:layout_width="110dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="2dp"
+            android:elevation="5dp"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/boss_fg_store_spiner">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+
+                <ImageView
+                    android:layout_width="47dp"
+                    android:layout_height="47dp"
+                    android:layout_marginTop="8dp"
+                    android:src="@drawable/menu_book_24px"
+                    android:tint="@color/green"
+                    tools:ignore="UseAppTint" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/pretendard_regular"
+                    android:text="레시피 관리"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/boss_fg_store_add"
+            android:orientation="vertical"
+            >
+
+        <TextView
+            android:id="@+id/access"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="@font/pretendard_semibold"
+            android:text="권한 요청 내역"
+            android:textSize="18sp"
+           />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/access_false_list"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="28dp"
+            android:scrollbarFadeDuration="0"
+            android:scrollbarThumbVertical="@drawable/scroll_bar"
+            android:scrollbars="vertical" />
+
+        <FrameLayout
+            android:layout_marginTop="28dp"
+            android:id="@+id/nothing_request"
+            android:layout_width="match_parent"
+            android:layout_height="100dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:textColor="@color/lightgray"
+                android:fontFamily="@font/pretendard_regular"
+                android:text="권한 요청이 없습니다."
+                android:textSize="16sp"
+                android:gravity="center"/>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/store_employee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="@font/pretendard_semibold"
+            android:text="우리 가게 직원"
+            android:textSize="18sp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/employee_list"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="20dp"
+            android:scrollbarFadeDuration="0"
+            android:scrollbarThumbVertical="@drawable/scroll_bar"
+            android:scrollbars="vertical"
+             />
+
+
+        <FrameLayout
+            android:id="@+id/nothing_employee"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="20dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:text="등록된 직원이 없습니다."
+                android:textColor="@color/lightgray"
+                android:fontFamily="@font/pretendard_regular"
+                android:gravity="center"
+                android:textSize="16sp"
+                />
+        </FrameLayout>
+
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</FrameLayout>

@@ -1,0 +1,77 @@
+{
+  "index": {
+    "number_of_replicas": 0
+  },
+  "analysis": {
+    "tokenizer": {
+      "edge_ngram_tokenizer": {
+        "type": "edge_ngram",
+        "min_gram": 1,
+        "max_gram": 20,
+        "token_chars": [
+          "letter",
+          "digit"
+        ]
+      },
+      "nori_tokenizer": {
+        "type": "nori_tokenizer",
+        "decompound_mode": "mixed"
+      },
+      "jaso_search_tokenizer": {
+        "type": "jaso_tokenizer",
+        "mistype": true,
+        "chosung": false
+      },
+      "jaso_index_tokenizer": {
+        "type": "jaso_tokenizer",
+        "mistype": true,
+        "chosung": true
+      }
+    },
+    "filter": {
+        "suggest_filter": {
+          "type": "edge_ngram",
+          "min_gram": 1,
+          "max_gram": 50
+        }
+      },
+      "analyzer": {
+        "nori_analyzer": {
+          "type": "custom",
+          "tokenizer": "nori_tokenizer",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "nori_edge_ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "edge_ngram_tokenizer",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "chosung_analyzer": {
+          "type": "custom",
+          "tokenizer": "jaso_index_tokenizer",
+          "filter": [
+            "suggest_filter"
+          ]
+        },
+        "engtohan_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "hantoeng_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      }
+    }
+  }
+}

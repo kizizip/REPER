@@ -1,0 +1,39 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1  # 최신 버전 적용
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false  # TLS(SSL) 활성화
+#      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/instance/instance.key
+#      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/instance/instance.crt
+#      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca.crt
+      - ES_JAVA_OPTS=-Xms4g -Xmx4g
+#      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+#    env_file:
+#      - .env
+    ports:
+      - "9200:9200"
+
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+      - ./jaso-analyzer:/usr/share/elasticsearch/plugins/jaso-analyzer  # 초성플러그인
+#      - ./certs:/usr/share/elasticsearch/config/certs
+#      - ./logs:/usr/share/elasticsearch/logs
+    networks:
+      - elastic_network
+    command: >
+      bash -c "
+      if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
+      elasticsearch-plugin install analysis-nori --batch;
+      fi;
+      /usr/local/bin/docker-entrypoint.sh eswrapper"
+
+networks:
+  elastic_network:
+    driver: bridge
+
+volumes:
+  elastic_data:
+    driver: local

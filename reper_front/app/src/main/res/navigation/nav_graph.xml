@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <!-- 전역 액션 정의 -->
+    <action
+        android:id="@+id/action_global_homeFragment"
+        app:destination="@id/homeFragment"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true"/>
+
+    <action
+        android:id="@+id/action_global_myPageFragment"
+        app:destination="@id/myPageFragment"
+        app:launchSingleTop="true"/>
+
+    <action
+        android:id="@+id/action_global_allRecipeFragment"
+        app:destination="@id/allRecipeFragment"
+        app:launchSingleTop="true"/>
+
+    <action
+        android:id="@+id/action_global_orderFragment"
+        app:destination="@id/orderFragment"
+        app:launchSingleTop="true"/>
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.ssafy.reper.ui.home.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/allRecipeFragment"
+        android:name="com.ssafy.reper.ui.recipe.AllRecipeFragment"
+        android:label="fragment_all_recipe"
+        tools:layout="@layout/fragment_all_recipe" />
+
+    <fragment
+        android:id="@+id/myPageFragment"
+        android:name="com.ssafy.reper.ui.mypage.MyPageFragment"
+        android:label="fragment_my_page"
+        tools:layout="@layout/fragment_my_page" />
+
+    <fragment
+        android:id="@+id/orderFragment"
+        android:name="com.ssafy.reper.ui.order.OrderFragment"
+        android:label="fragment_order"
+        tools:layout="@layout/fragment_order" />
+
+    <fragment
+        android:id="@+id/bossFragment"
+        android:name="com.ssafy.reper.ui.boss.BossFragment"
+        android:label="fragment_boss"
+        tools:layout="@layout/fragment_boss" />
+    <fragment
+        android:id="@+id/editMyAccountFragment"
+        android:name="com.ssafy.reper.ui.mypage.EditMyAccountFragment"
+        android:label="fragment_edit_my_account"
+        tools:layout="@layout/fragment_edit_my_account" />
+    <fragment
+        android:id="@+id/fullRecipeFragment"
+        android:name="com.ssafy.reper.ui.recipe.FullRecipeFragment"
+        android:label="fragment_full_recipe"
+        tools:layout="@layout/fragment_full_recipe" />
+
+    <fragment
+        android:id="@+id/noticeManageFragment"
+        android:name="com.ssafy.reper.ui.boss.NoticeManageFragment"
+        android:label="fragment_notice_manage"
+        tools:layout="@layout/fragment_notice_manage" />
+    <fragment
+        android:id="@+id/writeNotiFragment"
+        android:name="com.ssafy.reper.ui.boss.WriteNotiFragment"
+        android:label="fragment_write_noti"
+        tools:layout="@layout/fragment_write_noti" />
+    <fragment
+        android:id="@+id/orderRecipeFragment"
+        android:name="com.ssafy.reper.ui.order.OrderRecipeFragment"
+        android:label="fragment_order_recipe"
+        tools:layout="@layout/fragment_order_recipe" />
+    <fragment
+        android:id="@+id/stepRecipeFragment"
+        android:name="com.ssafy.reper.ui.recipe.StepRecipeFragment"
+        android:label="fragment_step_recipe"
+        tools:layout="@layout/fragment_step_recipe" />
+    <fragment
+        android:id="@+id/recipeManageFragment"
+        android:name="com.ssafy.reper.ui.boss.RecipeManageFragment"
+        android:label="fragment_recipe_manage"
+        tools:layout="@layout/fragment_recipe_manage" />
+    <fragment
+        android:id="@+id/storeManage"
+        android:name="com.ssafy.reper.ui.boss.StoreManageFragment"
+        android:label="fragment_store_manage"
+        tools:layout="@layout/fragment_store_manage" />
+
+</navigation>

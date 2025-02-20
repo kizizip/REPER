@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#101A24</color>
+    <color name="white">#FCFCFC</color>
+    <color name="orange">#ED9049</color>
+    <color name="red">#F26547</color>
+    <color name="green">#558948</color>
+    <color name="yellow">#EDE249</color>
+    <color name="ligtgreen">#6AB65D</color>
+    <color name="maingreen">#558948</color>
+    <color name="darkgreen">#1C4700</color>
+    <color name="lightgreen">#6AB65D</color>
+    <color name="morelightgreengray">#33558948</color>
+    <color name="lightorange">#ED9049</color>
+    <color name="mainorange">#F26547</color>
+    <color name="bgwhite">#FCFCFC</color>
+    <color name="fontblack">#101A24</color>
+    <color name="darkgray">#626262</color>
+    <color name="lightgray">#C4C4C4</color>
+    <color name="morelightgray">#EBEBEB</color>
+    <color name="banner_red">#ED3E3E</color>
+    <color name="banner_green">#156651</color>
+    <color name="banner_blue">#07547B</color>
+
+    <color name="mp_color_primary">#007F8B</color>
+</resources>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="330dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    app:cardCornerRadius="25dp">
+    <LinearLayout
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_gravity="center"
+        android:singleLine="true"
+        android:orientation="horizontal"
+        android:layout_marginHorizontal="32dp"
+        >
+    <TextView
+        android:id="@+id/dialog_delete_bold_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="굵은글씨"
+        android:maxWidth="180dp"
+        android:textSize="20sp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textColor="@color/fontblack"
+        android:fontFamily="@font/pretendard_semibold"/>
+
+        <TextView
+            android:id="@+id/dialog_esu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="에서"
+            android:textColor="@color/fontblack"
+            android:textSize="20sp"
+            android:layout_gravity="center"
+            android:singleLine="true"
+            />
+
+
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/dialog_delete_rle_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="님의 권한을 "
+        android:textColor="@color/fontblack"
+        android:textSize="20sp"
+        android:layout_gravity="center"
+        android:singleLine="true"
+        />
+
+    <TextView
+        android:id="@+id/dialog_delete_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="삭제했습니다."
+        android:textSize="20sp"
+        android:layout_gravity="center"
+        />
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="32dp"
+        android:orientation="horizontal">
+
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/dialog_delete_delete_btn"
+            android:layout_width="100dp"
+            android:layout_height="45dp"
+            android:text="확인"
+            android:background="@drawable/org_btn"
+            android:layout_marginRight="32dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="20dp"
+            android:textColor="@color/bgwhite"
+            android:fontFamily="@font/pretendard_bold"
+            />
+
+    </LinearLayout>
+
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

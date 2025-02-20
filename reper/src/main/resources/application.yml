@@ -1,0 +1,42 @@
+spring:
+  config:
+    import: optional:application-secrets.yml
+  datasource:
+    url: jdbc:mysql://localhost:3306/reper?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update # (개발환경) -> (운영 환경) validation/none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  elasticsearch:
+    uris: http://localhost:9200  # (보안 적용될땐 https로 바꾸기)
+    socket-timeout: 60s
+    username: ""  # 보안 비활성화에선 빈 값
+    password: ""
+    ssl:
+      enabled: false
+    repositories:
+      enabled: true
+#    username: elastic
+#    password: ${ELASTIC_PASSWORD}
+#    index:
+#      auto-create-index: false
+#      ca-certificate: classpath:docker/certs/ca.crt
+#      key: classpath:certs/elasticsearch.key
+#      certificate: classpath:certs/elasticsearch.crt
+
+logging.level:
+  org.hibernate.SQL: debug # (개발 환경) SQL 로그 출력
+  org.hibernate.orm.jdbc.bind: trace # (개발 환경) SQL 바인딩 값 출력
+
+springdoc.override-with-generic-response: false
+
+kakao:
+  client_id: 11a435ceceba6f2724e9f7b1b9b69f5b
+  redirect_uri: http://localhost:8080/api/auth/callback

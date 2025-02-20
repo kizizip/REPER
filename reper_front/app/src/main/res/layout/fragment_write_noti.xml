@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgwhite"
+    tools:context=".ui.boss.WriteNotiFragment">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="24dp">
+
+
+        <ImageView
+            android:id="@+id/noti_write_fg_back_icon"
+            android:layout_width="24dp"
+            android:layout_height="28dp"
+            android:src="@drawable/baseline_arrow_back_ios_24"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/textView"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textView"
+            style="@style/titleFontStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="60dp"
+            android:text="공지 쓰기"
+            app:layout_constraintStart_toEndOf="@+id/noti_write_fg_back_icon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id="@+id/noti_write_fg_delete_tv"
+            style="@style/titleFontStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="76dp"
+            android:text="삭제"
+            android:textColor="@color/mainorange"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="60dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/noti_write_fg_save_btn"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            >
+
+            <!-- 상단 라인 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lightgray" />
+
+            <!-- 제목 입력란 -->
+            <EditText
+                android:id="@+id/noti_write_fg_title_ET"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:background="@android:color/transparent"
+                android:backgroundTint="@color/lightgray"
+                android:fontFamily="@font/pretendard_semibold"
+                android:gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:hint="제목을 입력하세요"
+                android:textSize="18sp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+            <TextView
+                android:id="@+id/noti_write_fg_title_TV"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:background="@android:color/transparent"
+                android:backgroundTint="@color/lightgray"
+                android:fontFamily="@font/pretendard_semibold"
+                android:gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:text="제목을 입력하세요"
+                android:textSize="18sp"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+            <!-- 하단 라인 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lightgray" />
+
+            <!-- 내용 입력란 -->
+            <EditText
+                android:id="@+id/noti_write_fg_content_ET"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:fontFamily="@font/pretendard_regular"
+                android:gravity="top"
+                android:hint="내용을 입력해주세요"
+                android:scrollbarFadeDuration="0"
+                android:scrollbarThumbVertical="@drawable/scroll_bar"
+                android:scrollbars="vertical"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/noti_write_fg_content_TV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:fontFamily="@font/pretendard_regular"
+                android:gravity="top"
+                android:scrollbarFadeDuration="0"
+                android:scrollbarThumbVertical="@drawable/scroll_bar"
+                android:scrollbars="vertical"
+                android:text="컨텐츠를 넣자"
+                android:textSize="16sp" />
+
+            <!-- 하단 라인 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lightgray" />
+
+            <!-- 날짜 -->
+            <TextView
+                android:id="@+id/noti_fg_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="8dp"
+                android:text="2025. 01. 14"
+                android:textColor="@color/lightgray"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/noti_write_fg_save_btn"
+            style="@style/titleFontStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="80dp"
+            android:background="@drawable/butto_main"
+            android:text="저장"
+            android:textSize="20sp"
+            android:textColor="@color/bgwhite"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:layout_editor_absoluteX="24dp" />
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/noti_write_fg_modify_btn"
+            style="@style/titleFontStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="80dp"
+            android:background="@drawable/butto_main"
+            android:text="수정"
+            android:textSize="20sp"
+            android:textColor="@color/bgwhite"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:layout_editor_absoluteX="24dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</FrameLayout>

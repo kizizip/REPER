@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/background"
+    tools:context=".ui.login.LoginFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp"
+            android:layout_marginLeft="60dp"
+            android:layout_marginRight="60dp">
+
+            <!-- 앱 이름 -->
+            <LinearLayout
+                android:id="@+id/fragmentLoginLinearLayout1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="140sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_semibold"
+                    android:text="RE"
+                    android:textSize="50sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_semibold"
+                    android:text="cipe hel"
+                    android:textColor="#1C4700"
+                    android:textSize="25sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_semibold"
+                    android:text="PER"
+                    android:textSize="50sp" />
+
+            </LinearLayout>
+
+
+            <!-- 앱 로그인 -->
+
+            <LinearLayout
+                android:id="@+id/fragmentLoginLinearLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="100dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragmentLoginLinearLayout1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="@font/pretendard_semibold"
+                    android:text="로그인"
+                    android:textColor="#1C4700"
+                    android:textSize="22sp" />
+
+                <EditText
+                    android:id="@+id/fragmentLoginEamilInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="49.36dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="이메일을 입력해주세요."
+                    android:inputType="textEmailAddress"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text=""
+                    android:textColorHint="#C4C4C4"
+                    android:textSize="15.79sp" />
+
+
+                <EditText
+                    android:id="@+id/fragmentLoginPasswordInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="49.36dp"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="비밀번호를 입력해주세요."
+                    android:inputType="textPassword"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text=""
+                    android:textColorHint="#C4C4C4"
+                    android:textSize="15.79sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="invisible"
+                    android:gravity="end"
+                    android:text="비밀번호를 잊으셨나요?"
+                    android:textColor="#1C4700" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/fragmentLoginLoginBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="49.36dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/login_button"
+                    android:text="Log In"
+                    android:textColor="#FFFFFF"
+                    android:fontFamily="@font/pretendard_semibold"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+
+            <!-- 소셜 네트워크 로그인 버튼 -->
+
+            <LinearLayout
+                android:id="@+id/fragmentLoginLinearLayout3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@+id/fragmentLoginLinearLayout2">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="소셜네트워크 로그인"
+                    android:textColor="#1C4700" />
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/fragmentLoginKakaoLoginIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/kakao_logo" />
+
+                    <ImageView
+                        android:id="@+id/fragmentLoginGoogleLoginIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/google_logo" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- 회원가입 하기 -->
+            <LinearLayout
+                android:id="@+id/fragmentLoginLinearLayout4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragmentLoginLinearLayout3">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="8dp"
+                    android:text="회원이 아니신가요?"
+                    android:fontFamily="@font/pretendard_light"/>
+
+                <TextView
+                    android:id="@+id/ActivityLoginJoinText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="회원가입하기"
+                    android:textColor="#1C4700"
+                    android:fontFamily="@font/pretendard_bold" />
+            </LinearLayout>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</FrameLayout>

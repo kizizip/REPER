@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="titleFontStyle">
+        <item name="fontFamily">@font/pretendard_semibold</item>
+        <item name="android:textColor">@color/fontblack</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="styleTitle">
+        <item name="fontFamily">@font/pretendard_semibold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">#101A24</item>
+    </style>
+
+    <!-- 기본 MaterialButton 스타일 -->
+    <style name="BaseToggleButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <!-- 버튼 배경 색상 -->
+        <item name="backgroundTint">@android:color/transparent</item>
+        <!-- 텍스트 색상 -->
+        <item name="android:textColor">@color/green</item>
+        <!-- 모서리 둥글게 -->
+        <item name="cornerRadius">16dp</item>
+        <!-- 테두리 색상 -->
+        <item name="strokeColor">@color/green</item>
+        <!-- 테두리 두께 -->
+        <item name="strokeWidth">2dp</item>
+    </style>
+
+    <!-- 선택된 버튼 스타일 -->
+    <style name="CheckedToggleButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="backgroundTint">@color/green</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="strokeColor">@color/green</item>
+        <item name="strokeWidth">2dp</item>
+    </style>
+
+<!--    allrecipe-->
+    <!-- 기본 MaterialButton 스타일 -->
+    <style name="AllRecipeBaseToggleButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <!-- 버튼 배경 색상 -->
+        <item name="backgroundTint">@android:color/transparent</item>
+        <!-- 텍스트 색상 -->
+        <item name="android:textColor">@color/green</item>
+        <!-- 모서리 둥글게 -->
+        <item name="cornerRadius">16dp</item>
+        <!-- 테두리 색상 -->
+        <item name="strokeColor">@color/lightgreen</item>
+        <!-- 테두리 두께 -->
+        <item name="strokeWidth">2dp</item>
+    </style>
+
+    <!-- 선택된 버튼 스타일 -->
+    <style name="AllRecipeCheckedToggleButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="backgroundTint">@color/lightgreen</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="strokeColor">@color/lightgreen</item>
+        <item name="strokeWidth">2dp</item>
+    </style>
+</resources>
