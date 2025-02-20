@@ -432,7 +432,12 @@ class StepRecipeFragment : Fragment() {
 
         // 로티
         stepRecipeBinding.lottieAnimationView.visibility = View.VISIBLE
-        stepRecipeBinding.lottieAnimationView.setAnimationFromUrl(recipeSteps.get(stepIdx)?.animationUrl)
+        if(recipeSteps.get(stepIdx)?.animationUrl != null){
+            stepRecipeBinding.lottieAnimationView.setAnimationFromUrl(recipeSteps.get(stepIdx)?.animationUrl)
+        }
+        else{
+            stepRecipeBinding.lottieAnimationView.setAnimationFromUrl("https://cdn.lottielab.com/l/87fJhuooafErS0.json")
+        }
         // 레시피
         stepRecipeBinding.steprecipeFmTvStep?.visibility = View.VISIBLE
         stepRecipeBinding.steprecipeFmTvStep?.setText(recipeSteps?.get(stepIdx)?.instruction)
