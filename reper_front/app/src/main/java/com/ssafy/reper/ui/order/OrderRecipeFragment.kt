@@ -97,8 +97,8 @@ class OrderRecipeFragment : Fragment() {
         }
 
         // 탭 초기 상태 설정 (단계별 레시피 선택)
-        orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected = true
-        orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected = false
+        orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.isSelected = false
+        orderRecipebinding.orderRecipeFragmentAllRecipeTab.isSelected = true
 
         // 단계별 레시피 탭
         orderRecipebinding.orderRecipeFragmentStepbystepRecipeTab.setOnClickListener {

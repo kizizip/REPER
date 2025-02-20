@@ -91,6 +91,7 @@ class AllRecipeFragment : Fragment() {
                 mainViewModel.getRecipeList()
                 mainViewModel.recipeList.observe(viewLifecycleOwner){
                     if(searchQuery == "딸기"){
+                        allRecipeBinding.allrecipeFmEtSearch.setText(searchQuery)
                         viewModel.setSRecipes()
                     }else{
                         viewModel.setAllRecipes()
@@ -163,6 +164,10 @@ class AllRecipeFragment : Fragment() {
                 searchJob?.cancel()
                 searchJob = lifecycleScope.launch {
                     val searchText = s.toString()
+
+                    if(searchText == "딸기"){
+                        return@launch
+                    }
 
                     if (searchText.isEmpty()) {
                         withContext(Dispatchers.Main) {

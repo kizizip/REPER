@@ -152,10 +152,10 @@ class StepRecipeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         isFragmentActive = true
-        activity?.window?.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE,
-            WindowManager.LayoutParams.FLAG_SECURE
-        )
+//        activity?.window?.setFlags(
+//            WindowManager.LayoutParams.FLAG_SECURE,
+//            WindowManager.LayoutParams.FLAG_SECURE
+//        )
         mainActivity.hideBottomNavigation()
         // 음성 인식 재시작
         if (!isListening && isFragmentActive) {
@@ -172,7 +172,7 @@ class StepRecipeFragment : Fragment() {
         } catch (e: Exception) {
             Log.e(TAG, "Error unbinding camera use cases", e)
         }
-        activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+//        activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
         // 음성 인식 일시 중지
         if (::speechRecognizer.isInitialized) {
             speechRecognizer.stopListening()

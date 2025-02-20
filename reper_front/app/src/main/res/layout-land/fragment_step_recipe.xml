@@ -109,7 +109,7 @@
                 android:layout_height="250dp"
                 android:adjustViewBounds="true"
                 android:scaleType="centerInside"
-                app:layout_constraintBottom_toTopOf="@+id/steprecipe_fm_btn_right"
+                app:layout_constraintBottom_toTopOf="@+id/textView2"
                 app:layout_constraintEnd_toEndOf="@+id/steprecipe_fm_land_tv_recipe"
                 app:layout_constraintStart_toStartOf="@+id/steprecipe_fm_land_tv_recipe"
                 app:layout_constraintTop_toBottomOf="@+id/steprecipe_fm_land_tv_recipe"

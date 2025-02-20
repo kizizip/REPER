@@ -118,17 +118,17 @@ class FullRecipeFragment : Fragment() {
     //캡쳐방지 코드입니다! 메시지 내용은 수정불가능,, 핸드폰내에 저장된 메시지가 뜨는 거라고 하네요
     override fun onResume() {
         super.onResume()
-        activity?.window?.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE,
-            WindowManager.LayoutParams.FLAG_SECURE
-        )
+//        activity?.window?.setFlags(
+//            WindowManager.LayoutParams.FLAG_SECURE,
+//            WindowManager.LayoutParams.FLAG_SECURE
+//        )
 
         mainActivity.hideBottomNavigation()
         mainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 회전 잠금
     }
     override fun onPause() {
         super.onPause()
-        activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+//        activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
     }
     ////////////////////////////////////////////////////////////////////////////////////////
     override fun onDestroyView() {

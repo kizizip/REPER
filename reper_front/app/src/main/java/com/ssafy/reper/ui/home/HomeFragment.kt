@@ -466,15 +466,6 @@ class HomeFragment : Fragment() {
                 R.color.banner_green
             )
         )
-
-        bannerItems.add(
-            HomeBannerModel(
-                R.drawable.storebanner,
-                "여러 가게 정보도\n한번에 관리\n레퍼에선 모두 됩니다!",
-                "마이페이지 보러가기",
-                R.color.banner_blue
-            )
-        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
