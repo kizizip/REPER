@@ -216,4 +216,14 @@ public class RecipeController {
         return ResponseEntity.ok(recipes);
     }
 
+    // JPA 사용한 재료 포함 검색
+    @GetMapping("/stores/{storeId}/recipes/search-jpa")
+    @Operation(summary = "레시피 속도 비교용 JPA 재료 포함 검색")
+    public ResponseEntity<List<RecipeResponseDto>> searchByIngredientSQL(
+            @RequestParam Long storeId,
+            @RequestParam String keyword) {
+        List<RecipeResponseDto> results = recipeService.searchByStoreAndIngredient(storeId, keyword);
+        return ResponseEntity.ok(results);
+    }
+
 }

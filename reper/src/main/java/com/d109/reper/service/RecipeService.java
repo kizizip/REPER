@@ -13,6 +13,7 @@ import com.d109.reper.elasticsearch.RecipeSearchRepository;
 import com.d109.reper.repository.RecipeJpaRepository;
 import com.d109.reper.repository.RecipeRepository;
 import com.d109.reper.repository.StoreRepository;
+import com.d109.reper.response.RecipeJpaResponseDto;
 import com.d109.reper.response.RecipeResponseDto;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -234,6 +235,18 @@ public class RecipeService {
                 .map(RecipeResponseDto::new)
                 .toList();
     }
+
+
+    // JPA 재료 포함 검색
+    public List<RecipeResponseDto> searchByStoreAndIngredient(Long storeId, String keyword) {
+        Pageable pageable = PageRequest.of(0, 1000);
+        List<Recipe> recipes = recipeJpaRepository.searchByStoreIdAndIngredient(storeId, keyword, pageable);
+
+        return recipes.stream()
+                .map(RecipeJpaResponseDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 
     // ElasticSearch 레시피 동기화 test용 API
         // DB의 모든 레시피를 Elasticsearch로 동기화

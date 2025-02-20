@@ -12,8 +12,25 @@ import java.util.List;
 @Repository
 public interface RecipeJpaRepository extends JpaRepository<Recipe, Long> {
 
+    // 레시피 검색
     @Query("SELECT r FROM Recipe r WHERE r.store.storeId = :storeId AND r.recipeName LIKE CONCAT('%', :keyword, '%')")
     List<Recipe> searchByStoreIdAndRecipeName(
+            @Param("storeId") Long storeId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    // 재료 포함 검색
+    @Query("""
+        SELECT r FROM Recipe r
+        WHERE r.store.storeId = :storeId
+        AND r.recipeId IN (
+            SELECT ri.recipe.recipeId
+            FROM Ingredient ri
+            WHERE ri.ingredientName LIKE CONCAT('%', :keyword, '%')
+        )
+    """)
+    List<Recipe> searchByStoreIdAndIngredient(
             @Param("storeId") Long storeId,
             @Param("keyword") String keyword,
             Pageable pageable

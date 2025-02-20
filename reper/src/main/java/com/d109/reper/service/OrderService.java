@@ -62,7 +62,7 @@ public class OrderService {
 
     @Transactional
     public Order createRandomOrder() {
-        Store store = storeRepository.findById(75L)
+        Store store = storeRepository.findById(1L)
                 .orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
         Order order = new Order();
@@ -101,7 +101,7 @@ public class OrderService {
         orderDetailRepository.saveAll(orderDetails);
 
         // 주문 생성 후 이벤트 발행
-        eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
+//        eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
         System.out.println("이벤트 발생");
 
         return order;
@@ -127,7 +127,7 @@ public class OrderService {
     // 주문이 1분에 하나씩 생기게 스케쥴링
 //    @Scheduled(fixedDelay = 15000) // 테스트용 15초
 //    @Scheduled(fixedDelay = 60000)
-    @Scheduled(fixedDelay = 600000000) // 개발할때 공지 계속 오면 정신없으니 큰 값 설정 7일이래요
+//    @Scheduled(fixedDelay = 600000000) // 개발할때 공지 계속 오면 정신없으니 큰 값 설정 7일이래요
     public void createOrder1Min() {
         createRandomOrder();
         System.out.println("새로운 주문 생성" + LocalDateTime.now());

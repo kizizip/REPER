@@ -34,8 +34,8 @@
 //        long currentRecipeCount = recipeRepository.count(); // 현재 레시피 개수 확인
 //        long startIndex = currentRecipeCount + 1; // 새 레시피의 시작 ID
 //
-//        System.out.println("🔹 현재 레시피 개수: " + currentRecipeCount);
-//        System.out.println("🔹 새 레시피 추가 시작 ID: " + startIndex);
+//        System.out.println("현재 레시피 개수: " + currentRecipeCount);
+//        System.out.println("새 레시피 추가 시작 ID: " + startIndex);
 //
 //        List<String> baseRecipeNames = Arrays.asList(
 //                "에스프레소", "아메리카노", "카페라떼", "카푸치노", "바닐라라떼",
@@ -93,5 +93,5 @@
 //        List<String> modifiers = Arrays.asList("스페셜", "달콤한", "진한", "라이트", "더블", "트리플", "고급", "프리미엄", "한정판", "클래식");
 //        String modifier = modifiers.get(random.nextInt(modifiers.size()));
 //        return baseName + " " + modifier + " " + index;
-    }
-}
+//    }
+//}
