@@ -106,6 +106,85 @@ class BossFragment : Fragment() {
             }
         }
 
+        // 모든 요소들을 처음에는 숨김
+        binding.apply {
+            bossHeaderImage.translationY = -50f
+            bossHeaderImage.alpha = 1f
+            
+            storeFgBackIcon.alpha = 0f
+            bossMenu.alpha = 0f
+            
+            bossFgStoreSpiner.alpha = 0f
+            bossFgStoreAdd.alpha = 0f
+            bossFgNoticeList.alpha = 0f
+            bossFgRecipeManage.alpha = 0f
+            
+            access.alpha = 0f
+            accessFalseList.alpha = 0f
+            nothingRequest.alpha = 0f
+            
+            storeEmployee.alpha = 0f
+            employeeList.alpha = 0f
+            nothingEmployee.alpha = 0f
+        }
+
+        // 순차적으로 애니메이션 실행
+        startSequentialAnimations()
+    }
+
+    private fun startSequentialAnimations() {
+        val duration = 500L // 애니메이션 지속 시간
+        val delay = 200L    // 각 그룹 사이의 지연 시간
+
+        // 헤더 이미지 슬라이드 애니메이션
+        binding.bossHeaderImage.animate()
+            .translationY(0f)
+            .setDuration(1000)
+            .start()
+
+        // 뒤로가기 아이콘과 타이틀 페이드인
+        binding.apply {
+            listOf(storeFgBackIcon, bossMenu).forEach { view ->
+                view.animate()
+                    .alpha(1f)
+                    .setDuration(500)
+                    .setStartDelay(400)
+                    .start()
+            }
+        }
+
+        // 메뉴 그룹 애니메이션
+        binding.apply {
+            listOf(bossFgStoreSpiner, bossFgStoreAdd, bossFgNoticeList, bossFgRecipeManage).forEach { view ->
+                view.animate()
+                    .alpha(1f)
+                    .setDuration(duration)
+                    .setStartDelay(delay * 3)
+                    .start()
+            }
+        }
+
+        // 접근 권한 그룹 애니메이션
+        binding.apply {
+            listOf(access, accessFalseList, nothingRequest).forEach { view ->
+                view.animate()
+                    .alpha(1f)
+                    .setDuration(duration)
+                    .setStartDelay(delay * 4)
+                    .start()
+            }
+        }
+
+        // 직원 그룹 애니메이션
+        binding.apply {
+            listOf(storeEmployee, employeeList, nothingEmployee).forEach { view ->
+                view.animate()
+                    .alpha(1f)
+                    .setDuration(duration)
+                    .setStartDelay(delay * 5)
+                    .start()
+            }
+        }
     }
 
     override fun onResume() {

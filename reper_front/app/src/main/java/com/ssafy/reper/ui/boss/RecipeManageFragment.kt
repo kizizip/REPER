@@ -283,16 +283,38 @@ class RecipeManageFragment : Fragment() {
         bossViewModel.getMenuList(sharedStoreId)
 
         binding.recipeFgAddRV.layoutManager = LinearLayoutManager(requireContext())
-        val recipeAdapter =
-            RecipeAdapter(mutableListOf(), object : RecipeAdapter.ItemClickListener {
-                override fun onItemClick(position: Int) {
-                    val selectedRecipe = bossViewModel.recipeList.value?.get(position)
-                    selectedRecipe?.let {
-                        showDialog(it.recipeName, it.recipeId)
-                    }
+        val recipeAdapter = RecipeAdapter(mutableListOf(), object : RecipeAdapter.ItemClickListener {
+            override fun onItemClick(position: Int) {
+                val selectedRecipe = bossViewModel.recipeList.value?.get(position)
+                selectedRecipe?.let {
+                    showDialog(it.recipeName, it.recipeId)
                 }
-            })
+            }
+        })
 
+        // 애니메이션 설정
+        val animationSet = AnimationSet(true).apply {
+            val translateAnim = TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, -1f,
+                Animation.RELATIVE_TO_SELF, 0f
+            ).apply {
+                duration = 500
+            }
+
+            val alphaAnim = AlphaAnimation(0f, 1f).apply {
+                duration = 500
+            }
+
+            addAnimation(translateAnim)
+            addAnimation(alphaAnim)
+        }
+
+        binding.recipeFgAddRV.layoutAnimation = LayoutAnimationController(animationSet).apply {
+            delay = 0.1f
+            order = LayoutAnimationController.ORDER_NORMAL
+        }
 
         binding.recipeFgAddRV.adapter = recipeAdapter
 
@@ -304,7 +326,9 @@ class RecipeManageFragment : Fragment() {
             } else {
                 binding.recipeFgAddRV.visibility = View.VISIBLE
                 binding.nothingRecipe.visibility = View.GONE
-                recipeAdapter.updateData(recipes) // 리스트를 역순으로 정렬
+                recipeAdapter.updateData(recipes)
+                // 데이터가 업데이트될 때마다 애니메이션 재실행
+                binding.recipeFgAddRV.scheduleLayoutAnimation()
             }
             binding.recipeFgAddRV.apply {
                 layoutAnimation = LayoutAnimationController(AnimationSet(true).apply {
