@@ -69,4 +69,12 @@ public class OrderController {
             throw new RuntimeException("서버 오류 발생");
         }
     }
+
+    // 시연용 정해진 주문 API
+    @PostMapping("/create")
+    @Operation(summary = "발표용 주문 API")
+    public ResponseEntity<OrderResponseDto> createOrder(@PathVariable Long storeId) {
+        OrderResponseDto orderResponse = orderService.createOrder(storeId);
+        return ResponseEntity.ok(orderResponse);
+    }
 }
