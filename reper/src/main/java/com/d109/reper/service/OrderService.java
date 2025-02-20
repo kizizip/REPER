@@ -145,16 +145,19 @@ public class OrderService {
         order.setCompleted(false);
         order.setTakeout(new Random().nextBoolean());
 
-        order = orderRepository.saveAndFlush(order); // Flush를 사용하여 즉시 DB 반영
+        order = orderRepository.saveAndFlush(order); // Flush 사용하여 즉시 반영
 
-        // 정해진 주문 리스트 생성 후, 하나씩 추가
         addOrderDetail(order, 1839L, "얼음 적게");
         addOrderDetail(order, 1841L, "샷 추가");
         addOrderDetail(order, 1863L, "뜨겁게");
         addOrderDetail(order, 1873L, null);
         addOrderDetail(order, 1881L, "디카페인");
 
-        return new OrderResponseDto(order);
+        // 주문 생성 후 이벤트 발행 (FCM 전송 포함)
+        eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
+        System.out.println("이벤트 발생");
+
+        return new OrderResponseDto(order); // OrderResponseDto 변환 후 반환
     }
 
     private void addOrderDetail(Order order, Long recipeId, String customerRequest) {
@@ -166,21 +169,8 @@ public class OrderService {
         orderDetail.setQuantity(1);
         orderDetail.setCustomerRequest(customerRequest);
 
-        order.addOrderDetail(orderDetail); // ⭐ 연관관계 메서드 사용
-        orderDetailRepository.save(orderDetail); // ⭐ 반드시 저장
-    }
-
-
-
-    private OrderDetail createOrderDetail(Order order, Long recipeId, String customerRequest) {
-        Recipe recipe = recipeRepository.findOne(recipeId);
-
-        OrderDetail orderDetail = new OrderDetail();
-        orderDetail.setOrder(order);
-        orderDetail.setRecipe(recipe);
-        orderDetail.setQuantity(1); // 기본 수량 1로 설정
-        orderDetail.setCustomerRequest(customerRequest);
-        return orderDetail;
+        order.addOrderDetail(orderDetail);
+        orderDetailRepository.save(orderDetail);
     }
 
 
