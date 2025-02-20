@@ -58,7 +58,6 @@ class OrderViewModel : ViewModel() {
             try {
                 item = orderService.getOrder(ApplicationClass.sharedPreferencesUtil.getStoreId(), orderId)
                 item.orderDetails?.let {
-                    it.sortBy { it.recipeId }
                     for(detail in it){
                         list.add(mainViewModel.recipeList.value!!.filter { it.recipeId == detail.recipeId}.first())
                     }
