@@ -1,10 +1,96 @@
-# 🏪 음성인식 기반 카페 레시피 도우미
+# 🍵 당신 곁의 레시피 매니저, Reper
 
-## 👥 팀 구성
+## 👥 D109팀 구성
 | 역할 | 이름 |
 |------|------|
 | 팀장 | 심근원 |
 | 팀원 | 김정언, 박재영, 안주현, 이서현, 임지혜 |
+
+## 개발 기간 
+📅 **2025.01.13 ~ 2025.02.21 (총 6주)** 
+
+
+## 1. 프로젝트 소개
+**Reper**는 사장님과 아르바이트생의 서로 다른 고민을 해결하기 위해 개발된 AI 기반 **Recipe Helper** 앱입니다.
+- **사장님**은 **체계적인 레시피 관리**와 직원 교육 시간과 **비용을 줄이며**, 
+- **아르바이트생**은 **복잡한 레시피를 외우는 부담 없이** 쉽고 빠르게 업무에 적응할 수 있도록 지원합니다.
+
+사장님이 **레시피 PDF**를 업로드하면, 레시피 이름, 재료, 만드는 방법 등을 **자동으로 분류**하고, **대표 이미지 생성**까지 지원합니다.
+
+특히, **POS 연동** 기능을 통해 주문이 들어오면 **자동 알림**을 보내고,
+해당 주문에 맞는 **단계별 레시피**를 시각적으로 제공합니다.
+
+아르바이트생들은 음성 인식이나 제스처로 손쉽게 레시피 단계를 넘길 수 있어, **위생 문제를 줄이고** 정확한 레시피 학습으로 **매장 별 일관된 맛을 보장**할 수 있습니다.
+
+## 2.  주요 기능
+### 📝 레시피 자동 분류 & 대표 이미지 생성
+- **레시피 PDF 업로드** 시 레시피 이름, 재료, 조리 방법을 자동으로 추출하고고 저장
+- 레시피 **대표 이미지 자동 생성**
+- 단계별 레시피에 맞는 **로띠(Lottie) 애니메이션 자동 매칭**
+### 🔔 POS 연동 & 자동 알림
+- POS에 주문이 들어오면 새 주문 **자동 알림 발송**
+- 주문 내역에 맞는 **단계별 레시피 제공**
+
+### 👀 시각적 학습 효과 극대화
+- 조리 방법을 **이미지 로띠(Lottie) 애니메이션**으로 시각화
+- 단기 알바생도 **쉽고 빠르게 레시피 학습 가능**
+-  **가로/세로 모드 최적화**
+	 - **세로 모드**: 전체 레시피 단계를 한눈에 확인하고, 원하는 단계로 빠르게 이동 가능 
+	 - **가로 모드**: 집중도를 높이기 위해 **단계별 레시피만 표시**, 불필요한 UI 요소 최소화
+
+### 🗣️ 음성 인식 & 모션 인식
+- **"다음", "이전" 음성 명령**으로 레시피 단계 이동
+- **제스처 컨트롤 지원**으로 조리 중 손이 부족한 상황에서도 편리한 사용
+- **모션 인식**으로 시끄러운 매장 상황에서도 편리한 레시피 단계 이동 가능
+
+## 3.  기술 스택
+| 분야 | 사용 기술 |
+|------------|--------------------------------|
+| **Backend** | ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat&logo=springboot&logoColor=white), ![JPA](https://img.shields.io/badge/JPA-6DB33F?style=flat) ,  ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white), ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat&logo=openai&logoColor=white), ![Flask](https://img.shields.io/badge/Flask-000000?style=flat&logo=flask&logoColor=white), ![Elasticsearch](https://img.shields.io/badge/Elasticsearch-005571?style=flat&logo=elasticsearch&logoColor=white), ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=white) |
+| **AI** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white), ![Flask](https://img.shields.io/badge/Flask-000000?style=flat&logo=flask&logoColor=white), ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat&logo=openai&logoColor=white), ![PyMuPDF](https://img.shields.io/badge/PyMuPDF-FF6600?style=flat), ![Boto3](https://img.shields.io/badge/Boto3-569A31?style=flat)  
+| **Frontend** | ![Android Studio](https://img.shields.io/badge/Android%20Studio-3DDC84?style=flat&logo=android-studio&logoColor=white), ![Kotlin](https://img.shields.io/badge/Kotlin-0095D5?style=flat&logo=kotlin&logoColor=white), ![Retrofit2](https://img.shields.io/badge/Retrofit2-007ACC?style=flat), ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=white), ![MediaPipe](https://img.shields.io/badge/MediaPipe-FF6600?style=flat) |
+| **Infra** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white), ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=flat&logo=jenkins&logoColor=white) |
+| **CI/CD** | ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat&logo=github-actions&logoColor=white), ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=flat&logo=jenkins&logoColor=white) |
+| **Collaboration Tools** | ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white), ![GitLab](https://img.shields.io/badge/GitLab-FC6D26?style=flat&logo=gitlab&logoColor=white), ![Jira](https://img.shields.io/badge/Jira-0052CC?style=flat&logo=jira&logoColor=white), ![Figma](https://img.shields.io/badge/Figma-F24E1E?style=flat&logo=figma&logoColor=white), ![Notion](https://img.shields.io/badge/Notion-000000?style=flat&logo=notion&logoColor=white) |
+## 4. 팀원별 담당 기술 및 기여
+### 4-1. 팀원별 역할 및 담당 기술
+| 역할       | 이름  | 담당 분야 |
+|------------|------|-------------------------------------------|
+| **Backend** | 박재영 | Elasticsearch 검색, 주문 FCM 연동  |
+| **Backend** | 이서현| OAuth 2.0 (소셜 로그인), 모션 인식 |
+| **Backend** | 임지혜 | Flask + Spring Boot 연동, ChatGPT API, S3|
+| **Frontend/Infra** | 김정언 | Jenkins, 디버깅 |
+| **Frontend** | 심근원 | 음성인식 |
+| **Frontend** | 안주현 | FCM, 디버깅 |
+## 👨‍💻 팀원별 기술 기여
+### 4-2. 팀원별 상세 기여
+### 🔹 **Backend**
+#### 🏷 박재영
+- **Elasticsearch 최적화 및 검색 기능 개선**
+ - **MySQL - Elasticsearch 연동 및 자동 동기화** (CRUD 자동 인덱싱)
+ - **Elasticsearch 데이터 일관성 유지** (MySQL PK = Elasticsearch 문서 ID)
+ - **한글 검색 성능 최적화** (`Nori Tokenizer`, `Edge Ngram`, `jaso-analyzer`)
+ - **검색 정확도 향상** (초성 검색, 한글-로마자 변환, 오타 자동 보정)
+ - **재료 포함/미포함 검색 기능 구현** (`must_not`, `wildcard`)
+ - **공지 검색 기능 개선** (최신순 정렬, `updatedAt` 변환, `timeAgo` 실시간 계산)
+ - **Elasticsearch 성능 최적화** (단일 노드 환경에서 `replica=0` 설정)
+ - 주문 FCM 연동 알림
+#### 🏷 이서현
+-
+#### 🏷 임지혜 
+- 
+---
+### 🔹 **Frontend**
+#### 🏷 김정언 
+- 
+#### 🏷 심근원
+- 
+#### 🏷 안주현
+- 
+---
+### 🔹 **Infra**
+#### 🏷 김정언
+-
 
 ## 📊 프로젝트 기획
 
