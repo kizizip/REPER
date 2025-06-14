@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +34,6 @@ public class OrderService {
     private final StoreRepository storeRepository;
     private final RecipeRepository recipeRepository;
     private static final List<String> CUSTOMER_REQUESTS = List.of("시럽 추가", "샷 빼고", "연하게", "진하게", "얼음 적게");
-
     private final ApplicationEventPublisher eventPublisher;
 
     public OrderService(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository, StoreRepository storeRepository, RecipeRepository recipeRepository, ApplicationEventPublisher eventPublisher) {
@@ -132,4 +132,46 @@ public class OrderService {
         createRandomOrder();
         System.out.println("새로운 주문 생성" + LocalDateTime.now());
     }
+
+    // 발표용 만들어진 주문 API
+    @Transactional
+    public OrderResponseDto createOrder(Long storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Store not found"));
+
+        Order order = new Order();
+        order.setStore(store);
+        order.setOrderDate(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime());
+        order.setCompleted(false);
+        order.setTakeout(new Random().nextBoolean());
+
+        order = orderRepository.saveAndFlush(order); // Flush 사용하여 즉시 반영
+
+        addOrderDetail(order, 1839L, "얼음 적게");
+        addOrderDetail(order, 1841L, "샷 추가");
+        addOrderDetail(order, 1863L, "뜨겁게");
+        addOrderDetail(order, 1873L, null);
+        addOrderDetail(order, 1881L, "디카페인");
+
+        // 주문 생성 후 이벤트 발행 (FCM 전송 포함)
+        eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
+        System.out.println("이벤트 발생");
+
+        return new OrderResponseDto(order); // OrderResponseDto 변환 후 반환
+    }
+
+    private void addOrderDetail(Order order, Long recipeId, String customerRequest) {
+        Recipe recipe = recipeRepository.findOne(recipeId);
+
+        OrderDetail orderDetail = new OrderDetail();
+        orderDetail.setOrder(order);
+        orderDetail.setRecipe(recipe);
+        orderDetail.setQuantity(1);
+        orderDetail.setCustomerRequest(customerRequest);
+
+        order.addOrderDetail(orderDetail);
+        orderDetailRepository.save(orderDetail);
+    }
+
+
 }
