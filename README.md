@@ -242,14 +242,14 @@
 <table>
   <tr>
     <td align="center" width="300">
-      <a href="">
+      <a href="https://github.com/shimkwkr">
         <img src="" width="300" style="border-radius: 50%;">
         <br>
         <strong>심근원</strong>
       </a>
     </td>
     <td align="center" width="300">
-      <a href="">
+      <a href="https://github.com/coliny8468">
         <img src="" width="300" style="border-radius: 50%;">
         <br>
         <strong>안주현</strong>
@@ -276,7 +276,7 @@
   </tr>
   <tr>
     <td align="center" width="300">
-      <a href="">
+      <a href="https://github.com/kizizip">
         <img src="" width="300" style="border-radius: 50%;">
         <br>
         <strong>이서현</strong>
@@ -290,7 +290,7 @@
       </a>
     </td>
     <td align="center" width="300">
-      <a href="">
+      <a href="https://github.com/user-jihye">
         <img src="" width="300" style="border-radius: 50%;">
         <br>
         <strong>임지혜</strong>
