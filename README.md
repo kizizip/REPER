@@ -309,7 +309,6 @@
     </td>
   </tr>
 </table>
-![image.png](./image.png)
 <img src="docs/역할분담.png">
 
 
